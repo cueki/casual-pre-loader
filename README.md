@@ -1,4 +1,4 @@
-ALL OF THESE NEED TO BE RAN IN THE TF/ DIR
+ALL OF THESE NEED TO BE RAN IN THE TF/ DIR (or a dir with target tf_misc_xxx.vpks copied over)
 
 colorchange.py - Can be used to change 3 rgb values in the format of "$color" "[R G B]" based on the hex index. Values must be a float with no leading 0, ie .4 or just 1. Not really useful in its current state.
 
