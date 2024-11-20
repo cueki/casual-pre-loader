@@ -1,6 +1,6 @@
 def search_vpk_for_flamethrower(vpk: int) -> None:
     """Search a specific VPK file for flamethrower references."""
-    filename = f"tf2_misc_{vpk.zfill(3)}.vpk"
+    filename = f"tf2_misc_{str(vpk).zfill(3)}.vpk"
     
     try:
         # Read the entire file as bytes
