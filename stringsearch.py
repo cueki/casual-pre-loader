@@ -1,14 +1,6 @@
-def add_missing_zeros(i: int) -> str:
-    """Pad numbers with leading zeros."""
-    if i < 10:
-        return f"00{i}"
-    if i < 100:
-        return f"0{i}"
-    return str(i)
-
 def search_vpk_for_flamethrower(vpk: int) -> None:
     """Search a specific VPK file for flamethrower references."""
-    filename = f"tf2_misc_{add_missing_zeros(vpk)}.vpk"
+    filename = f"tf2_misc_{str(vpk).zfill(3)}.vpk"
     
     try:
         # Read the entire file as bytes
