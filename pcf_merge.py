@@ -1,5 +1,6 @@
+from dataclasses import dataclass
 import os
-from typing import Dict, Tuple, Optional, Set
+from typing import Dict, Tuple, Optional, Set, List
 from pcfcodec import PCFCodec, AttributeType, PCFElement
 import copy
 
@@ -21,10 +22,129 @@ def extract_pcf_from_vpk(vpk_data: bytes, offset: int, size: int) -> bytes:
     """Extract PCF data from VPK."""
     return vpk_data[offset:offset + size]
 
-def selective_merge_pcf(original_pcf: PCFCodec, new_pcf: PCFCodec) -> PCFCodec:
+@dataclass
+class ReclaimableSpace:
+    """Information about space that can be reclaimed."""
+    index: int
+    size: int
+    type: str
+    risk: str
+    data: bytes  # Store the original data
+
+def find_reclaimable_space(pcf: PCFCodec) -> List[ReclaimableSpace]:
+    """Identify spaces that can be reclaimed in the PCF file."""
+    reclaimable = []
+    
+    # Find unused strings
+    used_strings: Set[int] = set()
+    
+    # Track string usage
+    for element in pcf.pcf.elements:
+        used_strings.add(element.type_name_index)
+        for attr_name, (attr_type, attr_value) in element.attributes.items():
+            # Track attribute names
+            if isinstance(attr_name, bytes):
+                try:
+                    idx = pcf.pcf.string_dictionary.index(attr_name)
+                    used_strings.add(idx)
+                except ValueError:
+                    pass
+            
+            # Track string values
+            if attr_type == AttributeType.STRING:
+                if isinstance(attr_value, bytes):
+                    try:
+                        idx = pcf.pcf.string_dictionary.index(attr_value)
+                        used_strings.add(idx)
+                    except ValueError:
+                        pass
+    
+    # Add unused strings to reclaimable space
+    for idx, string in enumerate(pcf.pcf.string_dictionary):
+        if idx not in used_strings:
+            original_data = string if isinstance(string, bytes) else string.encode('ascii')
+            size = len(original_data) + 1  # Include null terminator
+            reclaimable.append(ReclaimableSpace(
+                index=idx,
+                size=size,
+                type='string',
+                risk='safe',
+                data=original_data
+            ))
+    
+    return reclaimable
+
+def remove_unused_strings(pcf: PCFCodec, unused_indices: Set[int]) -> None:
+    """Remove unused strings from the dictionary and update indices."""
+    # Create new string dictionary without unused strings
+    new_dictionary = []
+    index_map = {}  # Maps old indices to new indices
+    
+    for old_idx, string in enumerate(pcf.pcf.string_dictionary):
+        if old_idx not in unused_indices:
+            index_map[old_idx] = len(new_dictionary)
+            new_dictionary.append(string)
+    
+    # Update all references to string indices
+    for element in pcf.pcf.elements:
+        # Update type name index
+        if element.type_name_index in index_map:
+            element.type_name_index = index_map[element.type_name_index]
+            
+        # Update attribute name indices if needed
+        new_attributes = {}
+        for attr_name, (attr_type, attr_value) in element.attributes.items():
+            if isinstance(attr_name, bytes):
+                try:
+                    old_idx = pcf.pcf.string_dictionary.index(attr_name)
+                    if old_idx in index_map:
+                        new_attr_name = pcf.pcf.string_dictionary[old_idx]
+                    else:
+                        new_attr_name = attr_name
+                except ValueError:
+                    new_attr_name = attr_name
+            else:
+                new_attr_name = attr_name
+            new_attributes[new_attr_name] = (attr_type, attr_value)
+        element.attributes = new_attributes
+    
+    # Update the string dictionary
+    pcf.pcf.string_dictionary = new_dictionary
+
+def pad_file_to_size(filename: str, target_size: int) -> bool:
+    """Pad a file with null bytes to reach the target size."""
+    try:
+        current_size = os.path.getsize(filename)
+        if current_size > target_size:
+            print(f"Error: Current size {current_size} exceeds target size {target_size}")
+            return False
+            
+        if current_size < target_size:
+            padding_needed = target_size - current_size
+            print(f"\nPadding file with {padding_needed} null bytes to maintain original size")
+            
+            with open(filename, 'ab') as f:
+                f.write(b'\x00' * padding_needed)
+                
+            final_size = os.path.getsize(filename)
+            if final_size != target_size:
+                print(f"Error: Final size {final_size} doesn't match target {target_size}")
+                return False
+                
+        return True
+        
+    except Exception as e:
+        print(f"Error padding file: {e}")
+        return False
+
+def selective_merge_pcf(original_pcf: PCFCodec, new_pcf: PCFCodec, optimize_strings: bool = True) -> Tuple[PCFCodec, List[dict]]:
     """
     Selectively merge attributes from new PCF into original PCF,
     preserving original structure and extra attributes.
+    Now with optional string optimization.
+    
+    Returns:
+        Tuple of (merged PCFCodec, list of changes made)
     """
     # Create a deep copy of original to modify
     merged = copy.deepcopy(original_pcf)
@@ -32,6 +152,20 @@ def selective_merge_pcf(original_pcf: PCFCodec, new_pcf: PCFCodec) -> PCFCodec:
 
     # Track which elements we've processed
     processed_elements = set()
+    
+    # Find reclaimable space if optimization is enabled
+    if optimize_strings:
+        available_space = find_reclaimable_space(merged)
+        if available_space:
+            print("\nFound reclaimable space:")
+            total_space = sum(space.size for space in available_space)
+            print(f"Total reclaimable bytes: {total_space}")
+            
+            # Collect indices of unused strings
+            unused_string_indices = {space.index for space in available_space if space.type == 'string'}
+            if unused_string_indices:
+                print("Removing unused strings to optimize file size...")
+                remove_unused_strings(merged, unused_string_indices)
 
     # Process each element in the new PCF
     for new_idx, new_element in enumerate(new_pcf.pcf.elements):
@@ -49,7 +183,7 @@ def selective_merge_pcf(original_pcf: PCFCodec, new_pcf: PCFCodec) -> PCFCodec:
                         if orig_value != attr_value:
                             changes_made.append({
                                 'element': orig_idx,
-                                'attribute': attr_name.decode('ascii', errors='replace'),
+                                'attribute': attr_name.decode('ascii', errors='replace') if isinstance(attr_name, bytes) else attr_name,
                                 'old': orig_value,
                                 'new': attr_value
                             })
@@ -58,21 +192,18 @@ def selective_merge_pcf(original_pcf: PCFCodec, new_pcf: PCFCodec) -> PCFCodec:
                 processed_elements.add(orig_idx)
                 break
 
-    # Report changes
-    if changes_made:
-        print("\nChanges made:")
-        for change in changes_made:
-            print(f"\nElement {change['element']}: {change['attribute']}")
-            print(f"  Old: {change['old']}")
-            print(f"  New: {change['new']}")
-    else:
-        print("\nNo changes were necessary")
+    return merged, changes_made
 
-    return merged
-
-def merge_pcf_into_vpk(vpk_path: str, pattern_pcf_path: str, replacement_pcf_path: str, offset_hint: int = None) -> bool:
+def merge_pcf_into_vpk(
+    vpk_path: str, 
+    pattern_pcf_path: str, 
+    replacement_pcf_path: str, 
+    offset_hint: Optional[int] = None,
+    optimize_strings: bool = True
+) -> bool:
     """
     Selectively merge replacement PCF into VPK at location matching pattern PCF.
+    Now with string optimization support.
     """
     try:
         # Read files
@@ -113,9 +244,19 @@ def merge_pcf_into_vpk(vpk_path: str, pattern_pcf_path: str, replacement_pcf_pat
         replacement_pcf = PCFCodec()
         replacement_pcf.decode(replacement_pcf_path)
 
-        # Perform selective merge
+        # Perform selective merge with optimization
         print("\nPerforming selective merge...")
-        merged_pcf = selective_merge_pcf(original_pcf, replacement_pcf)
+        merged_pcf, changes = selective_merge_pcf(original_pcf, replacement_pcf, optimize_strings)
+
+        # Report changes
+        if changes:
+            print("\nChanges made:")
+            for change in changes:
+                print(f"\nElement {change['element']}: {change['attribute']}")
+                print(f"  Old: {change['old']}")
+                print(f"  New: {change['new']}")
+        else:
+            print("\nNo changes were necessary")
 
         # Save merged PCF temporarily
         temp_merged = "temp_merged.pcf"
@@ -158,11 +299,12 @@ def main():
     """Main entry point."""
     import argparse
     
-    parser = argparse.ArgumentParser(description='Selectively merge PCF file into VPK')
+    parser = argparse.ArgumentParser(description='Selectively merge PCF file into VPK with optimization')
     parser.add_argument('vpk_path', help='Path to target VPK file')
     parser.add_argument('pattern_pcf', help='Path to PCF file to use as search pattern')
     parser.add_argument('replacement_pcf', help='Path to PCF file with desired changes')
     parser.add_argument('--offset', type=int, help='Offset hint to speed up search (optional)')
+    parser.add_argument('--no-optimize', action='store_true', help='Disable string optimization')
     parser.add_argument('--backup', action='store_true', help='Create backup of VPK before modifying')
     
     args = parser.parse_args()
@@ -177,7 +319,8 @@ def main():
         args.vpk_path,
         args.pattern_pcf,
         args.replacement_pcf,
-        args.offset
+        args.offset,
+        not args.no_optimize
     )
     
     if success:
