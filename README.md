@@ -23,7 +23,6 @@ ALL OF THESE NEED TO BE RAN IN THE TF/ DIR (or a dir with target tf_misc_xxx.vpk
 ### 4. Team Color Tool (team_color_shift.py)
 - Specialized tool for modifying team colors in PCF files
 - Identifies and transforms red-dominant and blue-dominant colors
-- Preserves alpha channel values
 
 ### 5. Difference Checker (diff_check.py)
 - Compares two PCF files and identifies differences
