@@ -10,7 +10,7 @@ ALL OF THESE NEED TO BE RAN IN THE TF/ DIR (or a dir with target tf_misc_xxx.vpk
   - Binary data
 
 ### 2. Filepath Modification Tool (pcf_filepath_buffer.py)
-- Allows modification strings within PCF files
+- Allows modification of strings within PCF files
 - Implements space reclamation get those 5 bytes baby OH YEA
 - Maintains original file size through padding
 
