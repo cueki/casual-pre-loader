@@ -1,10 +1,10 @@
 from core.constants import AttributeType
 from operations.color import get_color_dominance
 from codec.codec import decode_pcf_file
-from models.color_wheel import plot_rgb_colors
+from models.color_wheel import plot_rgb_colors, plot_specific_colors
 
 vpk_file = "tf2_misc_000.vpk"
-pcf_file = "rockettrail.pcf"
+pcf_file = "medicgun_beam.pcf"
 output_pcf = "modified_beam.pcf"
 
 pink = 255, 79, 164
@@ -43,4 +43,4 @@ def analyze_pcf_colors(file):
 
 colors = analyze_pcf_colors(pcf)
 
-plot_rgb_colors(colors)
+plot_specific_colors(colors)
