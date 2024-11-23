@@ -94,7 +94,7 @@ def plot_specific_colors(rgb_colors, labels=None):
         # Create vector
         rgb_normalized = [c / 255 for c in rgb]
         ax.quiver(0, 0, x, y, angles='xy', scale_units='xy', scale=1,
-                  color=rgb_normalized, width=0.002, headwidth=0, alpha=.4,
+                  color=rgb_normalized, width=0.003, headwidth=0, alpha=.4,
                   headlength=0, headaxislength=0)
 
         # Add label if provided
