@@ -127,41 +127,6 @@ class ColorTransform:
         return self.pcf
 
 
-def transform_pcf_colors(pcf: PCFFile, target_color: RGB,
-                         elements: Optional[List[int]] = None) -> Tuple[PCFFile, ColorTransformResult]:
-    """
-    Transform all colors in a PCF to a target color while preserving relative values.
-
-    Args:
-        pcf: PCF file to transform
-        target_color: Target RGB color
-        elements: Optional list of element indices to process
-
-    Returns:
-        Tuple of (transformed PCF, transformation result)
-    """
-    transformer = ColorTransform(pcf)
-
-    def transform(r: int, g: int, b: int) -> RGB:
-        # Calculate color factors
-        avg_src = (r + g + b) / 3
-        avg_target = sum(target_color) / 3
-        if avg_src == 0:
-            return target_color
-
-        factor = avg_target / avg_src
-
-        # Apply transformation
-        new_r = min(255, int(target_color[0] * (r / 255)))
-        new_g = min(255, int(target_color[1] * (g / 255)))
-        new_b = min(255, int(target_color[2] * (b / 255)))
-
-        return new_r, new_g, new_b
-
-    result = transformer.apply_transform(transform, elements)
-    return transformer.get_transformed_pcf(), result
-
-
 def transform_team_colors(pcf: PCFFile, red_color: RGB, blue_color: RGB,
                           elements: Optional[List[int]] = None) -> Tuple[PCFFile, ColorTransformResult]:
     """

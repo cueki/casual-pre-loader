@@ -1,29 +1,19 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List
-from core.constants import PCFVersion
 from models.element import PCFElement
 
 @dataclass
 class PCFFile:
-    """Main PCF file model with improved functionality"""
-    version: PCFVersion
-    string_dictionary: List[str] = field(default_factory=list)
-    elements: List[PCFElement] = field(default_factory=list)
+    def __init__(self, version: str = "DMX_BINARY4_PCF2"):
+        self.version = version
+        self.string_dictionary: List[str] = []
+        self.elements: List[PCFElement] = []
 
     def add_string(self, string: str) -> int:
-        """Add string to dictionary and return index"""
+        """Add a string to the dictionary if it doesn't exist and return its index"""
         if string not in self.string_dictionary:
             self.string_dictionary.append(string)
         return self.string_dictionary.index(string)
 
-    def get_string(self, index: int) -> str:
-        """Get string from dictionary with bounds checking"""
-        if 0 <= index < len(self.string_dictionary):
-            return self.string_dictionary[index]
-        raise IndexError(f"String index {index} out of range")
-
-    def add_element(self, element: PCFElement) -> None:
-        """Add element with validation"""
-        if not isinstance(element, PCFElement):
-            raise TypeError("Must be PCFElement instance")
+    def add_element(self, element: PCFElement):
         self.elements.append(element)
