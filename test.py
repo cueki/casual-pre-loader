@@ -16,6 +16,8 @@ output_pcf = "modified_beam.pcf"
 pink_output_pcf = "stage1.pcf"
 purple_output_pcf = "stage2.pcf"
 
+mint = 66, 245, 153
+yellow = 233, 245, 66
 pink = 255, 79, 164
 purple = 212, 102, 255
 green = 173, 255, 47
@@ -30,6 +32,7 @@ blue = tuple(purple)
 # print(extract_pcf_signature(pcf_file))
 
 pcf = decode_pcf_file(pcf_file)
+print(pcf)
 hsv_list = []
 
 def analyze_pcf_colors(pcf_input):
@@ -77,15 +80,15 @@ def transform_with_shift(pcf: PCFFile, original_colors: List[Tuple[int, int, int
 color_list = analyze_pcf_colors(pcf)
 red_list = color_list[0]
 blue_list = color_list[1]
-pink_shift = color_shift(red_list, pink)
-purple_shift = color_shift(blue_list, purple)
+red_shift = color_shift(red_list, pink)
+blue_shift = color_shift(blue_list, purple)
 
 # print("number of red particles:", len(colors[0]))
 # print("number of blue particles:", len(colors[1]))
-stage1 = transform_with_shift(pcf, red_list, pink_shift)
+stage1 = transform_with_shift(pcf, red_list, red_shift)
 # encode_pcf_file(stage1, "stage1.pcf")
 # stage1_pcf = decode_pcf_file("stage1.pcf")
-stage2 = transform_with_shift(stage1, blue_list, purple_shift)
+stage2 = transform_with_shift(stage1, blue_list, blue_shift)
 encode_pcf_file(stage2, "stage2.pcf")
 
 # shifted_colors = []
@@ -94,24 +97,24 @@ encode_pcf_file(stage2, "stage2.pcf")
 #     shifted_colors.append(c)
 # for c in purple_shift:
 #     shifted_colors.append(c)
-
+# plot_rgb_vector(shifted_colors)
 unshifted_colors = []
 colors = analyze_pcf_colors(decode_pcf_file("stage2.pcf"))
 for c in colors[0]:
     unshifted_colors.append(c)
 for c in colors[1]:
     unshifted_colors.append(c)
-
 plot_rgb_vector(unshifted_colors)
-# plot_rgb_vector(shifted_colors)
-# with open(vpk_file, 'rb') as vpk_bytes:
-#     offset = find_in_vpk(vpk_bytes.read(), extract_pcf_signature(pcf_file))
-#     offset = offset[0][0]
-#
-# vpk_ops = VPKOperations()
-# result = vpk_ops.patch_pcf(
-#     vpk_path="tf2_misc_000.vpk",
-#     offset=offset,  # Byte offset where PCF starts in VPK
-#     pcf=stage2,
-#     create_backup=True  # Creates .backup file
-# )
+
+with open(vpk_file, 'rb') as vpk_bytes:
+    offset = find_in_vpk(vpk_bytes.read(), extract_pcf_signature(pcf_file))
+    offset = offset[0][0]
+
+vpk_ops = VPKOperations()
+result = vpk_ops.patch_pcf(
+    vpk_path="tf2_misc_000.vpk",
+    offset=offset,  # Byte offset where PCF starts in VPK
+    pcf=stage2,
+    create_backup=True  # Creates .backup file
+)
+print(result)

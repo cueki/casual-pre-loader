@@ -5,7 +5,7 @@ import os
 from core.constants import PCFVersion
 from core.errors import PCFError
 from models.pcf_file import PCFFile
-from codec.codec import encode_pcf_file
+from codec.codec import encode_pcf_file, PCFCodec
 
 @dataclass
 class VPKSearchResult:
@@ -181,10 +181,9 @@ class VPKOperations:
                         error_message="Failed to create backup"
                     )
 
-            # Read original PCF to get size
-            with open(vpk_path, 'rb') as f:
-                original_data = cls.read_binary_chunk(f, offset, 10000)  # Read reasonable chunk
-                original_size = len(original_data)
+            codec = PCFCodec()
+            codec.pcf = pcf
+            original_size = codec.get_size()
 
             # Encode modified PCF
             temp_path = f"{vpk_path}.temp"

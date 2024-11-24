@@ -10,7 +10,6 @@ class PCFFile:
         self.elements: List[PCFElement] = []
 
     def add_string(self, string: str) -> int:
-        """Add a string to the dictionary if it doesn't exist and return its index"""
         if string not in self.string_dictionary:
             self.string_dictionary.append(string)
         return self.string_dictionary.index(string)

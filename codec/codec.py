@@ -203,3 +203,47 @@ class PCFCodec:
                     attr_name = self.pcf.string_dictionary[type_name_index]
                     attr_value = self.read_attribute_data(file, attr_type)
                     element.attributes[attr_name] = (attr_type, attr_value)
+
+
+    def get_size(self) -> int:
+        """Calculate the encoded size of the PCF file in bytes without writing to disk"""
+        import io
+
+        output = io.BytesIO()
+
+        # Write header
+        version_string = getattr(PCFVersion, self.pcf.version)
+        write_null_terminated_string(output, f"{version_string}\n")
+
+        # Write string dictionary
+        if self.pcf.version == 'DMX_BINARY4_PCF2':
+            output.write(struct.pack('<I', len(self.pcf.string_dictionary)))
+        else:
+            output.write(struct.pack('<H', len(self.pcf.string_dictionary)))
+
+        for string in self.pcf.string_dictionary:
+            if isinstance(string, str):
+                write_null_terminated_string(output, string)
+            else:
+                output.write(string + b'\x00')
+
+        # Write element dictionary
+        output.write(struct.pack('<I', len(self.pcf.elements)))
+        for element in self.pcf.elements:
+            output.write(struct.pack('<H', element.type_name_index))
+            if isinstance(element.element_name, str):
+                write_null_terminated_string(output, element.element_name)
+            else:
+                output.write(element.element_name + b'\x00')
+            output.write(element.data_signature)
+
+        # Write element data
+        for element in self.pcf.elements:
+            output.write(struct.pack('<I', len(element.attributes)))
+            for attr_name, (attr_type, attr_value) in element.attributes.items():
+                name_index = self.pcf.string_dictionary.index(attr_name)
+                output.write(struct.pack('<H', name_index))
+                output.write(struct.pack('B', attr_type))
+                self.write_attribute_data(output, attr_type, attr_value)
+
+        return output.tell()
