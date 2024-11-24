@@ -1,5 +1,5 @@
-from typing import Dict, Tuple
 from enum import IntEnum, StrEnum
+from typing import Dict, Tuple
 
 
 class PCFVersion(StrEnum):
@@ -43,19 +43,20 @@ class AttributeType(IntEnum):
     MATRIX_ARRAY = 0x1C
 
 
-ATTRIBUTE_VALUES = {AttributeType.ELEMENT: '<I',
-                    AttributeType.INTEGER: '<i',
-                    AttributeType.FLOAT: '<f',
-                    AttributeType.BOOLEAN: 'B',
-                    AttributeType.STRING: '<H',
-                    AttributeType.BINARY: '<I',
-                    AttributeType.COLOR: '<4B',
-                    AttributeType.VECTOR2: '<2f',
-                    AttributeType.VECTOR3: '<3f',
-                    AttributeType.VECTOR4: '<4f',
-                    AttributeType.MATRIX: '<4f',
-                    AttributeType.ELEMENT_ARRAY: '<I',
-                    }
+ATTRIBUTE_VALUES: Dict[AttributeType, str] = {
+    AttributeType.ELEMENT: '<I',
+    AttributeType.INTEGER: '<i',
+    AttributeType.FLOAT: '<f',
+    AttributeType.BOOLEAN: 'B',
+    AttributeType.STRING: '<H',
+    AttributeType.BINARY: '<I',
+    AttributeType.COLOR: '<4B',
+    AttributeType.VECTOR2: '<2f',
+    AttributeType.VECTOR3: '<3f',
+    AttributeType.VECTOR4: '<4f',
+    AttributeType.MATRIX: '<4f',
+    AttributeType.ELEMENT_ARRAY: '<I',
+}
 
 
 PCF_OFFSETS: Dict[str, Tuple[int, int]] = {
