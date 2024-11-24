@@ -7,4 +7,4 @@ class PCFElement:
     type_name_index: int
     element_name: str
     data_signature: bytes
-    attributes: Dict[str, Tuple[AttributeType, Any]]  # Changed to store type with value
+    attributes: Dict[str, Tuple[AttributeType, Any]]

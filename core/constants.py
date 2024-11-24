@@ -1,7 +1,6 @@
 from enum import IntEnum, StrEnum
 from typing import Dict, Tuple
 
-
 class PCFVersion(StrEnum):
     """PCF version strings"""
     DMX_BINARY2_DMX1 = "<!-- dmx encoding binary 2 format dmx 1 -->"
