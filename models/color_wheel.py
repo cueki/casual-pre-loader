@@ -1,9 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import colorsys
-
 from matplotlib.patches import Circle
-
 
 def rgb_to_hsv(r, g, b):
     """Convert RGB [0-255] to HSV [0-360, 0-100, 0-100]"""
@@ -16,6 +14,7 @@ def hsv_to_rgb(h, s, v):
     """Convert HSV [0-360, 0-100, 0-100] to RGB [0-1]"""
     h, s, v = h / 360, s / 100, v / 100
     return colorsys.hsv_to_rgb(h, s, v)
+
 
 def plot_rgb_colors(rgb_colors, labels=None):
     """Plot specific RGB colors in polar coordinates"""
@@ -94,7 +93,7 @@ def plot_specific_colors(rgb_colors, labels=None):
         # Create vector
         rgb_normalized = [c / 255 for c in rgb]
         ax.quiver(0, 0, x, y, angles='xy', scale_units='xy', scale=1,
-                  color=rgb_normalized, width=0.003, headwidth=0, alpha=.4,
+                  color=rgb_normalized, width=0.003, headwidth=0, alpha=.3,
                   headlength=0, headaxislength=0)
 
         # Add label if provided

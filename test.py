@@ -4,7 +4,7 @@ from codec.codec import decode_pcf_file
 from models.color_wheel import plot_rgb_colors, plot_specific_colors
 
 vpk_file = "tf2_misc_000.vpk"
-pcf_file = "dxhr_fx.pcf"
+pcf_file = "summer2024_unusuals.pcf"
 output_pcf = "modified_beam.pcf"
 
 pink = 255, 79, 164
