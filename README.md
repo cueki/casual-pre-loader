@@ -1,31 +1,22 @@
-ALL OF THESE NEED TO BE RAN IN THE TF/ DIR (or a dir with target tf_misc_xxx.vpks copied over)
+Yea
 
-### 1. PCF File Format Handler (pcfcodec.py)
-- Implements basic PCF file format reading/writing
-- Handles various data types including:
-  - Basic types (integers, floats, booleans, strings)
-  - Geometric types (vectors, quaternions, matrices)
-  - Color data (RGBA)
-  - Arrays of these types
-  - Binary data
+~~refactor codebase~~
 
-### 2. Filepath Modification Tool (pcf_filepath_buffer.py)
-- Allows modification of strings within PCF files
-- Implements space reclamation get those 5 bytes baby OH YEA
-- Maintains original file size through null byte padding
+~~need to compare colored output vs aligned beam~~ + ~~color output for diff~~
 
-### 3. PCF Merger (pcf_merge.py)
-- Merges PCF files while preserving structure
-- Supports merging PCF data into VPK files
-- Includes optimization for string storage MORE BYTES!!!
-- Handles size when merging to maintain file integrity
+cym beam??
 
-### 4. Team Color Tool (team_color_shift.py)
-- Specialized tool for modifying team colors in PCF files
-- Identifies and transforms red-dominant and blue-dominant colors
+finding all uses of material files in vmt
 
-### 5. Difference Checker (diff_check.py)
-- Compares two PCF files and identifies differences
-- Can group differences by element, type, or attribute
+~~logic for rotating color palette~~ DONE! IM A JEANYUS 24/11/2024!
 
-REST OF THE CODE IS MOSTLY USELESS/ FOR STRAGING
+
+NEED TO CONFIRM WORKING:
+
+~~seek through vpk searching for byte signatures~~
+
+~~extract files from vpk~~
+
+~~write into pcf file without changing size~~
+
+~~write pcf back into vpk~~
