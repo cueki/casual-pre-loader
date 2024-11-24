@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from core.constants import AttributeType
 from core.errors import PCFError
 from models.pcf_file import PCFFile
-from models.element import PCFElement
 
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
@@ -44,7 +43,6 @@ def hsv_to_rgb(h, s, v):
 
 
 def is_color_attribute(name: str) -> bool:
-    """Check if attribute name typically represents a color"""
     color_indicators = {'color', 'color1', 'color2', 'color_fade'}
     name = name.lower()
     return any(indicator in name for indicator in color_indicators)
@@ -64,17 +62,9 @@ def get_color_dominance(color: RGBA) -> Optional[str]:
 
 
 def create_color(r: int, g: int, b: int, a: int = 255) -> RGBA:
-    """Create a validated RGBA color tuple"""
     if not all(0 <= x <= 255 for x in (r, g, b, a)):
         raise PCFError("Color values must be between 0 and 255")
     return r, g, b, a
-
-
-def transform_color(color: RGBA, transform_fn: callable) -> RGBA:
-    """Transform a color while preserving alpha"""
-    r, g, b, a = color
-    new_r, new_g, new_b = transform_fn(r, g, b)
-    return create_color(new_r, new_g, new_b, a)
 
 
 def average_rgb(rgb_list):
@@ -118,66 +108,46 @@ def color_shift(rgb_color_list: list, target_color: RGB):
     return shifted_colors
 
 
-class ColorTransform:
-    """Handles PCF color transformations"""
+def transform_with_shift(pcf: PCFFile, original_colors: List[Tuple[int, int, int]],
+                         shifted_colors: List[Tuple[int, int, int]]) -> PCFFile:
 
-    def __init__(self, pcf: PCFFile):
-        self.pcf = copy.deepcopy(pcf)
-        self.changes: List[ColorChange] = []
+    color_map = {orig: shifted for orig, shifted in zip(original_colors, shifted_colors)}
+    result_pcf = copy.deepcopy(pcf)
 
-    def process_element(self, element_idx: int, element: PCFElement,
-                        transform_fn: callable) -> List[ColorChange]:
-        """Process an element's color attributes"""
-        changes = []
-
-        for attr_name, (attr_type, attr_value) in element.attributes.items():
-            # Skip non-color attributes
-            if attr_type != AttributeType.COLOR or not is_color_attribute(str(attr_name)):
+    for element in result_pcf.elements:
+        for attr_name, (attr_type, value) in element.attributes.items():
+            if attr_type != AttributeType.COLOR:
                 continue
 
-            if not isinstance(attr_value, tuple) or len(attr_value) != 4:
+            r, g, b, a = value
+            rgb = (r, g, b)
+
+            if rgb in color_map:
+                new_r, new_g, new_b = color_map[rgb]
+                element.attributes[attr_name] = (attr_type, (new_r, new_g, new_b, a))
+
+    return result_pcf
+
+
+def analyze_pcf_colors(pcf_input):
+    red_colors = []
+    blue_colors = []
+
+    for element in pcf_input.elements:
+        for attr_name, (attr_type, value) in element.attributes.items():
+            if attr_type != AttributeType.COLOR:
                 continue
 
-            # Transform color
-            try:
-                new_color = transform_color(attr_value, transform_fn)
-                if new_color != attr_value:
-                    element.attributes[attr_name] = (attr_type, new_color)
-                    changes.append(ColorChange(
-                        element_index=element_idx,
-                        element_type=self.pcf.string_dictionary[element.type_name_index],
-                        attribute_name=str(attr_name),
-                        old_color=attr_value,
-                        new_color=new_color
-                    ))
-            except PCFError:
+            r, g, b, a = value
+            team = get_color_dominance((r, g, b, a))
+            if team == 'red':
+                red_colors.append((r, g, b))
+            if team == 'blue':
+                blue_colors.append((r, g, b))
+            else:
                 continue
 
-        return changes
-
-    def apply_transform(self, transform_fn: callable,
-                        element_filter: Optional[List[int]] = None) -> ColorTransformResult:
-        """Apply color transformation to PCF"""
-        self.changes = []
-        elements_processed = 0
-
-        for idx, element in enumerate(self.pcf.elements):
-            if element_filter is not None and idx not in element_filter:
-                continue
-
-            changes = self.process_element(idx, element, transform_fn)
-            self.changes.extend(changes)
-            elements_processed += 1
-
-        return ColorTransformResult(
-            changes=self.changes,
-            elements_processed=elements_processed,
-            attributes_changed=len(self.changes)
-        )
-
-    def get_transformed_pcf(self) -> PCFFile:
-        """Get the transformed PCF file"""
-        return self.pcf
+    return red_colors, blue_colors
 
 
 def print_color_changes(result: ColorTransformResult) -> None:

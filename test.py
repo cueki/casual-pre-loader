@@ -1,12 +1,9 @@
 import copy
 import os
-from typing import Tuple, List
 from core.constants import AttributeType, PCF_OFFSETS
-from models.pcf_file import PCFFile
-from operations.color import get_color_dominance
 from codec.codec import decode_pcf_file
 from tools.color_wheel import plot_rgb_vector
-from operations.color import color_shift
+from operations.color import color_shift, transform_with_shift, analyze_pcf_colors
 from operations.vpk import VPKOperations
 
 temp_pcf = "temp.pcf"
@@ -21,47 +18,6 @@ green = 173, 255, 47
 
 offset, size = PCF_OFFSETS.get(f"{pcf_file}")
 vpk_ops = VPKOperations
-hsv_list = []
-
-def analyze_pcf_colors(pcf_input):
-    red_colors = []
-    blue_colors = []
-
-    for element in pcf_input.elements:
-        for attr_name, (attr_type, value) in element.attributes.items():
-            if attr_type != AttributeType.COLOR:
-                continue
-
-            r, g, b, a = value
-            team = get_color_dominance((r, g, b, a))
-            if team == 'red':
-                red_colors.append((r, g, b))
-            if team == 'blue':
-                blue_colors.append((r, g, b))
-            else:
-                continue
-
-    return red_colors, blue_colors
-
-def transform_with_shift(pcf: PCFFile, original_colors: List[Tuple[int, int, int]],
-                         shifted_colors: List[Tuple[int, int, int]]) -> PCFFile:
-
-    color_map = {orig: shifted for orig, shifted in zip(original_colors, shifted_colors)}
-    result_pcf = copy.deepcopy(pcf)
-
-    for element in result_pcf.elements:
-        for attr_name, (attr_type, value) in element.attributes.items():
-            if attr_type != AttributeType.COLOR:
-                continue
-
-            r, g, b, a = value
-            rgb = (r, g, b)
-
-            if rgb in color_map:
-                new_r, new_g, new_b = color_map[rgb]
-                element.attributes[attr_name] = (attr_type, (new_r, new_g, new_b, a))
-
-    return result_pcf
 
 extracted_pcf = vpk_ops.extract_pcf(
     vpk_path=vpk_file,
@@ -94,5 +50,6 @@ result = vpk_ops.patch_pcf(
     pcf=stage_2,
     create_backup=True
 )
+
 os.remove(temp_pcf)
 print(result)
