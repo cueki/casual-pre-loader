@@ -1,5 +1,6 @@
-from enum import IntEnum, StrEnum
 from typing import Dict, Tuple
+from enum import IntEnum, StrEnum
+
 
 class PCFVersion(StrEnum):
     """PCF version strings"""
@@ -9,6 +10,7 @@ class PCFVersion(StrEnum):
     DMX_BINARY3_PCF2 = "<!-- dmx encoding binary 3 format pcf 2 -->"
     DMX_BINARY4_PCF2 = "<!-- dmx encoding binary 4 format pcf 2 -->"
     DMX_BINARY5_PCF2 = "<!-- dmx encoding binary 5 format pcf 2 -->"
+
 
 class AttributeType(IntEnum):
     ELEMENT = 0x01
@@ -39,6 +41,22 @@ class AttributeType(IntEnum):
     QANGLE_ARRAY = 0x1A
     QUATERNION_ARRAY = 0x1B
     MATRIX_ARRAY = 0x1C
+
+
+ATTRIBUTE_VALUES = {AttributeType.ELEMENT: '<I',
+                    AttributeType.INTEGER: '<i',
+                    AttributeType.FLOAT: '<f',
+                    AttributeType.BOOLEAN: 'B',
+                    AttributeType.STRING: '<H',
+                    AttributeType.BINARY: '<I',
+                    AttributeType.COLOR: '<4B',
+                    AttributeType.VECTOR2: '<2f',
+                    AttributeType.VECTOR3: '<3f',
+                    AttributeType.VECTOR4: '<4f',
+                    AttributeType.MATRIX: '<4f',
+                    AttributeType.ELEMENT_ARRAY: '<I',
+                    }
+
 
 PCF_OFFSETS: Dict[str, Tuple[int, int]] = {
     # PCF_FILE: (OFFSET, SIZE)
