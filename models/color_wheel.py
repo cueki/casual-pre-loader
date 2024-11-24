@@ -1,23 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import colorsys
 from matplotlib.patches import Circle
-
-def rgb_to_hsv(r, g, b):
-    """Convert RGB [0-255] to HSV [0-360, 0-100, 0-100]"""
-    r, g, b = r / 255.0, g / 255.0, b / 255.0
-    h, s, v = colorsys.rgb_to_hsv(r, g, b)
-    return h * 360, s * 100, v * 100
-
-
-def hsv_to_rgb(h, s, v):
-    """Convert HSV [0-360, 0-100, 0-100] to RGB [0-1]"""
-    h, s, v = h / 360, s / 100, v / 100
-    return colorsys.hsv_to_rgb(h, s, v)
-
+from operations.color import rgb_to_hsv
 
 def plot_rgb_colors(rgb_colors, labels=None):
-    """Plot specific RGB colors in polar coordinates"""
     plt.figure(figsize=(12, 12))
     ax = plt.subplot(111, projection='polar')
 
@@ -65,7 +51,7 @@ def plot_rgb_colors(rgb_colors, labels=None):
     plt.show()
 
 
-def plot_specific_colors(rgb_colors, labels=None):
+def plot_rgb_vector(rgb_colors, labels=None):
     plt.style.use('dark_background')
     fig, ax = plt.subplots(figsize=(12, 12))
     ax.axis('off')
