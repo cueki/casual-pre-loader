@@ -180,45 +180,6 @@ class ColorTransform:
         return self.pcf
 
 
-def transform_team_colors(pcf: PCFFile, red_color: RGB, blue_color: RGB,
-                          elements: Optional[List[int]] = None) -> Tuple[PCFFile, ColorTransformResult]:
-    """
-    Transform team-specific colors in a PCF file.
-
-    Args:
-        pcf: PCF file to transform
-        red_color: Target color for red team
-        blue_color: Target color for blue team
-        elements: Optional list of element indices to process
-
-    Returns:
-        Tuple of (transformed PCF, transformation result)
-    """
-    transformer = ColorTransform(pcf)
-
-    def transform(r: int, g: int, b: int) -> RGB:
-        dominance = get_color_dominance((r, g, b, 255))
-        if dominance == 'red':
-            target = red_color
-        elif dominance == 'blue':
-            target = blue_color
-        else:
-            return r, g, b
-
-        # Calculate intensity factor
-        intensity = (r + g + b) / (255 * 3)
-
-        # Apply transformation while preserving intensity
-        new_r = min(255, int(target[0] * intensity))
-        new_g = min(255, int(target[1] * intensity))
-        new_b = min(255, int(target[2] * intensity))
-
-        return new_r, new_g, new_b
-
-    result = transformer.apply_transform(transform, elements)
-    return transformer.get_transformed_pcf(), result
-
-
 def print_color_changes(result: ColorTransformResult) -> None:
     """Print a formatted summary of color changes"""
     if not result.has_changes:
