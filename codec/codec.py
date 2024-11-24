@@ -3,6 +3,7 @@ from typing import BinaryIO, Any
 from core.constants import PCFVersion, AttributeType
 from models.element import PCFElement
 from models.pcf_file import PCFFile
+import io
 
 def write_null_terminated_string(file: BinaryIO, string: str) -> None:
     # Ensure we write the exact bytes without any encoding/decoding loss
@@ -205,11 +206,7 @@ class PCFCodec:
 
 
     def get_size(self) -> int:
-        """Calculate the encoded size of the PCF file in bytes without writing to disk"""
-        import io
-
         output = io.BytesIO()
-
         # Write header
         version_string = getattr(PCFVersion, self.pcf.version)
         write_null_terminated_string(output, f"{version_string}\n")
