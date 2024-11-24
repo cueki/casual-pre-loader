@@ -1,6 +1,5 @@
-import copy
 import os
-from core.constants import AttributeType, PCF_OFFSETS
+from core.constants import PCF_OFFSETS
 from codec.codec import decode_pcf_file
 from tools.color_wheel import plot_rgb_vector
 from operations.color import color_shift, transform_with_shift, analyze_pcf_colors
