@@ -1,6 +1,6 @@
 import os
 from core.constants import PCF_OFFSETS
-from codec.codec import decode_pcf_file
+from codec.codec import PCFCodec
 from tools.color_wheel import plot_rgb_vector
 from operations.color import color_shift, transform_with_shift, analyze_pcf_colors
 from operations.vpk import VPKOperations
@@ -17,6 +17,7 @@ green = 173, 255, 47
 
 offset, size = PCF_OFFSETS.get(f"{pcf_file}")
 vpk_ops = VPKOperations
+codec = PCFCodec()
 
 extracted_pcf = vpk_ops.extract_pcf(
     vpk_path=vpk_file,
@@ -25,14 +26,14 @@ extracted_pcf = vpk_ops.extract_pcf(
     output_path=temp_pcf
 )
 
-temp_pcf_decode = decode_pcf_file(temp_pcf)
-color_list = analyze_pcf_colors(temp_pcf_decode)
+codec.decode(temp_pcf)
+color_list = analyze_pcf_colors(codec.pcf)
 red_list, blue_list = color_list
 
-red_shift = color_shift(red_list, purple)
-blue_shift = color_shift(blue_list, pink)
+red_shift = color_shift(red_list, mint)
+blue_shift = color_shift(blue_list, yellow)
 
-stage_1 = transform_with_shift(temp_pcf_decode, red_list, red_shift)
+stage_1 = transform_with_shift(codec.pcf, red_list, red_shift)
 stage_2 = transform_with_shift(stage_1, blue_list, blue_shift)
 
 shifted_colors_list = []

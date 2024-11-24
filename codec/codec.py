@@ -25,20 +25,6 @@ def read_null_terminated_string(file: BinaryIO) -> bytes:
     return bytes(chars)
 
 
-def decode_pcf_file(input_path: str) -> PCFFile:
-    """Decode a PCF file and return a PCFFile object"""
-    codec = PCFCodec()
-    codec.decode(input_path)
-    return codec.pcf
-
-
-def encode_pcf_file(pcf: PCFFile, output_path: str) -> None:
-    """Encode a PCFFile object to a PCF file"""
-    codec = PCFCodec()
-    codec.pcf = pcf
-    codec.encode(output_path)
-
-
 class PCFCodec:
     def __init__(self):
         self.pcf = PCFFile()

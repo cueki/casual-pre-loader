@@ -5,7 +5,7 @@ import os
 from core.constants import PCFVersion
 from core.errors import PCFError
 from models.pcf_file import PCFFile
-from codec.codec import encode_pcf_file, PCFCodec
+from codec.codec import PCFCodec
 
 @dataclass
 class VPKSearchResult:
@@ -187,7 +187,7 @@ class VPKOperations:
 
             # Encode modified PCF
             temp_path = f"{vpk_path}.temp"
-            encode_pcf_file(pcf, temp_path)
+            codec.encode(temp_path)
 
             with open(temp_path, 'rb') as f:
                 new_data = f.read()
