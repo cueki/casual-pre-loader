@@ -3,7 +3,6 @@ import colorsys
 from typing import Tuple, List, Optional
 from dataclasses import dataclass
 from core.constants import AttributeType
-from core.errors import PCFError
 from models.pcf_file import PCFFile
 
 RGB = Tuple[int, int, int]
@@ -59,12 +58,6 @@ def get_color_dominance(color: RGBA) -> Optional[str]:
     elif b > r:
         return 'blue'
     return None
-
-
-def create_color(r: int, g: int, b: int, a: int = 255) -> RGBA:
-    if not all(0 <= x <= 255 for x in (r, g, b, a)):
-        raise PCFError("Color values must be between 0 and 255")
-    return r, g, b, a
 
 
 def average_rgb(rgb_list):

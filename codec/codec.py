@@ -4,7 +4,6 @@ from core.constants import PCFVersion, AttributeType
 from models.element import PCFElement
 from models.pcf_file import PCFFile
 
-
 def write_null_terminated_string(file: BinaryIO, string: str) -> None:
     # Ensure we write the exact bytes without any encoding/decoding loss
     if isinstance(string, str):
