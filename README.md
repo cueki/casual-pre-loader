@@ -13,6 +13,9 @@ logic for rotating color palette
 
 NEED TO CONFIRM WORKING:
 ~~seek through vpk searching for byte signatures~~
+
 ~~extract files from vpk~~
+
 ~~write into pcf file without changing size~~
+
 write pcf back into vpk
