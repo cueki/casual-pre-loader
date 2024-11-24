@@ -1,11 +1,12 @@
-from typing import List, Tuple, Optional, BinaryIO
+import os
 from dataclasses import dataclass
 from pathlib import Path
-import os
+from typing import List, Tuple, Optional, BinaryIO
+
 from core.constants import PCFVersion
 from core.errors import PCFError
 from models.pcf_file import PCFFile
-from codec.codec import PCFCodec
+
 
 @dataclass
 class VPKSearchResult:
@@ -181,13 +182,12 @@ class VPKOperations:
                         error_message="Failed to create backup"
                     )
 
-            codec = PCFCodec()
-            codec.pcf = pcf
-            original_size = codec.get_size()
+            pcf = PCFFile(vpk_path)
+            original_size = pcf.get_size()
 
             # Encode modified PCF
             temp_path = f"{vpk_path}.temp"
-            codec.encode(temp_path)
+            pcf.encode(temp_path)
 
             with open(temp_path, 'rb') as f:
                 new_data = f.read()
