@@ -2,7 +2,6 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple, Optional, BinaryIO
-
 from core.constants import PCFVersion
 from core.errors import PCFError
 from models.pcf_file import PCFFile
@@ -154,7 +153,7 @@ class VPKOperations:
             return False
 
     @classmethod
-    def patch_pcf(cls, vpk_path: str, offset: int, pcf: PCFFile,
+    def patch_pcf(cls, vpk_path: str, offset: int, size: int, pcf: PCFFile,
                   create_backup: bool = True) -> PCFPatchResult:
         """
         Patch PCF in VPK file
@@ -162,6 +161,7 @@ class VPKOperations:
         Args:
             vpk_path: Path to VPK file
             offset: Offset of PCF in VPK
+            size: Size of PCF in VPK
             pcf: Modified PCF to write
             create_backup: Whether to create backup
 
@@ -182,9 +182,6 @@ class VPKOperations:
                         error_message="Failed to create backup"
                     )
 
-            pcf = PCFFile(vpk_path)
-            original_size = pcf.get_size()
-
             # Encode modified PCF
             temp_path = f"{vpk_path}.temp"
             pcf.encode(temp_path)
@@ -194,11 +191,11 @@ class VPKOperations:
                 new_size = len(new_data)
 
             # Verify size
-            if new_size > original_size:
+            if new_size > size:
                 os.remove(temp_path)
                 return PCFPatchResult(
                     success=False,
-                    original_size=original_size,
+                    original_size=size,
                     new_size=new_size,
                     offset=offset,
                     error_message="Modified PCF is larger than original"
@@ -208,13 +205,13 @@ class VPKOperations:
             with open(vpk_path, 'rb+') as f:
                 cls.write_binary_chunk(f, offset, new_data)
                 # Pad with nulls if smaller
-                if new_size < original_size:
-                    f.write(b'\x00' * (original_size - new_size))
+                if new_size < size:
+                    f.write(b'\x00' * (size - new_size))
 
             os.remove(temp_path)
             return PCFPatchResult(
                 success=True,
-                original_size=original_size,
+                original_size=size,
                 new_size=new_size,
                 offset=offset,
                 backup_path=backup_path

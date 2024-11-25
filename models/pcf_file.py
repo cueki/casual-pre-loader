@@ -23,8 +23,8 @@ class PCFFile:
     def add_element(self, element: PCFElement):
         self.elements.append(element)
 
-    def read_null_terminated_string(self,
-                                    file: BinaryIO) -> bytes:  # Ignore 'method may be static' warning for now, will be fixed later
+    @staticmethod
+    def read_null_terminated_string(file: BinaryIO) -> bytes:  # Ignore 'method may be static' warning for now, will be fixed later
         # Read raw bytes instead of decoding to string
         chars = bytearray()
         while True:
@@ -34,7 +34,8 @@ class PCFFile:
             chars.extend(char)
         return bytes(chars)
 
-    def write_null_terminated_string(self, file: BinaryIO,
+    @staticmethod
+    def write_null_terminated_string(file: BinaryIO,
                                      string: str) -> None:  # Ignore 'method may be static' warning for now, will be fixed later
         # Ensure we write the exact bytes without any encoding/decoding loss
         if isinstance(string, str):

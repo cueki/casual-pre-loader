@@ -48,6 +48,7 @@ plot_rgb_vector(shifted_colors_list)
 result = vpk_ops.patch_pcf(
     vpk_path=vpk_file,
     offset=offset,
+    size=size,
     pcf=stage_2,
     create_backup=True
 )
