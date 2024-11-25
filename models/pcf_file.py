@@ -1,11 +1,10 @@
 import io
 import struct
-from dataclasses import dataclass
 from pathlib import Path
-from typing import BinaryIO, Any, List
-
-from core.constants import PCFVersion, AttributeType, ATTRIBUTE_VALUES
+from dataclasses import dataclass
 from models.element import PCFElement
+from typing import BinaryIO, Any, List
+from core.constants import PCFVersion, AttributeType, ATTRIBUTE_VALUES
 
 
 @dataclass
