@@ -1,0 +1,5 @@
+vpk_file: tf2_misc_000.vpk
+pcf_file: medicgun_beam.pcf
+colors:
+  red: [66, 245, 153]  # mint
+  blue: [233, 245, 66] # yellow
