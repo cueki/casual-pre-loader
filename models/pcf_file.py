@@ -70,76 +70,50 @@ class PCFFile:
                 self.write_attribute_data(file, base_type, item)
             return
 
+        if attr_type in [AttributeType.COLOR, AttributeType.VECTOR2, AttributeType.VECTOR3, AttributeType.VECTOR4]:
+            file.write(struct.pack(ATTRIBUTE_VALUES.get(attr_type), *value))
+            return
+
         file.write(struct.pack(ATTRIBUTE_VALUES.get(attr_type), value))
 
-        # if attr_type == AttributeType.ELEMENT:
-        #     file.write(struct.pack('<I', value))
-        # elif attr_type == AttributeType.INTEGER:
-        #     file.write(struct.pack('<i', value))
-        # elif attr_type == AttributeType.FLOAT:
-        #     file.write(struct.pack('<f', value))
-        # elif attr_type == AttributeType.BOOLEAN:
-        #     file.write(struct.pack('B', value))
-        # elif attr_type == AttributeType.STRING:
-        #     if self.version == 'DMX_BINARY4_PCF2':
-        #         encoded = value.encode('ascii')
-        #         file.write(struct.pack('<H', len(encoded)))
-        #         file.write(encoded)
-        #     else:
-        #         self.write_null_terminated_string(file, value)
-        # elif attr_type == AttributeType.BINARY:
-        #     file.write(struct.pack('<I', len(value)))
-        #     file.write(value)
-        # elif attr_type == AttributeType.COLOR:
-        #     file.write(struct.pack('<4B', *value))
-        # elif attr_type == AttributeType.VECTOR2:
-        #     file.write(struct.pack('<2f', *value))
-        # elif attr_type == AttributeType.VECTOR3:
-        #     file.write(struct.pack('<3f', *value))
-        # elif attr_type == AttributeType.VECTOR4:
-        #     file.write(struct.pack('<4f', *value))
-        # elif attr_type == AttributeType.MATRIX:
-        #     for row in value:
-        #         file.write(struct.pack('<4f', *row))
-        # elif attr_type.value >= AttributeType.ELEMENT_ARRAY.value:
-        #     file.write(struct.pack('<I', len(value)))
-        #     base_type = AttributeType(attr_type.value - 14)
-        #     for item in value:
-        #         self.write_attribute_data(file, base_type, item)
-
     def read_attribute_data(self, file: BinaryIO, attr_type: AttributeType):
-        if attr_type == AttributeType.ELEMENT:
-            return struct.unpack('<I', file.read(4))[0]
-        elif attr_type == AttributeType.INTEGER:
-            return struct.unpack('<i', file.read(4))[0]
-        elif attr_type == AttributeType.FLOAT:
-            return struct.unpack('<f', file.read(4))[0]
-        elif attr_type == AttributeType.BOOLEAN:
+        if attr_type in [AttributeType.ELEMENT, AttributeType.INTEGER, AttributeType.FLOAT]:
+            return struct.unpack(ATTRIBUTE_VALUES.get(attr_type), file.read(4))[0]
+
+        if attr_type == AttributeType.BOOLEAN:
             return bool(file.read(1)[0])
-        elif attr_type == AttributeType.STRING:
+
+        if attr_type == AttributeType.STRING:
             if self.version == 'DMX_BINARY4_PCF2':
-                length = struct.unpack('<H', file.read(2))[0]
+                length = struct.unpack(ATTRIBUTE_VALUES.get(attr_type), file.read(2))[0]
                 return file.read(length).decode('ascii')
             return self.read_null_terminated_string(file)
-        elif attr_type == AttributeType.BINARY:
-            length = struct.unpack('<I', file.read(4))[0]
+
+        if attr_type == AttributeType.BINARY:
+            length = struct.unpack(ATTRIBUTE_VALUES.get(attr_type), file.read(4))[0]
             return file.read(length)
-        elif attr_type == AttributeType.COLOR:
+
+        if attr_type == AttributeType.COLOR:
             return struct.unpack('<4B', file.read(4))
-        elif attr_type == AttributeType.VECTOR2:
+
+        if attr_type == AttributeType.VECTOR2:
             return struct.unpack('<2f', file.read(8))
-        elif attr_type == AttributeType.VECTOR3:
+
+        if attr_type == AttributeType.VECTOR3:
             return struct.unpack('<3f', file.read(12))
-        elif attr_type == AttributeType.VECTOR4:
+
+        if attr_type == AttributeType.VECTOR4:
             return struct.unpack('<4f', file.read(16))
-        elif attr_type == AttributeType.MATRIX:
+
+        if attr_type == AttributeType.MATRIX:
             return [struct.unpack('<4f', file.read(16)) for _ in range(4)]
-        elif attr_type.value >= AttributeType.ELEMENT_ARRAY.value:
+
+        if attr_type.value >= AttributeType.ELEMENT_ARRAY.value:
             count = struct.unpack('<I', file.read(4))[0]
             base_type = AttributeType(attr_type.value - 14)
             return [self.read_attribute_data(file, base_type) for _ in range(count)]
-        else:
-            raise ValueError(f"Unsupported attribute type: {attr_type}")
+
+        raise ValueError(f"Unsupported attribute type: {attr_type}")
 
     def encode(self, output_path: str) -> None:
         with open(output_path, 'wb') as file:
