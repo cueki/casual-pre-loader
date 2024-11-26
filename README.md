@@ -12,6 +12,10 @@ finding all uses of material files in vmt
 
 ~~animate the color shift~~
 
+add logic if the number of colors is low to not shift with average but to shift directly 
+
+figure out divide by 0 error 
+
 NEED TO CONFIRM WORKING:
 
 ~~seek through vpk searching for byte signatures~~
