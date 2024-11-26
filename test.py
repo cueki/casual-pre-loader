@@ -1,4 +1,6 @@
 import os
+
+import matplotlib.pyplot as plt
 import yaml
 import argparse
 from dataclasses import dataclass
@@ -6,7 +8,7 @@ from core.constants import PCF_OFFSETS
 from models.pcf_file import PCFFile
 from operations.color import color_shift, transform_with_shift, analyze_pcf_colors
 from operations.vpk import VPKOperations
-from tools.color_wheel import plot_rgb_vector
+from tools.color_wheel import plot_rgb_vector, animate_color_shift
 
 
 @dataclass
@@ -47,7 +49,7 @@ def main():
     vpk_ops = VPKOperations
     pcf = PCFFile(temp_pcf)
 
-    extracted_pcf = vpk_ops.extract_pcf(
+    vpk_ops.extract_pcf(
         vpk_path=config.vpk_file,
         offset=offset,
         size=size,
@@ -64,23 +66,35 @@ def main():
     stage_1 = transform_with_shift(pcf, red_list, red_shift)
     stage_2 = transform_with_shift(stage_1, blue_list, blue_shift)
 
-    if args.plot:
-        shifted_colors_list = []
-        colors = analyze_pcf_colors(stage_2)
-        for c in colors[0]: shifted_colors_list.append(c)
-        for c in colors[1]: shifted_colors_list.append(c)
-        plot_rgb_vector(shifted_colors_list)
+    # if args.plot:
+    #     shifted_colors_list = []
+    #     colors = analyze_pcf_colors(stage_2)
+    #     for c in colors[0]: shifted_colors_list.append(c)
+    #     for c in colors[1]: shifted_colors_list.append(c)
+    #     plot_rgb_vector(shifted_colors_list)
 
-    result = vpk_ops.patch_pcf(
-        vpk_path=config.vpk_file,
-        offset=offset,
-        size=size,
-        pcf=stage_2,
-        create_backup=True
-    )
+    unshifted_colors_list = []
+    stage_0_colors = color_list
+    for c in stage_0_colors[0]: unshifted_colors_list.append(c)
+    for c in stage_0_colors[1]: unshifted_colors_list.append(c)
+
+    shifted_colors_list = []
+    stage_2_colors = analyze_pcf_colors(stage_2)
+    for c in stage_2_colors[0]: shifted_colors_list.append(c)
+    for c in stage_2_colors[1]: shifted_colors_list.append(c)
+
+    animate_color_shift(red_list, config.colors.red, blue_list, config.colors.blue)
+    plt.show()
+    # result = vpk_ops.patch_pcf(
+    #     vpk_path=config.vpk_file,
+    #     offset=offset,
+    #     size=size,
+    #     pcf=stage_2,
+    #     create_backup=True
+    # )
 
     os.remove(temp_pcf)
-    print(result)
+    # print(result)
 
 
 if __name__ == '__main__':
