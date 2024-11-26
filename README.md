@@ -10,6 +10,7 @@ finding all uses of material files in vmt
 
 ~~logic for rotating color palette~~ DONE! IM A JEANYUS 24/11/2024!
 
+~~animate the color shift~~
 
 NEED TO CONFIRM WORKING:
 
