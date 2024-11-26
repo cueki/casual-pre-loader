@@ -14,6 +14,8 @@ finding all uses of material files in vmt
 
 add logic if the number of colors is low to not shift with average but to shift directly 
 
+ALSO MAYBE IF THE FILE ONLY HAD ONE COLOR ADD LOGIC FOR A 3RD SHIFT (NEUTRAL COLOR)
+
 figure out divide by 0 error 
 
 NEED TO CONFIRM WORKING:
