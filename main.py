@@ -76,7 +76,7 @@ def process_pcf(vpk_file: str, pcf_file: str, red_target: Tuple[int, int, int],
             neutral_shift = color_shift(all_colors, neutral_target)
             result = transform_with_shift(result, all_colors, neutral_shift)
 
-    animate_color_shift(red_list, red_target, blue_list, blue_target, neutral_list, neutral_target, save_video=False)
+    # animate_color_shift(red_list, red_target, blue_list, blue_target, neutral_list, neutral_target, save_video=False)
 
     result = vpk_ops.patch_pcf(
         vpk_path=vpk_file,

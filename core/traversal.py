@@ -22,35 +22,35 @@ class PCFTraversal:
     def iter_tree(self,
                   root: Optional[PCFElement] = None,
                   depth: int = -1,
-                  _seen: Optional[Set[int]] = None) -> Iterator[tuple[PCFElement, int]]:
+                  seen_this_guy_before: Optional[Set[int]] = None) -> Iterator[tuple[PCFElement, int]]:
         """
         Recursively iterate through element tree, yielding (element, depth) pairs.
         Use depth=-1 for unlimited depth traversal.
-        Handles circular references via _seen set.
+        Handles circular references via seen_this_guy_before set.
         """
-        if _seen is None:
-            _seen = set()
+        if seen_this_guy_before is None:
+            seen_this_guy_before = set()
 
         # Start from all root elements if no root specified
         if root is None:
             for element in self.pcf.elements:
-                yield from self.iter_tree(element, depth, _seen)
+                yield from self.iter_tree(element, depth, seen_this_guy_before)
             return
 
         # Avoid circular references
         elem_id = id(root)
-        if elem_id in _seen:
+        if elem_id in seen_this_guy_before:
             return
-        _seen.add(elem_id)
+        seen_this_guy_before.add(elem_id)
 
-        yield root, len(_seen) - 1
+        yield root, len(seen_this_guy_before) - 1
 
         # Recurse through children if depth allows
         if depth != 0:
             for child in self.get_child_elements(root):
-                yield from self.iter_tree(child, depth - 1 if depth > 0 else -1, _seen)
+                yield from self.iter_tree(child, depth - 1 if depth > 0 else -1, seen_this_guy_before)
 
-        _seen.remove(elem_id)
+        seen_this_guy_before.remove(elem_id)
 
     def find_attributes(self,
                         attr_type: Optional[AttributeType] = None,
