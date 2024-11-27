@@ -137,15 +137,15 @@ def analyze_pcf_colors(pcf: PCFFile) -> Tuple[List[RGB], List[RGB], List[RGB]]:
 
     for element, attr_name, (_, rgba), _ in color_attrs:
         # Skip the tint clamps
-        if b'tint clamp' in attr_name:
-            continue
+        # if b'tint clamp' in attr_name:
+        #     continue
 
 
         # Update current context if not a Color element
         if not element.element_name.startswith(b'Color'):
             current_element = element.element_name
         # Process colors from Color elements using previous context
-        elif current_element and (b'color1' in attr_name or b'color2' in attr_name):
+        elif current_element and (b'color1' in attr_name or b'color2' in attr_name or b'tint clamp'):
             r, g, b, a = rgba
             if (r+g+b) == 765 or 0: # skip if 255, 255, 255 or 0, 0, 0
                 continue
