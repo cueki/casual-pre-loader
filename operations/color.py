@@ -53,12 +53,13 @@ def get_color_dominance(color: RGBA) -> Optional[str]:
     Returns: 'red', 'blue', or None if neither is dominant
     """
     r, g, b, a = color
-    if r > b:
+    if abs(r - b) <= 10:
+        return 'neutral'
+    elif r > b:
         return 'red'
     elif b > r:
         return 'blue'
     return None
-
 
 def average_rgb(rgb_list):
     """Calculate average RGB from a list of RGB tuples."""
@@ -72,17 +73,22 @@ def average_rgb(rgb_list):
 
 
 def color_shift(rgb_color_list: list, target_color: RGB):
-    # Convert input RGB colors to HSV
-    hsv_colors = [rgb_to_hsv(*rgb) for rgb in rgb_color_list]
+    # Calc average rgb
+    avg_r = sum(rgb[0] for rgb in rgb_color_list) / len(rgb_color_list)
+    avg_g = sum(rgb[1] for rgb in rgb_color_list) / len(rgb_color_list)
+    avg_b = sum(rgb[2] for rgb in rgb_color_list) / len(rgb_color_list)
 
+    # Convert to average HSV
+    average_hsv = rgb_to_hsv(avg_r, avg_g, avg_b)
+    
     # Convert target color to HSV
     target_hsv = rgb_to_hsv(*target_color)
 
-    # Calculate average hue
-    avg_hue = sum(hsv[0] for hsv in hsv_colors) / len(hsv_colors)
-
     # Calculate hue difference
-    hue_diff = target_hsv[0] - avg_hue
+    hue_diff = target_hsv[0] - average_hsv[0]
+
+    # Convert input RGB colors to HSV
+    hsv_colors = [rgb_to_hsv(*rgb) for rgb in rgb_color_list]
 
     # Shift each color by the hue difference
     shifted_colors = []
@@ -125,6 +131,7 @@ def transform_with_shift(pcf: PCFFile, original_colors: List[Tuple[int, int, int
 def analyze_pcf_colors(pcf_input):
     red_colors = []
     blue_colors = []
+    neutral_colors = []
 
     for element in pcf_input.elements:
         for attr_name, (attr_type, value) in element.attributes.items():
@@ -137,14 +144,15 @@ def analyze_pcf_colors(pcf_input):
                 red_colors.append((r, g, b))
             if team == 'blue':
                 blue_colors.append((r, g, b))
+            if team == 'neutral':
+                neutral_colors.append((r, g, b))
             else:
                 continue
 
-    return red_colors, blue_colors
+    return red_colors, blue_colors, neutral_colors
 
 
 def print_color_changes(result: ColorTransformResult) -> None:
-    """Print a formatted summary of color changes"""
     if not result.has_changes:
         print("No color changes were made")
         return
