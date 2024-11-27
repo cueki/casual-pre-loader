@@ -220,6 +220,38 @@ def compare_elements(elem1: PCFElement, elem2: PCFElement) -> List[Dict[str, Any
     return differences
 
 
+def pad_path(path: bytes, target_length: int) -> bytes:
+    """
+    Pad a path with spaces to reach target length while maintaining extension.
+    Used for maintaining consistent string lengths in PCF attributes.
+
+    Args:
+        path: Path as bytes
+        target_length: Desired total length
+
+    Returns:
+        Padded path as bytes
+    """
+    if len(path) >= target_length:
+        return path
+
+    try:
+        # Split at last dot while preserving the dot in extension
+        dot_index = path.rindex(b'.')
+        base = path[:dot_index]
+        ext = path[dot_index:]
+
+        # Add padding before the extension
+        padding_size = target_length - len(path)
+        padded = base + b' ' * padding_size + ext
+
+        return padded
+
+    except ValueError:
+        # No extension found, pad at end
+        return path + b' ' * (target_length - len(path))
+
+
 def get_file_size(filepath):
     try:
         return os.path.getsize(filepath)

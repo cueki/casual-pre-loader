@@ -3,6 +3,7 @@ import colorsys
 from typing import Tuple, List, Optional
 from dataclasses import dataclass
 from core.constants import AttributeType
+from core.traversal import PCFTraversal
 from models.pcf_file import PCFFile
 
 RGB = Tuple[int, int, int]
@@ -42,16 +43,13 @@ def hsv_to_rgb(h, s, v):
 
 
 def is_color_attribute(name: str) -> bool:
-    color_indicators = {'color', 'color1', 'color2', 'color_fade'}
-    name = name.lower()
-    return any(indicator in name for indicator in color_indicators)
+    color_indicators = {b'color', b'color1', b'color2', b'color3', b'color4', b'color_fade'}
+    if isinstance(name, str):
+        name = name.encode('ascii')
+    return any(indicator in name.lower() for indicator in color_indicators)
 
 
 def get_color_dominance(color: RGBA) -> Optional[str]:
-    """
-    Determine if a color is red or blue dominant.
-    Returns: 'red', 'blue', or None if neither is dominant
-    """
     r, g, b, a = color
     if abs(r - b) <= 10:
         return 'neutral'
@@ -61,22 +59,19 @@ def get_color_dominance(color: RGBA) -> Optional[str]:
         return 'blue'
     return None
 
+
 def average_rgb(rgb_list):
     """Calculate average RGB from a list of RGB tuples."""
-    if not rgb_list:
-        return 0, 0, 0
     r_sum = sum(rgb[0] for rgb in rgb_list)
     g_sum = sum(rgb[1] for rgb in rgb_list)
     b_sum = sum(rgb[2] for rgb in rgb_list)
     n = len(rgb_list)
-    return round(r_sum / n), round(g_sum / n), round(b_sum / n)
+    return (r_sum / n), (g_sum / n), (b_sum / n)
 
 
 def color_shift(rgb_color_list: list, target_color: RGB):
     # Calc average rgb
-    avg_r = sum(rgb[0] for rgb in rgb_color_list) / len(rgb_color_list)
-    avg_g = sum(rgb[1] for rgb in rgb_color_list) / len(rgb_color_list)
-    avg_b = sum(rgb[2] for rgb in rgb_color_list) / len(rgb_color_list)
+    avg_r, avg_g, avg_b = average_rgb(rgb_color_list)
 
     # Convert to average HSV
     average_hsv = rgb_to_hsv(avg_r, avg_g, avg_b)
@@ -117,37 +112,49 @@ def transform_with_shift(pcf: PCFFile, original_colors: List[Tuple[int, int, int
         for attr_name, (attr_type, value) in element.attributes.items():
             if attr_type != AttributeType.COLOR:
                 continue
-
-            r, g, b, a = value
-            rgb = (r, g, b)
-
-            if rgb in color_map:
-                new_r, new_g, new_b = color_map[rgb]
-                element.attributes[attr_name] = (attr_type, (new_r, new_g, new_b, a))
+            if is_color_attribute(attr_name):
+                r, g, b, a = value
+                rgb = (r, g, b)
+                if rgb in color_map:
+                    new_r, new_g, new_b = color_map[rgb]
+                    element.attributes[attr_name] = (attr_type, (new_r, new_g, new_b, a))
 
     return result_pcf
 
 
-def analyze_pcf_colors(pcf_input):
+def analyze_pcf_colors(pcf: PCFFile) -> Tuple[List[RGB], List[RGB], List[RGB]]:
+    traversal = PCFTraversal(pcf)
     red_colors = []
     blue_colors = []
     neutral_colors = []
 
-    for element in pcf_input.elements:
-        for attr_name, (attr_type, value) in element.attributes.items():
-            if attr_type != AttributeType.COLOR:
-                continue
+    current_element = None
 
-            r, g, b, a = value
-            team = get_color_dominance((r, g, b, a))
-            if team == 'red':
-                red_colors.append((r, g, b))
-            if team == 'blue':
-                blue_colors.append((r, g, b))
-            if team == 'neutral':
-                neutral_colors.append((r, g, b))
-            else:
+    color_attrs = traversal.find_attributes(
+        attr_type=AttributeType.COLOR,
+        max_depth=0
+    )
+
+    for element, attr_name, (_, rgba), _ in color_attrs:
+        # Skip the tint clamps
+        if b'tint clamp' in attr_name:
+            continue
+
+
+        # Update current context if not a Color element
+        if not element.element_name.startswith(b'Color'):
+            current_element = element.element_name
+        # Process colors from Color elements using previous context
+        elif current_element and (b'color1' in attr_name or b'color2' in attr_name):
+            r, g, b, a = rgba
+            if (r+g+b) == 765 or 0: # skip if 255, 255, 255 or 0, 0, 0
                 continue
+            if b'_blue' in current_element:
+                blue_colors.append((r, g, b))
+            elif b'_red' in current_element:
+                red_colors.append((r, g, b))
+            else:
+                neutral_colors.append((r, g, b))
 
     return red_colors, blue_colors, neutral_colors
 

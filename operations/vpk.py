@@ -1,7 +1,8 @@
 import os
+import struct
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Tuple, Optional, BinaryIO
+from typing import List, Tuple, Optional, BinaryIO, Dict
 from core.constants import PCFVersion
 from core.errors import PCFError
 from models.pcf_file import PCFFile
@@ -28,8 +29,23 @@ class PCFPatchResult:
     error_message: Optional[str] = None
 
 
+
+@dataclass
+class VPKEntry:
+    """Entry in VPK directory tree"""
+    path: str
+    crc: int
+    preload_bytes: int
+    archive_index: int
+    entry_offset: int
+    entry_length: int
+
+
 class VPKOperations:
     """Handles operations on PCFs within VPK files"""
+    def __init__(self, vpk_path: str):
+        self.path = vpk_path
+        self.entries: Dict[str, VPKEntry] = {}
 
     @staticmethod
     def read_binary_chunk(file: BinaryIO, offset: int, size: int) -> bytes:
@@ -70,6 +86,17 @@ class VPKOperations:
             return backup_path
         except OSError:
             return None
+
+    @staticmethod
+    def read_null_string(file: BinaryIO) -> str:
+        """Read null-terminated string from file"""
+        result = bytearray()
+        while True:
+            char = file.read(1)
+            if char == b'\0' or not char:
+                break
+            result.extend(char)
+        return result.decode('ascii', errors='replace')
 
     @classmethod
     def find_pcfs(cls, vpk_path: str, context_size: int = 100) -> List[VPKSearchResult]:

@@ -195,7 +195,7 @@ def animate_color_shift(red_colors=None, red_target=None, blue_colors=None, blue
         writer = FFMpegWriter(fps=60, bitrate=10000)
         anim.save('color.mp4', writer=writer)
 
-    plt.show(block=False)
+    plt.show()
 
     if show_metrics and frame_times:
         print(f"Performance Statistics:")

@@ -1,5 +1,10 @@
 vpk_file: tf2_misc_000.vpk
-pcf_file: medicgun_beam.pcf
-colors:
-  red: [65, 255, 75]
-  blue: [255, 165, 0]
+pcf_files:
+  - file: smoke_blackbillow_hoodoo.pcf
+    colors:
+      red: [0, 255, 0]
+      blue: [255, 0, 255]
+#  - file: medicgun_attrib.pcf
+#    colors:
+#      red: [255, 165, 0]
+#      blue: [65, 255, 75]
