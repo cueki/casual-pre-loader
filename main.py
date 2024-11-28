@@ -2,7 +2,7 @@ import os
 import json
 from idlelib.pyshell import restart_line
 from pathlib import Path
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 import matplotlib.pyplot as plt
 import yaml
 import argparse
@@ -11,10 +11,10 @@ from core.constants import PCF_OFFSETS, AttributeType
 from core.errors import PCFError
 from core.traversal import PCFTraversal
 from models.pcf_file import PCFFile
-from operations.color import color_shift, transform_with_shift, analyze_pcf_colors, RGB, is_color_attribute
+from operations.color import color_shift, transform_with_shift, analyze_pcf_colors, transform_team_colors, RGB
 from operations.vpk import VPKOperations, VPKSearchResult
 from tools.color_wheel import plot_rgb_vector, animate_color_shift
-
+import random
 
 @dataclass
 class ColorConfig:
@@ -42,8 +42,38 @@ def load_config(config_path: str) -> PCFConfig:
         )
 
 
-def process_pcf(vpk_file: str, pcf_file: str, red_target: Tuple[int, int, int],
-                blue_target: Tuple[int, int, int], neutral_target: Tuple[int, int, int]) -> None:
+def generate_random_rgb():
+    return (
+        random.randint(100, 255),
+        random.randint(50, 255),
+        random.randint(50, 255)
+    )
+
+
+def generate_random_targets():
+    return {
+        'red': {
+            'color1': generate_random_rgb(),
+            'color2': generate_random_rgb(),
+            'tint_clamp': generate_random_rgb(),
+            'color_fade': generate_random_rgb()
+        },
+        'blue': {
+            'color1': generate_random_rgb(),
+            'color2': generate_random_rgb(),
+            'tint_clamp': generate_random_rgb(),
+            'color_fade': generate_random_rgb()
+        },
+        'neutral': {
+            'color1': generate_random_rgb(),
+            'color2': generate_random_rgb(),
+            'tint_clamp': generate_random_rgb(),
+            'color_fade': generate_random_rgb()
+        }
+    }
+
+
+def process_pcf(vpk_file: str, pcf_file: str, targets: Dict[str, Dict[str, RGB]]) -> None:
 
     temp_pcf = f"temp_{pcf_file}"
     pcf = PCFFile(temp_pcf)
@@ -59,24 +89,10 @@ def process_pcf(vpk_file: str, pcf_file: str, red_target: Tuple[int, int, int],
     )
 
     pcf.decode()
-    red_list, blue_list, neutral_list = analyze_pcf_colors(pcf)
+    colors = analyze_pcf_colors(pcf, debug=True)
+    result = transform_team_colors(pcf, colors, targets, debug=True)
 
-    result = pcf
-    if red_list and blue_list:
-        red_shift = color_shift(red_list, red_target)
-        result = transform_with_shift(result, red_list, red_shift)
-        blue_shift = color_shift(blue_list, blue_target)
-        result = transform_with_shift(result, blue_list, blue_shift)
-        if neutral_list:  # Only process neutral if it exists
-            neutral_shift = color_shift(neutral_list, neutral_target)
-            result = transform_with_shift(result, neutral_list, neutral_shift)
-    elif not red_list or not blue_list:
-        all_colors = red_list + blue_list + neutral_list
-        if all_colors:
-            neutral_shift = color_shift(all_colors, neutral_target)
-            result = transform_with_shift(result, all_colors, neutral_shift)
-
-    # animate_color_shift(red_list, red_target, blue_list, blue_target, neutral_list, neutral_target, save_video=False)
+    # animate_color_shift(colors, targets, save_video=False)
 
     result = vpk_ops.patch_pcf(
         vpk_path=vpk_file,
@@ -135,27 +151,48 @@ def main():
     with open('config.yaml', 'r') as f:
         config = yaml.safe_load(f)
 
-    red_target = 0, 255, 127
-    blue_target = 255, 127, 0
-    neutral_target = 127, 0, 255
+    # red_target = 0, 255, 127
+    # blue_target = 255, 127, 0
+    # neutral_target = 127, 0, 255
+    # red_target = 0, 255, 0
+    # blue_target = 0, 255, 0
+    # neutral_target = 0, 255, 0
     vpk_file = config['vpk_file']
-    # for pcf_entry in config['pcf_files']:
-    #     pcf_file = pcf_entry['file']
-    #     red_target = pcf_entry['colors']['red']
-    #     blue_target = pcf_entry['colors']['blue']
-    #     process_pcf(vpk_file, pcf_file, red_target, blue_target, neutral_target)
+    #
+    # targets = {
+    #     'red': {
+    #         'color1': (255, 105, 180),
+    #         'color2': (144, 238, 144),
+    #         'tint_clamp': (255, 0, 255),
+    #         'color_fade': (255, 105, 180)
+    #     },
+    #     'blue': {
+    #         'color1': (255, 105, 180),
+    #         'color2': (144, 238, 144),
+    #         'tint_clamp': (255, 0, 255),
+    #         'color_fade': (255, 105, 180)
+    #     },
+    #     'neutral': {
+    #         'color1': (255, 105, 180),
+    #         'color2': (144, 238, 144),
+    #         'tint_clamp': (255, 0, 255),
+    #         'color_fade': (255, 105, 180)
+    #     }
+    # }
 
     for pcf_name in PCF_OFFSETS:
-        print(pcf_name)
-        process_pcf(vpk_file, pcf_name, red_target, blue_target, neutral_target)
+        print(f"Processing {pcf_name}")
+        targets = generate_random_targets()
+        print(f"Generated targets for {pcf_name}:", targets)
+        process_pcf(vpk_file, pcf_name, targets)
 
-    # tracer = Path("disguise.pcf")
+    # tracer = Path("rockettrail.pcf")
     # tracer_pcf = PCFFile(tracer)
     # tracer_pcf.decode()
-    # red_c, blue_c, neut_c = analyze_pcf_colors(tracer_pcf)
-    # print(red_c)
-    # print(blue_c)
-    # print(neut_c)
+    # colors = analyze_pcf_colors(tracer_pcf, debug=True)
+    # result = transform_team_colors(tracer_pcf, colors, targets, debug=)
+    # print(f"Processed {tracer_pcf}: {result}")
+
 
 if __name__ == '__main__':
     main()

@@ -1,6 +1,6 @@
 import copy
 import colorsys
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, Dict
 from dataclasses import dataclass
 from core.constants import AttributeType
 from core.traversal import PCFTraversal
@@ -43,7 +43,7 @@ def hsv_to_rgb(h, s, v):
 
 
 def is_color_attribute(name: str) -> bool:
-    color_indicators = {b'color', b'color1', b'color2', b'color3', b'color4', b'color_fade'}
+    color_indicators = {b'color', b'color1', b'color2', b'color3', b'color4', b'color_fade', b'tint clamp'}
     if isinstance(name, str):
         name = name.encode('ascii')
     return any(indicator in name.lower() for indicator in color_indicators)
@@ -96,17 +96,17 @@ def color_shift(rgb_color_list: list, target_color: RGB):
             new_hue += 360
 
         # Convert back to RGB, scale to 0-255 range
-        rgb = hsv_to_rgb(new_hue, hsv[1], hsv[2])
+        rgb = hsv_to_rgb(new_hue, hsv[1], 100)
         shifted_colors.append(tuple(round(c * 255) for c in rgb))
 
     return shifted_colors
 
 
 def transform_with_shift(pcf: PCFFile, original_colors: List[Tuple[int, int, int]],
-                         shifted_colors: List[Tuple[int, int, int]]) -> PCFFile:
-
+                         shifted_colors: List[Tuple[int, int, int]], debug=True) -> PCFFile:
     color_map = {orig: shifted for orig, shifted in zip(original_colors, shifted_colors)}
     result_pcf = copy.deepcopy(pcf)
+    changes_made = []
 
     for element in result_pcf.elements:
         for attr_name, (attr_type, value) in element.attributes.items():
@@ -117,46 +117,98 @@ def transform_with_shift(pcf: PCFFile, original_colors: List[Tuple[int, int, int
                 rgb = (r, g, b)
                 if rgb in color_map:
                     new_r, new_g, new_b = color_map[rgb]
-                    element.attributes[attr_name] = (attr_type, (new_r, new_g, new_b, a))
+                    old_value = (r, g, b, a)
+                    new_value = (new_r, new_g, new_b, a)
+                    element.attributes[attr_name] = (attr_type, new_value)
+
+                    changes_made.append({
+                        'element_name': element.element_name,
+                        'attribute': attr_name,
+                        'old_color': old_value,
+                        'new_color': new_value
+                    })
+
+    if debug:
+        print("\nColor changes made to PCF:")
+        for change in changes_made:
+            print(f"\nElement: {change['element_name']}")
+            print(f"Attribute: {change['attribute']}")
+            print(f"Old color: RGBA{change['old_color']}")
+            print(f"New color: RGBA{change['new_color']}")
 
     return result_pcf
 
 
-def analyze_pcf_colors(pcf: PCFFile) -> Tuple[List[RGB], List[RGB], List[RGB]]:
+def analyze_pcf_colors(pcf: PCFFile, debug=True) -> Dict[str, Dict[str, List[RGB]]]:
     traversal = PCFTraversal(pcf)
-    red_colors = []
-    blue_colors = []
-    neutral_colors = []
+    colors = {
+        'red': {'color1': [], 'color2': [], 'tint_clamp': [], 'color_fade': []},
+        'blue': {'color1': [], 'color2': [], 'tint_clamp': [], 'color_fade': []},
+        'neutral': {'color1': [], 'color2': [], 'tint_clamp': [], 'color_fade': []}
+    }
 
     current_element = None
+    color_attrs = traversal.find_attributes(attr_type=AttributeType.COLOR, max_depth=0)
 
-    color_attrs = traversal.find_attributes(
-        attr_type=AttributeType.COLOR,
-        max_depth=0
-    )
+    if debug:
+        print("\nStarting color analysis...")
 
     for element, attr_name, (_, rgba), _ in color_attrs:
-        # Skip the tint clamps
-        # if b'tint clamp' in attr_name:
-        #     continue
-
-
-        # Update current context if not a Color element
         if not element.element_name.startswith(b'Color'):
             current_element = element.element_name
-        # Process colors from Color elements using previous context
-        elif current_element and (b'color1' in attr_name or b'color2' in attr_name or b'tint clamp'):
+            if debug:
+                print(f"\nCurrent context element: {current_element}")
+        elif current_element:
             r, g, b, a = rgba
-            if (r+g+b) == 765 or 0: # skip if 255, 255, 255 or 0, 0, 0
+            if (r + g + b) == 765 or (r + g + b) == 0 or (r == g == b):
+                if debug:
+                    print(f"Skipping white/black/grey color: RGB({r},{g},{b})")
                 continue
-            if b'_blue' in current_element:
-                blue_colors.append((r, g, b))
-            elif b'_red' in current_element:
-                red_colors.append((r, g, b))
-            else:
-                neutral_colors.append((r, g, b))
 
-    return red_colors, blue_colors, neutral_colors
+            if debug:
+                print(f"\nProcessing color: RGB({r},{g},{b})")
+                print(f"Attribute name: {attr_name}")
+
+            # Determine team
+            is_red = b'_red' in current_element or b'red_' in current_element
+            is_blue = b'_blue' in current_element or b'blue_' in current_element
+            team = 'red' if is_red else 'blue' if is_blue else 'neutral'
+
+            if debug:
+                print(f"Team detection:")
+                print(f"  '_red' or 'red_' found: {is_red}")
+                print(f"  '_blue' or 'blue_' found: {is_blue}")
+                print(f"  Assigned team: {team}")
+
+            # Determine category
+            if b'tint clamp' in attr_name:
+                category = 'tint_clamp'
+            elif b'color_fade' in attr_name:
+                category = 'color_fade'
+            elif b'color1' in attr_name:
+                category = 'color1'
+            elif b'color2' in attr_name:
+                category = 'color2'
+            else:
+                if debug:
+                    print(f"Unknown category for attribute: {attr_name}")
+                continue
+
+            if debug:
+                print(f"Category: {category}")
+
+            colors[team][category].append((r, g, b))
+
+    if debug:
+        print("\nFinal color counts:")
+        for team in colors:
+            print(f"\n{team.upper()} TEAM:")
+            for category, color_list in colors[team].items():
+                print(f"  {category}: {len(color_list)} colors")
+                for color in color_list:
+                    print(f"    RGB{color}")
+
+    return colors
 
 
 def print_color_changes(result: ColorTransformResult) -> None:
@@ -172,3 +224,79 @@ def print_color_changes(result: ColorTransformResult) -> None:
         print(f"  Attribute: {change.attribute_name}")
         print(f"  Old: RGBA{change.old_color}")
         print(f"  New: RGBA{change.new_color}\n")
+
+
+def transform_team_colors(result_pcf: PCFFile, colors: Dict[str, Dict[str, List[RGB]]],
+                          targets: Dict[str, Dict[str, RGB]], debug=True) -> PCFFile:
+    result = result_pcf
+
+    if debug:
+        print("\nStarting color transformation...")
+        print("\nInitial state:")
+        for team in colors:
+            print(f"\n{team.upper()} TEAM TARGET COLORS:")
+            for category, target in targets[team].items():
+                print(f"  {category}: RGB{target}")
+
+    has_red = any(colors['red'].values())
+    has_blue = any(colors['blue'].values())
+
+    if debug:
+        print(f"\nTeam detection:")
+        print(f"  Has red team: {has_red}")
+        print(f"  Has blue team: {has_blue}")
+
+    if has_red and has_blue:
+        if debug:
+            print("\nProcessing both teams separately")
+
+        for team in ['red', 'blue', 'neutral']:
+            if debug:
+                print(f"\nProcessing {team} team:")
+
+            for category in ['color1', 'color2', 'tint_clamp', 'color_fade']:
+                if colors[team][category] and targets[team][category]:
+                    if debug:
+                        print(f"\n  Processing {category}:")
+                        print(f"    Original colors: {colors[team][category]}")
+                        print(f"    Target color: RGB{targets[team][category]}")
+
+                    shifted = color_shift(colors[team][category], targets[team][category])
+
+                    if debug:
+                        print(f"    Shifted colors: {shifted}")
+
+                    result = transform_with_shift(result, colors[team][category], shifted, debug=True)
+    else:
+        if debug:
+            print("\nProcessing all colors together")
+
+        all_colors_by_category = {
+            'color1': [], 'color2': [], 'tint_clamp': [], 'color_fade': []
+        }
+
+        for team in ['red', 'blue', 'neutral']:
+            for category in ['color1', 'color2', 'tint_clamp', 'color_fade']:
+                all_colors_by_category[category].extend(colors[team][category])
+
+        if debug:
+            print("\nCombined colors by category:")
+            for category, color_list in all_colors_by_category.items():
+                print(f"  {category}: {len(color_list)} colors")
+                print(f"    Colors: {color_list}")
+
+        for category in ['color1', 'color2', 'tint_clamp', 'color_fade']:
+            if all_colors_by_category[category] and targets['neutral'][category]:
+                if debug:
+                    print(f"\nProcessing combined {category}:")
+                    print(f"  Original colors: {all_colors_by_category[category]}")
+                    print(f"  Target color: RGB{targets['neutral'][category]}")
+
+                shifted = color_shift(all_colors_by_category[category], targets['neutral'][category])
+
+                if debug:
+                    print(f"  Shifted colors: {shifted}")
+
+                result = transform_with_shift(result, all_colors_by_category[category], shifted, debug=True)
+
+    return result
