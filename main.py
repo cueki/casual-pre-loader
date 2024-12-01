@@ -89,8 +89,8 @@ def process_pcf(vpk_file: str, pcf_file: str, targets: Dict[str, Dict[str, RGB]]
     )
 
     pcf.decode()
-    colors = analyze_pcf_colors(pcf, debug=True)
-    result = transform_team_colors(pcf, colors, targets, debug=True)
+    colors = analyze_pcf_colors(pcf, debug=False)
+    result = transform_team_colors(pcf, colors, targets)
 
     # animate_color_shift(colors, targets, save_video=False)
 
@@ -158,33 +158,39 @@ def main():
     # blue_target = 0, 255, 0
     # neutral_target = 0, 255, 0
     vpk_file = config['vpk_file']
-    #
-    # targets = {
-    #     'red': {
-    #         'color1': (255, 105, 180),
-    #         'color2': (144, 238, 144),
-    #         'tint_clamp': (255, 0, 255),
-    #         'color_fade': (255, 105, 180)
-    #     },
-    #     'blue': {
-    #         'color1': (255, 105, 180),
-    #         'color2': (144, 238, 144),
-    #         'tint_clamp': (255, 0, 255),
-    #         'color_fade': (255, 105, 180)
-    #     },
-    #     'neutral': {
-    #         'color1': (255, 105, 180),
-    #         'color2': (144, 238, 144),
-    #         'tint_clamp': (255, 0, 255),
-    #         'color_fade': (255, 105, 180)
-    #     }
-    # }
+    pcf_files = config['pcf_files']
 
-    for pcf_name in PCF_OFFSETS:
-        print(f"Processing {pcf_name}")
-        targets = generate_random_targets()
-        print(f"Generated targets for {pcf_name}:", targets)
-        process_pcf(vpk_file, pcf_name, targets)
+    targets = {
+        'red': {
+            'color1': (1, 1, 1),
+            'color2': (2, 2, 2,),
+            'tint_clamp': (3, 3, 3),
+            'color_fade': (4, 4, 4)
+        },
+        'blue': {
+            'color1': (5, 5, 5),
+            'color2': (6, 6, 6),
+            'tint_clamp': (7, 7, 7),
+            'color_fade': (8, 8, 8)
+        },
+        'neutral': {
+            'color1': (9, 9, 9),
+            'color2': (10, 10, 10),
+            'tint_clamp': (11, 11, 11),
+            'color_fade': (12, 12, 12)
+        }
+    }
+
+    for pcf_name in pcf_files:
+        # print(pcf_name['file'])
+        process_pcf(vpk_file, pcf_name['file'], targets)
+
+    # for pcf_name in PCF_OFFSETS:
+    #     print(pcf_name)
+    #     print(f"Processing {pcf_name}")
+    #     targets = generate_random_targets()
+    #     print(f"Generated targets for {pcf_name}:", targets)
+    #     process_pcf(vpk_file, pcf_name, targets)
 
     # tracer = Path("rockettrail.pcf")
     # tracer_pcf = PCFFile(tracer)
