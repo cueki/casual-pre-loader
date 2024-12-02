@@ -6,6 +6,7 @@ from core.constants import PCF_OFFSETS
 from models.pcf_file import PCFFile
 from operations.color import analyze_pcf_colors, transform_team_colors, RGB
 from operations.vpk import VPKOperations
+from tools.color_wheel import animate_color_shift
 
 
 def generate_random_rgb():
@@ -96,14 +97,14 @@ def main():
     }
 
     # DO ONLY WHAT IS IN CONFIG.YAML
-    # for pcf_name in pcf_files:
-    #     # targets = generate_random_targets() # if u want random
-    #     process_pcf(vpk_file, pcf_name['file'], targets)
+    for pcf_name in pcf_files:
+        # targets = generate_random_targets() # if u want random
+        process_pcf(vpk_file, pcf_name['file'], targets)
 
     # DO ALL PARTICLE FILES !!!
-    for pcf_name in PCF_OFFSETS:
-        # targets = generate_random_targets() # if u want random
-        process_pcf(vpk_file, pcf_name, targets)
+    # for pcf_name in PCF_OFFSETS:
+    #     # targets = generate_random_targets() # if u want random
+    #     process_pcf(vpk_file, pcf_name, targets)
 
 
 if __name__ == '__main__':

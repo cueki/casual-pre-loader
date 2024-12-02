@@ -8,7 +8,7 @@ class PCFTraversal:
         self.pcf = pcf
 
     def get_child_elements(self, element: PCFElement) -> Iterator[PCFElement]:
-        """Get all child elements through ELEMENT type attributes"""
+        # Get all child elements through ELEMENT type attributes
         for attr_name, (type_, value) in element.attributes.items():
             if type_ == AttributeType.ELEMENT:
                 if 0 <= value < len(self.pcf.elements):
@@ -23,9 +23,10 @@ class PCFTraversal:
                   depth: int = -1,
                   seen_this_guy_before: Optional[Set[int]] = None) -> Iterator[tuple[PCFElement, int]]:
         """
-        Recursively iterate through element tree, yielding (element, depth) pairs.
-        Use depth=-1 for unlimited depth traversal.
-        Handles circular references via seen_this_guy_before set.
+        Recursively iterate through element tree, yielding (element, depth) pairs
+        Use depth=-1 for unlimited depth traversal
+        Handles circular references via seen_this_guy_before set
+        I HAVE NO IDEA IF THIS WORKS EXACTLY HOW I INTENDED
         """
         if seen_this_guy_before is None:
             seen_this_guy_before = set()
@@ -58,7 +59,7 @@ class PCFTraversal:
                         value_predicate: Optional[Callable[[Any], bool]] = None,
                         max_depth: int = 0
                         ) -> Iterator[tuple[PCFElement, str, tuple[AttributeType, Any], int]]:
-        """Find attributes matching criteria, now includes depth information"""
+        # Find attributes matching criteria
         for element, depth in self.iter_tree(depth=max_depth):
             if element_name_pattern and element_name_pattern not in str(element.element_name):
                 continue
@@ -80,7 +81,7 @@ class PCFTraversal:
                           value_predicate: Optional[Callable[[Any], bool]] = None,
                           max_depth: int = -1
                           ) -> List[Dict[str, Any]]:
-        """Modify attributes matching criteria through the element tree"""
+        # Modify attributes matching criteria through the element tree - unused for now - offsets less scary ;w;
         changes = []
         for element, attr_name, (type_, old_value), depth in self.find_attributes(
                 attr_type, attr_name_pattern, element_name_pattern, value_predicate, max_depth

@@ -1,10 +1,8 @@
 import copy
 import colorsys
-from collections import defaultdict
 from math import floor
 import random
 from typing import Tuple, List, Dict
-from dataclasses import dataclass
 from core.constants import AttributeType
 from core.traversal import PCFTraversal
 from models.pcf_file import PCFFile
@@ -33,7 +31,6 @@ def is_color_attribute(name: str) -> bool:
 
 
 def average_rgb(rgb_list):
-    """Calculate average RGB from a list of RGB tuples."""
     r_sum = sum(rgb[0] for rgb in rgb_list)
     g_sum = sum(rgb[1] for rgb in rgb_list)
     b_sum = sum(rgb[2] for rgb in rgb_list)
@@ -211,5 +208,5 @@ def transform_team_colors(pcf: PCFFile, colors: Dict[str, Dict[str, List[tuple[R
     else:
         print("WARN: you are attempting to color change a particle file that does not contain any color attributes! "
               "Nothing will happen!")
-        current_pcf = current_pcf # maybe trap this in the future or do smthn here idk
+        pass # maybe trap this in the future or do smthn here idk
     return current_pcf

@@ -1,5 +1,4 @@
 import os
-import struct
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple, Optional, BinaryIO, Dict
@@ -10,7 +9,6 @@ from models.pcf_file import PCFFile
 
 @dataclass
 class VPKSearchResult:
-    """Result of a PCF search in VPK"""
     vpk_path: str
     offset: int
     size: int
@@ -20,7 +18,6 @@ class VPKSearchResult:
 
 @dataclass
 class PCFPatchResult:
-    """Result of patching a PCF in VPK"""
     success: bool
     original_size: int
     new_size: int
@@ -32,7 +29,6 @@ class PCFPatchResult:
 
 @dataclass
 class VPKEntry:
-    """Entry in VPK directory tree"""
     path: str
     crc: int
     preload_bytes: int
@@ -42,26 +38,23 @@ class VPKEntry:
 
 
 class VPKOperations:
-    """Handles operations on PCFs within VPK files"""
+    # Handles operations on stuff within VPK files
     def __init__(self, vpk_path: str):
         self.path = vpk_path
         self.entries: Dict[str, VPKEntry] = {}
 
     @staticmethod
     def read_binary_chunk(file: BinaryIO, offset: int, size: int) -> bytes:
-        """Read chunk of binary data from file"""
         file.seek(offset)
         return file.read(size)
 
     @staticmethod
     def write_binary_chunk(file: BinaryIO, offset: int, data: bytes) -> None:
-        """Write chunk of binary data to file"""
         file.seek(offset)
         file.write(data)
 
     @staticmethod
     def detect_pcf_version(data: bytes) -> Optional[str]:
-        """Detect PCF version from binary data"""
         try:
             # Find end of version string
             end = data.index(b'\x00')
@@ -77,7 +70,7 @@ class VPKOperations:
 
     @staticmethod
     def create_vpk_backup(vpk_path: str) -> Optional[str]:
-        """Create backup of VPK file"""
+        # Make backup... I probably should do this smarter
         try:
             backup_path = f"{vpk_path}.backup"
             if not os.path.exists(backup_path):
@@ -89,7 +82,6 @@ class VPKOperations:
 
     @staticmethod
     def read_null_string(file: BinaryIO) -> str:
-        """Read null-terminated string from file"""
         result = bytearray()
         while True:
             char = file.read(1)
@@ -99,75 +91,8 @@ class VPKOperations:
         return result.decode('ascii', errors='replace')
 
     @classmethod
-    def find_pcfs(cls, vpk_path: str, context_size: int = 100) -> List[VPKSearchResult]:
-        """
-        Find all PCFs in a VPK file
-
-        Args:
-            vpk_path: Path to VPK file
-            context_size: Number of context bytes to store around matches
-
-        Returns:
-            List of search results
-        """
-        results = []
-
-        try:
-            with open(vpk_path, 'rb') as f:
-                data = f.read()
-                pos = 0
-
-                while True:
-                    # Search for PCF header pattern
-                    pos = data.find(b'<!-- dmx encoding binary', pos)
-                    if pos == -1:
-                        break
-
-                    # Get context around match
-                    context_start = max(0, pos - context_size)
-
-                    # Find potential end of PCF by looking for next header or reasonable chunk
-                    next_pos = data.find(b'<!-- dmx encoding binary', pos + 100)
-                    if next_pos == -1:
-                        size = min(10000, len(data) - pos)  # Reasonable max size
-                    else:
-                        size = next_pos - pos
-
-                    context_end = min(len(data), pos + size + context_size)
-                    context = data[context_start:context_end]
-
-                    # Detect version
-                    pcf_version = cls.detect_pcf_version(data[pos:pos + 100])
-                    if pcf_version:
-                        results.append(VPKSearchResult(
-                            vpk_path=vpk_path,
-                            offset=pos,
-                            size=size,
-                            pcf_version=pcf_version,
-                            context=context
-                        ))
-
-                    pos += 1
-
-        except OSError as e:
-            raise PCFError(f"Error reading VPK file: {e}")
-
-        return results
-
-    @classmethod
     def extract_pcf(cls, vpk_path: str, offset: int, size: int, output_path: str) -> bool:
-        """
-        Extract PCF from VPK to file
-
-        Args:
-            vpk_path: Path to VPK file
-            offset: Offset of PCF in VPK
-            size: Size of PCF data
-            output_path: Path to save extracted PCF
-
-        Returns:
-            True if successful
-        """
+        # Extract PCF from VPK based on offset and size, careful, it will do exactly as you ask
         try:
             with open(vpk_path, 'rb') as f:
                 pcf_data = cls.read_binary_chunk(f, offset, size)
@@ -182,22 +107,10 @@ class VPKOperations:
     @classmethod
     def patch_pcf(cls, vpk_path: str, offset: int, size: int, pcf: PCFFile,
                   create_backup: bool = True) -> PCFPatchResult:
-        """
-        Patch PCF in VPK file
-
-        Args:
-            vpk_path: Path to VPK file
-            offset: Offset of PCF in VPK
-            size: Size of PCF in VPK
-            pcf: Modified PCF to write
-            create_backup: Whether to create backup
-
-        Returns:
-            Patch result
-        """
+        # Opposite of extract, write to location whatever bytes you want, will error if new PCF is too large
         backup_path = None
         try:
-            # Create backup if requested
+            # Create backup
             if create_backup:
                 backup_path = cls.create_vpk_backup(vpk_path)
                 if not backup_path:
@@ -209,10 +122,13 @@ class VPKOperations:
                         error_message="Failed to create backup"
                     )
 
-            # Encode modified PCF
+            # Temp VPK
             temp_path = f"{vpk_path}.temp"
+
+            # Encode modified PCF to temp
             pcf.encode(temp_path)
 
+            # Get size of the VPK
             with open(temp_path, 'rb') as f:
                 new_data = f.read()
                 new_size = len(new_data)
@@ -255,7 +171,7 @@ class VPKOperations:
 
     @staticmethod
     def batch_process_vpks(vpk_pattern: str, operation: callable) -> List[Tuple[str, bool]]:
-        """Process multiple VPK files with given operation"""
+        # My very own _dir.vpk ;) - unused
         results = []
         for vpk_path in Path('.').glob(vpk_pattern):
             try:
@@ -268,10 +184,8 @@ class VPKOperations:
 
 
 def format_vpk_number(num: int) -> str:
-    """Format VPK file number with leading zeros"""
     return f"{num:03d}"
 
 
 def get_vpk_path(base_name: str, number: int) -> str:
-    """Get full VPK path from base name and number"""
     return f"{base_name}_{format_vpk_number(number)}.vpk"

@@ -3,7 +3,7 @@ from typing import Dict, Tuple
 
 
 class PCFVersion(StrEnum):
-    """PCF version strings"""
+    # PCF version strings
     DMX_BINARY2_DMX1 = "<!-- dmx encoding binary 2 format dmx 1 -->"
     DMX_BINARY2_PCF1 = "<!-- dmx encoding binary 2 format pcf 1 -->"
     DMX_BINARY3_PCF1 = "<!-- dmx encoding binary 3 format pcf 1 -->"

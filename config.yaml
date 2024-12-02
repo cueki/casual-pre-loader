@@ -1,4 +1,7 @@
 vpk_file: tf2_misc_000.vpk
 pcf_files:
 #  - file: medicgun_beam.pcf
-  - file: medicgun_attrib.pcf
+#  - file: medicgun_attrib.pcf
+  - file: rocketbackblast.pcf
+  - file: explosion.pcf
+  - file: rockettrail.pcf

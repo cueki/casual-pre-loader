@@ -1,14 +1,12 @@
 import struct
-from pathlib import Path
 from models.pcf_file import PCFFile
 from core.traversal import PCFTraversal
 from core.constants import PCF_OFFSETS, AttributeType
 from operations.vpk import VPKOperations
 import os
-from models.vpk_file import VPKParser, VPKHeader, VPKDirectoryEntry, VPKChecksumReader, VMTComparator, \
-    print_vmt_comparison, VMTDirComparator, print_comparison_results
+from models.vpk_file import VPKParser
 import hashlib
-from typing import Dict, Tuple, List, Optional
+from typing import Dict
 
 
 def analyze_pcf_materials(vpk_file: str, pcf_file: str) -> None:

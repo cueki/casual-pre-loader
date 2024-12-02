@@ -1,6 +1,4 @@
-import time
-from typing import Dict, List
-
+from typing import Dict, List, Tuple
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, FFMpegWriter
@@ -11,6 +9,7 @@ from operations.color import rgb_to_hsv, color_shift, RGB
 plt.rcParams['animation.ffmpeg_path'] = "tools\\ffmpeg.exe"
 
 def ease_inout(t):
+    # We do a little quadratic smoothing
     if t < 0.5:
         return 2 * t * t
     else:
@@ -18,87 +17,29 @@ def ease_inout(t):
         return -0.5 * (t * (t - 2) - 1)
 
 
-def plot_rgb_vector(rgb_colors, labels=None):
-    plt.style.use('dark_background')
-    fig, ax = plt.subplots(figsize=(12, 12))
-    ax.axis('off')
-
-    # Set equal aspect ratio and center the plot
-    ax.set_aspect('equal')
-    ax.set_xlim(-1.2, 1.2)
-    ax.set_ylim(-1.2, 1.2)
-
-    for s in [0.2, 0.4, 0.6, 0.8, 1.0]:
-        circle = Circle((0, 0), s, fill=True, color='black', alpha=1)
-        ax.add_patch(circle)
-
-    # Plot each color as a vector
-    for i, rgb in enumerate(rgb_colors):
-        # Convert RGB to HSV
-        h, s, v = rgb_to_hsv(*rgb)
-
-        # Convert to radians and calculate vector components
-        theta = np.radians(h)
-        r = s / 100.0  # Normalize saturation to [0,1]
-        x = r * np.cos(theta)
-        y = r * np.sin(theta)
-
-        # Create vector
-        rgb_normalized = [c / 255 for c in rgb]
-        ax.quiver(0, 0, x, y, angles='xy', scale_units='xy', scale=1,
-                  color=rgb_normalized, width=0.003, headwidth=0, alpha=.3,
-                  headlength=0, headaxislength=0)
-
-        # Add label if provided
-        if labels and i < len(labels):
-            # Position label slightly beyond vector tip
-            label_x = x * 1.1
-            label_y = y * 1.1
-            ax.text(label_x, label_y, labels[i], ha='center', va='center')
-
-    # Add axes and grid
-    plt.grid(False)
-
-    # ax.set_title('Color Vectors in HSV Space', pad=20)
-    plt.tight_layout()
-    plt.show()
-
-
-def animate_color_shift(colors: Dict[str, Dict[str, List[RGB]]],
+def animate_color_shift(colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
                         targets: Dict[str, Dict[str, RGB]],
                         frames=120, interval=10,
-                        show_metrics=False, save_video=False):
+                        save_video=False):
+    # Dark arts animation - I cant believe this works
     plt.style.use('dark_background')
 
-    if show_metrics:
-        fig, (ax, ax_perf) = plt.subplots(2, 1, figsize=(12, 14),
-                                          gridspec_kw={'height_ratios': [4, 1]})
-        frame_times = []
-        line_perf, = ax_perf.plot([], [], 'g-', label='Frame Time (ms)')
-        ax_perf.set_xlim(0, frames)
-        ax_perf.set_ylim(0, 50)
-        ax_perf.set_xlabel('Frame')
-        ax_perf.set_ylabel('Time (ms)')
-        ax_perf.grid(True, alpha=0.3)
-        ax_perf.legend()
-    else:
-        fig, ax = plt.subplots(figsize=(12, 12))
-        frame_times = None
-        line_perf = None
+    fig, ax = plt.subplots(figsize=(12, 12))
 
     ax.axis('off')
     ax.set_aspect('equal')
     ax.set_xlim(-1.2, 1.2)
     ax.set_ylim(-1.2, 1.2)
 
-    # Calculate shifts for all categories and teams
+    # Calculate shifts for all colors
     shifted_colors = {}
     for team in ['red', 'blue', 'neutral']:
         shifted_colors[team] = {}
-        for category in ['color1', 'color2', 'tint_clamp', 'color_fade']:
+        for category in ['color1', 'color2', 'color_fade']:
             if colors[team][category] and targets[team][category]:
                 shifted_colors[team][category] = color_shift(colors[team][category],
-                                                             targets[team][category])
+                                                             targets[team][category],
+                                                             vibe_enabled=False)
             else:
                 shifted_colors[team][category] = []
 
@@ -123,9 +64,8 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[RGB]]],
 
     # Pre-compute color data
     color_data = []
-
     for team in ['red', 'blue', 'neutral']:
-        for category in ['color1', 'color2', 'tint_clamp', 'color_fade']:
+        for category in ['color1', 'color2', 'color_fade']:
             if not colors[team][category] or not targets[team][category]:
                 continue
 
@@ -166,16 +106,12 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[RGB]]],
                                            alpha=0.5)
         ax.add_collection(target_collection)
 
-    # Pre-allocate arrays for the update function
+    # Pre-allocate arrays for the update function, you heard that right... pre-allocate arrays... in python...
     new_segments = np.zeros((total_lines, 2, 2))
     new_colors = np.zeros((total_lines, 4))
 
     def update(frame):
-        if show_metrics:
-            start_time = time.time()
-
         t = ease_inout(frame / (frames - 1))
-
         for i, data in enumerate(color_data):
             current_h = data['start_hsv'][0] + t * data['dh']
             current_s = data['start_hsv'][1] + t * (data['target_hsv'][1] - data['start_hsv'][1])
@@ -192,12 +128,6 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[RGB]]],
         line_collection.set_segments(new_segments)
         line_collection.set_color(new_colors)
 
-        if show_metrics:
-            frame_time = (time.time() - start_time) * 1000
-            frame_times.append(frame_time)
-            line_perf.set_data(range(len(frame_times)), frame_times)
-            return line_collection, line_perf
-
         return line_collection,
 
     anim = FuncAnimation(fig, update, frames=frames, interval=interval,
@@ -208,12 +138,5 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[RGB]]],
         anim.save('color_shift.mp4', writer=writer)
 
     plt.show()
-
-    if show_metrics and frame_times:
-        print(f"Performance Statistics:")
-        print(f"Average frame time: {np.mean(frame_times):.2f}ms")
-        print(f"Max frame time: {np.max(frame_times):.2f}ms")
-        print(f"Min frame time: {np.min(frame_times):.2f}ms")
-        print(f"95th percentile: {np.percentile(frame_times, 95):.2f}ms")
 
     return anim

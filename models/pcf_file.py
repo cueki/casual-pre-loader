@@ -43,7 +43,7 @@ class PCFFile:
     @staticmethod
     def write_null_terminated_string(file: BinaryIO,
                                      string: str) -> None:
-        # Ensure we write the bytes without any changes
+        # Ensure we write the bytes without any shifting
         if isinstance(string, str):
             encoded = string.encode('ascii', errors='replace')
         else:
@@ -132,7 +132,7 @@ class PCFFile:
             else:
                 file.write(struct.pack('<H', len(self.string_dictionary)))
 
-            # Write each string with exact byte preservation
+            # Write each string with byte preservation
             for string in self.string_dictionary:
                 if isinstance(string, str):
                     self.write_null_terminated_string(file, string)
@@ -149,7 +149,7 @@ class PCFFile:
                     file.write(element.element_name + b'\x00')
                 file.write(element.data_signature)
 
-            # Write element data with exact byte preservation
+            # Write element data with byte preservation
             for element in self.elements:
                 file.write(struct.pack('<I', len(element.attributes)))
                 for attr_name, (attr_type, attr_value) in element.attributes.items():
@@ -174,7 +174,7 @@ class PCFFile:
             else:
                 raise ValueError(f"Unsupported PCF version: {header}")
 
-            # Read string dictionary preserving exact bytes
+            # Read string dictionary preserving bytes
             if self.version == 'DMX_BINARY4_PCF2':
                 count = struct.unpack('<I', file.read(4))[0]
             else:

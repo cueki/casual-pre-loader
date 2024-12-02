@@ -1,6 +1,5 @@
 import hashlib
 from dataclasses import dataclass
-from typing import Tuple
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 import struct

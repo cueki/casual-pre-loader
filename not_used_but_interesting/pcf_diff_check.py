@@ -1,15 +1,12 @@
 from models.pcf_file import PCFFile
-from core.traversal import PCFTraversal
 from typing import Dict, Any, Set, Tuple
 
 
 def get_element_attributes(pcf: PCFFile) -> Dict[str, Dict[str, Any]]:
     elements = {}
-
     for element in pcf.elements:
         element_name = element.element_name.decode('ascii', errors='replace')
         elements[element_name] = {}
-
         for attr_name, (attr_type, value) in element.attributes.items():
             try:
                 if isinstance(value, bytes):
@@ -18,10 +15,8 @@ def get_element_attributes(pcf: PCFFile) -> Dict[str, Dict[str, Any]]:
                     value = [v.decode('ascii', errors='replace') if isinstance(v, bytes) else v for v in value]
             except:
                 pass
-
             if isinstance(attr_name, bytes):
                 attr_name = attr_name.decode('ascii', errors='replace')
-
             elements[element_name][attr_name] = {
                 'value': value,
                 'type': attr_type.name

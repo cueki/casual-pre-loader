@@ -2,15 +2,7 @@ import binascii
 
 
 def hex_dump(file_path):
-    """
-    Generates the hex dump of a file.
-
-    Args:
-        file_path (str): Path to the file.
-
-    Returns:
-        list: List of hex values representing the file content.
-    """
+    # Generates the hex dump of a file.
     try:
         with open(file_path, 'rb') as file:
             content = file.read()
@@ -21,13 +13,7 @@ def hex_dump(file_path):
 
 
 def compare_hex_dumps(file1, file2):
-    """
-    Compares the hex dumps of two files and prints the differences.
-
-    Args:
-        file1 (str): Path to the first file.
-        file2 (str): Path to the second file.
-    """
+    # Compares the hex dumps of two files and prints the differences.
     hex1 = hex_dump(file1)
     hex2 = hex_dump(file2)
 
@@ -52,7 +38,6 @@ def compare_hex_dumps(file1, file2):
 
 
 if __name__ == "__main__":
-    # Example usage
     file1 = "tf2_misc_dir.vpk"
     file2 = "tf2_misc_dir_mod.vpk"
     compare_hex_dumps(file1, file2)
