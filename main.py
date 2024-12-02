@@ -44,9 +44,9 @@ def load_config(config_path: str) -> PCFConfig:
 
 def generate_random_rgb():
     return (
-        random.randint(100, 255),
-        random.randint(50, 255),
-        random.randint(50, 255)
+        random.randint(1, 254),
+        random.randint(1, 254), # 1-254 to avoid my filter of 0, 0, 0 and 255, 255, 255
+        random.randint(1, 254)
     )
 
 
@@ -55,19 +55,19 @@ def generate_random_targets():
         'red': {
             'color1': generate_random_rgb(),
             'color2': generate_random_rgb(),
-            'tint_clamp': generate_random_rgb(),
+            'tint_clamp': (255, 255, 255),
             'color_fade': generate_random_rgb()
         },
         'blue': {
             'color1': generate_random_rgb(),
             'color2': generate_random_rgb(),
-            'tint_clamp': generate_random_rgb(),
+            'tint_clamp': (255, 255, 255),
             'color_fade': generate_random_rgb()
         },
         'neutral': {
             'color1': generate_random_rgb(),
             'color2': generate_random_rgb(),
-            'tint_clamp': generate_random_rgb(),
+            'tint_clamp': (255, 255, 255),
             'color_fade': generate_random_rgb()
         }
     }
@@ -160,37 +160,51 @@ def main():
     vpk_file = config['vpk_file']
     pcf_files = config['pcf_files']
 
+    # targets = {
+    #     'red': {
+    #         'color1': (128, 255, 255),
+    #         'color2': (128, 255, 255),
+    #         'tint_clamp': (255, 255, 255),
+    #         'color_fade': (128, 192, 255)
+    #     },
+    #     'blue': {
+    #         'color1': (255, 128, 255),
+    #         'color2': (255, 128, 255),
+    #         'tint_clamp': (255, 255, 255),
+    #         'color_fade': (255, 128, 192)
+    #     },
+    #     'neutral': {
+    #         'color1': (255, 192, 128),
+    #         'color2': (255, 192, 128),
+    #         'tint_clamp': (255, 255, 255),
+    #         'color_fade': (192, 128, 255)
+    #     }
+    # }
     targets = {
         'red': {
-            'color1': (1, 2, 3),
-            'color2': (4, 5, 6),
-            'tint_clamp': (7, 8, 9),
-            'color_fade': (10, 11, 12)
+            'color1': (255, 128, 128),
+            'color2': (255, 128, 128),
+            'color_fade': (255, 128, 255)
         },
         'blue': {
-            'color1': (13, 14, 15),
-            'color2': (16, 17, 18),
-            'tint_clamp': (19, 20, 21),
-            'color_fade': (22, 23, 24)
+            'color1': (128, 128, 255),
+            'color2': (128, 128, 255),
+            'color_fade': (128, 255, 255)
         },
         'neutral': {
-            'color1': (25, 26, 27),
-            'color2': (28, 29, 30),
-            'tint_clamp': (31, 32, 33),
-            'color_fade': (34, 35, 36)
+            'color1': (255, 192, 128),
+            'color2': (255, 192, 128),
+            'color_fade': (192, 128, 255)
         }
     }
 
-    for pcf_name in pcf_files:
-        # print(pcf_name['file'])
-        process_pcf(vpk_file, pcf_name['file'], targets)
+    # for pcf_name in pcf_files:
+    #     # targets = generate_random_targets()
+    #     process_pcf(vpk_file, pcf_name['file'], targets)
 
-    # for pcf_name in PCF_OFFSETS:
-    #     print(pcf_name)
-    #     print(f"Processing {pcf_name}")
-    #     targets = generate_random_targets()
-    #     print(f"Generated targets for {pcf_name}:", targets)
-    #     process_pcf(vpk_file, pcf_name, targets)
+    for pcf_name in PCF_OFFSETS:
+        # targets = generate_random_targets()
+        process_pcf(vpk_file, pcf_name, targets)
 
     # tracer = Path("rockettrail.pcf")
     # tracer_pcf = PCFFile(tracer)

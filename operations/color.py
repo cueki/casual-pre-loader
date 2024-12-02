@@ -1,6 +1,8 @@
 import copy
 import colorsys
 from collections import defaultdict
+from math import floor
+import random
 from typing import Tuple, List, Dict
 from dataclasses import dataclass
 from core.constants import AttributeType
@@ -23,7 +25,8 @@ def hsv_to_rgb(h, s, v):
 
 
 def is_color_attribute(name: str) -> bool:
-    color_indicators = {b'color', b'color1', b'color2', b'color_fade', b'tint clamp'}
+    # color_indicators = {b'color', b'color1', b'color2', b'color_fade', b'tint clamp'}
+    color_indicators = {b'color', b'color1', b'color2', b'color_fade'}
     if isinstance(name, str):
         name = name.encode('ascii')
     return any(indicator in name.lower() for indicator in color_indicators)
@@ -38,7 +41,7 @@ def average_rgb(rgb_list):
     return (r_sum / n), (g_sum / n), (b_sum / n)
 
 
-def color_shift(rgb_color_list: list, target_color: RGB, vibe_enabled=True):
+def color_shift(rgb_color_list: list, target_color: RGB, vibe_enabled=True, random_enabled=False):
     # Calc average rgb
     avg_r, avg_g, avg_b = average_rgb(rgb_color_list)
 
@@ -54,19 +57,30 @@ def color_shift(rgb_color_list: list, target_color: RGB, vibe_enabled=True):
     # Convert input RGB colors to HSV
     hsv_colors = [rgb_to_hsv(*rgb) for rgb in rgb_color_list]
 
-    if not vibe_enabled:
+    if random_enabled and not vibe_enabled:
+        shifted_colors = []
+        for color in rgb_color_list:
+            # psycho mode
+            rand_hue = random.randint(1, 360)
+            rand_stat = random.randint(50, 100)
+            rgb = hsv_to_rgb(rand_hue, 40, 100) #  hardcoded max vibrance
+            shifted_colors.append(tuple(floor(c * 255) for c in rgb))
+        return shifted_colors
+
+    if not vibe_enabled and not random_enabled:
         shifted_colors = []
         for color in rgb_color_list:
             # I know this is really stupid but im tired and wanted a quick fix for toes that matched the logic
             new_hue = target_hsv[0]
             new_sat = target_hsv[1]
             new_vib = target_hsv[2]
-            rgb = hsv_to_rgb(new_hue, new_sat, new_vib) #  hardcoded max vibrance
-            shifted_colors.append(tuple(round(c * 255) for c in rgb))
+            # rgb = hsv_to_rgb(new_hue, 50, 100) #  hardcoded max vibrance
+            rgb = hsv_to_rgb(new_hue, new_sat, new_vib) # not hardcoded for test
+            shifted_colors.append(tuple(floor(c * 255) for c in rgb))
         return shifted_colors
 
     # Shift each color by the hue difference
-    if vibe_enabled:
+    if vibe_enabled and not random_enabled:
         shifted_colors = []
         for hsv in hsv_colors:
             new_hue = hsv[0] + hue_diff
@@ -77,19 +91,23 @@ def color_shift(rgb_color_list: list, target_color: RGB, vibe_enabled=True):
                 new_hue += 360
 
             # Convert back to RGB, scale to 0-255 range
-            rgb = hsv_to_rgb(new_hue, hsv[1],  100)
-            shifted_colors.append(tuple(round(c * 255) for c in rgb))
-
+            rgb = hsv_to_rgb(new_hue, max(hsv[1], 50),  100)
+            shifted_colors.append(tuple(floor(c * 255) for c in rgb))
         return shifted_colors
 
 
 def analyze_pcf_colors(pcf: PCFFile) -> Dict[str, Dict[str, List[tuple[RGB, bytes]]]]:
 
     traversal = PCFTraversal(pcf)
+    # colors = {
+    #     'red': {'color1': [], 'color2': [], 'tint_clamp': [], 'color_fade': []},
+    #     'blue': {'color1': [], 'color2': [], 'tint_clamp': [], 'color_fade': []},
+    #     'neutral': {'color1': [], 'color2': [], 'tint_clamp': [], 'color_fade': []}
+    # }
     colors = {
-        'red': {'color1': [], 'color2': [], 'tint_clamp': [], 'color_fade': []},
-        'blue': {'color1': [], 'color2': [], 'tint_clamp': [], 'color_fade': []},
-        'neutral': {'color1': [], 'color2': [], 'tint_clamp': [], 'color_fade': []}
+        'red': {'color1': [], 'color2': [], 'color_fade': []},
+        'blue': {'color1': [], 'color2': [], 'color_fade': []},
+        'neutral': {'color1': [], 'color2': [], 'color_fade': []}
     }
 
     current_element = None
@@ -101,7 +119,8 @@ def analyze_pcf_colors(pcf: PCFFile) -> Dict[str, Dict[str, List[tuple[RGB, byte
         elif current_element:
             r, g, b, a = rgba
 
-            if (r + g + b) == 765 or (r + g + b) == 0 or (r == g == b):
+            # if (r + g + b) == 765 or (r + g + b) == 0 or (r == g == b):
+            if (r + g + b) == 765 or (r + g + b) == 0:
                 continue
 
             # Determine team
@@ -110,9 +129,9 @@ def analyze_pcf_colors(pcf: PCFFile) -> Dict[str, Dict[str, List[tuple[RGB, byte
             team = 'red' if is_red else 'blue' if is_blue else 'neutral'
 
             # Determine category
-            if b'tint clamp' in attr_name:
-                category = 'tint_clamp'
-            elif b'color_fade' in attr_name:
+            # if b'tint clamp' in attr_name:
+            #     category = 'tint_clamp'
+            if b'color_fade' in attr_name:
                 category = 'color_fade'
             elif b'color1' in attr_name:
                 category = 'color1'
@@ -134,7 +153,6 @@ def transform_with_shift(pcf: PCFFile,
                  for (orig, context), shifted in zip(original_colors_with_context, shifted_colors)}
 
     result_pcf = copy.deepcopy(pcf)
-    changes_made = []
     traversal = PCFTraversal(result_pcf)
     transforms_needed = len(original_colors_with_context)
     transforms_done = 0
@@ -152,7 +170,8 @@ def transform_with_shift(pcf: PCFFile,
             r, g, b, a = rgba
             rgb = (r, g, b)
 
-            if (r + g + b) == 765 or (r + g + b) == 0 or (r == g == b):
+            # if (r + g + b) == 765 or (r + g + b) == 0 or (r == g == b):
+            if (r + g + b) == 765 or (r + g + b) == 0:
                 continue
 
             # Look up color using both RGB value and context
@@ -174,15 +193,15 @@ def transform_team_colors(pcf: PCFFile, colors: Dict[str, Dict[str, List[tuple[R
 
     if has_red or has_blue or has_neutral:
         for team in ['red', 'blue', 'neutral']:
-            for category in ['color1', 'color2', 'tint_clamp', 'color_fade']:
+            # for category in ['color1', 'color2', 'tint_clamp', 'color_fade']:
+            for category in ['color1', 'color2', 'color_fade']:
                 if colors[team][category] and targets[team][category]:
-
                     original_colors_with_context = colors[team][category]
                     original_colors = [c[0] for c in original_colors_with_context]
-                    shifted = color_shift(original_colors, targets[team][category], vibe_enabled=False)
-                    print("WARN: WILL BE IDENTICAL ON SECOND RUN:")
-                    print("OlD:", original_colors)
-                    print("NEW:", shifted)
+                    shifted = color_shift(original_colors, targets[team][category], vibe_enabled=False, random_enabled=False)
+                    # print("WARN: WILL BE IDENTICAL ON CONSECUTIVE RUNS")
+                    # print("OlD:", original_colors)
+                    # print("NEW:", shifted)
 
                     current_pcf = transform_with_shift(
                         current_pcf,
@@ -190,7 +209,7 @@ def transform_team_colors(pcf: PCFFile, colors: Dict[str, Dict[str, List[tuple[R
                         shifted,
                     )
     else:
-        print("WARN: you are attempting to color change particle that does not contain any color attributes! "
+        print("WARN: you are attempting to color change a particle file that does not contain any color attributes! "
               "Nothing will happen!")
         current_pcf = current_pcf # maybe trap this in the future or do smthn here idk
     return current_pcf
