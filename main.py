@@ -8,7 +8,6 @@ from operations.color import analyze_pcf_colors, transform_team_colors, RGB
 from operations.vpk import VPKOperations
 
 
-
 def generate_random_rgb():
     return (
         random.randint(1, 254),
@@ -38,14 +37,11 @@ def generate_random_targets():
 
 
 def process_pcf(vpk_file: str, pcf_file: str, targets: Dict[str, Dict[str, RGB]]) -> None:
-
+    # temp particle file for reading and writing - get it from the vpk with the offsets in constants using vpk_ops
     temp_pcf = f"temp_{pcf_file}"
     pcf = PCFFile(temp_pcf)
-
     offset, size = PCF_OFFSETS.get(pcf_file)
-
     vpk_ops = VPKOperations
-
     vpk_ops.extract_pcf(
         vpk_path=vpk_file,
         offset=offset,
@@ -53,12 +49,14 @@ def process_pcf(vpk_file: str, pcf_file: str, targets: Dict[str, Dict[str, RGB]]
         output_path=temp_pcf
     )
 
+    # "decode" and extract color info from the file
     pcf.decode()
     colors = analyze_pcf_colors(pcf)
     result = transform_team_colors(pcf, colors, targets)
 
     # animate_color_shift(colors, targets, save_video=False) # this is the color wheel animation, is broken rn
 
+    # patch the changes back into the vpk with the new particle file using the same offset
     result = vpk_ops.patch_pcf(
         vpk_path=vpk_file,
         offset=offset,
@@ -68,6 +66,7 @@ def process_pcf(vpk_file: str, pcf_file: str, targets: Dict[str, Dict[str, RGB]]
     )
     print(f"Processed {pcf_file}: {result}")
 
+    # cleanup temp
     os.remove(temp_pcf)
 
 
@@ -96,7 +95,7 @@ def main():
         }
     }
 
-    # DO ONLY WHATS IN CONFIG.YAML
+    # DO ONLY WHAT IS IN CONFIG.YAML
     # for pcf_name in pcf_files:
     #     # targets = generate_random_targets() # if u want random
     #     process_pcf(vpk_file, pcf_name['file'], targets)
