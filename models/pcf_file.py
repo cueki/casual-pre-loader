@@ -2,9 +2,15 @@ import io
 import struct
 from pathlib import Path
 from dataclasses import dataclass
-from models.element import PCFElement
-from typing import BinaryIO, Any, List
+from typing import BinaryIO, Any, List, Dict, Tuple
 from core.constants import PCFVersion, AttributeType, ATTRIBUTE_VALUES
+
+@dataclass
+class PCFElement:
+    type_name_index: int
+    element_name: str
+    data_signature: bytes
+    attributes: Dict[str, Tuple[AttributeType, Any]]
 
 
 @dataclass

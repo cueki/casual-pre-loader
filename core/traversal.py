@@ -1,6 +1,5 @@
 from typing import Callable, Iterator, Any, Dict, List, Optional, Set
-from models.pcf_file import PCFFile
-from models.element import PCFElement
+from models.pcf_file import PCFFile, PCFElement
 from core.constants import AttributeType
 
 

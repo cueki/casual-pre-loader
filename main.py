@@ -89,7 +89,7 @@ def process_pcf(vpk_file: str, pcf_file: str, targets: Dict[str, Dict[str, RGB]]
     )
 
     pcf.decode()
-    colors = analyze_pcf_colors(pcf, debug=False)
+    colors = analyze_pcf_colors(pcf)
     result = transform_team_colors(pcf, colors, targets)
 
     # animate_color_shift(colors, targets, save_video=False)
@@ -162,22 +162,22 @@ def main():
 
     targets = {
         'red': {
-            'color1': (1, 1, 1),
-            'color2': (2, 2, 2,),
-            'tint_clamp': (3, 3, 3),
-            'color_fade': (4, 4, 4)
+            'color1': (1, 2, 3),
+            'color2': (4, 5, 6),
+            'tint_clamp': (7, 8, 9),
+            'color_fade': (10, 11, 12)
         },
         'blue': {
-            'color1': (5, 5, 5),
-            'color2': (6, 6, 6),
-            'tint_clamp': (7, 7, 7),
-            'color_fade': (8, 8, 8)
+            'color1': (13, 14, 15),
+            'color2': (16, 17, 18),
+            'tint_clamp': (19, 20, 21),
+            'color_fade': (22, 23, 24)
         },
         'neutral': {
-            'color1': (9, 9, 9),
-            'color2': (10, 10, 10),
-            'tint_clamp': (11, 11, 11),
-            'color_fade': (12, 12, 12)
+            'color1': (25, 26, 27),
+            'color2': (28, 29, 30),
+            'tint_clamp': (31, 32, 33),
+            'color_fade': (34, 35, 36)
         }
     }
 

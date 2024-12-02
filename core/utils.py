@@ -1,8 +1,7 @@
 import os
 from typing import Tuple, List, Optional, Set, Dict, Any
 from core.constants import AttributeType
-from models.element import PCFElement
-from models.pcf_file import PCFFile
+from models.pcf_file import PCFFile, PCFElement
 
 def find_in_vpk(vpk_data: bytes, pattern: bytes, context_size: int = 1000) -> List[Tuple[int, bytes]]:
     """
