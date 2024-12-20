@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 from matplotlib.collections import LineCollection
 from matplotlib.patches import Circle
-from operations.color import rgb_to_hsv, color_shift, RGB
+from operations.color import rgb_to_hsv, color_shift, RGB, ColorShiftMode
 
 plt.rcParams['animation.ffmpeg_path'] = "tools\\ffmpeg.exe"
 
@@ -18,7 +18,7 @@ def ease_inout(t):
 
 def animate_color_shift(colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
                        targets: Dict[str, Dict[str, RGB]],
-                       frames=120, interval=10,
+                       frames=120, interval=10, color_mode: ColorShiftMode = ColorShiftMode.MATCH_TARGET,
                        save_video=False):
     plt.style.use('dark_background')
 
@@ -39,7 +39,7 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
                 rgb_list = [color_tuple[0] for color_tuple in colors[team][category]]
                 shifted_colors[team][category] = color_shift(rgb_list,
                                                           targets[team][category],
-                                                          vibe_enabled=False)
+                                                          color_mode)
             else:
                 shifted_colors[team][category] = []
 

@@ -4,7 +4,7 @@ import random
 from typing import Dict
 from core.constants import PCF_OFFSETS
 from models.pcf_file import PCFFile
-from operations.color import analyze_pcf_colors, transform_team_colors, RGB
+from operations.color import analyze_pcf_colors, transform_team_colors, RGB, ColorShiftMode
 from operations.vpk import VPKOperations
 from tools.color_wheel import animate_color_shift
 
@@ -37,7 +37,8 @@ def generate_random_targets():
     }
 
 
-def process_pcf(vpk_file: str, pcf_file: str, targets: Dict[str, Dict[str, RGB]]) -> None:
+def process_pcf(vpk_file: str, pcf_file: str, targets: Dict[str, Dict[str, RGB]],
+                color_mode: ColorShiftMode = ColorShiftMode.MATCH_TARGET) -> None:
     # temp particle file for reading and writing - get it from the vpk with the offsets in constants using vpk_ops
     temp_pcf = f"temp_{pcf_file}"
     pcf = PCFFile(temp_pcf)
@@ -53,19 +54,19 @@ def process_pcf(vpk_file: str, pcf_file: str, targets: Dict[str, Dict[str, RGB]]
     # "decode" and extract color info from the file
     pcf.decode()
     colors = analyze_pcf_colors(pcf)
-    result = transform_team_colors(pcf, colors, targets)
+    result = transform_team_colors(pcf, colors, targets, color_mode)
 
-    animate_color_shift(colors, targets, save_video=False) # this is the color wheel animation, is broken rn
+    animate_color_shift(colors, targets, color_mode=color_mode, save_video=False) # this is the color wheel animation
 
     # patch the changes back into the vpk with the new particle file using the same offset
-    result = vpk_ops.patch_pcf(
-        vpk_path=vpk_file,
-        offset=offset,
-        size=size,
-        pcf=result,
-        create_backup=True
-    )
-    print(f"Processed {pcf_file}: {result}")
+    # result = vpk_ops.patch_pcf(
+    #     vpk_path=vpk_file,
+    #     offset=offset,
+    #     size=size,
+    #     pcf=result,
+    #     create_backup=True
+    # )
+    # print(f"Processed {pcf_file}: {result}")
 
     # cleanup temp
     os.remove(temp_pcf)
@@ -77,6 +78,13 @@ def main():
 
     vpk_file = config['vpk_file']
     pcf_files = config['pcf_files']
+
+    color_mode_str = config.get('color_shift', {}).get('mode', 'MATCH_TARGET')
+    try:
+        color_mode = ColorShiftMode[color_mode_str]
+    except KeyError:
+        print(f"Warning: Invalid color shift mode '{color_mode_str}', using MATCH_TARGET")
+        color_mode = ColorShiftMode.MATCH_TARGET
 
     if not os.path.exists(vpk_file):
         print("vpk_file does not exist")
@@ -102,12 +110,12 @@ def main():
     # DO ONLY WHAT IS IN CONFIG.YAML
     for pcf_name in pcf_files:
         # targets = generate_random_targets() # if u want random
-        process_pcf(vpk_file, pcf_name['file'], targets)
+        process_pcf(vpk_file, pcf_name['file'], targets, color_mode)
 
     # DO ALL PARTICLE FILES !!!
     # for pcf_name in PCF_OFFSETS:
     #     # targets = generate_random_targets() # if u want random
-    #     process_pcf(vpk_file, pcf_name, targets)
+    #     process_pcf(vpk_file, pcf_name, targets, color_mode)
 
 
 if __name__ == '__main__':
