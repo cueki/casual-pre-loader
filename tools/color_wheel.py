@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, FFMpegWriter
@@ -9,19 +9,17 @@ from operations.color import rgb_to_hsv, color_shift, RGB
 plt.rcParams['animation.ffmpeg_path'] = "tools\\ffmpeg.exe"
 
 def ease_inout(t):
-    # We do a little quadratic smoothing
+    # Quadratic smoothing
     if t < 0.5:
         return 2 * t * t
     else:
         t = 2 * t - 1
         return -0.5 * (t * (t - 2) - 1)
 
-
 def animate_color_shift(colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
-                        targets: Dict[str, Dict[str, RGB]],
-                        frames=120, interval=10,
-                        save_video=False):
-    # Dark arts animation - I cant believe this works
+                       targets: Dict[str, Dict[str, RGB]],
+                       frames=120, interval=10,
+                       save_video=False):
     plt.style.use('dark_background')
 
     fig, ax = plt.subplots(figsize=(12, 12))
@@ -37,9 +35,11 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
         shifted_colors[team] = {}
         for category in ['color1', 'color2', 'color_fade']:
             if colors[team][category] and targets[team][category]:
-                shifted_colors[team][category] = color_shift(colors[team][category],
-                                                             targets[team][category],
-                                                             vibe_enabled=False)
+                # Extract just the RGB values from the tuples for color shifting
+                rgb_list = [color_tuple[0] for color_tuple in colors[team][category]]
+                shifted_colors[team][category] = color_shift(rgb_list,
+                                                          targets[team][category],
+                                                          vibe_enabled=False)
             else:
                 shifted_colors[team][category] = []
 
@@ -50,16 +50,16 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
 
     # Calculate total number of lines needed
     total_lines = sum(len(colors[team][cat])
-                      for team in colors
-                      for cat in colors[team])
+                     for team in colors
+                     for cat in colors[team])
 
     segments = np.zeros((total_lines, 2, 2))
     colors_array = np.zeros((total_lines, 4))
 
     line_collection = LineCollection(segments, colors=colors_array,
-                                     linewidth=3,
-                                     alpha=0.8,
-                                     capstyle='round')
+                                   linewidth=3,
+                                   alpha=0.8,
+                                   capstyle='round')
     ax.add_collection(line_collection)
 
     # Pre-compute color data
@@ -69,9 +69,11 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
             if not colors[team][category] or not targets[team][category]:
                 continue
 
-            for rgb in colors[team][category]:
+            for color_tuple in colors[team][category]:
+                rgb = color_tuple[0]  # Get the RGB value from the tuple
                 h1, s1, v1 = rgb_to_hsv(*rgb)
-                shifted = shifted_colors[team][category][colors[team][category].index(rgb)]
+                shifted_index = colors[team][category].index(color_tuple)
+                shifted = shifted_colors[team][category][shifted_index]
                 target_h, target_s, target_v = rgb_to_hsv(*shifted)
 
                 dh = target_h - h1
@@ -83,7 +85,8 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
                     'target_hsv': np.array([target_h, target_s, target_v]),
                     'dh': dh,
                     'start_rgb': np.array(rgb),
-                    'target_rgb': np.array(shifted)
+                    'target_rgb': np.array(shifted),
+                    'context': color_tuple[1]  # Store the context bytes
                 })
 
     # Add target indicators
@@ -100,13 +103,13 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
 
     if target_segments:
         target_collection = LineCollection(target_segments,
-                                           colors=target_colors,
-                                           linewidth=1.5,
-                                           linestyle='--',
-                                           alpha=0.5)
+                                         colors=target_colors,
+                                         linewidth=1.5,
+                                         linestyle='--',
+                                         alpha=0.5)
         ax.add_collection(target_collection)
 
-    # Pre-allocate arrays for the update function, you heard that right... pre-allocate arrays... in python...
+    # Pre-allocate arrays for the update function
     new_segments = np.zeros((total_lines, 2, 2))
     new_colors = np.zeros((total_lines, 4))
 
@@ -131,7 +134,7 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
         return line_collection,
 
     anim = FuncAnimation(fig, update, frames=frames, interval=interval,
-                         blit=True, repeat=False)
+                        blit=True, repeat=False)
 
     if save_video:
         writer = FFMpegWriter(fps=60, bitrate=10000)

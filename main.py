@@ -55,7 +55,7 @@ def process_pcf(vpk_file: str, pcf_file: str, targets: Dict[str, Dict[str, RGB]]
     colors = analyze_pcf_colors(pcf)
     result = transform_team_colors(pcf, colors, targets)
 
-    # animate_color_shift(colors, targets, save_video=False) # this is the color wheel animation, is broken rn
+    animate_color_shift(colors, targets, save_video=False) # this is the color wheel animation, is broken rn
 
     # patch the changes back into the vpk with the new particle file using the same offset
     result = vpk_ops.patch_pcf(
@@ -78,6 +78,9 @@ def main():
     vpk_file = config['vpk_file']
     pcf_files = config['pcf_files']
 
+    if not os.path.exists(vpk_file):
+        print("vpk_file does not exist")
+
     targets = {
         'red': {
             'color1': (255, 128, 128),
@@ -95,7 +98,7 @@ def main():
             'color_fade': (192, 128, 255)
         }
     }
-
+    # peek_file_header("temp_medicgun_beam.pcf")
     # DO ONLY WHAT IS IN CONFIG.YAML
     for pcf_name in pcf_files:
         # targets = generate_random_targets() # if u want random

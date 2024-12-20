@@ -26,7 +26,7 @@ def scan_pcf_offsets(folder_path: str, output_path: str = "pcf_offsets.json"):
     with open(output_path, "w") as f:
         json.dump(offsets, f, indent=4)
     # Generate constants.py content
-    constants = ["from typing import Dict, Tuple\n\n", "PCF_OFFSETS: Dict[str, Tuple[int, int]] = {"]
+    constants = ["PCF_OFFSETS: Dict[str, Tuple[int, int]] = {"]
     for filename, data in offsets.items():
         constants.append(f'    "{filename}": ({data["offset"]}, {data["size"]}),')
     constants.append("}")
