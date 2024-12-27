@@ -1,6 +1,6 @@
 vpk_file: tf2_misc_000.vpk
 color_shift:
-  mode: PRESERVE_FEEL  # Can be MATCH_TARGET, PRESERVE_FEEL, or RANDOM (default is MATCH_TARGET)
+  mode: MATCH_TARGET  # Can be MATCH_TARGET, PRESERVE_FEEL, or RANDOM (default is MATCH_TARGET)
 pcf_files:
   - file: medicgun_beam.pcf
   - file: medicgun_attrib.pcf

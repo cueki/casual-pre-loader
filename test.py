@@ -2,6 +2,7 @@ import struct
 from models.pcf_file import PCFFile
 from core.traversal import PCFTraversal
 from core.constants import PCF_OFFSETS, AttributeType
+from operations.vmt_wasted_space import VMTSpaceManager
 from operations.vpk import VPKOperations
 import os
 from models.vpk_file import VPKParser
@@ -222,7 +223,7 @@ def process_vmt_comments(vpk_parser: VPKParser) -> Dict[str, int]:
                 # Decode VMT content
                 vmt_text = vmt_data.decode('utf-8')
 
-                # Find comment positions
+                # Find comment positions and store comment text
                 comment_positions = []
                 i = 0
                 while i < len(vmt_text):
@@ -242,19 +243,32 @@ def process_vmt_comments(vpk_parser: VPKParser) -> Dict[str, int]:
                         i += 1
 
                 if comment_positions:
-                    # Convert to bytearray for modification
-                    vmt_bytes = bytearray(vmt_data)
+                    # Convert to list of characters for modification
+                    vmt_chars = list(vmt_text)
+                    total_comment_length = 0
 
-                    # Replace comments with null bytes
+                    # Remove comments from their positions
                     for start, end in reversed(comment_positions):
                         comment_length = end - start
-                        vmt_bytes[start:end] = b' ' * comment_length
+                        total_comment_length += comment_length
+                        del vmt_chars[start:end]
+
+                    # Add equivalent whitespace at the end
+                    vmt_chars.extend(' ' * total_comment_length)
+
+                    # Convert back to bytes
+                    modified_vmt = ''.join(vmt_chars).encode('utf-8')
+
+                    # Verify the size matches original
+                    if len(modified_vmt) != len(vmt_data):
+                        print(f"Warning: Size mismatch for {filename}.vmt")
+                        continue
 
                     # Write back to VPK
                     archive_path = f"{vpk_parser.base_path}_{entry.archive_index:03d}.vpk"
                     with open(archive_path, 'r+b') as f:
                         f.seek(entry.entry_offset)
-                        f.write(vmt_bytes)
+                        f.write(modified_vmt)
 
                     full_path = f"{path}/{filename}.vmt" if path else f"{filename}.vmt"
                     results[full_path] = len(comment_positions)
@@ -302,47 +316,41 @@ def count_whitespace(vpk_parser: VPKParser) -> Dict[str, Dict[str, int]]:
 
 
 def main():
-    # modify_vpk()
-    # print_vpk_checksums('tf2_misc_dir.vpk')
-    # print_vpk_checksums('tf2_misc_dir_mod.vpk')
-    # text = read_vpk_context("tf2_misc_dir.vpk", 4833327)
-    # print(text)
-    # patch_vpk_file("tf2_misc_dir.vpk")
-    # display_vpk_structure("tf2_misc_dir.vpk.modified", "materials/effects/")
-    # search_vmts()
+    # local_dir = "uwu"
+    # vpk_path = "tf2_misc_dir.vpk"
+    # vpk = VPKParser(vpk_path)
+    # vpk.parse_directory()
+    # modified_files = process_vmt_comments(vpk)
+    # for path, num_comments in modified_files.items():
+    #     print(f"Modified {path}: replaced {num_comments} comments with whitespace bytes")
     #
-    # comparator = VMTComparator("C:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2/tf/tf2_misc_dir.vpk", "uwu.vpk")
-    # results = comparator.compare_vmts()
-    # for filename, comparisons in results.items():
-    #     print_vmt_comparison(filename, comparisons)
-
-    local_dir = "uwu"
-    vpk_path = "tf2_misc_dir.vpk"
-    vpk = VPKParser(vpk_path)
-    vpk.parse_directory()
-    modified_files = process_vmt_comments(vpk)
-    for path, num_comments in modified_files.items():
-        print(f"Modified {path}: replaced {num_comments} comments with whitespace bytes")
-
-    stats = count_whitespace(vpk)
-
-    print(f"\nTotal whitespace bytes across all files: {stats['__summary__']['total_whitespace_bytes']:,}")
-    print(f"Total VMT files analyzed: {stats['__summary__']['total_files']}")
-
-    print("\nTop 10 files by whitespace percentage:")
-    sorted_files = sorted(
-        [(k, v) for k, v in stats.items() if k != '__summary__'],
-        key=lambda x: x[1]['whitespace_percentage'],
-        reverse=True
-    )[:10]
-
-    for path, data in sorted_files:
-        print(f"\n{path}")
-        print(f"Whitespace: {data['whitespace_bytes']:,} bytes ({data['whitespace_percentage']}%)")
-        print(f"Total size: {data['total_size']:,} bytes")
+    # stats = count_whitespace(vpk)
+    #
+    # print(f"\nTotal whitespace bytes across all files: {stats['__summary__']['total_whitespace_bytes']:,}")
+    # print(f"Total VMT files analyzed: {stats['__summary__']['total_files']}")
+    #
+    # print("\nTop 10 files by whitespace percentage:")
+    # sorted_files = sorted(
+    #     [(k, v) for k, v in stats.items() if k != '__summary__'],
+    #     key=lambda x: x[1]['whitespace_percentage'],
+    #     reverse=True
+    # )[:10]
+    #
+    # for path, data in sorted_files:
+    #     print(f"\n{path}")
+    #     print(f"Whitespace: {data['whitespace_bytes']:,} bytes ({data['whitespace_percentage']}%)")
+    #     print(f"Total size: {data['total_size']:,} bytes")
 
     # comparator = VMTDirComparator(local_dir, vpk_path)
     # results = comparator.compare_files()
     # print_comparison_results(results)
+    manager = VMTSpaceManager()
+
+    # Analyze a directory of VMT files
+    vmt_path = "vmt_test/"
+    vmt_files = manager.analyze_directory(vmt_path)
+    manager.print_analysis(vmt_files)
+    manager.consolidate_spaces(vmt_path)
+
 if __name__ == "__main__":
     main()

@@ -6,7 +6,7 @@ from matplotlib.collections import LineCollection
 from matplotlib.patches import Circle
 from operations.color import rgb_to_hsv, color_shift, RGB, ColorShiftMode
 
-plt.rcParams['animation.ffmpeg_path'] = "tools\\ffmpeg.exe"
+# plt.rcParams['animation.ffmpeg_path'] = "tools\\ffmpeg.exe"
 
 def ease_inout(t):
     # Quadratic smoothing
