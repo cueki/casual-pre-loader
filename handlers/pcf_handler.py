@@ -9,7 +9,6 @@ class PCFHandler:
         self.vpk = vpk_handler
 
     def list_pcf_files(self) -> List[str]:
-        """List all PCF files in the VPK"""
         return self.vpk.find_files('*.pcf')
 
     def process_pcf(self, pcf_name: str, processor: callable, create_backup: bool = True) -> bool:

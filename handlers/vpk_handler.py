@@ -6,7 +6,7 @@ import os
 
 class VPKHandler:
     def __init__(self, vpk_path: str):
-        """Initialize VPK handler with path to VPK file"""
+        # Initialize VPK handler with path to VPK file
         # Convert to _dir.vpk path if needed
         if not vpk_path.endswith('_dir.vpk'):
             vpk_path = str(Path(vpk_path).with_suffix('')).rsplit('_', 1)[0] + '_dir.vpk'
@@ -17,20 +17,16 @@ class VPKHandler:
         self.vpk_parser.parse_directory()
 
     def list_extensions(self) -> List[str]:
-        """Get all file extensions in the VPK"""
         return list(self.vpk_parser.directory.keys())
 
     def list_paths_for_extension(self, extension: str) -> List[str]:
-        """Get all paths that contain files of a given extension"""
+        # Get all paths that contain files of a given extension
         if extension not in self.vpk_parser.directory:
             return []
         return list(self.vpk_parser.directory[extension].keys())
 
     def list_files(self, extension: Optional[str] = None, path: Optional[str] = None) -> List[str]:
-        """
-        List files in the VPK, optionally filtered by extension and/or path.
-        Returns full file paths including extension.
-        """
+        # List files in the VPK, optionally filtered by extension and/or path. Returns full file paths + extension.
         files = []
 
         # If extension specified, only look in that extension's directory
@@ -80,7 +76,7 @@ class VPKHandler:
         return None
 
     def get_file_entry(self, filepath: str) -> Optional[Tuple[str, str, VPKDirectoryEntry]]:
-        """Get VPK entry for a file given its full path"""
+        # Get VPK entry for a file given its full path
         try:
             # Split path into components
             path = Path(filepath)
@@ -103,13 +99,13 @@ class VPKHandler:
         return None
 
     def get_archive_path(self, archive_index: int) -> str:
-        """Get the path to a specific VPK archive file"""
+        # Get the path to a specific VPK index
         if archive_index == 0x7fff:
             return self.dir_path
         return f"{self.base_path}_{archive_index:03d}.vpk"
 
     def read_from_archive(self, archive_index: int, offset: int, size: int) -> Optional[bytes]:
-        """Read data from a specific VPK archive"""
+        # Read data from a specific VPK slice
         archive_path = self.get_archive_path(archive_index)
         try:
             with open(archive_path, 'rb') as f:
@@ -120,7 +116,7 @@ class VPKHandler:
             return None
 
     def extract_file(self, filepath: str, output_path: str) -> bool:
-        """Extract a file from the VPK to the specified output path"""
+        # Extract a file from the VPK to the specified output path
         entry_info = self.get_file_entry(filepath)
         if not entry_info:
             return False
@@ -140,10 +136,9 @@ class VPKHandler:
 
             # Write to output file
             with open(output_path, 'wb') as f:
-                # Write preload data if it exists
+                # Write preload data if it exists (it won't but whatever)
                 if entry.preload_bytes > 0 and entry.preload_data:
                     f.write(entry.preload_data)
-                # Write main file data
                 f.write(file_data)
 
             return True
@@ -153,7 +148,7 @@ class VPKHandler:
             return False
 
     def patch_file(self, filepath: str, new_data: bytes, create_backup: bool = True) -> bool:
-        """Patch a file in the VPK with new data"""
+        # Patch a file in the VPK with new data
         entry_info = self.get_file_entry(filepath)
         if not entry_info:
             return False
@@ -193,10 +188,7 @@ class VPKHandler:
             return False
 
     def iter_files(self, pattern: Optional[str] = None) -> Iterator[Tuple[str, bytes]]:
-        """
-        Iterate over files in the VPK, yielding (filepath, content) pairs.
-        Optionally filter by glob pattern.
-        """
+        # Iterate over files in the VPK, yielding (filepath, content) pairs. Filter with glob.
         files = self.find_files(pattern) if pattern else self.list_files()
 
         for filepath in files:

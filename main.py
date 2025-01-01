@@ -5,7 +5,6 @@ from handlers.pcf_handler import PCFHandler
 from handlers.vpk_handler import VPKHandler
 from models.pcf_file import PCFFile
 from operations.color import analyze_pcf_colors, transform_team_colors, RGB
-from core.constants import PCF_OFFSETS
 
 def color_processor(targets: Dict[str, Dict[str, RGB]]):
     def process(pcf: PCFFile) -> PCFFile:
@@ -56,7 +55,7 @@ def main():
     #     print(f"Processed {pcf_entry['file']}: {'Success' if success else 'Failed'}")
 
     # Process all PCF files
-    for k in PCF_OFFSETS.keys():
+    for k in pcf_handler.list_pcf_files():
         success = pcf_handler.process_pcf(k, processor)
         print(f"Processed {k}: {'Success' if success else 'Failed'}")
 
