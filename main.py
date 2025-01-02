@@ -1,7 +1,7 @@
 import os
 import yaml
 from typing import Dict
-from handlers.pcf_handler import PCFHandler
+from handlers.file_handler import FileHandler
 from handlers.vpk_handler import VPKHandler
 from models.pcf_file import PCFFile
 from operations.color import analyze_pcf_colors, transform_team_colors, RGB
@@ -25,7 +25,7 @@ def main():
 
     # Initialize handlers
     vpk_handler = VPKHandler(vpk_file)
-    pcf_handler = PCFHandler(vpk_handler)
+    file_handler = FileHandler(vpk_handler)
 
     # Define color targets
     targets = {
@@ -55,8 +55,8 @@ def main():
     #     print(f"Processed {pcf_entry['file']}: {'Success' if success else 'Failed'}")
 
     # Process all PCF files
-    for k in pcf_handler.list_pcf_files():
-        success = pcf_handler.process_pcf(k, processor)
+    for k in file_handler.list_pcf_files():
+        success = file_handler.process_file(k, processor)
         print(f"Processed {k}: {'Success' if success else 'Failed'}")
 
 
