@@ -1,78 +1,66 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Callable, Iterator
 import re
 
 
 @dataclass
-class WastedSpace:
-    start_pos: int
+class WastedBytes:
+    start: int
     length: int
-    original_content: str
-    line_number: int
+    content: str
+
+
+def rebuild_content(content: str, waste_bytes: List[WastedBytes]) -> str:
+    waste_bytes.sort(key=lambda x: x.start, reverse=True)
+    result = content
+    for waste in waste_bytes:
+        result = result[:waste.start] + result[waste.start + waste.length:]
+    return result
+
+
+def find_closing_bracket(content: str) -> int:
+    matches = list(re.finditer(r'}\s*$', content, re.MULTILINE))
+    return matches[-1].start() if matches else -1
+
+
+def append_whitespace(content: str, total_bytes: int) -> str:
+    # Add before the closing bracket
+    closing_pos = find_closing_bracket(content)
+    if closing_pos == -1:
+        return content
+
+    return (
+            content[:closing_pos] +
+            ' ' * (total_bytes - 1) + '\n' +
+            content[closing_pos:]
+    )
 
 
 class VMTSpaceAnalyzer:
     def __init__(self):
-        self.comment_pattern = re.compile(rb'^\s*//.*$', re.MULTILINE)
+        self.waste_detectors: List[Callable[[str], Iterator[WastedBytes]]] = []
 
-    def find_closing_bracket(self, content: str) -> int:
-        matches = list(re.finditer(r'}\s*$', content, re.MULTILINE))
-        return matches[-1].start() if matches else -1
-
-    def analyze_content(self, content: bytes) -> List[WastedSpace]:
-        # Analyzes VMT content and returns list of wasted spaces
-        wasted_spaces = []
-        line_number = 1
-        current_pos = 0
-
-        try:
-            decoded = content.decode('utf-8')
-            lines = decoded.splitlines(keepends=True)
-
-            for line in lines:
-                stripped = line.lstrip()
-                if stripped.startswith('//'):
-                    wasted_spaces.append(WastedSpace(
-                        start_pos=current_pos,
-                        length=len(line),
-                        original_content=line.rstrip('\n\r'),
-                        line_number=line_number
-                    ))
-                current_pos += len(line)
-                line_number += 1
-
-            return wasted_spaces
-
-        except UnicodeDecodeError:
-            return []
+    def add_detector(self, detector: Callable[[str], Iterator[WastedBytes]]):
+        self.waste_detectors.append(detector)
 
     def consolidate_spaces(self, content: bytes) -> bytes:
-        # Process VMT content to consolidate wasted space
         try:
             decoded = content.decode('utf-8')
-            closing_bracket_pos = self.find_closing_bracket(decoded)
-
-            if closing_bracket_pos == -1:
+            if not decoded.strip():
                 return content
 
-            wasted_spaces = self.analyze_content(content)
-            total_wasted_bytes = sum(space.length for space in wasted_spaces)
+            # Collect all wasted bytes
+            waste_bytes = []
+            for detector in self.waste_detectors:
+                waste_bytes.extend(detector(decoded))
 
-            if total_wasted_bytes == 0:
+            total_waste = sum(w.length for w in waste_bytes)
+            if total_waste == 0:
                 return content
 
-            # Remove comments
-            for space in sorted(wasted_spaces, key=lambda x: x.start_pos, reverse=True):
-                decoded = decoded[:space.start_pos] + decoded[space.start_pos + space.length:]
-
-            # Find new closing bracket position and structure result
-            new_closing_pos = self.find_closing_bracket(decoded)
-            if new_closing_pos == -1:
-                return content
-
-            prefix = '\n'.join(decoded[:new_closing_pos].split('\n'))
-            whitespace = ' ' * (total_wasted_bytes - 1) + '\n'
-            result = prefix + whitespace + decoded[new_closing_pos:]
+            # Rebuild content
+            result = rebuild_content(decoded, waste_bytes)
+            result = append_whitespace(result, total_waste)
 
             return result.encode('utf-8')
 
