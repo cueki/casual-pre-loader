@@ -45,16 +45,16 @@ class FileHandler:
             # Process based on file type
             file_type = Path(file_name).suffix.lower()
             if file_type == '.pcf':
-                pcf = PCFFile(temp_path)
-                pcf.decode()
-                processed = processor(pcf)
-                processed.encode(temp_path)
+                old_pcf = PCFFile(temp_path)
+                old_pcf.decode()
+                new_pcf = processor(old_pcf)
+                new_pcf.encode(temp_path)
             elif file_type == '.vmt':
                 with open(temp_path, 'rb') as f:
-                    content = f.read()
-                processed = processor(content)
+                    old_vmt = f.read()
+                new_vmt = processor(old_vmt)
                 with open(temp_path, 'wb') as f:
-                    f.write(processed)
+                    f.write(new_vmt)
             else:
                 raise ValueError(f"Unsupported file type: {file_type}")
 

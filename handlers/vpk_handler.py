@@ -6,39 +6,81 @@ import os
 
 class VPKHandler:
     def __init__(self, vpk_path: str):
-        # Initialize VPK handler with path to VPK file
-        # Convert to _dir.vpk path if needed
-        if not vpk_path.endswith('_dir.vpk'):
-            vpk_path = str(Path(vpk_path).with_suffix('')).rsplit('_', 1)[0] + '_dir.vpk'
+        """
+        Initialize VPK handler with path to VPK file.
+        Handles both directory-based VPKs (_dir.vpk) and single-file VPKs.
+        """
+        self.original_path = vpk_path
 
-        self.dir_path = vpk_path
-        self.base_path = vpk_path[:-8]  # Remove "_dir.vpk"
-        self.vpk_parser = VPKParser(vpk_path)
+        # Check if it's a _dir.vpk path
+        if vpk_path.endswith('_dir.vpk'):
+            if os.path.exists(vpk_path):
+                self.dir_path = vpk_path
+                self.base_path = vpk_path[:-8]  # Remove "_dir.vpk"
+                self.is_dir_vpk = True
+            else:
+                raise ValueError(f"Could not find directory VPK: {vpk_path}")
+        else:
+            # For non-dir VPKs, try to find the corresponding _dir.vpk
+            path_without_ext = str(Path(vpk_path).with_suffix(''))
+            # Remove any _NNN suffix if present
+            if path_without_ext[-4:-1].isdigit() and path_without_ext[-4] == '_':
+                path_without_ext = path_without_ext[:-4]
+
+            possible_dir_path = f"{path_without_ext}_dir.vpk"
+
+            if os.path.exists(possible_dir_path):
+                self.dir_path = possible_dir_path
+                self.base_path = path_without_ext
+                self.is_dir_vpk = True
+            # If no _dir.vpk exists, treat as single file VPK
+            elif os.path.exists(vpk_path):
+                self.dir_path = vpk_path
+                self.base_path = str(Path(vpk_path).with_suffix(''))
+                self.is_dir_vpk = False
+            else:
+                raise ValueError(f"Could not find VPK file: {vpk_path} or directory VPK: {possible_dir_path}")
+
+        print(f"VPK Type: {'Directory' if self.is_dir_vpk else 'Single file'}")
+        print(f"Directory path: {self.dir_path}")
+        print(f"Base path: {self.base_path}")
+
+        self.vpk_parser = VPKParser(self.dir_path)
         self.vpk_parser.parse_directory()
+
+        self.header_offset = 0
+        if not self.is_dir_vpk:
+            # Calculate header offset for single-file VPKs
+            self.header_offset = self._calculate_header_offset()
+
+    def get_archive_path(self, archive_index: int) -> str:
+        """Get the path to a specific VPK archive."""
+        if not self.is_dir_vpk:
+            # For single-file VPKs, always use the original file
+            return self.original_path
+
+        # For directory VPKs, use the normal archive system
+        if archive_index == 0x7fff:
+            return self.dir_path
+        return f"{self.base_path}_{archive_index:03d}.vpk"
 
     def list_extensions(self) -> List[str]:
         return list(self.vpk_parser.directory.keys())
 
     def list_paths_for_extension(self, extension: str) -> List[str]:
-        # Get all paths that contain files of a given extension
         if extension not in self.vpk_parser.directory:
             return []
         return list(self.vpk_parser.directory[extension].keys())
 
     def list_files(self, extension: Optional[str] = None, path: Optional[str] = None) -> List[str]:
-        # List files in the VPK, optionally filtered by extension and/or path. Returns full file paths + extension.
         files = []
-
-        # If extension specified, only look in that extension's directory
         extensions = [extension] if extension else self.vpk_parser.directory.keys()
 
         for ext in extensions:
             if ext not in self.vpk_parser.directory:
                 continue
 
-            # If path specified, only look in that path
             paths = [path] if path else self.vpk_parser.directory[ext].keys()
-
             for p in paths:
                 if p not in self.vpk_parser.directory[ext]:
                     continue
@@ -50,25 +92,18 @@ class VPKHandler:
         return files
 
     def find_files(self, pattern: str) -> List[str]:
-        # Find files matching a glob pattern (e.g., '*.pcf', 'materials/*.vmt')
         all_files = self.list_files()
         return [f for f in all_files if Path(f).match(pattern)]
 
     def find_file_path(self, filename: str) -> Optional[str]:
-        # Find the full internal VPK path for a file given just its name.
-        # e.g., 'explosion.pcf' -> 'particles/explosion.pcf'
-
-        # Extract extension from filename
         try:
             name, ext = filename.rsplit('.', 1)
         except ValueError:
             return None
 
-        # Check if this extension exists in VPK
         if ext not in self.vpk_parser.directory:
             return None
 
-        # Search through all paths for this file
         for path in self.vpk_parser.directory[ext]:
             if name in self.vpk_parser.directory[ext][path]:
                 return f"{path}/{filename}" if path else filename
@@ -76,47 +111,57 @@ class VPKHandler:
         return None
 
     def get_file_entry(self, filepath: str) -> Optional[Tuple[str, str, VPKDirectoryEntry]]:
-        # Get VPK entry for a file given its full path
         try:
-            # Split path into components
             path = Path(filepath)
-            extension = path.suffix[1:]  # Remove the dot
+            extension = path.suffix[1:]
             filename = path.stem
             directory = str(path.parent)
 
-            # Clean up directory path
             if directory == '.':
                 directory = ''
 
-            # Check if file exists in VPK
             if (extension in self.vpk_parser.directory and
                     directory in self.vpk_parser.directory[extension] and
                     filename in self.vpk_parser.directory[extension][directory]):
                 return extension, directory, self.vpk_parser.directory[extension][directory][filename]
 
-        except (AttributeError, KeyError):
-            pass
+        except (AttributeError, KeyError) as e:
+            print(f"somethings wrong, I can feel it {e}")
         return None
 
-    def get_archive_path(self, archive_index: int) -> str:
-        # Get the path to a specific VPK index
-        if archive_index == 0x7fff:
-            return self.dir_path
-        return f"{self.base_path}_{archive_index:03d}.vpk"
+    def _calculate_header_offset(self) -> int:
+        """Calculate the offset where file data begins in a single-file VPK."""
+        try:
+            with open(self.dir_path, 'rb') as f:
+                # VPK header is 28 bytes (7 uint32 values)
+                header = f.read(28)
+                if len(header) != 28:
+                    return 0
+
+                tree_size = int.from_bytes(header[8:12], 'little')
+                total_offset = (28 + tree_size)  # Tree + header offset
+
+                return total_offset
+
+        except Exception as e:
+            print(f"Error calculating header offset: {e}")
+            return 0
 
     def read_from_archive(self, archive_index: int, offset: int, size: int) -> Optional[bytes]:
-        # Read data from a specific VPK slice
         archive_path = self.get_archive_path(archive_index)
         try:
             with open(archive_path, 'rb') as f:
-                f.seek(offset)
+                adjusted_offset = offset
+                if not self.is_dir_vpk:
+                    adjusted_offset = offset + self.header_offset
+
+                f.seek(adjusted_offset)
                 return f.read(size)
         except (IOError, OSError) as e:
             print(f"Error reading from archive {archive_path}: {e}")
             return None
 
     def extract_file(self, filepath: str, output_path: str) -> bool:
-        # Extract a file from the VPK to the specified output path
         entry_info = self.get_file_entry(filepath)
         if not entry_info:
             return False
@@ -124,7 +169,6 @@ class VPKHandler:
         extension, directory, entry = entry_info
 
         try:
-            # Read from appropriate archive
             file_data = self.read_from_archive(
                 entry.archive_index,
                 entry.entry_offset,
@@ -134,9 +178,7 @@ class VPKHandler:
             if not file_data:
                 return False
 
-            # Write to output file
             with open(output_path, 'wb') as f:
-                # Write preload data if it exists (it won't but whatever)
                 if entry.preload_bytes > 0 and entry.preload_data:
                     f.write(entry.preload_data)
                 f.write(file_data)
@@ -148,7 +190,7 @@ class VPKHandler:
             return False
 
     def patch_file(self, filepath: str, new_data: bytes, create_backup: bool = True) -> bool:
-        # Patch a file in the VPK with new data
+        # Patch a file in the VPK with new data (ONLY WORKS WITH _DIR.VPK)
         entry_info = self.get_file_entry(filepath)
         if not entry_info:
             return False
@@ -157,12 +199,11 @@ class VPKHandler:
 
         try:
             # Verify size
-            if len(new_data) > entry.entry_length:
+            if len(new_data) != entry.entry_length:
                 raise ValueError(
-                    f"Modified file is larger than original "
-                    f"({len(new_data)} > {entry.entry_length} bytes)"
+                    f"Modified file is does not match original "
+                    f"({len(new_data)} != {entry.entry_length} bytes)"
                 )
-
             # Get the correct VPK archive path
             archive_path = self.get_archive_path(entry.archive_index)
 
@@ -177,9 +218,6 @@ class VPKHandler:
             with open(archive_path, 'rb+') as f:
                 f.seek(entry.entry_offset)
                 f.write(new_data)
-                # Pad with nulls if smaller
-                if len(new_data) < entry.entry_length:
-                    f.write(b'\x00' * (entry.entry_length - len(new_data)))
 
             return True
 
