@@ -3,6 +3,8 @@ from typing import Dict
 from models.pcf_file import PCFFile
 from operations.color import RGB, analyze_pcf_colors, transform_team_colors
 from operations.detectors import comment_detector, quote_detector
+from operations.pcf_merge import find_duplicate_array_elements, update_array_indices, nullify_unused_elements, \
+    reorder_elements
 from operations.vmt_wasted_space import VMTSpaceAnalyzer, find_closing_bracket
 
 
@@ -21,42 +23,6 @@ def vmt_space_processor():
 
     def process_vmt(content: bytes) -> bytes:
         return analyzer.consolidate_spaces(content)
-
-    return process_vmt
-
-
-def vmt_nodraw_replace_processor():
-    def process_vmt(content: bytes) -> bytes:
-        try:
-            # Decode the VMT content
-            text = content.decode('utf-8')
-            original_size = len(content)
-
-            # Find the shader name (first line in quotes)
-            shader_match = re.match(r'^"([^"]+)"', text)
-            if not shader_match:
-                return content
-
-            shader_name = shader_match.group(1)
-
-            # Create new VMT content with just nodraw
-            new_content = f'"{shader_name}"\n{{\n\t$nodraw\t1\n'
-
-            # Calculate how many bytes we need to pad
-            current_size = len(new_content.encode('utf-8'))
-            padding_needed = original_size - current_size - 2  # -1 for the closing brace
-
-            # Add padding if needed
-            if padding_needed < 0:
-                return content  # Can't make it smaller
-
-            # Add padding spaces before closing brace
-            new_content += ' ' * padding_needed + '\n}'
-
-            return new_content.encode('utf-8')
-
-        except UnicodeDecodeError:
-            return content
 
     return process_vmt
 
@@ -107,3 +73,27 @@ def vmt_texture_replace_processor(old_texture: str, new_texture: str):
             return content
 
     return process_vmt
+
+
+def pcf_duplicate_index_processor():
+    def process_pcf(pcf: PCFFile) -> PCFFile:
+        duplicates = find_duplicate_array_elements(pcf)
+
+        if duplicates:
+            print("Found duplicate elements: ")
+            for hash_, indices in duplicates.items():
+                print(f"Indices: {indices}")
+
+            update_array_indices(pcf, duplicates)
+            nullify_unused_elements(pcf, duplicates)
+            print("Updated array indices and nullified unused elements")
+
+            # Reorder elements to be sequential
+            reorder_elements(pcf)
+            print("Reordered elements to be sequential")
+        else:
+            print("No duplicates found")
+
+        return pcf
+
+    return process_pcf
