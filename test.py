@@ -1,348 +1,358 @@
-import struct
-from models.pcf_file import PCFFile
-from core.traversal import PCFTraversal
-from core.constants import PCF_OFFSETS, AttributeType
-from operations.vpk import VPKOperations
+import copy
 import os
-from models.vpk_file import VPKParser
-import hashlib
-from typing import Dict
+from handlers.file_handler import FileHandler
+from handlers.vpk_handler import VPKHandler
+from models.pcf_file import PCFFile, PCFElement
+from core.constants import AttributeType
 
 
-def analyze_pcf_materials(vpk_file: str, pcf_file: str) -> None:
+def find_particle_system_definition(pcf: PCFFile, name: str):
     """
-    Analyze a PCF file for elements with material attributes
-
-    Args:
-        vpk_file: Path to VPK file
-        pcf_file: Name of PCF file to analyze
+    Find a particle system definition element by name.
+    Looks specifically for elements that have the characteristic arrays
+    of a particle system definition.
     """
-    # Get PCF offset and size from constants
-    offset, size = PCF_OFFSETS.get(pcf_file)
-    if not offset:
-        print(f"Error: Could not find offset for {pcf_file}")
-        return
+    name_bytes = name.encode('ascii')
+    characteristic_arrays = {b'operators', b'renderers', b'initializers', b'emitters'}
 
-    # Create temporary file for PCF extraction
-    temp_pcf = f"temp_{pcf_file}"
+    # First pass: look for exact name match
+    for elem in pcf.elements:
+        if elem.element_name == name_bytes:
+            # Check if this element has the characteristic arrays of a particle system definition
+            has_arrays = any(array_name in elem.attributes for array_name in characteristic_arrays)
+            if has_arrays:
+                return elem
 
-    try:
-        # Extract PCF from VPK
-        print(f"\nAnalyzing {pcf_file}...")
-        extracted = VPKOperations.extract_pcf(
-            vpk_path=vpk_file,
-            offset=offset,
-            size=size,
-            output_path=temp_pcf
-        )
-
-        if not extracted:
-            print(f"Error: Failed to extract {pcf_file}")
-            return
-
-        # Load and decode PCF
-        pcf = PCFFile(temp_pcf)
-        pcf.decode()
-
-        # Create traversal object
-        traversal = PCFTraversal(pcf)
-
-        # Find all attributes containing "material"
-        material_attrs = traversal.find_attributes(
-            attr_name_pattern="material",
-            max_depth=-1  # Search all depths
-        )
-
-        # Print results
-        found_materials = False
-        for element, attr_name, (attr_type, value), depth in material_attrs:
-            found_materials = True
-            print(f"\nElement: {element.element_name.decode('ascii', errors='replace')}")
-            print(f"Depth: {depth}")
-            print(f"Attribute: {attr_name}")
-            if attr_type == AttributeType.STRING:
-                try:
-                    print(f"Material: {value.decode('ascii', errors='replace')}")
-                except:
-                    print(f"Material: {value}")
-            else:
-                print(f"Value: {value} (Type: {attr_type.name})")
-
-        if not found_materials:
-            print("No material attributes found")
-
-    finally:
-        # Clean up temporary file
-        if os.path.exists(temp_pcf):
-            os.remove(temp_pcf)
-
-
-def display_vpk_structure(vpk_dir_path: str, filter_path: str = None):
-    parser = VPKParser(vpk_dir_path)
-    parser.parse_directory()
-
-    # Get all files and filter if needed
-    files = sorted(parser.list_files())
-    if filter_path:
-        files = [f for f in files if f.startswith(filter_path)]
-
-    # Create a tree structure
-    current_path = ""
-    indent = "  "
-
-    print(f"\nDisplaying files in: {filter_path or 'root'}")
-    print("-" * 50)
-
-    for file in files:
-        path_parts = file.split('/')
-
-        # Handle root files
-        if len(path_parts) == 1:
-            print(f"└── {path_parts[0]}")
-            continue
-
-        # Handle files in directories
-        directory = '/'.join(path_parts[:-1])
-        filename = path_parts[-1]
-
-        if directory != current_path:
-            print(f"├── {directory}/")
-            current_path = directory
-
-        print(f"{indent}└── {filename}")
-
-    print(f"\nTotal files: {len(files)}")
-
-
-def patch_vpk_file(vpk_path: str):
-    with open(vpk_path, 'rb') as f:
-        data = bytearray(f.read())
-
-    # Known offsets for materials/effects/softglow.vmt
-    filename_offset = None
-    offset = 28  # Skip header
-
-    # Now look for materials/effects
-    while offset < len(data):
-        # print(data[offset:offset + len("materials/effects/softglow.vmt")])
-        if data[offset:offset + len("softglow")] == b'softglow':
-            filename_offset = offset
-            offset = offset - 40
-            print(data[offset:offset + 80])
-            print("Found materials/effects/softglow path")
-
-        offset += 1
-
-    if filename_offset is None:
-        print("Could not locate filename offset")
-        return False
-
-    print(f"Found filename at offset: {filename_offset}")
-
-    # Replace "softglow" with "a\0\0\0\0\0\0" (maintain same length)
-    data[filename_offset:filename_offset + 8] = b'a\0\0\0\0\0\0\0'
-
-    # Calculate new MD5s
-    header = struct.unpack('<7I', data[:28])
-    tree_size = header[2]
-    md5_section_size = header[3]
-    other_md5_size = header[4]
-
-    # Calculate offsets for MD5 sections
-    tree_offset = 28
-    md5_section_offset = tree_offset + tree_size
-    other_md5_offset = md5_section_offset + md5_section_size
-
-    # Calculate new checksums
-    tree_md5 = hashlib.md5(data[tree_offset:tree_offset + tree_size]).digest()
-    archive_md5 = hashlib.md5(data[md5_section_offset:md5_section_offset + md5_section_size]).digest()
-
-    # Update checksums in VPK_OtherMD5Section
-    data[other_md5_offset:other_md5_offset + 16] = tree_md5
-    data[other_md5_offset + 16:other_md5_offset + 32] = archive_md5
-
-    # Calculate and update whole file checksum last
-    # Zero out the whole file checksum section first
-    data[other_md5_offset + 32:other_md5_offset + 48] = b'\0' * 16
-    whole_file_md5 = hashlib.md5(data).digest()
-    data[other_md5_offset + 32:other_md5_offset + 48] = whole_file_md5
-
-    # Write modified VPK
-    output_path = f"{vpk_path}.modified"
-    with open(output_path, 'wb') as f:
-        f.write(data)
-
-    print(f"Modified VPK written to {output_path}")
-    print(f"New checksums:")
-    print(f"Tree MD5: {tree_md5.hex()}")
-    print(f"Archive MD5: {archive_md5.hex()}")
-    print(f"Whole File MD5: {whole_file_md5.hex()}")
-
-    return True
-
-
-def modify_vpk():
-    vpk_path = "C:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2/tf/tf2_misc_dir.vpk"
-    vpk = VPKParser(vpk_path)
-    vpk.parse_directory()
-
-    if 'materials/effects' in vpk.directory['vmt']:
-        entry = vpk.directory['vmt']['materials/effects'].get('softglow')
-        if entry:
-            with open(vpk_path, 'r+b') as f:
-                f.seek(entry.directory_offset)
-                f.write(b'noobglow')
-            print(f"CRC: {hex(entry.crc)}")
-            print(f"Archive Index: {entry.archive_index}")
-            print(f"Entry Offset: {entry.entry_offset}")
-            print(f"Entry Length: {entry.entry_length}")
-            print(f"Preload Bytes: {entry.preload_bytes}")
-            print(f"Directory Offset: {entry.directory_offset}")
-            return True
-    return False
-
-
-def process_vmt_comments(vpk_parser: VPKParser) -> Dict[str, int]:
-    results = {}
-
-    # Find all VMT files
-    if 'vmt' not in vpk_parser.directory:
-        return results
-
-    for path in vpk_parser.directory['vmt']:
-        for filename in vpk_parser.directory['vmt'][path]:
-            entry = vpk_parser.directory['vmt'][path][filename]
-
-            # Get VMT content
-            vmt_data = vpk_parser.get_file_data('vmt', path, filename)
-            if not vmt_data:
+    # Debug: Log all particle system names found in the PCF
+    found_systems = []
+    for elem in pcf.elements:
+        has_arrays = any(array_name in elem.attributes for array_name in characteristic_arrays)
+        if has_arrays:
+            try:
+                sys_name = elem.element_name.decode('ascii')
+                found_systems.append(sys_name)
+            except UnicodeDecodeError:
                 continue
 
-            try:
-                # Decode VMT content
-                vmt_text = vmt_data.decode('utf-8')
+    print(f"\nDebug: Looking for system '{name}'")
+    print(f"Debug: Found {len(found_systems)} particle systems in PCF:")
+    print("\n".join(f"  - {sys}" for sys in sorted(found_systems)))
 
-                # Find comment positions
-                comment_positions = []
-                i = 0
-                while i < len(vmt_text):
-                    if vmt_text[i:i + 2] == '//':
-                        # Find start of comment line
-                        start = vmt_text.rfind('\n', 0, i)
-                        start = start + 1 if start != -1 else 0
-
-                        # Find end of comment line
-                        end = vmt_text.find('\n', i)
-                        if end == -1:
-                            end = len(vmt_text)
-
-                        comment_positions.append((start, end))
-                        i = end + 1
-                    else:
-                        i += 1
-
-                if comment_positions:
-                    # Convert to bytearray for modification
-                    vmt_bytes = bytearray(vmt_data)
-
-                    # Replace comments with null bytes
-                    for start, end in reversed(comment_positions):
-                        comment_length = end - start
-                        vmt_bytes[start:end] = b' ' * comment_length
-
-                    # Write back to VPK
-                    archive_path = f"{vpk_parser.base_path}_{entry.archive_index:03d}.vpk"
-                    with open(archive_path, 'r+b') as f:
-                        f.seek(entry.entry_offset)
-                        f.write(vmt_bytes)
-
-                    full_path = f"{path}/{filename}.vmt" if path else f"{filename}.vmt"
-                    results[full_path] = len(comment_positions)
-
-            except (UnicodeDecodeError, IOError) as e:
-                print(f"Error processing {filename}.vmt: {e}")
-
-    return results
+    return None
 
 
-def count_whitespace(vpk_parser: VPKParser) -> Dict[str, Dict[str, int]]:
-    results = {}
-    total_whitespace = 0
-
-    if 'vmt' not in vpk_parser.directory:
-        return results
-
-    for path in vpk_parser.directory['vmt']:
-        for filename in vpk_parser.directory['vmt'][path]:
-            vmt_data = vpk_parser.get_file_data('vmt', path, filename)
-            if not vmt_data:
-                continue
-
-            try:
-                whitespace_count = sum(1 for b in vmt_data if b == 0x20 or b == 0x09)
-                full_path = f"{path}/{filename}.vmt" if path else f"{filename}.vmt"
-
-                results[full_path] = {
-                    'whitespace_bytes': whitespace_count,
-                    'total_size': len(vmt_data),
-                    'whitespace_percentage': round((whitespace_count / len(vmt_data)) * 100, 2)
-                }
-
-                total_whitespace += whitespace_count
-
-            except (UnicodeDecodeError, IOError) as e:
-                print(f"Error processing {filename}.vmt: {e}")
-
-    results['__summary__'] = {
-        'total_whitespace_bytes': total_whitespace,
-        'total_files': len(results) - 1  # Subtract 1 for summary entry
+def can_update_attribute(attr_type: AttributeType, attr_name: bytes) -> bool:
+    """Determine if an attribute can be safely updated without changing file size."""
+    # Only allow numerical types
+    safe_types = {
+        AttributeType.INTEGER,
+        AttributeType.FLOAT,
+        AttributeType.COLOR,  # RGBA values are just numbers
+        AttributeType.VECTOR2,
+        AttributeType.VECTOR3,
+        AttributeType.VECTOR4,
     }
 
-    return results
+    # Never modify certain attributes even if they're numerical
+    unsafe_attributes = {
+        b'child',
+        b'children',
+        b'parent',
+        b'parents',
+        b'operators',
+        b'emitters',
+        b'initializers',
+        b'renderers',
+        b'forces',
+        b'constraints',
+        b'type_name_index',  # Just to be extra safe
+    }
 
+    return (attr_type in safe_types and
+            attr_name not in unsafe_attributes)
+
+
+def get_array_elements(pcf: PCFFile, elem: PCFElement, array_name: bytes) -> list[PCFElement]:
+    """Get all elements from an array attribute."""
+    if array_name not in elem.attributes:
+        return []
+
+    attr_type, indices = elem.attributes[array_name]
+    if attr_type != AttributeType.ELEMENT_ARRAY:
+        return []
+
+    elements = []
+    for idx in indices:
+        if 0 <= idx < len(pcf.elements):
+            elements.append(pcf.elements[idx])
+
+    return elements
+
+
+def find_matching_element(target_elem: PCFElement, source_elements: list[PCFElement]):
+    """Find a matching element in the source elements list based on name and functionName."""
+    target_name = target_elem.element_name
+    target_function_name = target_elem.attributes.get(b'functionName', (None, None))[1]
+
+    for source_elem in source_elements:
+        if source_elem.element_name == target_name:
+            source_function_name = source_elem.attributes.get(b'functionName', (None, None))[1]
+            if source_function_name == target_function_name:
+                return source_elem
+    return None
+
+
+def format_value(value):
+    """Format value for logging."""
+    if isinstance(value, (tuple, list)):
+        return f"{value}"
+    return str(value)
+
+
+def update_matching_attributes(target_elem: PCFElement, source_elem: PCFElement) -> tuple[bool, list[str]]:
+    """
+    Update numerical attributes that exist in both elements.
+    Returns (changes_made, list of change descriptions)
+    """
+    changes_made = False
+    changes = []
+
+    for attr_name, (target_type, target_value) in target_elem.attributes.items():
+        if attr_name not in source_elem.attributes:
+            continue
+
+        source_type, source_value = source_elem.attributes[attr_name]
+        if source_type != target_type:
+            continue
+
+        if can_update_attribute(target_type, attr_name):
+            if target_value != source_value:
+                target_elem.attributes[attr_name] = (target_type, source_value)
+                changes.append(
+                    f"    {attr_name.decode('ascii')}: {format_value(target_value)} → {format_value(source_value)}")
+                changes_made = True
+
+    return changes_made, changes
+
+
+class PCFModifier:
+    def __init__(self, target_pcf: PCFFile, source_pcf: PCFFile):
+        self.target_pcf = target_pcf
+        self.source_pcf = source_pcf
+
+    def update_array_elements(self, pcf: PCFFile, target_elem: PCFElement, source_elem: PCFElement,
+                              array_name: bytes) -> tuple[bool, list[str]]:
+        """Update elements in a specific array."""
+        changes_made = False
+        all_changes = []
+
+        target_elements = get_array_elements(pcf, target_elem, array_name)
+        source_elements = get_array_elements(self.source_pcf, source_elem, array_name)
+
+        for target_child in target_elements:
+            matching_source = find_matching_element(target_child, source_elements)
+            if matching_source:
+                child_changed, child_changes = update_matching_attributes(target_child, matching_source)
+                if child_changed:
+                    all_changes.append(
+                        f"  In {array_name.decode('ascii')} element {target_child.element_name.decode('ascii')}:")
+                    all_changes.extend(child_changes)
+                    changes_made = True
+
+        return changes_made, all_changes
+
+    def update_all_array_elements(self, pcf: PCFFile, target_elem: PCFElement, source_elem: PCFElement) -> tuple[
+        bool, list[str]]:
+        """Update elements in all arrays."""
+        changes_made = False
+        all_changes = []
+
+        array_attributes = [
+            b'operators',
+            b'renderers',
+            b'initializers',
+            b'emitters',
+            b'forces'
+        ]
+
+        for array_name in array_attributes:
+            array_changed, array_changes = self.update_array_elements(pcf, target_elem, source_elem, array_name)
+            if array_changed:
+                changes_made = True
+                all_changes.extend(array_changes)
+
+        return changes_made, all_changes
+
+    def modify_to_match(self, target_element_name: str, source_element_name: str) -> tuple[PCFFile, list[str]]:
+        """
+        Modify numerical attributes in target element to match source element where possible.
+        Returns (modified PCF, list of changes made)
+        """
+        modified_pcf = copy.deepcopy(self.target_pcf)
+        all_changes = []
+
+        source_element = find_particle_system_definition(self.source_pcf, source_element_name)
+        if not source_element:
+            raise ValueError(f"Source particle system {source_element_name} not found in source PCF")
+
+        target_element = find_particle_system_definition(modified_pcf, target_element_name)
+        if not target_element:
+            raise ValueError(f"Target particle system {target_element_name} not found in target PCF")
+
+        # Update root attributes
+        root_changed, root_changes = update_matching_attributes(target_element, source_element)
+        if root_changed:
+            all_changes.append("  Root element changes:")
+            all_changes.extend(root_changes)
+
+        # Update array elements
+        arrays_changed, array_changes = self.update_all_array_elements(modified_pcf, target_element, source_element)
+        if arrays_changed:
+            all_changes.extend(array_changes)
+
+        return modified_pcf, all_changes
+
+
+def batch_process_pcf(game_vpk_path: str, mod_vpk_path: str, pcf_path: str,
+                      element_mappings: list[tuple[str, str]], create_backup: bool = True) -> tuple[bool, list[str]]:
+    """Process multiple elements in a PCF file in a single pass."""
+    messages = []
+    game_vpk = VPKHandler(game_vpk_path)
+    mod_vpk = VPKHandler(mod_vpk_path)
+    game_file_handler = FileHandler(game_vpk)
+
+    temp_game_pcf = f"temp_game_{os.path.basename(pcf_path)}"
+    temp_mod_pcf = f"temp_mod_{os.path.basename(pcf_path)}"
+
+    try:
+        print(f"\nDebug: Extracting files...")
+        print(f"Debug: Game VPK Path: {game_vpk_path}")
+        print(f"Debug: Mod VPK Path: {mod_vpk_path}")
+        print(f"Debug: PCF Path: {pcf_path}")
+
+        # Extract PCFs from both VPKs
+        if not game_vpk.extract_file(pcf_path, temp_game_pcf):
+            messages.append(f"Failed to extract {pcf_path} from game VPK")
+            return False, messages
+
+        if not mod_vpk.extract_file(pcf_path, temp_mod_pcf):
+            messages.append(f"Failed to extract {pcf_path} from mod VPK")
+            return False, messages
+
+        print(f"Debug: Temp files created successfully")
+        print(f"Debug: Game PCF temp file: {temp_game_pcf}")
+        print(f"Debug: Mod PCF temp file: {temp_mod_pcf}")
+
+        # Load and decode PCFs
+        print(f"Debug: Loading PCFs...")
+        source_pcf = PCFFile(temp_mod_pcf)
+        source_pcf.decode()
+        print(f"Debug: Source PCF loaded and decoded")
+
+        def processor(target_pcf: PCFFile) -> PCFFile:
+            modified_pcf = copy.deepcopy(target_pcf)
+            modifier = PCFModifier(modified_pcf, source_pcf)
+
+            successful_mappings = []
+            failed_mappings = []
+            all_changes = {}
+
+            for game_element, mod_element in element_mappings:
+                try:
+                    print(f"\nDebug: Processing mapping {game_element} → {mod_element}")
+                    modified_pcf, changes = modifier.modify_to_match(game_element, mod_element)
+                    if changes:
+                        successful_mappings.append((game_element, mod_element))
+                        all_changes[(game_element, mod_element)] = changes
+                    else:
+                        messages.append(f"No changes needed for {game_element} → {mod_element}")
+                except ValueError as e:
+                    failed_mappings.append((game_element, mod_element, str(e)))
+
+            if successful_mappings:
+                messages.append("\nSuccessful updates:")
+                for game_elem, mod_elem in successful_mappings:
+                    messages.append(f"\n  {game_elem} → {mod_elem}:")
+                    messages.extend(all_changes[(game_elem, mod_elem)])
+
+            if failed_mappings:
+                messages.append("\nFailed updates:")
+                for game_elem, mod_elem, error in failed_mappings:
+                    messages.append(f"  - {game_elem} → {mod_elem}: {error}")
+
+            return modified_pcf
+
+        success = game_file_handler.process_file(pcf_path, processor, create_backup)
+        return success, messages
+
+    finally:
+        print("\nDebug: Cleaning up temporary files...")
+        if os.path.exists(temp_game_pcf):
+            os.remove(temp_game_pcf)
+            print(f"Debug: Removed {temp_game_pcf}")
+        if os.path.exists(temp_mod_pcf):
+            os.remove(temp_mod_pcf)
+            print(f"Debug: Removed {temp_mod_pcf}")
+
+
+def update_from_config(config_path: str):
+    """Update PCF files based on a YAML config file with detailed change reporting."""
+    import yaml
+
+    with open(config_path, 'r') as f:
+        config = yaml.safe_load(f)
+
+    game_vpk = config['game_vpk_path']
+    if not os.path.exists(game_vpk):
+        print(f"Game VPK not found: {game_vpk}")
+        return
+
+    all_messages = []
+
+    for mod in config.get('mods', []):
+        mod_vpk = mod['vpk_path']
+        if not os.path.exists(mod_vpk):
+            print(f"Mod VPK not found: {mod_vpk}")
+            continue
+
+        mod_messages = [f"\nProcessing mod: {os.path.basename(mod_vpk)}"]
+        pcf_mappings = {}
+
+        for pcf_patch in mod.get('patches', []):
+            pcf_file = pcf_patch['pcf_file']
+            if pcf_file not in pcf_mappings:
+                pcf_mappings[pcf_file] = []
+
+            for element_group in pcf_patch.get('elements', []):
+                mod_element = element_group['mod_element']
+                game_elements = element_group.get('game_elements', [])
+
+                if game_elements:
+                    pcf_mappings[pcf_file].extend(
+                        (game_element, mod_element) for game_element in game_elements
+                    )
+
+        for pcf_file, mappings in pcf_mappings.items():
+            mod_messages.append(f"\nPCF file: {pcf_file}")
+            success, pcf_messages = batch_process_pcf(
+                game_vpk,
+                mod_vpk,
+                pcf_file,
+                mappings
+            )
+            mod_messages.extend(pcf_messages)
+            mod_messages.append(f"Overall status: {'Success' if success else 'Failed'}")
+
+        all_messages.extend(mod_messages)
+
+    print("\n=== PCF Processing Report ===")
+    for message in all_messages:
+        print(message)
+    print("\n=== End of Report ===")
 
 def main():
-    # modify_vpk()
-    # print_vpk_checksums('tf2_misc_dir.vpk')
-    # print_vpk_checksums('tf2_misc_dir_mod.vpk')
-    # text = read_vpk_context("tf2_misc_dir.vpk", 4833327)
-    # print(text)
-    # patch_vpk_file("tf2_misc_dir.vpk")
-    # display_vpk_structure("tf2_misc_dir.vpk.modified", "materials/effects/")
-    # search_vmts()
-    #
-    # comparator = VMTComparator("C:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2/tf/tf2_misc_dir.vpk", "uwu.vpk")
-    # results = comparator.compare_vmts()
-    # for filename, comparisons in results.items():
-    #     print_vmt_comparison(filename, comparisons)
+    # update_from_config('dxhr_fx.yaml')
+    update_from_config('medicgun_beam.yaml')
 
-    local_dir = "uwu"
-    vpk_path = "tf2_misc_dir.vpk"
-    vpk = VPKParser(vpk_path)
-    vpk.parse_directory()
-    modified_files = process_vmt_comments(vpk)
-    for path, num_comments in modified_files.items():
-        print(f"Modified {path}: replaced {num_comments} comments with whitespace bytes")
-
-    stats = count_whitespace(vpk)
-
-    print(f"\nTotal whitespace bytes across all files: {stats['__summary__']['total_whitespace_bytes']:,}")
-    print(f"Total VMT files analyzed: {stats['__summary__']['total_files']}")
-
-    print("\nTop 10 files by whitespace percentage:")
-    sorted_files = sorted(
-        [(k, v) for k, v in stats.items() if k != '__summary__'],
-        key=lambda x: x[1]['whitespace_percentage'],
-        reverse=True
-    )[:10]
-
-    for path, data in sorted_files:
-        print(f"\n{path}")
-        print(f"Whitespace: {data['whitespace_bytes']:,} bytes ({data['whitespace_percentage']}%)")
-        print(f"Total size: {data['total_size']:,} bytes")
-
-    # comparator = VMTDirComparator(local_dir, vpk_path)
-    # results = comparator.compare_files()
-    # print_comparison_results(results)
 if __name__ == "__main__":
     main()

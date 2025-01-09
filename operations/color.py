@@ -1,5 +1,6 @@
 import copy
 import colorsys
+from enum import Enum, auto
 from math import floor
 import random
 from typing import Tuple, List, Dict
@@ -9,6 +10,12 @@ from models.pcf_file import PCFFile
 
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
+
+
+class ColorShiftMode(Enum):
+    MATCH_TARGET = auto()
+    PRESERVE_FEEL = auto()
+    RANDOM = auto()
 
 
 def rgb_to_hsv(r, g, b):
@@ -38,13 +45,13 @@ def average_rgb(rgb_list):
     return (r_sum / n), (g_sum / n), (b_sum / n)
 
 
-def color_shift(rgb_color_list: list, target_color: RGB, vibe_enabled=True, random_enabled=False):
+def color_shift(rgb_color_list: list, target_color: RGB, mode: ColorShiftMode = ColorShiftMode.MATCH_TARGET):
     # Calc average rgb
     avg_r, avg_g, avg_b = average_rgb(rgb_color_list)
 
     # Convert to average HSV
     average_hsv = rgb_to_hsv(avg_r, avg_g, avg_b)
-    
+
     # Convert target color to HSV
     target_hsv = rgb_to_hsv(*target_color)
 
@@ -54,30 +61,26 @@ def color_shift(rgb_color_list: list, target_color: RGB, vibe_enabled=True, rand
     # Convert input RGB colors to HSV
     hsv_colors = [rgb_to_hsv(*rgb) for rgb in rgb_color_list]
 
-    if random_enabled and not vibe_enabled:
+    if mode == ColorShiftMode.RANDOM:
         shifted_colors = []
-        for color in rgb_color_list:
-            # psycho mode
+        for _ in rgb_color_list:
             rand_hue = random.randint(1, 360)
-            rand_stat = random.randint(50, 100)
-            rgb = hsv_to_rgb(rand_hue, 40, 100) #  hardcoded max vibrance
+            rand_sat = random.randint(50, 100)
+            rgb = hsv_to_rgb(rand_hue, rand_sat, 100)  # hardcoded max vibrance
             shifted_colors.append(tuple(floor(c * 255) for c in rgb))
         return shifted_colors
 
-    if not vibe_enabled and not random_enabled:
+    if mode == ColorShiftMode.MATCH_TARGET:
         shifted_colors = []
-        for color in rgb_color_list:
-            # I know this is really stupid but im tired and wanted a quick fix for toes that matched the logic
+        for _ in rgb_color_list:
             new_hue = target_hsv[0]
             new_sat = target_hsv[1]
             new_vib = target_hsv[2]
-            # rgb = hsv_to_rgb(new_hue, 50, 100) #  hardcoded max vibrance
-            rgb = hsv_to_rgb(new_hue, new_sat, new_vib) # not hardcoded for test
+            rgb = hsv_to_rgb(new_hue, new_sat, new_vib)
             shifted_colors.append(tuple(floor(c * 255) for c in rgb))
         return shifted_colors
 
-    # Shift each color by the hue difference
-    if vibe_enabled and not random_enabled:
+    if mode == ColorShiftMode.PRESERVE_FEEL:
         shifted_colors = []
         for hsv in hsv_colors:
             new_hue = hsv[0] + hue_diff
@@ -88,7 +91,7 @@ def color_shift(rgb_color_list: list, target_color: RGB, vibe_enabled=True, rand
                 new_hue += 360
 
             # Convert back to RGB, scale to 0-255 range
-            rgb = hsv_to_rgb(new_hue, max(hsv[1], 50),  100)
+            rgb = hsv_to_rgb(new_hue, max(hsv[1], 50), 100)
             shifted_colors.append(tuple(floor(c * 255) for c in rgb))
         return shifted_colors
 
@@ -182,7 +185,7 @@ def transform_with_shift(pcf: PCFFile,
 
 
 def transform_team_colors(pcf: PCFFile, colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
-                          targets: Dict[str, Dict[str, RGB]]) -> PCFFile:
+                          targets: Dict[str, Dict[str, RGB]], color_mode: ColorShiftMode = ColorShiftMode.MATCH_TARGET) -> PCFFile:
     current_pcf = copy.deepcopy(pcf)
     has_red = any(colors['red'].values())
     has_blue = any(colors['blue'].values())
@@ -195,7 +198,7 @@ def transform_team_colors(pcf: PCFFile, colors: Dict[str, Dict[str, List[tuple[R
                 if colors[team][category] and targets[team][category]:
                     original_colors_with_context = colors[team][category]
                     original_colors = [c[0] for c in original_colors_with_context]
-                    shifted = color_shift(original_colors, targets[team][category], vibe_enabled=False, random_enabled=False)
+                    shifted = color_shift(original_colors, targets[team][category], color_mode)
                     # print("WARN: WILL BE IDENTICAL ON CONSECUTIVE RUNS")
                     # print("OlD:", original_colors)
                     # print("NEW:", shifted)
