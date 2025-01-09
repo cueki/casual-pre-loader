@@ -175,11 +175,140 @@ def compare_particle_systems(pcf1: PCFFile, pcf2: PCFFile, particle_system_name:
             print('\n'.join(category_output))
 
 
-if __name__ == "__main__":
-    pcf_game = PCFFile("../medicgun_beam.pcf")
-    pcf_mod = PCFFile("../medicgun_beam_mod.pcf")
-    pcf_game.decode()
-    pcf_mod.decode()
-    particle_systems = find_childless_particle_systems(pcf_game)
-    for system in particle_systems:
-        compare_particle_systems(pcf_game, pcf_mod, system)
+def get_element_hash(element: PCFElement) -> str:
+    """Create a hash of element attributes for comparison."""
+    sorted_attrs = sorted(
+        (name.decode('ascii'), type_, str(value))
+        for name, (type_, value) in element.attributes.items()
+    )
+    return str(sorted_attrs)
+
+
+def find_duplicate_array_elements(pcf: PCFFile) -> Dict[str, List[int]]:
+    """
+    Find duplicate elements referenced in array attributes, where element.type_name_index == 41.
+    Returns a dictionary of attribute hashes mapping to lists of element indices.
+    Only includes entries with more than one index (actual duplicates).
+    """
+    # Dictionary to store hash -> [element indices]
+    hash_to_indices = {}
+
+    # Examine each element in the PCF
+    for element in pcf.elements:
+        # Look through all attributes
+        for attr_name, (attr_type, value) in element.attributes.items():
+            # Check if it's an element array
+            if attr_type == AttributeType.ELEMENT_ARRAY:
+                # Check each referenced element index
+                for idx in value:
+                    if idx < len(pcf.elements):
+                        referenced_element = pcf.elements[idx]
+                        # Check if referenced element is type 41
+                        if referenced_element.type_name_index == 41:
+                            element_hash = get_element_hash(referenced_element)
+                            if element_hash not in hash_to_indices:
+                                hash_to_indices[element_hash] = []
+                            hash_to_indices[element_hash].append(idx)
+
+    # Filter to only include duplicates
+    duplicates = {
+        hash_: indices
+        for hash_, indices in hash_to_indices.items()
+        if len(indices) > 1
+    }
+
+    return duplicates
+
+
+def update_array_indices(pcf: PCFFile, duplicates: Dict[str, List[int]]):
+    """
+    Update ELEMENT_ARRAY indices to reuse the first occurrence of duplicate elements.
+    """
+    # Create a mapping of old indices to their replacement
+    index_map = {}
+    for indices in duplicates.values():
+        first_index = indices[0]  # Keep the first occurrence
+        # Map all other indices to the first one
+        for idx in indices[1:]:
+            index_map[idx] = first_index
+
+    # Update all ELEMENT_ARRAY attributes in the PCF
+    for element in pcf.elements:
+        for attr_name, (attr_type, value) in element.attributes.items():
+            if attr_type == AttributeType.ELEMENT_ARRAY:
+                # Update indices in the array
+                new_value = [index_map.get(idx, idx) for idx in value]
+                element.attributes[attr_name] = (attr_type, new_value)
+
+
+def nullify_unused_elements(pcf: PCFFile, duplicates):
+    # Get all indices that are duplicates (excluding the first occurrence)
+    unused_indices = []
+    for indices in duplicates.values():
+        unused_indices.extend(indices[1:])
+
+    # For each unused index, rename while preserving length
+    for i, idx in enumerate(unused_indices):
+        original_element = pcf.elements[idx]
+        original_name = original_element.element_name
+        new_name = f"unused".encode('ascii')
+
+        # Calculate padding needed
+        padding_length = len(original_name) - len(new_name)
+        if padding_length < 0:
+            print(f"Warning: New name 'unused{i + 1}' is longer than original name {original_name}, skipping")
+            continue
+
+        # Add null byte padding to maintain length
+        padded_name = new_name + (b'\x20' * padding_length)
+
+        # Update the element name while preserving everything else
+        original_element.element_name = padded_name
+
+
+def find_used_elements(pcf: PCFFile) -> set:
+    """Find indices of elements that are referenced in ELEMENT_ARRAY attributes."""
+    used_indices = set()
+
+    for element in pcf.elements:
+        for _, (attr_type, value) in element.attributes.items():
+            if attr_type == AttributeType.ELEMENT_ARRAY:
+                used_indices.update(value)
+            elif attr_type == AttributeType.ELEMENT:
+                used_indices.add(value)
+
+    return used_indices
+
+
+def reorder_elements(pcf: PCFFile):
+    """Reorder elements to be sequential, updating all references."""
+    # Find which elements are actually used
+    used_indices = find_used_elements(pcf)
+
+    # Create mapping of old indices to new indices
+    old_to_new = {}
+    new_index = 0
+
+    for old_index in range(len(pcf.elements)):
+        if old_index in used_indices:
+            old_to_new[old_index] = new_index
+            new_index += 1
+
+    # Create new elements list in correct order
+    new_elements = []
+    for old_index, element in enumerate(pcf.elements):
+        if old_index in used_indices:
+            new_elements.append(element)
+
+    # Update all references in ELEMENT_ARRAY attributes
+    for element in new_elements:
+        for attr_name, (attr_type, value) in element.attributes.items():
+            if attr_type == AttributeType.ELEMENT_ARRAY:
+                new_value = [old_to_new[idx] for idx in value]
+                element.attributes[attr_name] = (attr_type, new_value)
+            elif attr_type == AttributeType.ELEMENT:
+                new_value = old_to_new[value]
+                element.attributes[attr_name] = (attr_type, new_value)
+
+    # Replace elements list with reordered one
+    pcf.elements = new_elements
