@@ -2,7 +2,6 @@ from typing import Dict
 from models.pcf_file import PCFFile, PCFElement
 from core.constants import AttributeType
 from operations.pcf_compress import get_element_hash
-from test import print_verification
 
 
 def find_matching_attribute(pcf: PCFFile, element: PCFElement) -> int:
@@ -153,5 +152,4 @@ def merge_pcf_elements(base_pcf: PCFFile, mod_pcf: PCFFile) -> PCFFile:
                 break
 
     result_pcf = base_pcf
-    print_verification(result_pcf, mod_pcf, "medicgun_")
     return base_pcf
