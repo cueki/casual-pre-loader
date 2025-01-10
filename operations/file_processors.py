@@ -4,7 +4,6 @@ from models.pcf_file import PCFFile
 from operations.color import RGB, analyze_pcf_colors, transform_team_colors
 from operations.detectors import comment_detector, quote_detector
 from operations.pcf_compress import compress_duplicate_elements
-from operations.pcf_merge import merge_pcf_elements
 from operations.vmt_wasted_space import VMTSpaceAnalyzer, find_closing_bracket
 
 
@@ -78,19 +77,5 @@ def vmt_texture_replace_processor(old_texture: str, new_texture: str):
 def pcf_duplicate_index_processor():
     def process_pcf(pcf: PCFFile) -> PCFFile:
         return compress_duplicate_elements(pcf)
-
-    return process_pcf
-
-
-def pcf_merge_processor(mod_pcf_path: str):
-    def process_pcf(base_pcf: PCFFile) -> PCFFile:
-        base_pcf = compress_duplicate_elements(base_pcf)
-        # Load the modded PCF
-        mod_pcf = PCFFile(mod_pcf_path)
-        mod_pcf.decode()
-        mod_pcf = compress_duplicate_elements(mod_pcf)
-
-        # Merge the PCFs
-        return merge_pcf_elements(base_pcf, mod_pcf)
 
     return process_pcf
