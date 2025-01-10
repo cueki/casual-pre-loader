@@ -1,9 +1,19 @@
 import os
+from pathlib import Path
 import yaml
 from handlers.file_handler import FileHandler
 from handlers.vpk_handler import VPKHandler
 from operations.file_processors import *
-from operations.pcf_merge import *
+
+
+def pcf_mod_processor(mod_path: str):
+    def process_pcf(game_pcf: PCFFile) -> PCFFile:
+        # Load the mod PCF
+        mod_pcf = PCFFile(mod_path)
+        mod_pcf.decode()
+        return compress_duplicate_elements(mod_pcf)
+
+    return process_pcf
 
 
 def main():
@@ -45,7 +55,8 @@ def main():
 
     # Process all PCF files
     # for k in file_handler.list_pcf_files():
-    #     success = file_handler.process_file(k, pcf_color_processor(targets))
+    #     # success = file_handler.process_file(k, pcf_color_processor(targets))
+    #     success = file_handler.process_file(k, pcf_duplicate_index_processor())
     #     print(f"Processed {k}: {'Success' if success else 'Failed'}")
 
     # Process all VMT files
@@ -58,7 +69,23 @@ def main():
     #     "softglow.vmt",
     #     vmt_texture_replace_processor("Effects/softglow", "Effects/tp_floorglow")
     # )
-    # file_handler.process_file("electric1.vmt", vmt_nodraw_replacer())
+
+    mods_path = Path("mods/")
+    mod_files = list(mods_path.glob('*.pcf'))
+
+    for mod_file in mod_files:
+        # Get the base filename to match against VPK files
+        base_name = mod_file.name
+        print(f"Processing mod: {base_name}")
+
+        # Process the file
+        success = file_handler.process_file(
+            base_name,
+            pcf_mod_processor(str(mod_file)),
+            create_backup=True
+        )
+        print(f"Processed {base_name}: {'Success' if success else 'Failed'}")
+
 
 if __name__ == "__main__":
     main()

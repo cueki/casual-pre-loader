@@ -15,15 +15,6 @@ class FileHandler:
         return self.vpk.find_files('*.vmt')
 
     def process_file(self, file_name: str, processor: callable, create_backup: bool = True) -> bool:
-        """
-        Process a file using a provided processor function.
-        Args:
-            file_name: Can be just the filename (e.g., 'explosion.pcf') or a full path if you know it
-            processor: Callable that modifies the temporary file extracted from the vpk
-            create_backup: Whether to create a backup of the vpk before modifying
-        Returns:
-            bool: Success or failure
-        """
         # If it's just a filename, find its full path
         if '/' not in file_name:
             full_path = self.vpk.find_file_path(file_name)
@@ -37,6 +28,13 @@ class FileHandler:
         temp_path = f"temp_{Path(file_name).name}"
 
         try:
+            # Get original file size before any processing
+            entry_info = self.vpk.get_file_entry(full_path)
+            if not entry_info:
+                print(f"Failed to get file entry for {full_path}")
+                return False
+            original_size = entry_info[2].entry_length
+
             # Extract file as temporary for processing
             if not self.vpk.extract_file(full_path, temp_path):
                 print(f"Failed to extract {full_path}")
@@ -45,28 +43,38 @@ class FileHandler:
             # Process based on file type
             file_type = Path(file_name).suffix.lower()
             if file_type == '.pcf':
-                old_pcf = PCFFile(temp_path)
-                old_pcf.decode()
-                new_pcf = processor(old_pcf)
-                new_pcf.encode(temp_path)
+                pcf = PCFFile(temp_path)
+                pcf.decode()
+                processed = processor(pcf)
+                processed.encode(temp_path)
+
+                # Read processed PCF data and check size
+                with open(temp_path, 'rb') as f:
+                    new_data = f.read()
+
+                if len(new_data) != original_size:
+                    print(f"WARNING: PCF size mismatch in {file_name}")
+                    print(f"Original size: {original_size}, New size: {len(new_data)}")
+                    if len(new_data) < original_size:
+                        padding_needed = original_size - len(new_data)
+                        print(f"Adding {padding_needed} bytes of padding")
+                        new_data = new_data[:-1] + b' ' * padding_needed + new_data[-1:]
+                    else:
+                        print("ERROR: New PCF is larger than original!")
+                        return False
+
             elif file_type == '.vmt':
                 with open(temp_path, 'rb') as f:
-                    old_vmt = f.read()
-                new_vmt = processor(old_vmt)
-                with open(temp_path, 'wb') as f:
-                    f.write(new_vmt)
+                    content = f.read()
+                new_data = processor(content)
             else:
                 raise ValueError(f"Unsupported file type: {file_type}")
-
-            # Read processed data
-            with open(temp_path, 'rb') as f:
-                new_data = f.read()
 
             # Patch back into VPK
             return self.vpk.patch_file(full_path, new_data, create_backup)
 
         except Exception as e:
-            print(f"Error processing PCF: {e}")
+            print(f"Error processing file: {e}")
             return False
 
         finally:

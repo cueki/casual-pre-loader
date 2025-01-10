@@ -3,8 +3,8 @@ from typing import Dict
 from models.pcf_file import PCFFile
 from operations.color import RGB, analyze_pcf_colors, transform_team_colors
 from operations.detectors import comment_detector, quote_detector
-from operations.pcf_merge import find_duplicate_array_elements, update_array_indices, nullify_unused_elements, \
-    reorder_elements
+from operations.pcf_compress import compress_duplicate_elements
+from operations.pcf_merge import merge_pcf_elements
 from operations.vmt_wasted_space import VMTSpaceAnalyzer, find_closing_bracket
 
 
@@ -77,23 +77,20 @@ def vmt_texture_replace_processor(old_texture: str, new_texture: str):
 
 def pcf_duplicate_index_processor():
     def process_pcf(pcf: PCFFile) -> PCFFile:
-        duplicates = find_duplicate_array_elements(pcf)
+        return compress_duplicate_elements(pcf)
 
-        if duplicates:
-            print("Found duplicate elements: ")
-            for hash_, indices in duplicates.items():
-                print(f"Indices: {indices}")
+    return process_pcf
 
-            update_array_indices(pcf, duplicates)
-            nullify_unused_elements(pcf, duplicates)
-            print("Updated array indices and nullified unused elements")
 
-            # Reorder elements to be sequential
-            reorder_elements(pcf)
-            print("Reordered elements to be sequential")
-        else:
-            print("No duplicates found")
+def pcf_merge_processor(mod_pcf_path: str):
+    def process_pcf(base_pcf: PCFFile) -> PCFFile:
+        base_pcf = compress_duplicate_elements(base_pcf)
+        # Load the modded PCF
+        mod_pcf = PCFFile(mod_pcf_path)
+        mod_pcf.decode()
+        mod_pcf = compress_duplicate_elements(mod_pcf)
 
-        return pcf
+        # Merge the PCFs
+        return merge_pcf_elements(base_pcf, mod_pcf)
 
     return process_pcf
