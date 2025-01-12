@@ -57,3 +57,33 @@ ATTRIBUTE_VALUES: Dict[AttributeType, str] = {
     AttributeType.MATRIX: '<4f',
     AttributeType.ELEMENT_ARRAY: '<I',
 }
+
+
+DEFAULTS = [
+    ("max_particles", 1000),
+    ("initial_particles", 0),
+    ("material", b"vgui/white"),  # Stored as bytes in PCF
+    ("bounding_box_min", (-10.0, -10.0, -10.0)),  # Vector
+    ("bounding_box_max", (10.0, 10.0, 10.0)),  # Vector
+    ("cull_radius", 0.0),
+    ("cull_cost", 1.0),
+    ("cull_control_point", 0),
+    ("cull_replacement_definition", b""),  # Empty string stored as bytes
+    ("radius", 5.0),
+    ("color", (255, 255, 255, 255)),  # Color stored as RGBA tuple
+    ("rotation", 0.0),
+    ("rotation_speed", 0.0),
+    ("sequence_number", 0),
+    ("sequence_number1", 0),
+    ("group id", 0),
+    ("maximum time step", 0.1),
+    ("maximum sim tick rate", 0.0),
+    ("minimum sim tick rate", 0.0),
+    ("minimum rendered frames", 0),
+    ("control point to disable rendering if it is the camera", -1),
+    ("maximum draw distance", 100000.0),
+    ("time to sleep when not drawn", 8.0),
+    ("Sort particles", True),
+    ("batch particle systems", False),
+    ("view model effect", False)
+]

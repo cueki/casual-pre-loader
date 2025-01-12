@@ -53,8 +53,8 @@ class FileHandler:
                     new_data = f.read()
 
                 if len(new_data) != original_size:
-                    print(f"WARNING: PCF size mismatch in {file_name}")
-                    print(f"Original size: {original_size}, New size: {len(new_data)}")
+                    # print(f"WARNING: PCF size mismatch in {file_name}")
+                    # print(f"Original size: {original_size}, New size: {len(new_data)}")
                     if len(new_data) < original_size:
                         padding_needed = original_size - len(new_data)
                         print(f"Adding {padding_needed} bytes of padding")

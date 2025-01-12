@@ -6,16 +6,6 @@ from handlers.vpk_handler import VPKHandler
 from operations.file_processors import *
 
 
-def pcf_mod_processor(mod_path: str):
-    def process_pcf(game_pcf: PCFFile) -> PCFFile:
-        # Load the mod PCF
-        mod_pcf = PCFFile(mod_path)
-        mod_pcf.decode()
-        return compress_duplicate_elements(mod_pcf)
-
-    return process_pcf
-
-
 def main():
     with open('config.yaml', 'r') as f:
         config = yaml.safe_load(f)
@@ -79,13 +69,16 @@ def main():
         print(f"Processing mod: {base_name}")
 
         # Process the file
-        success = file_handler.process_file(
+        file_handler.process_file(
             base_name,
             pcf_mod_processor(str(mod_file)),
-            create_backup=True
+            create_backup=False
         )
-        print(f"Processed {base_name}: {'Success' if success else 'Failed'}")
 
+    # cool_pcf = PCFFile("npc_fx.pcf")
+    # cool_pcf.decode()
+    # compressed = remove_duplicate_elements(cool_pcf)
+    # compressed.encode("whatever2.pcf")
 
 if __name__ == "__main__":
     main()

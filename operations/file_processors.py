@@ -3,7 +3,7 @@ from typing import Dict
 from models.pcf_file import PCFFile
 from operations.color import RGB, analyze_pcf_colors, transform_team_colors
 from operations.detectors import comment_detector, quote_detector
-from operations.pcf_compress import compress_duplicate_elements
+from operations.pcf_compress import remove_duplicate_elements
 from operations.vmt_wasted_space import VMTSpaceAnalyzer, find_closing_bracket
 
 
@@ -76,6 +76,16 @@ def vmt_texture_replace_processor(old_texture: str, new_texture: str):
 
 def pcf_duplicate_index_processor():
     def process_pcf(pcf: PCFFile) -> PCFFile:
-        return compress_duplicate_elements(pcf)
+        return remove_duplicate_elements(pcf)
+
+    return process_pcf
+
+
+def pcf_mod_processor(mod_path: str):
+    def process_pcf(game_pcf: PCFFile) -> PCFFile:
+        # Load the mod PCF
+        mod_pcf = PCFFile(mod_path)
+        mod_pcf.decode()
+        return remove_duplicate_elements(mod_pcf)
 
     return process_pcf

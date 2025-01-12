@@ -1,5 +1,5 @@
 import copy
-from core.constants import AttributeType
+from core.constants import AttributeType, DEFAULTS
 from models.pcf_file import PCFFile, PCFElement
 
 
@@ -18,6 +18,9 @@ def get_element_hash(element: PCFElement):
 
 def find_duplicate_array_elements(pcf: PCFFile):
     # find duplicate elements referenced in array attributes
+    # print("\nElement types in file:")
+    # for i, element in enumerate(pcf.elements):
+    #     print(f"Element {i}: type_name_index={element.type_name_index} name={element.element_name}")
     hash_to_indices = {}
 
     for element in pcf.elements:
@@ -26,7 +29,7 @@ def find_duplicate_array_elements(pcf: PCFFile):
                 for idx in value:
                     if idx < len(pcf.elements):
                         referenced_element = pcf.elements[idx]
-                        if referenced_element.type_name_index == 41 or referenced_element.type_name_index == 38:
+                        if referenced_element.type_name_index not in (0, 3):
                             element_hash = get_element_hash(referenced_element)
                             if element_hash not in hash_to_indices:
                                 hash_to_indices[element_hash] = []
@@ -52,31 +55,6 @@ def update_array_indices(pcf: PCFFile, duplicates):
                 # update indices in the array
                 new_value = [index_map.get(idx, idx) for idx in value]
                 element.attributes[attr_name] = (attr_type, new_value)
-
-
-def nullify_unused_elements(pcf: PCFFile, duplicates):
-    # get all indices that are duplicates (excluding the first occurrence)
-    unused_indices = []
-    for indices in duplicates.values():
-        unused_indices.extend(indices[1:])
-
-    # for each unused index, rename while preserving length
-    for i, idx in enumerate(unused_indices):
-        original_element = pcf.elements[idx]
-        original_name = original_element.element_name
-        new_name = f"unused".encode('ascii')
-
-        # Calculate padding needed
-        padding_length = len(original_name) - len(new_name)
-        if padding_length < 0:
-            print(f"Warning: New name 'unused{i + 1}' is longer than original name {original_name}, skipping")
-            continue
-
-        # Add null byte padding to maintain length
-        padded_name = new_name + (b'\x20' * padding_length)
-
-        # Update the element name while preserving everything else
-        original_element.element_name = padded_name
 
 
 def reorder_elements(pcf: PCFFile, duplicates):
@@ -125,7 +103,52 @@ def reorder_elements(pcf: PCFFile, duplicates):
     pcf.elements = new_elements
 
 
-def compress_duplicate_elements(pcf: PCFFile) -> PCFFile:
+def rename_child_elements(pcf: PCFFile):
+    for i, element in enumerate(pcf.elements):
+        if element.type_name_index == 41:
+            element.element_name = str(i).encode('ascii')
+
+
+def check_and_remove_defaults(pcf: PCFFile):
+    """Remove any attributes that match the system defaults"""
+    removed_count = 0
+
+    for element in pcf.elements:
+        attributes_to_remove = []
+
+        for attr_name, (attr_type, value) in element.attributes.items():
+            # Convert attribute name from bytes to string for comparison
+            attr_name_str = attr_name.decode('ascii')
+
+            # Check against each default
+            for default_name, default_value in DEFAULTS:
+                if attr_name_str == default_name:
+                    # Handle special cases for different types
+                    matches_default = False
+
+                    if isinstance(default_value, (int, float, bool)):
+                        matches_default = value == default_value
+                    elif isinstance(default_value, tuple):
+                        # Handle Vector3 and Color
+                        if len(default_value) in (3, 4):
+                            matches_default = value == default_value
+                    elif isinstance(default_value, bytes):
+                        # Handle string comparisons
+                        matches_default = value == default_value
+
+                    if matches_default:
+                        attributes_to_remove.append(attr_name)
+                        removed_count += 1
+                        break
+
+        # Remove all identified default attributes
+        for attr_name in attributes_to_remove:
+            del element.attributes[attr_name]
+
+    return removed_count
+
+
+def remove_duplicate_elements(pcf: PCFFile) -> PCFFile:
     # create copy to avoid modifying original
     result_pcf = copy.deepcopy(pcf)
 
@@ -134,8 +157,10 @@ def compress_duplicate_elements(pcf: PCFFile) -> PCFFile:
 
     if duplicates:
         update_array_indices(result_pcf, duplicates)
-        nullify_unused_elements(result_pcf, duplicates)
         reorder_elements(result_pcf, duplicates)
+        rename_child_elements(result_pcf)
+        num_removed = check_and_remove_defaults(result_pcf)
+        print(f"Removed {num_removed} redundant default attributes")
     else:
         print("No duplicates found")
 
