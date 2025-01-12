@@ -59,9 +59,9 @@ def vmt_texture_replace_processor(old_texture: str, new_texture: str):
                 if available_space < size_diff:
                     return content
                 print("bigger")
-                # Find where the whitespace line begins
+                # find where the whitespace line begins
                 whitespace_start = closing_pos - len(whitespace_line)
-                # Remove characters from the whitespace but preserve the newline
+                # remove characters from the whitespace but preserve the newline
                 modified = (modified[:whitespace_start] +
                             whitespace_line[:-1][:-size_diff] + '\n' +
                             modified[closing_pos:])
@@ -82,7 +82,7 @@ def pcf_duplicate_index_processor():
 
 
 def pcf_mod_processor(mod_path: str):
-    def process_pcf(game_pcf: PCFFile) -> PCFFile:
+    def process_pcf() -> PCFFile:
         # Load the mod PCF
         mod_pcf = PCFFile(mod_path)
         mod_pcf.decode()

@@ -1,6 +1,6 @@
+import os
 from typing import List
 from pathlib import Path
-import os
 from models.pcf_file import PCFFile
 
 
@@ -15,7 +15,7 @@ class FileHandler:
         return self.vpk.find_files('*.vmt')
 
     def process_file(self, file_name: str, processor: callable, create_backup: bool = True) -> bool:
-        # If it's just a filename, find its full path
+        # if it's just a filename, find its full path
         if '/' not in file_name:
             full_path = self.vpk.find_file_path(file_name)
             if not full_path:
@@ -24,23 +24,23 @@ class FileHandler:
         else:
             full_path = file_name
 
-        # Create temp file for processing
+        # create temp file for processing
         temp_path = f"temp_{Path(file_name).name}"
 
         try:
-            # Get original file size before any processing
+            # get original file size before any processing
             entry_info = self.vpk.get_file_entry(full_path)
             if not entry_info:
                 print(f"Failed to get file entry for {full_path}")
                 return False
             original_size = entry_info[2].entry_length
 
-            # Extract file as temporary for processing
+            # extract file as temporary for processing
             if not self.vpk.extract_file(full_path, temp_path):
                 print(f"Failed to extract {full_path}")
                 return False
 
-            # Process based on file type
+            # process based on file type
             file_type = Path(file_name).suffix.lower()
             if file_type == '.pcf':
                 pcf = PCFFile(temp_path)
@@ -48,7 +48,7 @@ class FileHandler:
                 processed = processor(pcf)
                 processed.encode(temp_path)
 
-                # Read processed PCF data and check size
+                # read processed PCF data and check size
                 with open(temp_path, 'rb') as f:
                     new_data = f.read()
 
@@ -70,7 +70,7 @@ class FileHandler:
             else:
                 raise ValueError(f"Unsupported file type: {file_type}")
 
-            # Patch back into VPK
+            # patch back into VPK
             return self.vpk.patch_file(full_path, new_data, create_backup)
 
         except Exception as e:
@@ -78,6 +78,6 @@ class FileHandler:
             return False
 
         finally:
-            # Cleanup
+            # cleanup
             if os.path.exists(temp_path):
                 os.remove(temp_path)

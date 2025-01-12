@@ -24,7 +24,7 @@ def find_closing_bracket(content: str) -> int:
 
 
 def append_whitespace(content: str, total_bytes: int) -> str:
-    # Add before the closing bracket
+    # add before the closing bracket
     closing_pos = find_closing_bracket(content)
     if closing_pos == -1:
         return content
@@ -49,7 +49,7 @@ class VMTSpaceAnalyzer:
             if not decoded.strip():
                 return content
 
-            # Collect all wasted bytes
+            # collect all wasted bytes
             waste_bytes = []
             for detector in self.waste_detectors:
                 waste_bytes.extend(detector(decoded))
@@ -58,7 +58,7 @@ class VMTSpaceAnalyzer:
             if total_waste == 0:
                 return content
 
-            # Rebuild content
+            # rebuild content
             result = rebuild_content(decoded, waste_bytes)
             result = append_whitespace(result, total_waste)
 

@@ -17,26 +17,12 @@ class PCFElement:
 class PCFFile:
     def __init__(self, input_file: Union[Path, str], version: str = "DMX_BINARY4_PCF2"):
         self.version = version
-        self.string_dictionary: List[bytes] = []  # Changed to explicitly store bytes
+        self.string_dictionary: List[bytes] = []  # changed to explicitly store bytes
         self.elements: List[PCFElement] = []
         self.input_file = Path(input_file)
 
-    def add_string(self, string: Union[str, bytes]) -> int:
-        # Convert string to bytes if it isn't already
-        if isinstance(string, str):
-            string_bytes = string.encode('ascii', errors='replace')
-        else:
-            string_bytes = string
-
-        if string_bytes not in self.string_dictionary:
-            self.string_dictionary.append(string_bytes)
-        return self.string_dictionary.index(string_bytes)
-
-    def add_element(self, element: PCFElement):
-        self.elements.append(element)
-
     @staticmethod
-    def read_null_terminated_string(file: BinaryIO) -> bytes:
+    def read_null_terminated_string(file: BinaryIO):
         chars = bytearray()
         while True:
             char = file.read(1)
@@ -46,7 +32,7 @@ class PCFFile:
         return bytes(chars)
 
     @staticmethod
-    def write_null_terminated_string(file: BinaryIO, string: Union[str, bytes]) -> None:
+    def write_null_terminated_string(file: BinaryIO, string: Union[str, bytes]):
         if isinstance(string, str):
             encoded = string.encode('ascii', errors='replace')
         else:
@@ -96,7 +82,7 @@ class PCFFile:
         if attr_type == AttributeType.STRING:
             if self.version == 'DMX_BINARY4_PCF2':
                 length = struct.unpack(ATTRIBUTE_VALUES.get(attr_type), file.read(2))[0]
-                return file.read(length)  # Return bytes instead of decoding
+                return file.read(length)
             return self.read_null_terminated_string(file)
 
         if attr_type == AttributeType.BINARY:
@@ -127,28 +113,28 @@ class PCFFile:
 
     def encode(self, output_path: str) -> None:
         with open(output_path, 'wb') as file:
-            # Write header
+            # write header
             version_string = getattr(PCFVersion, self.version)
             self.write_null_terminated_string(file, f"{version_string}\n")
 
-            # Write string dictionary
+            # write string dictionary
             if self.version == 'DMX_BINARY4_PCF2':
                 file.write(struct.pack('<I', len(self.string_dictionary)))
             else:
                 file.write(struct.pack('<H', len(self.string_dictionary)))
 
-            # Write strings as raw bytes
+            # write strings as raw bytes
             for string in self.string_dictionary:
                 file.write(string + b'\x00')
 
-            # Write element dictionary
+            # write element dictionary
             file.write(struct.pack('<I', len(self.elements)))
             for element in self.elements:
                 file.write(struct.pack('<H', element.type_name_index))
                 file.write(element.element_name + b'\x00')
                 file.write(element.data_signature)
 
-            # Write element data
+            # write element data
             for element in self.elements:
                 file.write(struct.pack('<I', len(element.attributes)))
                 for attr_name, (attr_type, attr_value) in element.attributes.items():
@@ -159,7 +145,7 @@ class PCFFile:
 
     def decode(self):
         with open(self.input_file, 'rb') as file:
-            # Read header
+            # read header
             header = self.read_null_terminated_string(file)
             header_str = header.decode('ascii', errors='replace')
 
@@ -172,18 +158,18 @@ class PCFFile:
             else:
                 raise ValueError(f"Unsupported PCF version: {header}")
 
-            # Read string dictionary
+            # read string dictionary
             if self.version == 'DMX_BINARY4_PCF2':
                 count = struct.unpack('<I', file.read(4))[0]
             else:
                 count = struct.unpack('<H', file.read(2))[0]
 
-            # Store strings as bytes
+            # rtore strings as bytes
             for _ in range(count):
                 string = self.read_null_terminated_string(file)
                 self.string_dictionary.append(string)
 
-            # Read element dictionary
+            # read element dictionary
             element_count = struct.unpack('<I', file.read(4))[0]
             for _ in range(element_count):
                 type_name_index = struct.unpack('<H', file.read(2))[0]
@@ -198,7 +184,7 @@ class PCFFile:
                 )
                 self.elements.append(element)
 
-            # Read element data
+            # read element data
             for element in self.elements:
                 attribute_count = struct.unpack('<I', file.read(4))[0]
                 for _ in range(attribute_count):

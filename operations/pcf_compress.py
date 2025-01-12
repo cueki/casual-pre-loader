@@ -110,7 +110,6 @@ def rename_child_elements(pcf: PCFFile):
 
 
 def check_and_remove_defaults(pcf: PCFFile):
-    """Remove any attributes that match the system defaults"""
     removed_count = 0
 
     for element in pcf.elements:

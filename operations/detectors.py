@@ -4,7 +4,7 @@ from operations.vmt_wasted_space import  WastedBytes
 
 
 def comment_detector(content: str) -> Iterator[WastedBytes]:
-    # Detect comment lines
+    # detect comment lines
     pos = 0
     for line in content.splitlines(keepends=True):
         if line.lstrip().startswith('//'):
