@@ -75,10 +75,10 @@ def main():
             create_backup=False
         )
 
-    # cool_pcf = PCFFile("medicgun_beam.pcf")
+    # cool_pcf = PCFFile("medicgun_attrib.pcf")
     # cool_pcf.decode()
     # compressed = remove_duplicate_elements(cool_pcf)
-    # compressed.encode("whatever5.pcf")
+    # compressed.encode("whatever1.pcf")
 
 if __name__ == "__main__":
     main()

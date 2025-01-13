@@ -1,4 +1,5 @@
 import os
+import traceback
 from typing import List
 from pathlib import Path
 from models.pcf_file import PCFFile
@@ -53,8 +54,6 @@ class FileHandler:
                     new_data = f.read()
 
                 if len(new_data) != original_size:
-                    # print(f"WARNING: PCF size mismatch in {file_name}")
-                    # print(f"Original size: {original_size}, New size: {len(new_data)}")
                     if len(new_data) < original_size:
                         padding_needed = original_size - len(new_data)
                         print(f"Adding {padding_needed} bytes of padding")
@@ -74,7 +73,11 @@ class FileHandler:
             return self.vpk.patch_file(full_path, new_data, create_backup)
 
         except Exception as e:
-            print(f"Error processing file: {e}")
+            print(f"Error processing file {file_name}:")
+            print(f"Exception type: {type(e).__name__}")
+            print(f"Exception message: {str(e)}")
+            print("Traceback:")
+            traceback.print_exc()
             return False
 
         finally:
