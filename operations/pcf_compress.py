@@ -1,5 +1,5 @@
 import copy
-from core.constants import AttributeType, DEFAULTS
+from core.constants import AttributeType, ELEMENT_DEFAULTS, ATTRIBUTE_DEFAULTS
 from models.pcf_file import PCFFile, PCFElement
 
 
@@ -19,17 +19,19 @@ def get_element_hash(element: PCFElement):
 def find_duplicate_array_elements(pcf: PCFFile):
     # find duplicate elements referenced in array attributes
     # print("\nElement types in file:")
-    # for i, element in enumerate(pcf.elements):
-    #     print(f"Element {i}: type_name_index={element.type_name_index} name={element.element_name}")
     hash_to_indices = {}
 
     for element in pcf.elements:
+        type_name = pcf.string_dictionary[element.type_name_index].decode('ascii')
+        # print(f"Element type={type_name} ({element.type_name_index}) name={element.element_name}")
+
         for attr_name, (attr_type, value) in element.attributes.items():
             if attr_type == AttributeType.ELEMENT_ARRAY:
                 for idx in value:
                     if idx < len(pcf.elements):
                         referenced_element = pcf.elements[idx]
-                        if referenced_element.type_name_index not in (0, 3):
+                        ref_type_name = pcf.string_dictionary[referenced_element.type_name_index].decode('ascii')
+                        if ref_type_name not in ('DmeElement', 'DmeParticleSystemDefinition'):
                             element_hash = get_element_hash(referenced_element)
                             if element_hash not in hash_to_indices:
                                 hash_to_indices[element_hash] = []
@@ -105,7 +107,8 @@ def reorder_elements(pcf: PCFFile, duplicates):
 
 def rename_child_elements(pcf: PCFFile):
     for i, element in enumerate(pcf.elements):
-        if element.type_name_index == 41:
+        type_name = pcf.string_dictionary[element.type_name_index].decode('ascii')
+        if type_name == 'DmeParticleOperator':
             element.element_name = str(i).encode('ascii')
 
 
@@ -115,24 +118,32 @@ def check_and_remove_defaults(pcf: PCFFile):
     for element in pcf.elements:
         attributes_to_remove = []
 
+        # get the element type name from string dictionary
+        type_name = pcf.string_dictionary[element.type_name_index].decode('ascii')
+
+        # determine which defaults to check
+        defaults_to_check = []
+        if type_name == 'DmeParticleOperator':
+            defaults_to_check.extend(ATTRIBUTE_DEFAULTS)
+        elif type_name == 'DmeParticleSystemDefinition':
+            defaults_to_check.extend(ELEMENT_DEFAULTS)
+
         for attr_name, (attr_type, value) in element.attributes.items():
-            # Convert attribute name from bytes to string for comparison
             attr_name_str = attr_name.decode('ascii')
 
-            # Check against each default
-            for default_name, default_value in DEFAULTS:
+            # check against each default
+            for default_name, default_value in defaults_to_check:
                 if attr_name_str == default_name:
-                    # Handle special cases for different types
                     matches_default = False
 
                     if isinstance(default_value, (int, float, bool)):
                         matches_default = value == default_value
                     elif isinstance(default_value, tuple):
-                        # Handle Vector3 and Color
+                        # handle vector
                         if len(default_value) in (3, 4):
                             matches_default = value == default_value
                     elif isinstance(default_value, bytes):
-                        # Handle string comparisons
+                        # handle string comparisons
                         matches_default = value == default_value
 
                     if matches_default:
@@ -140,7 +151,7 @@ def check_and_remove_defaults(pcf: PCFFile):
                         removed_count += 1
                         break
 
-        # Remove all identified default attributes
+        # remove all identified default attributes
         for attr_name in attributes_to_remove:
             del element.attributes[attr_name]
 

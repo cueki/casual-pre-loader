@@ -60,7 +60,7 @@ class FileHandler:
                         print(f"Adding {padding_needed} bytes of padding")
                         new_data = new_data[:-1] + b' ' * padding_needed + new_data[-1:]
                     else:
-                        print("ERROR: New PCF is larger than original!")
+                        print(f"ERROR: New PCF is {len(new_data) - original_size} bytes larger than original!")
                         return False
 
             elif file_type == '.vmt':

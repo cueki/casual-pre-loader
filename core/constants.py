@@ -59,7 +59,7 @@ ATTRIBUTE_VALUES: Dict[AttributeType, str] = {
 }
 
 
-DEFAULTS = [
+ELEMENT_DEFAULTS = [
     ("max_particles", 1000),
     ("initial_particles", 0),
     ("material", b"vgui/white"),  # Stored as bytes in PCF
@@ -86,4 +86,22 @@ DEFAULTS = [
     ("Sort particles", True),
     ("batch particle systems", False),
     ("view model effect", False)
+]
+
+
+ATTRIBUTE_DEFAULTS = [
+    ("operator start fadein", 0.0),
+    ("operator end fadein", 0.0),
+    ("operator start fadeout", 0.0),
+    ("operator end fadeout", 0.0),
+    ("operator fade oscillate", 0.0),
+    ("Visibility Proxy Input Control Point Number", -1),
+    ("Visibility Proxy Radius", 1.0),
+    ("Visibility input minimum", 0.0),
+    ("Visibility input maximum", 1.0),
+    ("Visibility Alpha Scale minimum", 0.0),
+    ("Visibility Alpha Scale maximum", 1.0),
+    ("Visibility Radius Scale minimum", 1.0),
+    ("Visibility Radius Scale maximum", 1.0),
+    ("Visibility Camera Depth Bias", 0.0)
 ]

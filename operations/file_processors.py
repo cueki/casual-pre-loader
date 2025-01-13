@@ -82,7 +82,7 @@ def pcf_duplicate_index_processor():
 
 
 def pcf_mod_processor(mod_path: str):
-    def process_pcf() -> PCFFile:
+    def process_pcf(game_pcf) -> PCFFile:
         # Load the mod PCF
         mod_pcf = PCFFile(mod_path)
         mod_pcf.decode()
