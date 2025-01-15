@@ -258,8 +258,8 @@ def remove_duplicate_elements(pcf: PCFFile) -> PCFFile:
         print("No duplicates found")
 
     # Clean up string dictionary
-    strings_removed = clean_string_dictionary(result_pcf)
-    if strings_removed > 0:
-        print(f"Removed {strings_removed} unused type strings")
+    # strings_removed = clean_string_dictionary(result_pcf)
+    # if strings_removed > 0:
+    #     print(f"Removed {strings_removed} unused type strings")
 
     return result_pcf

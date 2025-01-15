@@ -1,5 +1,5 @@
-vpk_file: C:\Program Files (x86)\Steam\steamapps\common\Team Fortress 2\tf\tf2_misc_dir.vpk
-#vpk_file: tf2_misc_dir.vpk
+#vpk_file: C:\Program Files (x86)\Steam\steamapps\common\Team Fortress 2\tf\tf2_misc_dir.vpk
+vpk_file: tf2_misc_dir.vpk
 color_shift:
   mode: MATCH_TARGET  # Can be MATCH_TARGET, PRESERVE_FEEL, or RANDOM (default is MATCH_TARGET)
 pcf_files:

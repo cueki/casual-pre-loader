@@ -111,7 +111,7 @@ class PCFFile:
 
         raise ValueError(f"Unsupported attribute type: {attr_type}")
 
-    def encode(self, output_path: str) -> None:
+    def encode(self, output_path: str) -> 'PCFFile':
         with open(output_path, 'wb') as file:
             # write header
             version_string = getattr(PCFVersion, self.version)
@@ -143,6 +143,8 @@ class PCFFile:
                     file.write(struct.pack('B', attr_type))
                     self.write_attribute_data(file, attr_type, attr_value)
 
+        return self
+
     def decode(self):
         with open(self.input_file, 'rb') as file:
             # read header
@@ -164,7 +166,7 @@ class PCFFile:
             else:
                 count = struct.unpack('<H', file.read(2))[0]
 
-            # rtore strings as bytes
+            # store strings as bytes
             for _ in range(count):
                 string = self.read_null_terminated_string(file)
                 self.string_dictionary.append(string)
@@ -194,3 +196,5 @@ class PCFFile:
                     attr_name = self.string_dictionary[type_name_index]
                     attr_value = self.read_attribute_data(file, attr_type)
                     element.attributes[attr_name] = (attr_type, attr_value)
+
+        return self

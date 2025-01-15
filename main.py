@@ -4,6 +4,44 @@ import yaml
 from handlers.file_handler import FileHandler
 from handlers.vpk_handler import VPKHandler
 from operations.file_processors import *
+from operations.pcf_merge import merge_pcf_files
+
+
+def merge_pcf_directory(directory, output_path, file_handler, base_pcf_path):
+    try:
+        directory = Path(directory)
+        if not directory.exists() or not directory.is_dir():
+            print(f"Directory does not exist: {directory}")
+            return False
+
+        pcf_files = list(directory.glob('*.pcf'))
+        if not pcf_files:
+            print(f"No PCF files found in {directory}")
+            return False
+
+        base_pcf = PCFFile(base_pcf_path).decode()
+
+        for pcf_path in pcf_files:
+            print(f"Processing {pcf_path.name}...")
+
+            current_pcf = PCFFile(str(pcf_path))
+            current_pcf.decode()
+            base_pcf = merge_pcf_files(base_pcf, current_pcf)
+
+            file_handler.process_file(
+                pcf_path.name,
+                pcf_empty_root_processor(),
+                create_backup=False
+            )
+
+        # Save the merged PCF
+        base_pcf.encode(str(output_path))
+        print(f"Successfully created merged PCF at {output_path}")
+        return True
+
+    except Exception as e:
+        print(f"Error merging PCF files: {str(e)}")
+        return False
 
 
 def main():
@@ -60,6 +98,17 @@ def main():
     #     vmt_texture_replace_processor("Effects/softglow", "Effects/tp_floorglow")
     # )
 
+    large_mods_path = Path("bugged/")
+    output_path = Path("mods/item_fx.pcf")
+    base_pcf_path=Path("item_fx.pcf")
+
+    merge_pcf_directory(
+        directory=large_mods_path,
+        output_path=output_path,
+        file_handler=file_handler,
+        base_pcf_path=base_pcf_path
+    )
+
     mods_path = Path("mods/")
     mod_files = list(mods_path.glob('*.pcf'))
 
@@ -75,10 +124,7 @@ def main():
             create_backup=False
         )
 
-    # cool_pcf = PCFFile("medicgun_attrib.pcf")
-    # cool_pcf.decode()
-    # compressed = remove_duplicate_elements(cool_pcf)
-    # compressed.encode("whatever1.pcf")
+
 
 if __name__ == "__main__":
     main()
