@@ -45,212 +45,169 @@ class ParticleMerger:
         self.file_handler = file_handler
         self.vpk_handler = vpk_handler
         self.mod_folder = Path(mod_folder)
-        self.BATCH_SIZE = 1
 
         print("\nInitializing ParticleMerger...")
         print(f"Mod folder: {self.mod_folder}")
 
-        # Get all game files first
+        # create a list of (archive_index, filepath) tuples for game files
         excluded_patterns = ['dx80', 'dx90', 'default', 'unusual', 'test', '_high']
-        self.game_files = set(
-            file for file in file_handler.list_pcf_files()
-            if not any(pattern in file.lower() for pattern in excluded_patterns)
-        )
+        game_file_tuples = []
+
+        for file in file_handler.list_pcf_files():
+            if any(pattern in file.lower() for pattern in excluded_patterns):
+                continue
+
+            entry_info = vpk_handler.get_file_entry(file)
+            if not entry_info:
+                continue
+
+            _, _, entry = entry_info
+
+            game_file_tuples.append((entry.archive_index, file))
+
+        # Sort by archive index first, then by filepath
+        game_file_tuples.sort(key=lambda x: (x[0], x[1]))
+
+        # just the filepaths pls
+        self.game_files = [file for _, file in game_file_tuples]
         print(f"Found {len(self.game_files)} game PCF files")
 
-        # Get mod files and normalize their paths
-        self.mod_files = set()
+        # get mod files and normalize path for filtering
+        self.mod_files = []
         for f in self.mod_folder.glob('*.pcf'):
             if 'particles/' not in f.name:
                 normalized_path = f'particles/{f.name}'
             else:
                 normalized_path = f.name
-            self.mod_files.add(normalized_path)
+            self.mod_files.append(normalized_path)
+
         print(f"Found {len(self.mod_files)} mod PCF files")
 
-        # Store overlapping files separately
-        self.overlapping_files = self.mod_files.intersection(self.game_files)
-        # Remove overlapping files from game files
-        self.game_files = self.game_files - self.overlapping_files
+        # track overlapping files
+        self.overlapping_files = []
+        self.missing_game_files = []
+
+        for game_file in self.game_files:
+            if game_file in self.mod_files:
+                self.overlapping_files.append(game_file)
+            else:
+                self.missing_game_files.append(game_file)
+
         print(f"Found {len(self.overlapping_files)} overlapping files")
-        print(f"After removing overlapping files, {len(self.game_files)} game files remain")
+        print(f"After removing overlapping files, {len(self.missing_game_files)} game files remain")
 
         self.ignore_list: Set[str] = set()
         self.merged_files: Dict[str, List[str]] = {}
 
     def get_sorted_game_files(self):
-        file_sizes = []
-        for file in self.game_files.union(self.overlapping_files):
+        file_order = []
+        for file in self.game_files:
             entry_info = self.vpk_handler.get_file_entry(file)
             if entry_info:
                 _, _, entry = entry_info
-                file_sizes.append((file, entry.entry_length))
+                file_order.append((file, entry.archive_index, entry.entry_length))
 
-        return sorted(file_sizes, key=lambda x: x[1], reverse=True)
-
-    def get_size_limit(self, batch_number: int) -> int:
-        if batch_number >= len(self.get_sorted_game_files()):
-            return 0
-
-        return self.get_sorted_game_files()[batch_number][1]
-
-    def get_file_size(self, file_info) -> int:
-        try:
-            if isinstance(file_info, tuple):
-                # for game files
-                return os.path.getsize(file_info[1])
-            else:
-                # for mod files
-                base_name = Path(file_info).name
-                mod_path = self.mod_folder / base_name
-                return os.path.getsize(mod_path)
-        except (OSError, IOError) as e:
-            print(f"Error getting file size for {file_info}: {e}")
-            return 0
-
-    def process_file_batch(self, files_to_process: List[any], start_idx: int):
-        processed_files = []
-        # this is to ensure that the final batch gets returned if number of files is not divisible by the batch size
-        end_idx = min(start_idx + self.BATCH_SIZE, len(files_to_process))
-        current_pcf = None
-
-        try:
-            for idx in range(start_idx, end_idx):
-                file_info = files_to_process[idx]
-                # we store the temp game files as tuples
-                if isinstance(file_info, tuple):
-                    game_file, temp_path = file_info
-                    source_path = temp_path
-                    file_name = game_file
-                # these are the mod files
-                else:
-                    file_name = file_info
-                    base_name = Path(file_name).name
-                    source_path = self.mod_folder / base_name
-
-                print(f"Processing file {idx + 1}/{len(files_to_process)}: {file_name}")
-                source_pcf = PCFFile(source_path).decode()
-
-                # merge all the files in the batch
-                if current_pcf is None:
-                    current_pcf = source_pcf
-                else:
-                    current_pcf = merge_pcf_files(current_pcf, source_pcf)
-
-                # keep track of what we have done
-                processed_files.append(file_name)
-
-            return current_pcf, processed_files, end_idx
-
-        except Exception as e:
-            print(f"Error processing batch: {e}")
-            raise
+        return sorted(file_order, key=lambda x: x[1])
 
     def merge_particles(self):
         print("\nStarting particle merge process...")
 
-        # prepare files to process
-        files_to_process = list(self.mod_files)
+        # game files first, then mod files
+        files_to_process = []
 
         # extract game files to temporary location
-        temp_game_files = []
         temp_dir = Path("temp_game_files")
         temp_dir.mkdir(exist_ok=True)
 
         print("\nExtracting game files for processing...")
-        for game_file in self.game_files:
+        for game_file in self.missing_game_files:
             temp_path = temp_dir / Path(game_file).name
             if self.file_handler.vpk.extract_file(game_file, str(temp_path)):
-                temp_game_files.append((game_file, temp_path))
+                files_to_process.append(game_file)
             else:
                 print(f"Failed to extract {game_file}")
 
-        # this is the list of all the files
-        files_to_process.extend(temp_game_files)
+        # mod files
+        files_to_process.extend(self.mod_files)
         print(f"\nTotal files to process: {len(files_to_process)}")
-        files_to_process.sort(key=self.get_file_size, reverse=True)
-        output_number = 1
+
+        output_number = 0
         current_idx = 0
 
         while current_idx < len(files_to_process):
             print(f"\nStarting new file at index {current_idx}")
-            # this is a really stupid way to get the name of the file we hope to replace lol
-            current_output = Path(self.get_sorted_game_files()[output_number - 1][0]).name
-            max_size = self.get_size_limit(output_number - 1)
-            print(f"Size limit for file {output_number}: {max_size:,} bytes")
+            current_output = Path(self.get_sorted_game_files()[output_number][0]).name
+            current_output_max_size = self.get_sorted_game_files()[output_number][2]
+            print(f"Size limit for file {output_number}: {current_output_max_size:,} bytes")
 
             # keep track of successfully processed files
             successful_merges = []
 
-            # start with first file
-            current_pcf, first_batch, next_idx = self.process_file_batch(files_to_process, current_idx)
+            # process first file
+            file_name = files_to_process[current_idx]
+            base_name = Path(file_name).name
+            if file_name in self.mod_files:
+                source_path = self.mod_folder / base_name
+            else:
+                source_path = temp_dir / base_name
 
-            # double check if even the first file is too large (should probably kill the process)
-            potential_size = check_compressed_size(current_pcf)
-            if potential_size > max_size:
-                print(f"\nWARNING: Single file exceeds size limit ({potential_size:,} > {max_size:,} bytes)")
+            # double check if even the first file is too large
+            potential_size = check_compressed_size(PCFFile(source_path).decode())
+            if potential_size > current_output_max_size:
+                print(f"\nWARNING: Single file exceeds size limit ({potential_size:,} > {current_output_max_size:,} bytes)")
                 print("Moving to next file...")
-                current_idx = next_idx
+                output_number += 1
                 continue
 
-            successful_merges.extend(first_batch)
+            successful_merges.append(source_path)
+            current_pcf = PCFFile(source_path).decode()
+            next_idx = current_idx + 1
 
             while next_idx < len(files_to_process):
-                # try merging next batch
-                test_pcf, test_batch, test_idx = self.process_file_batch(files_to_process, next_idx)
-
-                # try merging with current batch
-                merged_pcf = merge_pcf_files(current_pcf, test_pcf)
-                potential_size = check_compressed_size(merged_pcf)
-
-                if potential_size <= max_size:
-                    # merge was successful, update state
-                    current_pcf = merged_pcf
-                    successful_merges.extend(test_batch)
-                    next_idx = test_idx
+                # try merging next file
+                file_name = files_to_process[next_idx]
+                base_name = Path(file_name).name
+                if file_name in self.mod_files:
+                    source_path = self.mod_folder / base_name
                 else:
-                    print(f"\nBatch would exceed size limit ({potential_size:,} > {max_size:,} bytes)")
-                    print("Rolling back and rebuilding from successful merges...")
+                    source_path = temp_dir / base_name
 
-                    # rebuild PCF from successful merges
-                    rebuilt_pcf = None
-                    for i in range(0, len(successful_merges)):
-                        file_info = files_to_process[current_idx + i]
+                print(f"Processing file {next_idx + 1}/{len(files_to_process)}: {source_path}")
+                next_pcf = PCFFile(source_path).decode()
 
-                        # handle both mod files and game files
-                        if isinstance(file_info, tuple):
-                            game_file, temp_path = file_info
-                            source_path = temp_path
-                        else:
-                            base_name = Path(file_info).name
-                            source_path = self.mod_folder / base_name
+                # try merging with current PCF
+                try:
+                    merged_pcf = merge_pcf_files(current_pcf, next_pcf)
+                    potential_size = check_compressed_size(merged_pcf)
 
-                        source_pcf = PCFFile(source_path).decode()
-
-                        if rebuilt_pcf is None:
-                            rebuilt_pcf = source_pcf
-                        else:
-                            rebuilt_pcf = merge_pcf_files(rebuilt_pcf, source_pcf)
-
-                    current_pcf = rebuilt_pcf
+                    if potential_size <= current_output_max_size:
+                        # merge was successful, update state
+                        current_pcf = merged_pcf
+                        successful_merges.append(source_path)
+                        next_idx += 1
+                    else:
+                        print(f"\nFile would exceed size limit ({potential_size:,} > {current_output_max_size:,} bytes)")
+                        break
+                except Exception as e:
+                    print(f"Error merging file {file_name}: {e}")
                     break
 
-            # save the current file
-            output_path = Path(f"output/{current_output}")
-            if save_merged_pcf(current_pcf, output_path):
-                print(f"\nSaved file {output_number}")
+            # save the last successful merge state
+            if len(successful_merges) > 0:
+                output_path = Path(f"output/{current_output}")
+                out_merge = PCFFile(successful_merges[0]).decode()
+                for merge in successful_merges[1:]:
+                    out_merge = merge_pcf_files(out_merge, PCFFile(merge).decode())
+                out_merge.encode(output_path)
                 current_idx += len(successful_merges)
                 output_number += 1
-            else:
-                print(f"Failed to save batch {output_number}, skipping...")
-                current_idx = next_idx
 
-        # clean up temporary files
-        for _, temp_path in temp_game_files:
-            os.remove(temp_path)
-
-        if temp_dir.exists():
-            temp_dir.rmdir()
+        # Clean up temporary files
+        # for _, temp_path in temp_dir:
+        #     os.remove(temp_path)
+        #
+        # if temp_dir.exists():
+        #     temp_dir.rmdir()
 
         return self.merged_files
 
