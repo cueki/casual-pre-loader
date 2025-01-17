@@ -1,5 +1,3 @@
-import copy
-
 from models.pcf_file import PCFFile, PCFElement
 from core.constants import AttributeType
 

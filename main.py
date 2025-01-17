@@ -3,45 +3,11 @@ from pathlib import Path
 import yaml
 from handlers.file_handler import FileHandler
 from handlers.vpk_handler import VPKHandler
-from operations.file_processors import *
+from models.pcf_file import PCFFile
+from operations.file_processors import pcf_mod_processor, pcf_empty_root_processor, pcf_color_processor
+from operations.pcf_compress import remove_duplicate_elements
 from operations.pcf_merge import merge_pcf_files
-
-
-def merge_pcf_directory(directory, output_path, file_handler, base_pcf_path):
-    try:
-        directory = Path(directory)
-        if not directory.exists() or not directory.is_dir():
-            print(f"Directory does not exist: {directory}")
-            return False
-
-        pcf_files = list(directory.glob('*.pcf'))
-        if not pcf_files:
-            print(f"No PCF files found in {directory}")
-            return False
-
-        base_pcf = PCFFile(base_pcf_path).decode()
-
-        for pcf_path in pcf_files:
-            print(f"Processing {pcf_path.name}...")
-
-            current_pcf = PCFFile(str(pcf_path))
-            current_pcf.decode()
-            base_pcf = merge_pcf_files(base_pcf, current_pcf)
-
-            file_handler.process_file(
-                pcf_path.name,
-                pcf_empty_root_processor(),
-                create_backup=False
-            )
-
-        # Save the merged PCF
-        base_pcf.encode(str(output_path))
-        print(f"Successfully created merged PCF at {output_path}")
-        return True
-
-    except Exception as e:
-        print(f"Error merging PCF files: {str(e)}")
-        return False
+from tools.pcf_squish import ParticleMerger
 
 
 def main():
@@ -53,77 +19,55 @@ def main():
         print("vpk_file does not exist")
         return
 
-    # Initialize handlers
+    # initialize handlers
     vpk_handler = VPKHandler(vpk_file)
     file_handler = FileHandler(vpk_handler)
 
-    # Define color targets
-    targets = {
-        'red': {
-            'color1': (255, 128, 128),
-            'color2': (255, 128, 128),
-            'color_fade': (255, 128, 255)
-        },
-        'blue': {
-            'color1': (128, 128, 255),
-            'color2': (128, 128, 255),
-            'color_fade': (128, 255, 255)
-        },
-        'neutral': {
-            'color1': (255, 192, 128),
-            'color2': (255, 192, 128),
-            'color_fade': (192, 128, 255)
-        }
-    }
+    ParticleMerger(file_handler, vpk_handler, "mods/").process()
 
-    # Process specific PCF files from config
-    # for pcf_entry in config['pcf_files']:
-    #     success = pcf_handler.process_pcf(pcf_entry['file'], processor)
-    #     print(f"Processed {pcf_entry['file']}: {'Success' if success else 'Failed'}")
+    # # pre-process the pcf files that are too large
+    # merge_files = Path("bugged2/").glob('*.pcf')
+    # target_pcf = PCFFile(Path("bigboom.pcf")).decode()
+    # output_path = Path("fat.pcf")
+    #
+    # for merge_file in merge_files:
+    #     base_name = merge_file.name
+    #     print(f"Merging mod: {base_name} into {output_path.name}")
+    #
+    #     current_pcf = PCFFile(merge_file).decode()
+    #     target_pcf = merge_pcf_files(target_pcf, current_pcf)
+    #
+    #     file_handler.process_file(
+    #         base_name,
+    #         pcf_empty_root_processor(),
+    #         create_backup=False
+    #     )
+    #
+    # # item_fx.pcf now contains 10 pcf files worth of data because its so large it can fit it all
+    # target_pcf.encode(output_path)
 
-    # Process all PCF files
-    # for k in file_handler.list_pcf_files():
-    #     # success = file_handler.process_file(k, pcf_color_processor(targets))
-    #     success = file_handler.process_file(k, pcf_duplicate_index_processor())
-    #     print(f"Processed {k}: {'Success' if success else 'Failed'}")
+    excluded_patterns = ['dx80', 'default', 'unusual', 'test']
+    for file in file_handler.list_pcf_files():
+        if not any(pattern in file.lower() for pattern in excluded_patterns):
+            base_name = Path(file).name
+            file_handler.process_file(
+                base_name,
+                pcf_empty_root_processor(),
+                create_backup=False
+            )
 
-    # Process all VMT files
-    # for k in file_handler.list_vmt_files():
-    #     success = file_handler.process_file(k, vmt_space_processor())
-    #     print(f"Processed {k}: {'Success' if success else 'Failed'}")
-
-    # file_handler.process_file("softglow.vmt", vmt_space_processor())
-    # file_handler.process_file(
-    #     "softglow.vmt",
-    #     vmt_texture_replace_processor("Effects/softglow", "Effects/tp_floorglow")
-    # )
-
-    large_mods_path = Path("bugged/")
-    output_path = Path("mods/item_fx.pcf")
-    base_pcf_path=Path("item_fx.pcf")
-
-    merge_pcf_directory(
-        directory=large_mods_path,
-        output_path=output_path,
-        file_handler=file_handler,
-        base_pcf_path=base_pcf_path
-    )
-
-    mods_path = Path("mods/")
-    mod_files = list(mods_path.glob('*.pcf'))
+    # compress the mod files and put them in the game
+    mod_files = Path("output/").glob('*.pcf')
 
     for mod_file in mod_files:
-        # Get the base filename to match against VPK files
         base_name = mod_file.name
         print(f"Processing mod: {base_name}")
-
-        # Process the file
         file_handler.process_file(
             base_name,
             pcf_mod_processor(str(mod_file)),
             create_backup=False
         )
-
+        os.remove(mod_file)
 
 
 if __name__ == "__main__":

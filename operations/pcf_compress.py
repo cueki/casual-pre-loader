@@ -240,8 +240,7 @@ def remove_duplicate_elements(pcf: PCFFile) -> PCFFile:
     # create copy to avoid modifying original
     result_pcf = copy.deepcopy(pcf)
 
-    if fix_child_references(result_pcf):
-        print("Fixed invalid child references")
+    fix_child_references(result_pcf)
 
     # find duplicates
     duplicates = find_duplicate_array_elements(result_pcf)
@@ -250,10 +249,8 @@ def remove_duplicate_elements(pcf: PCFFile) -> PCFFile:
         update_array_indices(result_pcf, duplicates)
         reorder_elements(result_pcf, duplicates)
         rename_operators(result_pcf)
-        num_removed = check_and_remove_defaults(result_pcf)
-        if clean_children_arrays(result_pcf):
-            print("Removed duplicate child indices")
-        print(f"Removed {num_removed} redundant default attributes")
+        check_and_remove_defaults(result_pcf)
+        clean_children_arrays(result_pcf)
     else:
         print("No duplicates found")
 

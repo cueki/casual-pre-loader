@@ -111,7 +111,7 @@ class PCFFile:
 
         raise ValueError(f"Unsupported attribute type: {attr_type}")
 
-    def encode(self, output_path: str) -> 'PCFFile':
+    def encode(self, output_path: Union[Path, str]) -> 'PCFFile':
         with open(output_path, 'wb') as file:
             # write header
             version_string = getattr(PCFVersion, self.version)
