@@ -1,114 +1,74 @@
 import os
+from pathlib import Path
 import yaml
-import random
-from typing import Dict
-from core.constants import PCF_OFFSETS
-from models.pcf_file import PCFFile
-from operations.color import analyze_pcf_colors, transform_team_colors, RGB
-from operations.vpk import VPKOperations
-from tools.color_wheel import animate_color_shift
-
-
-def generate_random_rgb():
-    return (
-        random.randint(1, 254),
-        random.randint(1, 254), # 1-254 to avoid my filter of 0, 0, 0 and 255, 255, 255
-        random.randint(1, 254)
-    )
-
-
-def generate_random_targets():
-    return {
-        'red': {
-            'color1': generate_random_rgb(),
-            'color2': generate_random_rgb(),
-            'color_fade': generate_random_rgb()
-        },
-        'blue': {
-            'color1': generate_random_rgb(),
-            'color2': generate_random_rgb(),
-            'color_fade': generate_random_rgb()
-        },
-        'neutral': {
-            'color1': generate_random_rgb(),
-            'color2': generate_random_rgb(),
-            'color_fade': generate_random_rgb()
-        }
-    }
-
-
-def process_pcf(vpk_file: str, pcf_file: str, targets: Dict[str, Dict[str, RGB]]) -> None:
-    # temp particle file for reading and writing - get it from the vpk with the offsets in constants using vpk_ops
-    temp_pcf = f"temp_{pcf_file}"
-    pcf = PCFFile(temp_pcf)
-    offset, size = PCF_OFFSETS.get(pcf_file)
-    vpk_ops = VPKOperations
-    vpk_ops.extract_pcf(
-        vpk_path=vpk_file,
-        offset=offset,
-        size=size,
-        output_path=temp_pcf
-    )
-
-    # "decode" and extract color info from the file
-    pcf.decode()
-    colors = analyze_pcf_colors(pcf)
-    result = transform_team_colors(pcf, colors, targets)
-
-    animate_color_shift(colors, targets, save_video=False) # this is the color wheel animation, is broken rn
-
-    # patch the changes back into the vpk with the new particle file using the same offset
-    result = vpk_ops.patch_pcf(
-        vpk_path=vpk_file,
-        offset=offset,
-        size=size,
-        pcf=result,
-        create_backup=True
-    )
-    print(f"Processed {pcf_file}: {result}")
-
-    # cleanup temp
-    os.remove(temp_pcf)
+from handlers.file_handler import FileHandler
+from handlers.vpk_handler import VPKHandler
+from operations.file_processors import pcf_mod_processor, pcf_empty_root_processor
+from tools.backup_manager import BackupManager
+from tools.pcf_squish import ParticleMerger
+from tools.vpk_unpack import VPKExtractor
 
 
 def main():
     with open('config.yaml', 'r') as f:
         config = yaml.safe_load(f)
 
-    vpk_file = config['vpk_file']
-    pcf_files = config['pcf_files']
+    # initialize backup manager with game VPK path
+    backup_manager = BackupManager(config['vpk_file'])
 
-    if not os.path.exists(vpk_file):
-        print("vpk_file does not exist")
+    # create initial backup if it doesn't exist
+    if not backup_manager.create_initial_backup():
+        print("Failed to create/verify backup")
+        return
 
-    targets = {
-        'red': {
-            'color1': (255, 128, 128),
-            'color2': (255, 128, 128),
-            'color_fade': (255, 128, 255)
-        },
-        'blue': {
-            'color1': (128, 128, 255),
-            'color2': (128, 128, 255),
-            'color_fade': (128, 255, 255)
-        },
-        'neutral': {
-            'color1': (255, 192, 128),
-            'color2': (255, 192, 128),
-            'color_fade': (192, 128, 255)
-        }
-    }
-    # peek_file_header("temp_medicgun_beam.pcf")
-    # DO ONLY WHAT IS IN CONFIG.YAML
-    for pcf_name in pcf_files:
-        # targets = generate_random_targets() # if u want random
-        process_pcf(vpk_file, pcf_name['file'], targets)
+    # prepare fresh working copy from backup
+    if not backup_manager.prepare_working_copy():
+        print("Failed to prepare working copy")
+        return
 
-    # DO ALL PARTICLE FILES !!!
-    # for pcf_name in PCF_OFFSETS:
-    #     # targets = generate_random_targets() # if u want random
-    #     process_pcf(vpk_file, pcf_name, targets)
+    working_vpk_path = backup_manager.get_working_vpk_path()
 
+    output_dir = 'mods'
+    user_vpk = VPKHandler('20241223.vpk')
+    VPKExtractor(user_vpk, output_dir).extract_files()
 
-if __name__ == '__main__':
+    # initialize handlers
+    vpk_handler = VPKHandler(str(working_vpk_path))
+    file_handler = FileHandler(vpk_handler)
+
+    ParticleMerger(file_handler, vpk_handler, "mods/particles/").process()
+
+    excluded_patterns = ['dx80', 'default', 'unusual', 'test']
+    for file in file_handler.list_pcf_files():
+        if not any(pattern in file.lower() for pattern in excluded_patterns):
+            base_name = Path(file).name
+            file_handler.process_file(
+                base_name,
+                pcf_empty_root_processor(),
+                create_backup=False
+            )
+
+    # compress the mod files and put them in the game
+    mod_files = Path("output/").glob('*.pcf')
+
+    for mod_file in mod_files:
+        base_name = mod_file.name
+        print(f"Processing mod: {base_name}")
+        file_handler.process_file(
+            base_name,
+            pcf_mod_processor(str(mod_file)),
+            create_backup=False
+        )
+        os.remove(mod_file)
+
+    if not backup_manager.deploy_to_game():
+        print("Failed to deploy to game directory")
+        return
+
+    if Path('output/').exists():
+        Path('output/').rmdir()
+
+    print("Processing complete!")
+
+if __name__ == "__main__":
     main()
