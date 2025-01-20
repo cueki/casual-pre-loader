@@ -67,6 +67,7 @@ def main():
 
     if Path('output/').exists():
         Path('output/').rmdir()
+
     print("Processing complete!")
 
 if __name__ == "__main__":
