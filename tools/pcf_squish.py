@@ -49,8 +49,23 @@ class ParticleMerger:
         print("\nInitializing ParticleMerger...")
         print(f"Mod folder: {self.mod_folder}")
 
+        # get mod files and normalize path for filtering
+        self.mod_files = []
+        for f in self.mod_folder.glob('*.pcf'):
+            if 'particles/' not in f.name:
+                normalized_path = f'particles/{f.name}'
+            else:
+                normalized_path = f.name
+            self.mod_files.append(normalized_path)
+
+        print(f"Found {len(self.mod_files)} mod PCF files")
+
         # create a list of (archive_index, filepath) tuples for game files
-        excluded_patterns = ['dx80', 'dx90', 'default', 'unusual', 'test', '_high', 'explosion']
+        if 'articles/explosion.pcf' in self.mod_files:
+            excluded_patterns = ['dx80', 'dx90', 'default', 'unusual', 'test', '_high']
+        else:
+            excluded_patterns = ['dx80', 'dx90', 'default', 'unusual', 'test', '_high', 'explosion']
+
         game_file_tuples = []
 
         for file in file_handler.list_pcf_files():
@@ -71,17 +86,6 @@ class ParticleMerger:
         # just the filepaths pls
         self.game_files = [file for _, file in game_file_tuples]
         print(f"Found {len(self.game_files)} game PCF files")
-
-        # get mod files and normalize path for filtering
-        self.mod_files = []
-        for f in self.mod_folder.glob('*.pcf'):
-            if 'particles/' not in f.name:
-                normalized_path = f'particles/{f.name}'
-            else:
-                normalized_path = f.name
-            self.mod_files.append(normalized_path)
-
-        print(f"Found {len(self.mod_files)} mod PCF files")
 
         # track overlapping files
         self.overlapping_files = []
