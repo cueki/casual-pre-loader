@@ -207,7 +207,7 @@ class ParticleMerger:
                 output_number += 1
 
         # clean up temporary files
-        for _, temp_path in temp_dir.glob('*.pcf'):
+        for temp_path in temp_dir.glob('*.pcf'):
             os.remove(temp_path)
 
         if temp_dir.exists():
