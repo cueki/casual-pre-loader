@@ -3,10 +3,7 @@ from pathlib import Path
 import yaml
 from handlers.file_handler import FileHandler
 from handlers.vpk_handler import VPKHandler
-from models.pcf_file import PCFFile
-from operations.file_processors import pcf_mod_processor, pcf_empty_root_processor, pcf_color_processor
-from operations.pcf_compress import remove_duplicate_elements
-from operations.pcf_merge import merge_pcf_files
+from operations.file_processors import pcf_mod_processor, pcf_empty_root_processor
 from tools.pcf_squish import ParticleMerger
 
 
@@ -24,27 +21,6 @@ def main():
     file_handler = FileHandler(vpk_handler)
 
     ParticleMerger(file_handler, vpk_handler, "mods/").process()
-
-    # # pre-process the pcf files that are too large
-    # merge_files = Path("bugged2/").glob('*.pcf')
-    # target_pcf = PCFFile(Path("bigboom.pcf")).decode()
-    # output_path = Path("fat.pcf")
-    #
-    # for merge_file in merge_files:
-    #     base_name = merge_file.name
-    #     print(f"Merging mod: {base_name} into {output_path.name}")
-    #
-    #     current_pcf = PCFFile(merge_file).decode()
-    #     target_pcf = merge_pcf_files(target_pcf, current_pcf)
-    #
-    #     file_handler.process_file(
-    #         base_name,
-    #         pcf_empty_root_processor(),
-    #         create_backup=False
-    #     )
-    #
-    # # item_fx.pcf now contains 10 pcf files worth of data because its so large it can fit it all
-    # target_pcf.encode(output_path)
 
     excluded_patterns = ['dx80', 'default', 'unusual', 'test']
     for file in file_handler.list_pcf_files():
