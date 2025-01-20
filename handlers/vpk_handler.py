@@ -48,7 +48,7 @@ class VPKHandler:
 
         self.header_offset = 0
         if not self.is_dir_vpk:
-            # Calculate header offset for single-file VPKs
+            # calculate header offset for single-file VPKs
             self.header_offset = self._calculate_header_offset()
 
     def get_archive_path(self, archive_index: int) -> str:
@@ -82,6 +82,10 @@ class VPKHandler:
 
     def find_files(self, pattern: str):
         all_files = self.list_files()
+        # directory prefix
+        if pattern.endswith('/'):
+            return [f for f in all_files if f.startswith(pattern)]
+        # normal file
         return [f for f in all_files if Path(f).match(pattern)]
 
     def find_file_path(self, filename: str):
@@ -102,9 +106,10 @@ class VPKHandler:
     def get_file_entry(self, filepath: str):
         try:
             path = Path(filepath)
-            extension = path.suffix[1:]
+            extension = path.suffix[1:]  # removes the dot
             filename = path.stem
-            directory = str(path.parent)
+            # ensure forward slashes and handle nested paths correctly
+            directory = str(path.parent).replace('\\', '/')
 
             if directory == '.':
                 directory = ''
@@ -128,7 +133,7 @@ class VPKHandler:
                     return 0
 
                 tree_size = int.from_bytes(header[8:12], 'little')
-                total_offset = (28 + tree_size)  # Tree + header offset
+                total_offset = (28 + tree_size)  # tree + header offset
 
                 return total_offset
 
@@ -187,23 +192,23 @@ class VPKHandler:
         _, _, entry = entry_info
 
         try:
-            # Verify size
+            # verify size
             if len(new_data) != entry.entry_length:
                 raise ValueError(
                     f"Modified file is does not match original "
                     f"({len(new_data)} != {entry.entry_length} bytes)"
                 )
-            # Get the correct VPK archive path
+            # get the correct VPK archive path
             archive_path = self.get_archive_path(entry.archive_index)
 
-            # Create backup if requested
+            # create backup if requested
             if create_backup:
                 backup_path = f"{archive_path}.backup"
                 if not os.path.exists(backup_path):
                     with open(archive_path, 'rb') as src, open(backup_path, 'wb') as dst:
                         dst.write(src.read())
 
-            # Write the modified data
+            # write the modified data
             with open(archive_path, 'rb+') as f:
                 f.seek(entry.entry_offset)
                 f.write(new_data)
@@ -213,27 +218,3 @@ class VPKHandler:
         except Exception as e:
             print(f"Error patching file: {e}")
             return False
-
-    def iter_files(self, pattern: Optional[str] = None) -> Iterator[Tuple[str, bytes]]:
-        # Iterate over files in the VPK, yielding (filepath, content) pairs. Filter with glob.
-        files = self.find_files(pattern) if pattern else self.list_files()
-
-        for filepath in files:
-            entry_info = self.get_file_entry(filepath)
-            if not entry_info:
-                continue
-
-            _, _, entry = entry_info
-
-            # Read file data from appropriate archive
-            file_data = self.read_from_archive(
-                entry.archive_index,
-                entry.entry_offset,
-                entry.entry_length
-            )
-
-            if file_data:
-                # Combine preload data if it exists
-                if entry.preload_bytes > 0 and entry.preload_data:
-                    file_data = entry.preload_data + file_data
-                yield filepath, file_data

@@ -196,6 +196,7 @@ class ParticleMerger:
                     print(f"Error merging file {file_name}: {e}")
                     break
 
+            Path('output/').mkdir(exist_ok=True)
             # save the last successful merge state
             if len(successful_merges) > 0:
                 output_path = Path(f"output/{current_output}")
