@@ -1,4 +1,5 @@
 import os
+import copy
 from pathlib import Path
 from typing import List, Set, Dict
 from models.pcf_file import PCFFile
@@ -6,18 +7,16 @@ from handlers.file_handler import FileHandler
 from handlers.vpk_handler import VPKHandler
 from operations.pcf_merge import merge_pcf_files
 from operations.pcf_compress import remove_duplicate_elements
-import copy
+from core.folder_setup import folder_setup
 
 
 def check_compressed_size(pcf: PCFFile):
-    compressed_path = Path("temp_size_check.pcf")
-
+    # check the size of the compressed pcf to make sure it fits
+    compressed_path = folder_setup.get_temp_path("temp_size_check.pcf")
     test_pcf = copy.deepcopy(pcf)
     compressed = remove_duplicate_elements(test_pcf)
-
     compressed.encode(compressed_path)
     size = os.path.getsize(compressed_path)
-
     os.remove(compressed_path)
 
     return size
@@ -25,9 +24,6 @@ def check_compressed_size(pcf: PCFFile):
 
 def save_merged_pcf(pcf: PCFFile, output_path: Path) -> bool:
     try:
-        # create output directory if it doesn't exist
-        output_path.parent.mkdir(exist_ok=True)
-
         # save uncompressed version
         pcf.encode(output_path)
         uncompressed_size = os.path.getsize(output_path)
@@ -37,27 +33,26 @@ def save_merged_pcf(pcf: PCFFile, output_path: Path) -> bool:
 
     except Exception as e:
         print(f"Error saving merged PCF: {str(e)}")
+
         return False
 
 
 class ParticleMerger:
-    def __init__(self, file_handler: FileHandler, vpk_handler: VPKHandler, mod_folder: str):
+    def __init__(self, file_handler: FileHandler, vpk_handler: VPKHandler):
         self.file_handler = file_handler
         self.vpk_handler = vpk_handler
-        self.mod_folder = Path(mod_folder)
 
         print("\nInitializing ParticleMerger...")
-        print(f"Mod folder: {self.mod_folder}")
+        print(f"Mod folder: {folder_setup.mods_dir}")
 
         # get mod files and normalize path for filtering
         self.mod_files = []
-        for f in self.mod_folder.glob('*.pcf'):
+        for f in folder_setup.mods_particle_dir.glob('*.pcf'):
             if 'particles/' not in f.name:
                 normalized_path = f'particles/{f.name}'
             else:
                 normalized_path = f.name
             self.mod_files.append(normalized_path)
-
         print(f"Found {len(self.mod_files)} mod PCF files")
 
         # create a list of (archive_index, filepath) tuples for game files
@@ -120,13 +115,10 @@ class ParticleMerger:
         files_to_process = []
 
         # extract game files to temporary location
-        temp_dir = Path("temp_game_files")
-        temp_dir.mkdir(exist_ok=True)
-
         print("\nExtracting game files for processing...")
         for game_file in self.missing_game_files:
-            temp_path = temp_dir / Path(game_file).name
-            if self.file_handler.vpk.extract_file(game_file, str(temp_path)):
+            game_file_name = Path(game_file).name
+            if self.file_handler.vpk.extract_file(game_file, str(folder_setup.get_game_files_path(game_file_name))):
                 files_to_process.append(game_file)
             else:
                 print(f"Failed to extract {game_file}")
@@ -151,9 +143,9 @@ class ParticleMerger:
             file_name = files_to_process[current_idx]
             base_name = Path(file_name).name
             if file_name in self.mod_files:
-                source_path = self.mod_folder / base_name
+                source_path = folder_setup.mods_particle_dir / base_name
             else:
-                source_path = temp_dir / base_name
+                source_path = folder_setup.game_files_dir / base_name
 
             # double check if even the first file is too large
             potential_size = check_compressed_size(PCFFile(source_path).decode())
@@ -172,9 +164,9 @@ class ParticleMerger:
                 file_name = files_to_process[next_idx]
                 base_name = Path(file_name).name
                 if file_name in self.mod_files:
-                    source_path = self.mod_folder / base_name
+                    source_path = folder_setup.mods_particle_dir / base_name
                 else:
-                    source_path = temp_dir / base_name
+                    source_path = folder_setup.game_files_dir / base_name
 
                 print(f"Processing file {next_idx + 1}/{len(files_to_process)}: {source_path}")
                 next_pcf = PCFFile(source_path).decode()
@@ -196,23 +188,15 @@ class ParticleMerger:
                     print(f"Error merging file {file_name}: {e}")
                     break
 
-            Path('output/').mkdir(exist_ok=True)
             # save the last successful merge state
             if len(successful_merges) > 0:
-                output_path = Path(f"output/{current_output}")
+                output_path = folder_setup.output_dir / current_output
                 out_merge = PCFFile(successful_merges[0]).decode()
                 for merge in successful_merges[1:]:
                     out_merge = merge_pcf_files(out_merge, PCFFile(merge).decode())
                 out_merge.encode(output_path)
                 current_idx += len(successful_merges)
                 output_number += 1
-
-        # clean up temporary files
-        for temp_path in temp_dir.glob('*.pcf'):
-            os.remove(temp_path)
-
-        if temp_dir.exists():
-            temp_dir.rmdir()
 
         return self.merged_files
 

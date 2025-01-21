@@ -62,15 +62,15 @@ ATTRIBUTE_VALUES: Dict[AttributeType, str] = {
 ELEMENT_DEFAULTS = [
     ("max_particles", 1000),
     ("initial_particles", 0),
-    ("material", b"vgui/white"),  # Stored as bytes in PCF
-    ("bounding_box_min", (-10.0, -10.0, -10.0)),  # Vector
-    ("bounding_box_max", (10.0, 10.0, 10.0)),  # Vector
+    ("material", b"vgui/white"),
+    ("bounding_box_min", (-10.0, -10.0, -10.0)),
+    ("bounding_box_max", (10.0, 10.0, 10.0)),
     ("cull_radius", 0.0),
     ("cull_cost", 1.0),
     ("cull_control_point", 0),
-    ("cull_replacement_definition", b""),  # Empty string stored as bytes
+    ("cull_replacement_definition", b""),
     ("radius", 5.0),
-    ("color", (255, 255, 255, 255)),  # Color stored as RGBA tuple
+    ("color", (255, 255, 255, 255)),
     ("rotation", 0.0),
     ("rotation_speed", 0.0),
     ("sequence_number", 0),
@@ -104,4 +104,19 @@ ATTRIBUTE_DEFAULTS = [
     ("Visibility Radius Scale minimum", 1.0),
     ("Visibility Radius Scale maximum", 1.0),
     ("Visibility Camera Depth Bias", 0.0)
+]
+
+
+CUSTOM_VPK_NAMES = [
+    "wermware_2025.vpk",
+    "fragaholic_config.vpk",
+    "cuekicuttersolution.vpk",
+    "meow_meow_meow_sad_song_1_hour_compilation.vpk",
+    "schizophrenia_injection.vpk",
+    "pls_answer_my_email_eric.vpk",
+    "SUBJECT_LINE_VERY_POTENTIAL_LIKELY_BAD_THING_TF2.vpk",
+    "go_spin_the_badge.vpk",
+    "4_year_ban_for_this_btw.vpk",
+    "20dollarbill.vpk",
+    "rgl_anti_anticheat"
 ]
