@@ -118,5 +118,5 @@ CUSTOM_VPK_NAMES = [
     "go_spin_the_badge.vpk",
     "4_year_ban_for_this_btw.vpk",
     "20dollarbill.vpk",
-    "rgl_anti_anticheat"
+    "rgl_anti_anticheat.vpk"
 ]

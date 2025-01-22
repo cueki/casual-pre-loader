@@ -131,10 +131,8 @@ class ParticleMerger:
         current_idx = 0
 
         while current_idx < len(files_to_process):
-            print(f"\nStarting new file at index {current_idx}")
             current_output = Path(self.get_sorted_game_files()[output_number][0]).name
             current_output_max_size = self.get_sorted_game_files()[output_number][2]
-            print(f"Size limit for file {output_number}: {current_output_max_size:,} bytes")
 
             # keep track of successfully processed files
             successful_merges = []
@@ -150,8 +148,6 @@ class ParticleMerger:
             # double check if even the first file is too large
             potential_size = check_compressed_size(PCFFile(source_path).decode())
             if potential_size > current_output_max_size:
-                print(f"\nWARNING: Single file exceeds size limit ({potential_size:,} > {current_output_max_size:,} bytes)")
-                print("Moving to next file...")
                 output_number += 1
                 continue
 
@@ -168,7 +164,7 @@ class ParticleMerger:
                 else:
                     source_path = folder_setup.game_files_dir / base_name
 
-                print(f"Processing file {next_idx + 1}/{len(files_to_process)}: {source_path}")
+                print(f"Processing file {next_idx + 1}/{len(files_to_process)}")
                 next_pcf = PCFFile(source_path).decode()
 
                 # try merging with current PCF
@@ -182,7 +178,6 @@ class ParticleMerger:
                         successful_merges.append(source_path)
                         next_idx += 1
                     else:
-                        print(f"\nFile would exceed size limit ({potential_size:,} > {current_output_max_size:,} bytes)")
                         break
                 except Exception as e:
                     print(f"Error merging file {file_name}: {e}")

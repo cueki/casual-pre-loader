@@ -9,6 +9,7 @@ from core.folder_setup import folder_setup
 from handlers.file_handler import FileHandler
 from handlers.vpk_handler import VPKHandler
 from operations.file_processors import pcf_mod_processor, pcf_empty_root_processor
+from operations.game_type import replace_game_type
 from tools.backup_manager import BackupManager
 from tools.pcf_squish import ParticleMerger
 from tools.vpk_unpack import VPKExtractor
@@ -73,8 +74,12 @@ def main():
 
     # custom folder shenanigans
     if folder_setup.mods_everything_else_dir.exists():
+        replace_game_type(Path(config['tf_dir']) / 'gameinfo.txt')
         custom_dir = Path(config['tf_dir']) / 'custom'
         custom_dir.mkdir(exist_ok=True)
+        for custom_vpk in CUSTOM_VPK_NAMES:
+            if (custom_dir / custom_vpk).exists():
+                os.remove(custom_dir / custom_vpk)
         new_pak = vpk.new(str(folder_setup.mods_everything_else_dir))
         new_pak.save(custom_dir / random.choice(CUSTOM_VPK_NAMES))
 
