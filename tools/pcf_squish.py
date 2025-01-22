@@ -38,9 +38,10 @@ def save_merged_pcf(pcf: PCFFile, output_path: Path) -> bool:
 
 
 class ParticleMerger:
-    def __init__(self, file_handler: FileHandler, vpk_handler: VPKHandler):
+    def __init__(self, file_handler: FileHandler, vpk_handler: VPKHandler, progress_callback=None):
         self.file_handler = file_handler
         self.vpk_handler = vpk_handler
+        self.progress_callback = progress_callback
 
         print("\nInitializing ParticleMerger...")
         print(f"Mod folder: {folder_setup.mods_dir}")
@@ -82,6 +83,13 @@ class ParticleMerger:
         self.game_files = [file for _, file in game_file_tuples]
         print(f"Found {len(self.game_files)} game PCF files")
 
+        self.total_files = len(self.game_files) + len(self.mod_files)
+        self.processed_files = 0
+
+        # Update initial progress
+        if self.progress_callback:
+            self.progress_callback(0, f"Found {self.total_files} files to process")
+
         # track overlapping files
         self.overlapping_files = []
         self.missing_game_files = []
@@ -97,6 +105,11 @@ class ParticleMerger:
 
         self.ignore_list: Set[str] = set()
         self.merged_files: Dict[str, List[str]] = {}
+
+    def update_progress(self, message=""):
+        if self.progress_callback:
+            progress = (self.processed_files / self.total_files) * 100
+            self.progress_callback(progress, message)
 
     def get_sorted_game_files(self):
         file_order = []
@@ -120,6 +133,8 @@ class ParticleMerger:
             game_file_name = Path(game_file).name
             if self.file_handler.vpk.extract_file(game_file, str(folder_setup.get_game_files_path(game_file_name))):
                 files_to_process.append(game_file)
+                self.processed_files += 1
+                self.update_progress(f"Extracted {game_file_name}")
             else:
                 print(f"Failed to extract {game_file}")
 
@@ -140,6 +155,8 @@ class ParticleMerger:
             # process first file
             file_name = files_to_process[current_idx]
             base_name = Path(file_name).name
+            self.update_progress(f"Processing {base_name}")
+
             if file_name in self.mod_files:
                 source_path = folder_setup.mods_particle_dir / base_name
             else:
@@ -177,6 +194,8 @@ class ParticleMerger:
                         current_pcf = merged_pcf
                         successful_merges.append(source_path)
                         next_idx += 1
+                        self.processed_files += 1
+                        self.update_progress(f"Processed {base_name}")
                     else:
                         break
                 except Exception as e:
