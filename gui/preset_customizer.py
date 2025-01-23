@@ -66,14 +66,15 @@ class PresetCustomizer(QDialog):
     def __init__(self, parent, preset_name: str, selection_manager):
         super().__init__(parent)
         # she init on my super till i oop
+        self.none_btn = None
+        self.default_btn = None
         self.selection_label = None
         self.files_layout = None
         self.files_widget = None
-        self.select_all_btn = None
         self.search_edit = None
 
         self.setWindowTitle(f"Customize Preset: {preset_name}")
-        self.setFixedSize(600, 500)
+        self.setFixedSize(400, 500)
         self.setModal(True)
 
         self.parent = parent
@@ -82,6 +83,7 @@ class PresetCustomizer(QDialog):
         self.selected_files = self.selection_manager.get_selection(preset_name)
         self.available_files = []
         self.file_frames = {}
+        self.selection_state = "default"
 
         self.setup_ui()
         self.load_preset_files()
@@ -90,7 +92,22 @@ class PresetCustomizer(QDialog):
         layout = QVBoxLayout(self)
         layout.setSpacing(10)
 
-        # Search bar
+        # selection state buttons
+        state_frame = QWidget()
+        state_layout = QHBoxLayout(state_frame)
+        state_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.default_btn = QPushButton("Default (All)")
+        self.none_btn = QPushButton("None")
+        self.default_btn.clicked.connect(lambda: self.set_selection_state("default"))
+        self.none_btn.clicked.connect(lambda: self.set_selection_state("none"))
+
+        state_layout.addWidget(self.default_btn)
+        state_layout.addWidget(self.none_btn)
+        state_layout.addStretch()
+        layout.addWidget(state_frame)
+
+        # search bar
         search_frame = QWidget()
         search_layout = QHBoxLayout(search_frame)
         search_layout.setContentsMargins(0, 0, 0, 0)
@@ -99,15 +116,11 @@ class PresetCustomizer(QDialog):
         self.search_edit = QLineEdit()
         self.search_edit.textChanged.connect(self.filter_files)
 
-        self.select_all_btn = QPushButton("Select All")
-        self.select_all_btn.clicked.connect(self.toggle_all)
-
         search_layout.addWidget(search_icon)
         search_layout.addWidget(self.search_edit)
-        search_layout.addWidget(self.select_all_btn)
         layout.addWidget(search_frame)
 
-        # Scrollable files area
+        # scrollable files area
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -120,21 +133,42 @@ class PresetCustomizer(QDialog):
         scroll.setWidget(self.files_widget)
         layout.addWidget(scroll)
 
-        # Selection counter
+        # selection counter
         self.selection_label = QLabel("Selected: 0 files")
         layout.addWidget(self.selection_label)
 
-        # Buttons
+        # buttons
         button_layout = QHBoxLayout()
         save_button = QPushButton("Save Selection")
         save_button.clicked.connect(self.save_selection)
         cancel_button = QPushButton("Cancel")
         cancel_button.clicked.connect(self.reject)
-
         button_layout.addWidget(save_button)
         button_layout.addWidget(cancel_button)
         button_layout.addStretch()
         layout.addLayout(button_layout)
+
+    def set_selection_state(self, state: str):
+        self.selection_state = state
+        if state == "default":
+            # select all files
+            self.selected_files = set(self.available_files)
+        elif state == "none":
+            # deselect all files
+            self.selected_files = set()
+        else:  # "custom"
+            return  # keep current selection
+
+        # update UI
+        for filename, frame in self.file_frames.items():
+            frame.set_checked(filename in self.selected_files)
+        self.update_selection_count()
+        self.update_selection_state_ui()
+
+    def update_selection_state_ui(self):
+        # update state button appearances
+        self.default_btn.setEnabled(self.selection_state != "default")
+        self.none_btn.setEnabled(self.selection_state != "none")
 
     def load_preset_files(self):
         preset_path = Path("presets") / f"{self.preset_name}.zip"
@@ -180,14 +214,23 @@ class PresetCustomizer(QDialog):
                 frame.set_checked(True)
 
         self.update_selection_count()
-        self.select_all_btn.setText("Select All" if all_checked else "Deselect All")
 
     def on_file_toggle(self, filename: str, checked: bool):
         if checked:
             self.selected_files.add(filename)
         else:
             self.selected_files.discard(filename)
+
+        # update selection state
+        if self.selected_files == set(self.available_files):
+            self.selection_state = "default"
+        elif not self.selected_files:
+            self.selection_state = "none"
+        else:
+            self.selection_state = "custom"
+
         self.update_selection_count()
+        self.update_selection_state_ui()
 
     def update_selection_count(self):
         self.selection_label.setText(f"Selected: {len(self.selected_files)} files")

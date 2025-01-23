@@ -1,10 +1,11 @@
 import threading
+import zipfile
 from pathlib import Path
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLineEdit, QLabel, QProgressBar,
                              QListWidget, QFileDialog, QMessageBox,
-                             QGroupBox, QApplication)
-from PyQt6.QtCore import pyqtSignal
+                             QGroupBox, QApplication, QSplitter)
+from PyQt6.QtCore import pyqtSignal, Qt
 from gui.interface import ParticleOperations
 from gui.preset_customizer import PresetSelectionManager, PresetCustomizer
 
@@ -25,31 +26,34 @@ class ParticleManagerGUI(QMainWindow):
         self.browse_button = None
         self.tf_path_edit = None
         self.presets_list = None
+        self.addons_list = None
         
         self.current_phase = ""
         self.current_phase_number = 0
         self.setWindowTitle("cukei's custom casual particle pre-loader :)")
-        self.setFixedSize(800, 370)
+        self.setFixedSize(500, 500)
 
-        # Initialize variables
+        # initialize variables
         self.tf_path = ""
         self.selected_preset_files = set()
+        self.selected_addons = []
         self.processing = False
 
-        # Initialize managers
+        # initialize managers
         self.selection_manager = PresetSelectionManager()
         self.operations = ParticleOperations()
 
-        # Setup UI
+        # setup UI
         self.setup_ui()
+        self.initialize_preset_selections()
         self.load_presets()
+        self.load_addons()
         self.load_last_directory()
 
-        # Connect signals
+        # connect signals
         self.operations.progress_signal.connect(self.update_progress)
         self.operations.error_signal.connect(self.show_error)
         self.operations.success_signal.connect(self.show_success)
-        self.operations.phase_signal.connect(self.update_phase_label)
         self.operations.operation_finished.connect(lambda: self.set_processing_state(False))
 
     def setup_ui(self):
@@ -57,7 +61,7 @@ class ParticleManagerGUI(QMainWindow):
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
 
-        # TF Directory Group
+        # tf Directory Group
         tf_group = QGroupBox("tf/ Directory")
         tf_layout = QHBoxLayout()
         self.tf_path_edit = QLineEdit()
@@ -68,16 +72,20 @@ class ParticleManagerGUI(QMainWindow):
         tf_group.setLayout(tf_layout)
         main_layout.addWidget(tf_group)
 
-        # Presets Group
+        lists_splitter = QSplitter(Qt.Orientation.Vertical)
+
+        # presets Group
         presets_group = QGroupBox("Available Presets")
         presets_layout = QVBoxLayout()
+        self.presets_list = QListWidget()
+        self.presets_list.itemSelectionChanged.connect(self.on_preset_select)
 
-        # Presets List
+        # presets List
         self.presets_list = QListWidget()
         self.presets_list.itemSelectionChanged.connect(self.on_preset_select)
         presets_layout.addWidget(self.presets_list)
 
-        # Customize Button
+        # customize Button
         controls_layout = QHBoxLayout()
         self.customize_button = QPushButton("Customize Selected Preset")
         self.customize_button.clicked.connect(self.open_customizer)
@@ -85,13 +93,22 @@ class ParticleManagerGUI(QMainWindow):
         controls_layout.addStretch()
         controls_layout.addWidget(self.customize_button)
         presets_layout.addLayout(controls_layout)
-
         presets_group.setLayout(presets_layout)
-        main_layout.addWidget(presets_group)
+        lists_splitter.addWidget(presets_group)
 
-        # Buttons
+        # addons Group
+        addons_group = QGroupBox("Available Addons - (if selected, preload in an offline map before joining casual)")
+        addons_layout = QVBoxLayout()
+        self.addons_list = QListWidget()
+        self.addons_list.setSelectionMode(QListWidget.SelectionMode.MultiSelection)
+        addons_layout.addWidget(self.addons_list)
+        addons_group.setLayout(addons_layout)
+        lists_splitter.addWidget(addons_group)
+        main_layout.addWidget(lists_splitter)
+
+        # buttons
         button_layout = QHBoxLayout()
-        self.install_button = QPushButton("Install Selected Preset")
+        self.install_button = QPushButton("Install Selected Preset and Addons")
         self.install_button.clicked.connect(self.start_install_thread)
         self.restore_button = QPushButton("Restore Backup")
         self.restore_button.clicked.connect(self.start_restore_thread)
@@ -100,7 +117,7 @@ class ParticleManagerGUI(QMainWindow):
         button_layout.addStretch()
         main_layout.addLayout(button_layout)
 
-        # Progress Group
+        # progress Group
         progress_group = QGroupBox("Progress")
         progress_layout = QVBoxLayout()
         self.progress_bar = QProgressBar()
@@ -110,7 +127,7 @@ class ParticleManagerGUI(QMainWindow):
         progress_group.setLayout(progress_layout)
         main_layout.addWidget(progress_group)
 
-        # Connect signals directly to UI updates
+        # connect signals directly to UI updates
         self.progress_signal.connect(self.update_progress)
         self.error_signal.connect(self.show_error)
         self.success_signal.connect(self.show_success)
@@ -126,6 +143,19 @@ class ParticleManagerGUI(QMainWindow):
         except Exception as e:
             print(f"Error loading last directory: {e}")
 
+    def load_addons(self):
+        addons_dir = Path("addons")
+        if not addons_dir.exists():
+            addons_dir.mkdir(exist_ok=True)
+            return
+
+        self.addons_list.clear()
+        for addon in addons_dir.glob("*.zip"):
+            self.addons_list.addItem(addon.stem)
+
+    def get_selected_addons(self):
+        return [item.text() for item in self.addons_list.selectedItems()]
+
     def save_last_directory(self):
         try:
             with open("last_directory.txt", "w") as f:
@@ -139,6 +169,29 @@ class ParticleManagerGUI(QMainWindow):
             self.tf_path = directory
             self.tf_path_edit.setText(directory)
             self.save_last_directory()
+
+    def initialize_preset_selections(self):
+        presets_dir = Path("presets")
+        if not presets_dir.exists():
+            return
+
+        # get all preset names
+        preset_names = [preset.stem for preset in presets_dir.glob("*.zip")]
+
+        # initialize selections for presets that don't have them
+        for preset_name in preset_names:
+            if preset_name not in self.selection_manager.selections:
+                # get available files from preset
+                try:
+                    with zipfile.ZipFile(presets_dir / f"{preset_name}.zip", 'r') as zip_ref:
+                        files = [
+                            name.split('/')[-1] for name in zip_ref.namelist()
+                            if name.endswith('.pcf') and 'particles/' in name
+                        ]
+                        # initialize with all files selected
+                        self.selection_manager.save_selection(preset_name, set(files))
+                except Exception as e:
+                    print(f"Error initializing selections for {preset_name}: {e}")
 
     def load_presets(self):
         presets_dir = Path("presets")
@@ -157,12 +210,12 @@ class ParticleManagerGUI(QMainWindow):
             self.selected_preset_files = self.selection_manager.get_selection(selected_preset)
             self.customize_button.setEnabled(True)
 
-            button_text = (f"Install Selected Files ({len(self.selected_preset_files)})"
-                           if self.selected_preset_files else "Install Selected Preset")
+            button_text = (f"Install Selected Preset and Addons"
+                           if self.selected_preset_files else "Install Selected Preset and Addons")
             self.install_button.setText(button_text)
         else:
             self.customize_button.setEnabled(False)
-            self.install_button.setText("Install Selected Preset")
+            self.install_button.setText("Install Selected Preset and Addons")
 
     def validate_inputs(self):
         if not self.tf_path:
@@ -182,14 +235,6 @@ class ParticleManagerGUI(QMainWindow):
     def update_progress(self, progress, message):
         self.progress_bar.setValue(progress)
         self.status_label.setText(message)
-
-    def update_phase_label(self, phase_name):
-        self.status_label.setText(f"Starting {phase_name}")
-
-    def update_phase(self, phase_name):
-        self.current_phase = phase_name
-        self.current_phase_number += 1
-        self.progress_signal.emit(0, f"Starting {phase_name}")
 
     def set_processing_state(self, processing: bool):
         enabled = not processing
@@ -213,27 +258,31 @@ class ParticleManagerGUI(QMainWindow):
 
         PresetCustomizer(self, selected_preset, self.selection_manager).exec()
 
-        button_text = (f"Install Selected Files ({len(self.selected_preset_files)})"
-                       if self.selected_preset_files else "Install Selected Preset")
-        self.install_button.setText(button_text)
-
     def start_install_thread(self):
         if not self.validate_inputs():
             return
 
         selected_preset = self.presets_list.selectedItems()[0].text()
-        msg = (f"Installing {len(self.selected_preset_files)} selected files from preset '{selected_preset}'"
-               if self.selected_preset_files else f"Installing all files from preset '{selected_preset}'")
+        selected_addons = self.get_selected_addons()
 
-        if (QMessageBox.question(self, "Confirm Installation", f"{msg}. Continue?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        msg = []
+        if self.selected_preset_files:
+            msg.append(f"Installing {len(self.selected_preset_files)} selected files from preset '{selected_preset}'")
+        else:
+            msg.append(f"Installing all files from preset '{selected_preset}'")
+
+        if selected_addons:
+            msg.append(f"\nInstalling {len(selected_addons)} addons")
+
+        if (QMessageBox.question(self, "Confirm Installation", f"{'. '.join(msg)}. \nContinue?",
+                                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
                 != QMessageBox.StandardButton.Yes):
             return
 
         self.set_processing_state(True)
         thread = threading.Thread(
             target=self.operations.install_preset,
-            args=(self.tf_path, selected_preset, self.selected_preset_files)
+            args=(self.tf_path, selected_preset, self.selected_preset_files, selected_addons)
         )
         thread.daemon = True
         thread.start()
