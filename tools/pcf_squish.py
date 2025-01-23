@@ -86,7 +86,7 @@ class ParticleMerger:
         self.total_files = len(self.game_files) + len(self.mod_files)
         self.processed_files = 0
 
-        # Update initial progress
+        # update initial progress
         if self.progress_callback:
             self.progress_callback(0, f"Found {self.total_files} files to process")
 
