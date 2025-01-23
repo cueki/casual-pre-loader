@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Dict
-from models.pcf_file import PCFFile
+from parsers.pcf_file import PCFFile
 from operations.color import RGB, analyze_pcf_colors, transform_team_colors
 from operations.pcf_compress import remove_duplicate_elements
 

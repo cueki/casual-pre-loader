@@ -8,6 +8,7 @@ import threading
 import vpk
 from core.constants import CUSTOM_VPK_NAMES
 from core.folder_setup import folder_setup
+from gui_stuff.preset_customizer import PresetCustomizer, PresetSelectionManager
 from handlers.file_handler import FileHandler
 from handlers.vpk_handler import VPKHandler
 from operations.file_processors import pcf_mod_processor, pcf_empty_root_processor
@@ -29,29 +30,29 @@ class ProgressRedirector:
 
 class ParticleManagerGUI:
     def __init__(self, root):
-        self.restore_button = None
-        self.install_button = None
-        self.browse_button = None
-        self.presets_listbox = None
-        self.progress_bar = None
-        self.status_label = None
-
         self.root = root
         self.root.title("cukei's custom casual particle pre-loader :)")
         self.root.geometry("800x370")
 
+        # Initialize selection manager
+        self.selection_manager = PresetSelectionManager()
+
         # variables
         self.tf_path = tk.StringVar()
-        self.selected_preset = tk.StringVar()
+        self.selected_preset_files = set()
         self.processing = False
 
         self.create_widgets()
         self.load_presets()
 
+        # Load last used directory if available
+        self.load_last_directory()
+
         self.current_phase = ""
         self.total_phases = 4  # ParticleMerger, Empty Root, Mod Processing, Deployment
         self.current_phase_number = 0
 
+        self.selected_preset_files = set()
 
     def create_widgets(self):
         # main container
@@ -74,8 +75,21 @@ class ParticleManagerGUI:
         presets_frame = ttk.LabelFrame(main_frame, text="Available Presets", padding="5")
         presets_frame.pack(fill="x", padx=5, pady=5)
 
+        preset_controls = ttk.Frame(presets_frame)
+        preset_controls.pack(fill="x", padx=5, pady=5)
+
+        self.customize_button = ttk.Button(
+            preset_controls,
+            text="Customize Selected Preset",
+            command=self.open_customizer,
+            state="disabled"
+        )
+        self.customize_button.pack(side="right", padx=5)
+
+        # Add presets listbox
         self.presets_listbox = tk.Listbox(presets_frame, selectmode=tk.SINGLE, height=5)
         self.presets_listbox.pack(fill="x", padx=5, pady=5)
+        self.presets_listbox.bind('<<ListboxSelect>>', self.on_preset_select)
 
         # buttons
         button_frame = ttk.Frame(main_frame)
@@ -97,6 +111,23 @@ class ParticleManagerGUI:
 
         self.status_label = ttk.Label(progress_frame, text="")
         self.status_label.pack(fill="x", padx=5)
+
+    def load_last_directory(self):
+        try:
+            if Path("last_directory.txt").exists():
+                with open("last_directory.txt", "r") as f:
+                    last_dir = f.read().strip()
+                    if Path(last_dir).exists():
+                        self.tf_path.set(last_dir)
+        except Exception as e:
+            print(f"Error loading last directory: {e}")
+
+    def save_last_directory(self):
+        try:
+            with open("last_directory.txt", "w") as f:
+                f.write(self.tf_path.get())
+        except Exception as e:
+            print(f"Error saving last directory: {e}")
 
     def update_progress(self, progress, message=""):
         def update():
@@ -121,7 +152,6 @@ class ParticleManagerGUI:
         self.browse_button.configure(state=state)
         self.install_button.configure(state=state)
         self.restore_button.configure(state=state)
-        self.presets_listbox.configure(state=state)
 
     def start_install_thread(self):
         if not self.validate_inputs():
@@ -146,6 +176,7 @@ class ParticleManagerGUI:
         directory = filedialog.askdirectory(title="Select tf/ Directory")
         if directory:
             self.tf_path.set(directory)
+            self.save_last_directory()
 
     def load_presets(self):
         presets_dir = Path("presets")
@@ -173,8 +204,59 @@ class ParticleManagerGUI:
 
         return True
 
+    def on_preset_select(self, event=None):
+        selection = self.presets_listbox.curselection()
+        if selection:
+            selected_preset = self.presets_listbox.get(selection[0])
+            self.selected_preset_files = self.selection_manager.get_selection(selected_preset)
+            self.customize_button.config(state="normal")
+
+            # Update install button text if there's a saved selection
+            if self.selected_preset_files:
+                self.install_button.config(text=f"Install Selected Files ({len(self.selected_preset_files)})")
+            else:
+                self.install_button.config(text="Install Selected Preset")
+        else:
+            self.customize_button.config(state="disabled")
+            self.install_button.config(text="Install Selected Preset")
+
+    def open_customizer(self):
+        selection = self.presets_listbox.curselection()
+        if not selection:
+            return
+
+        selected_preset = self.presets_listbox.get(selection[0])
+
+        # Load any existing selection
+        self.selected_preset_files = self.selection_manager.get_selection(selected_preset)
+
+        # Open customizer with selection manager
+        customizer = PresetCustomizer(self.root, selected_preset, self.selection_manager)
+        self.root.wait_window(customizer)
+
+        # Update install button state based on selection
+        if self.selected_preset_files:
+            self.install_button.config(text=f"Install Selected Files ({len(self.selected_preset_files)})")
+        else:
+            self.install_button.config(text="Install Selected Preset")
+
     def install_preset(self):
         try:
+            if not self.validate_inputs():
+                return
+
+            selected_preset = self.presets_listbox.get(self.presets_listbox.curselection())
+
+            # If we have selected files, verify with user
+            if self.selected_preset_files:
+                message = f"Installing {len(self.selected_preset_files)} selected files from preset '{selected_preset}'"
+                if not messagebox.askyesno("Confirm Installation", f"{message}. Continue?"):
+                    return
+            else:
+                message = f"Installing all files from preset '{selected_preset}'"
+                if not messagebox.askyesno("Confirm Installation", f"{message}. Continue?"):
+                    return
+
             self.current_phase_number = 0
             self.current_phase = "Initialization"
             self.update_progress(0, "Starting installation...")
@@ -198,9 +280,20 @@ class ParticleManagerGUI:
             selected_preset = self.presets_listbox.get(self.presets_listbox.curselection())
             preset_path = Path("presets") / f"{selected_preset}.zip"
 
-            output_dir = folder_setup.mods_dir
             with zipfile.ZipFile(preset_path, 'r') as zip_ref:
-                zip_ref.extractall(output_dir)
+                if self.selected_preset_files:
+                    # Extract only selected files
+                    all_files = zip_ref.namelist()
+                    selected_paths = [
+                        path for path in all_files
+                        if path.endswith('.pcf') and
+                           path.split('/')[-1] in self.selected_preset_files
+                    ]
+                    for file in selected_paths:
+                        zip_ref.extract(file, folder_setup.mods_dir)
+                else:
+                    # Extract all files
+                    zip_ref.extractall(folder_setup.mods_dir)
 
             working_vpk_path = backup_manager.get_working_vpk_path()
 
@@ -259,6 +352,8 @@ class ParticleManagerGUI:
                 for custom_vpk in CUSTOM_VPK_NAMES:
                     if (custom_dir / custom_vpk).exists():
                         os.remove(custom_dir / custom_vpk)
+                    if (custom_dir / Path(custom_vpk + "sound.cache")).exists():
+                        os.remove(custom_dir / Path(custom_vpk + "sound.cache"))
                 new_pak = vpk.new(str(folder_setup.mods_everything_else_dir))
                 new_pak.save(custom_dir / random.choice(CUSTOM_VPK_NAMES))
 
@@ -269,7 +364,6 @@ class ParticleManagerGUI:
         finally:
             folder_setup.cleanup_temp_folders()
             self.root.after(0, self.set_processing_state, False)
-            # Reset progress tracking
             self.current_phase_number = 0
             self.current_phase = ""
             self.root.after(0, self.update_progress, 0, "")
@@ -289,6 +383,14 @@ class ParticleManagerGUI:
             if not backup_manager.deploy_to_game():
                 self.root.after(0, messagebox.showerror, "Error", "Failed to restore backup")
                 return
+
+            custom_dir = Path(self.tf_path.get()) / 'custom'
+            custom_dir.mkdir(exist_ok=True)
+            for custom_vpk in CUSTOM_VPK_NAMES:
+                if (custom_dir / custom_vpk).exists():
+                    os.remove(custom_dir / custom_vpk)
+                if (custom_dir / Path(custom_vpk + "sound.cache")).exists():
+                    os.remove(custom_dir / Path(custom_vpk + "sound.cache"))
 
             self.root.after(0, messagebox.showinfo, "Success", "Backup restored successfully!")
 

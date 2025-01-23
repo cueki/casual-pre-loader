@@ -2,7 +2,7 @@ import os
 import copy
 from pathlib import Path
 from typing import List, Set, Dict
-from models.pcf_file import PCFFile
+from parsers.pcf_file import PCFFile
 from handlers.file_handler import FileHandler
 from handlers.vpk_handler import VPKHandler
 from operations.pcf_merge import merge_pcf_files

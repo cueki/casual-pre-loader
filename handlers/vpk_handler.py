@@ -1,5 +1,5 @@
 from typing import Optional, List
-from models.vpk_file import VPKParser
+from parsers.vpk_file import VPKParser
 from pathlib import Path
 import os
 

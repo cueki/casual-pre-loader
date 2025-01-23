@@ -18,8 +18,8 @@ python_files = [
     ('core/folder_setup.py', 'core'),
     ('handlers/file_handler.py', 'handlers'),
     ('handlers/vpk_handler.py', 'handlers'),
-    ('models/pcf_file.py', 'models'),
-    ('models/vpk_file.py', 'models'),
+    ('parsers/pcf_file.py', 'parsers'),
+    ('parsers/vpk_file.py', 'parsers'),
     ('operations/file_processors.py', 'operations'),
     ('operations/pcf_compress.py', 'operations'),
     ('operations/pcf_merge.py', 'operations'),
@@ -27,6 +27,7 @@ python_files = [
     ('tools/backup_manager.py', 'tools'),
     ('tools/pcf_squish.py', 'tools'),
     ('tools/vpk_unpack.py', 'tools'),
+    ('gui/preset_customizer.py', 'gui')
 ]
 
 a = Analysis(
