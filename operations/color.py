@@ -6,7 +6,7 @@ import random
 from typing import Tuple, List, Dict
 from core.constants import AttributeType
 from core.traversal import PCFTraversal
-from models.pcf_file import PCFFile
+from parsers.pcf_file import PCFFile
 
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]

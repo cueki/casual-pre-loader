@@ -1,5 +1,5 @@
 from typing import Callable, Any, Optional, Set
-from models.pcf_file import PCFFile, PCFElement
+from parsers.pcf_file import PCFFile, PCFElement
 from core.constants import AttributeType
 
 

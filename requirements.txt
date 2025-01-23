@@ -1,4 +1,6 @@
-matplotlib
-numpy
-PyYAML
-
+PyYAML~=6.0.2
+vpk~=1.4.0
+PyInstaller~=6.4.0
+numpy~=1.26.4
+matplotlib~=3.8.3
+PyQt6~=6.8.0

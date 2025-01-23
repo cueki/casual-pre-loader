@@ -1,5 +1,5 @@
-from typing import Optional, Tuple, List, Iterator
-from models.vpk_file import VPKParser
+from typing import Optional, List
+from parsers.vpk_file import VPKParser
 from pathlib import Path
 import os
 

@@ -2,7 +2,8 @@ import os
 import traceback
 from typing import List
 from pathlib import Path
-from models.pcf_file import PCFFile
+from parsers.pcf_file import PCFFile
+from core.folder_setup import folder_setup
 
 
 class FileHandler:
@@ -25,8 +26,8 @@ class FileHandler:
         else:
             full_path = file_name
 
-        # create temp file for processing
-        temp_path = f"temp_{Path(file_name).name}"
+        # create temp file for processing in working directory
+        temp_path = folder_setup.get_temp_path(f"temp_{Path(file_name).name}")
 
         try:
             # get original file size before any processing
@@ -37,7 +38,7 @@ class FileHandler:
             original_size = entry_info[2].entry_length
 
             # extract file as temporary for processing
-            if not self.vpk.extract_file(full_path, temp_path):
+            if not self.vpk.extract_file(full_path, str(temp_path)):
                 print(f"Failed to extract {full_path}")
                 return False
 
