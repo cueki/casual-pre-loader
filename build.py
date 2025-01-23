@@ -13,7 +13,7 @@ block_cipher = None
 
 # Collect all Python files
 python_files = [
-    ('gui.py', '.'),
+    ('app.py', '.'),
     ('core/constants.py', 'core'),
     ('core/folder_setup.py', 'core'),
     ('handlers/file_handler.py', 'handlers'),
@@ -27,11 +27,12 @@ python_files = [
     ('tools/backup_manager.py', 'tools'),
     ('tools/pcf_squish.py', 'tools'),
     ('tools/vpk_unpack.py', 'tools'),
-    ('gui/preset_customizer.py', 'gui')
+    ('gui/preset_customizer.py', 'gui'),
+    ('gui/interface.py', 'gui')
 ]
 
 a = Analysis(
-    ['gui.py'],
+    ['app.py'],
     pathex=[],
     binaries=[],
     datas=python_files,

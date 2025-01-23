@@ -63,6 +63,7 @@ class ParticleOperations(QObject):
                         path for path in all_files
                         if path.endswith('.pcf') and
                            path.split('/')[-1] in selected_files
+                           or not path.endswith('.pcf')
                     ]
                     for file in selected_paths:
                         zip_ref.extract(file, folder_setup.mods_dir)

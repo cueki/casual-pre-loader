@@ -5,8 +5,8 @@ from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QListWidget, QFileDialog, QMessageBox,
                              QGroupBox, QApplication)
 from PyQt6.QtCore import pyqtSignal
-from gui_stuff.interface import ParticleOperations
-from gui_stuff.preset_customizer import PresetSelectionManager, PresetCustomizer
+from gui.interface import ParticleOperations
+from gui.preset_customizer import PresetSelectionManager, PresetCustomizer
 
 
 class ParticleManagerGUI(QMainWindow):
