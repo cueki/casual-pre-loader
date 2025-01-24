@@ -9,6 +9,8 @@ This, of course, may make your game unstable, the presets I provide will be test
 
 If at any point the game is too unstable, and you cannot figure out why, I have included a "restore backup" feature that should return the game to its original state. **If this does not work for whatever reason, verify the game's integrity in Steam, and it will all go back to normal.**
 
+IF YOU GET ANY WEIRD ERRORS LIKE "an error occured: 8" IT'S BECAUSE THE BACKUP IS CORRUPT, DELETE THE BACKUP FOLDER AND VERIFY GAME FILES, THEN TRY AGAIN :).
+
 As for performance, I only tested this locally with my own config and saw little to no difference between the presets (nothing outside the range of random distribution). Your result may vary with different configs/ settings.
 
 Is this VAC safe? Yes. Could Valve patch this out of the game easily? Also yes. Enjoy it while you can :).
