@@ -28,6 +28,10 @@ This is my love letter to TF2, thank you for 15 years.
 
 If you have any questions, my discord is @cukei
 
+# Step-by-Step Tutorial Video
+
+[![YouTube Video](https://img.youtube.com/vi/3ETcjUPCqZI/0.jpg)](https://youtu.be/3ETcjUPCqZI)
+
 # Steps For Making Your Own Preset:
 
 will add later
