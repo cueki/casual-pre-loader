@@ -197,7 +197,7 @@ class ParticleManagerGUI(QMainWindow):
             addons_dir.mkdir(exist_ok=True)
             return
 
-        recommended_file = Path("recommended_addons.txt")
+        recommended_file = Path("recommended.txt")
         recommended_addons = set()
         if recommended_file.exists():
             with open(recommended_file, 'r') as f:
@@ -207,13 +207,13 @@ class ParticleManagerGUI(QMainWindow):
         for addon in addons_dir.glob("*.zip"):
             item = QListWidgetItem(addon.stem)
             if addon.stem in recommended_addons:
-                item.setText(f"{addon.stem} (recommended)")
+                item.setText(f"{addon.stem} (recommended!)")
             if addon.stem in self.tooltips:
                 item.setToolTip(self.tooltips[addon.stem])
             self.addons_list.addItem(item)
 
     def get_selected_addons(self):
-        return [item.text().replace(" (recommended)", "") for item in self.addons_list.selectedItems()]
+        return [item.text().replace(" (recommended!)", "") for item in self.addons_list.selectedItems()]
 
     def load_presets(self):
         presets_dir = Path("presets")
@@ -221,7 +221,7 @@ class ParticleManagerGUI(QMainWindow):
             self.show_error("Presets directory not found!")
             return
 
-        recommended_file = Path("recommended_presets.txt")
+        recommended_file = Path("recommended.txt")
         recommended_presets = set()
         if recommended_file.exists():
             with open(recommended_file, 'r') as f:
@@ -231,7 +231,7 @@ class ParticleManagerGUI(QMainWindow):
         for preset in presets_dir.glob("*.zip"):
             item = QListWidgetItem(preset.stem)
             if preset.stem in recommended_presets:
-                item.setText(f"{preset.stem} (recommended)")
+                item.setText(f"{preset.stem} (recommended!)")
             if preset.stem in self.tooltips:
                 item.setToolTip(self.tooltips[preset.stem])
             self.presets_list.addItem(item)
@@ -239,7 +239,7 @@ class ParticleManagerGUI(QMainWindow):
     def on_preset_select(self):
         selected_items = self.presets_list.selectedItems()
         if selected_items:
-            selected_preset = selected_items[0].text().replace(" (recommended)", "")
+            selected_preset = selected_items[0].text().replace(" (recommended!)", "")
             self.selected_preset_files = self.selection_manager.get_selection(selected_preset)
             self.customize_button.setEnabled(True)
             button_text = "Install Selected Preset and Addons"
