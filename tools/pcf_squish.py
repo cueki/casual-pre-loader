@@ -57,10 +57,7 @@ class ParticleMerger:
         print(f"Found {len(self.mod_files)} mod PCF files")
 
         # create a list of (archive_index, filepath) tuples for game files
-        if 'particles/explosion.pcf' in self.mod_files:
-            excluded_patterns = ['dx80', 'dx90', 'default', 'unusual', 'test', '_high']
-        else:
-            excluded_patterns = ['dx80', 'dx90', 'default', 'unusual', 'test', '_high', 'explosion']
+        excluded_patterns = ['dx80', 'dx90', 'default', 'unusual', 'test', '_high']
 
         game_file_tuples = []
 
