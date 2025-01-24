@@ -208,10 +208,10 @@ class ParticleManagerGUI(QMainWindow):
         self.addons_list.clear()
         for addon in addons_dir.glob("*.zip"):
             item = QListWidgetItem(addon.stem)
-            if addon.stem in recommended_addons:
-                item.setText(f"{addon.stem} (recommended!)")
-            if addon.stem in self.tooltips:
-                item.setToolTip(self.tooltips[addon.stem])
+            # if addon.stem in recommended_addons:
+            #     item.setText(f"{addon.stem} (recommended!)")
+            # if addon.stem in self.tooltips:
+            #     item.setToolTip(self.tooltips[addon.stem])
             self.addons_list.addItem(item)
 
     def get_selected_addons(self):
@@ -232,10 +232,10 @@ class ParticleManagerGUI(QMainWindow):
         self.presets_list.clear()
         for preset in presets_dir.glob("*.zip"):
             item = QListWidgetItem(preset.stem)
-            if preset.stem in recommended_presets:
-                item.setText(f"{preset.stem} (recommended!)")
-            if preset.stem in self.tooltips:
-                item.setToolTip(self.tooltips[preset.stem])
+            # if preset.stem in recommended_presets:
+            #     item.setText(f"{preset.stem} (recommended!)")
+            # if preset.stem in self.tooltips:
+            #     item.setToolTip(self.tooltips[preset.stem])
             self.presets_list.addItem(item)
 
     def on_preset_select(self):
