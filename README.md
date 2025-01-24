@@ -2,6 +2,8 @@
 
 Or if you want to run with python:
 
+`git clone https://github.com/cueki/casual-particle-pre-loader` (or just download it the repo manually)
+
 `pip install -r requirements.txt`
 
 `python app.py`
