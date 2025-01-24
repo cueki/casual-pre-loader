@@ -2,14 +2,12 @@
 
 Or if you want to run with python:
 
-`git clone https://github.com/cueki/casual-particle-pre-loader` (or just download it the repo manually)
-
-`cd casual-particle-pre-loader`
-
-`pip install -r requirements.txt`
-
-`python app.py`
-
+```
+git clone https://github.com/cueki/casual-particle-pre-loader
+cd casual-particle-pre-loader
+pip install -r requirements.txt
+python app.py
+```
 # Some Info:
 
 ### Simply put, <ins> any custom particle you want can now work in casual. </ins>
