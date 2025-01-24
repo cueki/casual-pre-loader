@@ -132,7 +132,7 @@ class ParticleOperations(QObject):
 
                 for custom_vpk in CUSTOM_VPK_NAMES:
                     vpk_path = custom_dir / custom_vpk
-                    cache_path = custom_dir / (custom_vpk + "sound.cache")
+                    cache_path = custom_dir / (custom_vpk + ".sound.cache")
                     if vpk_path.exists():
                         vpk_path.unlink()
                     if cache_path.exists():
@@ -171,7 +171,7 @@ class ParticleOperations(QObject):
 
             for custom_vpk in CUSTOM_VPK_NAMES:
                 vpk_path = custom_dir / custom_vpk
-                cache_path = custom_dir / (custom_vpk + "sound.cache")
+                cache_path = custom_dir / (custom_vpk + ".sound.cache")
                 if vpk_path.exists():
                     vpk_path.unlink()
                 if cache_path.exists():
