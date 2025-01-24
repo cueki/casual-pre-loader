@@ -8,8 +8,6 @@ Or if you want to run with python:
 
 # Some Info:
 
-## I don't even know where to begin.
-
 ### Simply put, <ins> any custom particle you want can now work in casual. </ins>
 
 ### Dx80 doesn't work (any particle with dx80 in its name) because they are special, this may be resolved in the future if enough people ask for it.
@@ -30,4 +28,4 @@ If you have any questions, my discord is @cukei
 
 # Steps For Making Your Own Preset:
 
-## will add later
+will add later
