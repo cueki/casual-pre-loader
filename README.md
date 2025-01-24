@@ -1,4 +1,13 @@
+# Download the latest release [Here](https://github.com/cueki/casual-particle-pre-loader/releases/).
+
+Or if you want to run with python:
+
+`pip install -r requirements.txt`
+
+`python app.py`
+
 # Some Info:
+
 ## I don't even know where to begin.
 
 ### Simply put, <ins> any custom particle you want can now work in casual. </ins>
