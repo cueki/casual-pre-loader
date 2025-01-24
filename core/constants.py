@@ -108,15 +108,13 @@ ATTRIBUTE_DEFAULTS = [
 
 
 CUSTOM_VPK_NAMES = [
-    "wermware_2025.vpk",
-    "fragaholic_config.vpk",
-    "cuekicuttersolution.vpk",
-    "meow_meow_meow_sad_song_1_hour_compilation.vpk",
-    "schizophrenia_injection.vpk",
-    "pls_answer_my_email_eric.vpk",
-    "SUBJECT_LINE_VERY_POTENTIAL_LIKELY_BAD_THING_TF2.vpk",
-    "go_spin_the_badge.vpk",
-    "4_year_ban_for_this_btw.vpk",
-    "20dollarbill.vpk",
-    "rgl_anti_anticheat.vpk"
+    "_wermware_2025.vpk",
+    "_fragaholic_config.vpk",
+    "_cuekicuttersolution.vpk",
+    "_meow_meow_meow_sad_song_1_hour_compilation.vpk",
+    "_pls_answer_my_email_eric.vpk",
+    "_SUBJECT_LINE_VERY_POTENTIAL_LIKELY_BAD_THING_TF2.vpk",
+    "_go_spin_the_badge.vpk",
+    "_4_year_ban_for_this_btw.vpk",
+    "_rgl_anti_anticheat.vpk"
 ]
