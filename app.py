@@ -109,6 +109,8 @@ class ParticleManagerGUI(QMainWindow):
         addons_layout.addWidget(self.addons_list)
         addons_group.setLayout(addons_layout)
         lists_splitter.addWidget(addons_group)
+
+        # splitter
         main_layout.addWidget(lists_splitter)
 
         # buttons
@@ -334,6 +336,7 @@ class ParticleManagerGUI(QMainWindow):
 
 def main():
     app = QApplication([])
+    app.setStyle("windowsvista")
     font = app.font()
     font.setPointSize(10)
     app.setFont(font)
