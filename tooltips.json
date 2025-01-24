@@ -1,0 +1,10 @@
+{
+    "ghytd_preset": "This preset is dedicated to my GOAT the custom particle demon. Gamebanana is linked in the README.",
+    "minecraft_preset": "Also made by ghytd, their 'Square Series' effects pack.",
+    "fiona_preset": "Fiona can update this if she wants.",
+    "normal-tf2-but-better-preset": "This has the particle fixes from the UltimateVisualFixPack, github linked in README",
+
+    "NoBurningOverlay": "Removes the burning effect on screen while on fire",
+    "NoSentryShieldOverlay": "Removes the shield from the wrangler, useful if the particle pack changes wrangler effects.",
+    "UltimateVisualFixPack": "This contains every non particle fix from the UltimateVisualFixPack, github linked in README"
+}

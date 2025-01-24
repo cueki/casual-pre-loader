@@ -1,10 +1,11 @@
+import json
 import threading
 import zipfile
 from pathlib import Path
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLineEdit, QLabel, QProgressBar,
                              QListWidget, QFileDialog, QMessageBox,
-                             QGroupBox, QApplication, QSplitter)
+                             QGroupBox, QApplication, QSplitter, QListWidgetItem)
 from PyQt6.QtCore import pyqtSignal, Qt
 from gui.interface import ParticleOperations
 from gui.preset_customizer import PresetSelectionManager, PresetCustomizer
@@ -17,7 +18,7 @@ class ParticleManagerGUI(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        # thank god
+        # waking up in the morning gotta thank god
         self.status_label = None
         self.progress_bar = None
         self.restore_button = None
@@ -27,11 +28,15 @@ class ParticleManagerGUI(QMainWindow):
         self.tf_path_edit = None
         self.presets_list = None
         self.addons_list = None
-        
+
         self.current_phase = ""
         self.current_phase_number = 0
         self.setWindowTitle("cukei's custom casual particle pre-loader :)")
-        self.setFixedSize(500, 500)
+        self.setFixedSize(500, 550)
+
+        # tooltips
+        self.tooltips = {}
+        self.load_tooltips()
 
         # initialize variables
         self.tf_path = ""
@@ -75,7 +80,7 @@ class ParticleManagerGUI(QMainWindow):
         lists_splitter = QSplitter(Qt.Orientation.Vertical)
 
         # presets Group
-        presets_group = QGroupBox("Available Presets")
+        presets_group = QGroupBox("Available Presets, pick one.")
         presets_layout = QVBoxLayout()
         self.presets_list = QListWidget()
         self.presets_list.itemSelectionChanged.connect(self.on_preset_select)
@@ -97,7 +102,7 @@ class ParticleManagerGUI(QMainWindow):
         lists_splitter.addWidget(presets_group)
 
         # addons Group
-        addons_group = QGroupBox("Available Addons - (if selected, preload in an offline map before joining casual)")
+        addons_group = QGroupBox("Available Addons, add as many as you'd like, be sure to preload.")
         addons_layout = QVBoxLayout()
         self.addons_list = QListWidget()
         self.addons_list.setSelectionMode(QListWidget.SelectionMode.MultiSelection)
@@ -143,19 +148,6 @@ class ParticleManagerGUI(QMainWindow):
         except Exception as e:
             print(f"Error loading last directory: {e}")
 
-    def load_addons(self):
-        addons_dir = Path("addons")
-        if not addons_dir.exists():
-            addons_dir.mkdir(exist_ok=True)
-            return
-
-        self.addons_list.clear()
-        for addon in addons_dir.glob("*.zip"):
-            self.addons_list.addItem(addon.stem)
-
-    def get_selected_addons(self):
-        return [item.text() for item in self.addons_list.selectedItems()]
-
     def save_last_directory(self):
         try:
             with open("last_directory.txt", "w") as f:
@@ -193,25 +185,64 @@ class ParticleManagerGUI(QMainWindow):
                 except Exception as e:
                     print(f"Error initializing selections for {preset_name}: {e}")
 
+    def load_tooltips(self):
+        tooltips_path = Path("tooltips.json")
+        if tooltips_path.exists():
+            with open(tooltips_path, 'r') as f:
+                self.tooltips = json.load(f)
+
+    def load_addons(self):
+        addons_dir = Path("addons")
+        if not addons_dir.exists():
+            addons_dir.mkdir(exist_ok=True)
+            return
+
+        recommended_file = Path("recommended_addons.txt")
+        recommended_addons = set()
+        if recommended_file.exists():
+            with open(recommended_file, 'r') as f:
+                recommended_addons = {line.strip() for line in f}
+
+        self.addons_list.clear()
+        for addon in addons_dir.glob("*.zip"):
+            item = QListWidgetItem(addon.stem)
+            if addon.stem in recommended_addons:
+                item.setText(f"{addon.stem} (recommended)")
+            if addon.stem in self.tooltips:
+                item.setToolTip(self.tooltips[addon.stem])
+            self.addons_list.addItem(item)
+
+    def get_selected_addons(self):
+        return [item.text().replace(" (recommended)", "") for item in self.addons_list.selectedItems()]
+
     def load_presets(self):
         presets_dir = Path("presets")
         if not presets_dir.exists():
             self.show_error("Presets directory not found!")
             return
 
+        recommended_file = Path("recommended_presets.txt")
+        recommended_presets = set()
+        if recommended_file.exists():
+            with open(recommended_file, 'r') as f:
+                recommended_presets = {line.strip() for line in f}
+
         self.presets_list.clear()
         for preset in presets_dir.glob("*.zip"):
-            self.presets_list.addItem(preset.stem)
+            item = QListWidgetItem(preset.stem)
+            if preset.stem in recommended_presets:
+                item.setText(f"{preset.stem} (recommended)")
+            if preset.stem in self.tooltips:
+                item.setToolTip(self.tooltips[preset.stem])
+            self.presets_list.addItem(item)
 
     def on_preset_select(self):
         selected_items = self.presets_list.selectedItems()
         if selected_items:
-            selected_preset = selected_items[0].text()
+            selected_preset = selected_items[0].text().replace(" (recommended)", "")
             self.selected_preset_files = self.selection_manager.get_selection(selected_preset)
             self.customize_button.setEnabled(True)
-
-            button_text = (f"Install Selected Preset and Addons"
-                           if self.selected_preset_files else "Install Selected Preset and Addons")
+            button_text = "Install Selected Preset and Addons"
             self.install_button.setText(button_text)
         else:
             self.customize_button.setEnabled(False)
@@ -303,6 +334,9 @@ class ParticleManagerGUI(QMainWindow):
 
 def main():
     app = QApplication([])
+    font = app.font()
+    font.setPointSize(10)
+    app.setFont(font)
     window = ParticleManagerGUI()
     window.show()
     app.exec()
