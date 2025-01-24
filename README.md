@@ -1,7 +1,9 @@
-## Some Info:
-### I don't even know where to begin.
+# Some Info:
+## I don't even know where to begin.
 
-Simply put, any custom particles you want can now work in casual. 
+### Simply put, <ins> any custom particle you want can now work in casual. </ins>
+
+### Dx80 doesn't work (any particle with dx80 in its name) because they are special, this may be resolved in the future if enough people ask for it.
 
 This, of course, may make your game unstable, the presets I provide will be tested by me and others vigorously to ensure as few crashes as possible.
 
@@ -15,6 +17,6 @@ This is my love letter to TF2, thank you for 15 years.
 
 If you have any questions, my discord is @cukei
 
-## Steps For Making Your Own Preset:
+# Steps For Making Your Own Preset:
 
-### will add later
+## will add later
