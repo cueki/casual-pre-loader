@@ -1,3 +1,5 @@
+[![Join Our Discord!](https://img.shields.io/badge/Discord-Join%20Us-7289DA.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/2SZbfXzKYQ)
+
 # Download the latest release [Here](https://github.com/cueki/casual-particle-pre-loader/releases/).
 
 Or if you want to run with python:
