@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
 from PyQt6.QtCore import pyqtSignal, Qt
 from gui.interface import ParticleOperations
 from gui.preset_customizer import PresetSelectionManager, PresetCustomizer
+from gui.preset_descriptor import PresetDescription
 
 
 class ParticleManagerGUI(QMainWindow):
@@ -19,6 +20,7 @@ class ParticleManagerGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         # waking up in the morning gotta thank god
+        self.preset_description = None
         self.status_label = None
         self.progress_bar = None
         self.restore_button = None
@@ -32,11 +34,7 @@ class ParticleManagerGUI(QMainWindow):
         self.current_phase = ""
         self.current_phase_number = 0
         self.setWindowTitle("cukei's custom casual particle pre-loader :)")
-        self.setFixedSize(500, 550)
-
-        # tooltips
-        self.tooltips = {}
-        self.load_tooltips()
+        self.setFixedSize(800, 600)
 
         # initialize variables
         self.tf_path = ""
@@ -77,43 +75,66 @@ class ParticleManagerGUI(QMainWindow):
         tf_group.setLayout(tf_layout)
         main_layout.addWidget(tf_group)
 
-        lists_splitter = QSplitter(Qt.Orientation.Vertical)
+        # Upper section (presets and description)
+        upper_widget = QWidget()
+        upper_layout = QHBoxLayout(upper_widget)
+        upper_layout.setContentsMargins(0, 0, 0, 0)
 
-        # presets group
-        presets_group = QGroupBox("Available Presets, pick one.")
+        # Presets Group
+        presets_group = QGroupBox("Available Presets")
         presets_layout = QVBoxLayout()
-        self.presets_list = QListWidget()
-        self.presets_list.itemSelectionChanged.connect(self.on_preset_select)
-
-        # presets list
         self.presets_list = QListWidget()
         self.presets_list.itemSelectionChanged.connect(self.on_preset_select)
         presets_layout.addWidget(self.presets_list)
 
-        # customize button
-        controls_layout = QHBoxLayout()
+        # Customize Button
         self.customize_button = QPushButton("Customize Selected Preset")
         self.customize_button.clicked.connect(self.open_customizer)
         self.customize_button.setEnabled(False)
-        controls_layout.addStretch()
-        controls_layout.addWidget(self.customize_button)
-        presets_layout.addLayout(controls_layout)
+        presets_layout.addWidget(self.customize_button)
         presets_group.setLayout(presets_layout)
-        lists_splitter.addWidget(presets_group)
 
-        # addons group
-        addons_group = QGroupBox("Available Addons, add as many as you'd like, be sure to preload.")
+        # Description Panel
+        description_group = QGroupBox("Preset Details")
+        description_layout = QVBoxLayout()
+        self.preset_description = PresetDescription()
+        description_layout.addWidget(self.preset_description)
+        description_group.setLayout(description_layout)
+
+        # Add to upper layout with splitter
+        upper_splitter = QSplitter(Qt.Orientation.Horizontal)
+        upper_splitter.addWidget(presets_group)
+        upper_splitter.addWidget(description_group)
+        # upper_splitter.setStretchFactor(0, 0)
+        # upper_splitter.setStretchFactor(1, 1)
+        upper_splitter.setChildrenCollapsible(False)
+        # upper_splitter.setFixedSize(upper_splitter.sizeHint())
+        upper_splitter.setSizes([200, 600])
+        upper_splitter.handle(1).setEnabled(False)
+        upper_layout.addWidget(upper_splitter)
+
+        # Main content splitter
+        content_splitter = QSplitter(Qt.Orientation.Vertical)
+
+        # Add upper section to content splitter
+        content_splitter.addWidget(upper_widget)
+
+        # Addons Group
+        addons_group = QGroupBox("Available Addons")
         addons_layout = QVBoxLayout()
         self.addons_list = QListWidget()
         self.addons_list.setSelectionMode(QListWidget.SelectionMode.MultiSelection)
         addons_layout.addWidget(self.addons_list)
         addons_group.setLayout(addons_layout)
-        lists_splitter.addWidget(addons_group)
 
-        # splitter
-        main_layout.addWidget(lists_splitter)
+        # Add content splitter to main layout
+        content_splitter.addWidget(addons_group)
+        # content_splitter.setChildrenCollapsible(False)
+        content_splitter.handle(1).setEnabled(False)
+        content_splitter.setSizes([400, 200])
+        main_layout.addWidget(content_splitter)
 
-        # buttons
+        # Buttons
         button_layout = QHBoxLayout()
         self.install_button = QPushButton("Install Selected Preset and Addons")
         self.install_button.clicked.connect(self.start_install_thread)
@@ -121,10 +142,9 @@ class ParticleManagerGUI(QMainWindow):
         self.restore_button.clicked.connect(self.start_restore_thread)
         button_layout.addWidget(self.install_button)
         button_layout.addWidget(self.restore_button)
-        button_layout.addStretch()
         main_layout.addLayout(button_layout)
 
-        # progress Group
+        # Progress Group
         progress_group = QGroupBox("Progress")
         progress_layout = QVBoxLayout()
         self.progress_bar = QProgressBar()
@@ -187,12 +207,6 @@ class ParticleManagerGUI(QMainWindow):
                 except Exception as e:
                     print(f"Error initializing selections for {preset_name}: {e}")
 
-    def load_tooltips(self):
-        tooltips_path = Path("tooltips.json")
-        if tooltips_path.exists():
-            with open(tooltips_path, 'r') as f:
-                self.tooltips = json.load(f)
-
     def load_addons(self):
         addons_dir = Path("addons")
         if not addons_dir.exists():
@@ -202,12 +216,10 @@ class ParticleManagerGUI(QMainWindow):
         self.addons_list.clear()
         for addon in addons_dir.glob("*.zip"):
             item = QListWidgetItem(addon.stem)
-            if addon.stem in self.tooltips:
-                item.setToolTip(self.tooltips[addon.stem])
             self.addons_list.addItem(item)
 
     def get_selected_addons(self):
-        return [item.text().replace(" (recommended!)", "") for item in self.addons_list.selectedItems()]
+        return [item.text() for item in self.addons_list.selectedItems()]
 
     def load_presets(self):
         presets_dir = Path("presets")
@@ -218,21 +230,39 @@ class ParticleManagerGUI(QMainWindow):
         self.presets_list.clear()
         for preset in presets_dir.glob("*.zip"):
             item = QListWidgetItem(preset.stem)
-            if preset.stem in self.tooltips:
-                item.setToolTip(self.tooltips[preset.stem])
             self.presets_list.addItem(item)
 
     def on_preset_select(self):
         selected_items = self.presets_list.selectedItems()
         if selected_items:
-            selected_preset = selected_items[0].text().replace(" (recommended!)", "")
+            selected_preset = selected_items[0].text()
             self.selected_preset_files = self.selection_manager.get_selection(selected_preset)
             self.customize_button.setEnabled(True)
-            button_text = "Install Selected Preset and Addons"
-            self.install_button.setText(button_text)
+
+            # update description panel
+            preset_info = self.load_preset_info(selected_preset)
+            self.preset_description.update_content(selected_preset, preset_info)
         else:
             self.customize_button.setEnabled(False)
-            self.install_button.setText("Install Selected Preset and Addons")
+            self.preset_description.clear()
+
+    @staticmethod
+    def load_preset_info(preset_name: str) -> dict:
+        try:
+            with open("presets/info.json", "r") as f:
+                all_presets = json.load(f)
+                return all_presets.get(preset_name, {
+                    "type": "Unknown",
+                    "description": "No description available.",
+                    "features": []
+                })
+        except Exception as e:
+            print(f"Error loading preset info: {e}")
+            return {
+                "type": "Unknown",
+                "description": "Error loading preset information.",
+                "features": []
+            }
 
     def validate_inputs(self):
         if not self.tf_path:

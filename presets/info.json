@@ -1,0 +1,13 @@
+{
+    "Default_preset": {
+        "type": "vanilla",
+        "description": "Standard TF2 particles optimized for performance",
+        "features": [
+            "Original game effects with visual bugs fixed",
+            "Less blinding short circuit and flamethrowers.",
+            "test string",
+            "another"
+        ],
+        "preview": "presets/images/default.png"
+    }
+}
