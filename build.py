@@ -29,6 +29,7 @@ python_files = [
     ('tools/pcf_squish.py', 'tools'),
     ('tools/vpk_unpack.py', 'tools'),
     ('gui/preset_customizer.py', 'gui'),
+    ('gui/preset_descriptor.py', 'gui'),
     ('gui/interface.py', 'gui')
 ]
 

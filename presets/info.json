@@ -1,13 +1,40 @@
 {
-    "Default_preset": {
+    "Vanilla+": {
         "type": "vanilla",
-        "description": "Standard TF2 particles optimized for performance",
+        "description": "Standard TF2 particles",
         "features": [
             "Original game effects with visual bugs fixed",
-            "Less blinding short circuit and flamethrowers.",
-            "test string",
-            "another"
+            "Less blinding short circuit and flamethrowers",
+            "Is basically just TF2 but better"
         ],
-        "preview": "presets/images/default.png"
+        "preview": "image.jpg"
+    },
+    "Minecraft": {
+        "type": "fun",
+        "description": "Also known as Ghytd's Square Series",
+        "features": [
+            "Very blocky",
+            "Almost every particle effect related to combat is changed",
+            "Really clean honestly, works very well with flat textures"
+        ],
+        "preview": "image.jpg"
+    },
+    "Ghytd": {
+        "type": "fun",
+        "description": "Also known as Ghytd's Particle Effects Collection - slightly modified by me to fix crashes :)",
+        "features": [
+            "Overhauls everything",
+            "Futuristic vibe",
+            "You will get flashbanged by the teleporter effects"
+        ],
+        "preview": "image.jpg"
+    },
+    "Fiona's": {
+        "type": "friend",
+        "description": "Fiona update this please",
+        "features": [
+            "Pink lightwarp"
+        ],
+        "preview": "image.jpg"
     }
 }

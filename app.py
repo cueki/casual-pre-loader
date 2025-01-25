@@ -105,11 +105,7 @@ class ParticleManagerGUI(QMainWindow):
         upper_splitter = QSplitter(Qt.Orientation.Horizontal)
         upper_splitter.addWidget(presets_group)
         upper_splitter.addWidget(description_group)
-        # upper_splitter.setStretchFactor(0, 0)
-        # upper_splitter.setStretchFactor(1, 1)
-        upper_splitter.setChildrenCollapsible(False)
-        # upper_splitter.setFixedSize(upper_splitter.sizeHint())
-        upper_splitter.setSizes([200, 600])
+        upper_splitter.setSizes([200, 800])
         upper_splitter.handle(1).setEnabled(False)
         upper_layout.addWidget(upper_splitter)
 
@@ -129,9 +125,8 @@ class ParticleManagerGUI(QMainWindow):
 
         # Add content splitter to main layout
         content_splitter.addWidget(addons_group)
-        # content_splitter.setChildrenCollapsible(False)
         content_splitter.handle(1).setEnabled(False)
-        content_splitter.setSizes([400, 200])
+        content_splitter.setSizes([500, 200])
         main_layout.addWidget(content_splitter)
 
         # Buttons
@@ -228,9 +223,27 @@ class ParticleManagerGUI(QMainWindow):
             return
 
         self.presets_list.clear()
+
+        # Group presets by type
+        preset_groups = {"vanilla": [], "fun": [], "friend": [], "unknown": []}
+
         for preset in presets_dir.glob("*.zip"):
-            item = QListWidgetItem(preset.stem)
-            self.presets_list.addItem(item)
+            preset_info = self.load_preset_info(preset.stem)
+            preset_type = preset_info.get("type", "unknown").lower()
+            preset_groups[preset_type].append(preset.stem)
+
+        type_order = ["vanilla", "fun", "friend", "unknown"]
+        first_item = None
+        for preset_type in type_order:
+            if preset_groups[preset_type]:
+                for preset_name in sorted(preset_groups[preset_type]):
+                    item = QListWidgetItem(preset_name)
+                    self.presets_list.addItem(item)
+                    if first_item is None:
+                        first_item = item
+
+        if first_item:
+            self.presets_list.setCurrentItem(first_item)
 
     def on_preset_select(self):
         selected_items = self.presets_list.selectedItems()

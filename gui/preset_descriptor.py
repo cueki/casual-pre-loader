@@ -111,10 +111,10 @@ class PresetDescription(QWidget):
             self.features_label.hide()
             self.features_list.hide()
 
-        # Handle preview image if provided
+        # handle preview image if provided
         preview_path = preset_info.get("preview")
         if preview_path and Path(preview_path).exists():
-            # Image loading logic here
+            # image loading logic here
             self.preview_label.show()
             self.preview_image.show()
         else:
