@@ -8,9 +8,9 @@ from core.constants import PCFVersion, AttributeType, ATTRIBUTE_VALUES
 @dataclass
 class PCFElement:
     type_name_index: int
-    element_name: bytes  # Changed to explicitly use bytes
+    element_name: bytes
     data_signature: bytes
-    attributes: Dict[bytes, Tuple[AttributeType, Any]]  # Changed key type to bytes
+    attributes: Dict[bytes, Tuple[AttributeType, Any]]
 
 
 @dataclass

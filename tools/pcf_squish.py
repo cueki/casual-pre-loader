@@ -73,7 +73,7 @@ class ParticleMerger:
 
             game_file_tuples.append((entry.archive_index, file))
 
-        # Sort by archive index first, then by filepath
+        # sort by archive index first, then by filepath
         game_file_tuples.sort(key=lambda x: (x[0], x[1]))
 
         # just the filepaths pls
@@ -104,6 +104,7 @@ class ParticleMerger:
         self.merged_files: Dict[str, List[str]] = {}
 
     def update_progress(self, message=""):
+        # loading bar callback
         if self.progress_callback:
             progress = (self.processed_files / self.total_files) * 100
             self.progress_callback(progress, message)

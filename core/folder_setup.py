@@ -77,5 +77,5 @@ class FolderConfig:
         return self.game_files_dir / filename
 
 
-# Create a default instance for import
+# create a default instance for import
 folder_setup = FolderConfig()

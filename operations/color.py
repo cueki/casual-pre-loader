@@ -30,7 +30,6 @@ def hsv_to_rgb(h, s, v):
 
 
 def is_color_attribute(name: str) -> bool:
-    # color_indicators = {b'color', b'color1', b'color2', b'color_fade', b'tint clamp'}
     color_indicators = {b'color', b'color1', b'color2', b'color_fade'}
     if isinstance(name, str):
         name = name.encode('ascii')
@@ -46,19 +45,19 @@ def average_rgb(rgb_list):
 
 
 def color_shift(rgb_color_list: list, target_color: RGB, mode: ColorShiftMode = ColorShiftMode.MATCH_TARGET):
-    # Calc average rgb
+    # calc average rgb
     avg_r, avg_g, avg_b = average_rgb(rgb_color_list)
 
-    # Convert to average HSV
+    # convert to average HSV
     average_hsv = rgb_to_hsv(avg_r, avg_g, avg_b)
 
-    # Convert target color to HSV
+    # convert target color to HSV
     target_hsv = rgb_to_hsv(*target_color)
 
-    # Calculate hue difference
+    # calculate hue difference
     hue_diff = target_hsv[0] - average_hsv[0]
 
-    # Convert input RGB colors to HSV
+    # convert input RGB colors to HSV
     hsv_colors = [rgb_to_hsv(*rgb) for rgb in rgb_color_list]
 
     if mode == ColorShiftMode.RANDOM:
@@ -84,13 +83,13 @@ def color_shift(rgb_color_list: list, target_color: RGB, mode: ColorShiftMode = 
         shifted_colors = []
         for hsv in hsv_colors:
             new_hue = hsv[0] + hue_diff
-            # Normalize hue to 0-360 range
+            # normalize hue to 0-360 range
             if new_hue > 360:
                 new_hue -= 360
             elif new_hue < 0:
                 new_hue += 360
 
-            # Convert back to RGB, scale to 0-255 range
+            # convert back to RGB, scale to 0-255 range
             rgb = hsv_to_rgb(new_hue, max(hsv[1], 50), 100)
             shifted_colors.append(tuple(floor(c * 255) for c in rgb))
         return shifted_colors
@@ -99,11 +98,6 @@ def color_shift(rgb_color_list: list, target_color: RGB, mode: ColorShiftMode = 
 def analyze_pcf_colors(pcf: PCFFile) -> Dict[str, Dict[str, List[tuple[RGB, bytes]]]]:
 
     traversal = PCFTraversal(pcf)
-    # colors = {
-    #     'red': {'color1': [], 'color2': [], 'tint_clamp': [], 'color_fade': []},
-    #     'blue': {'color1': [], 'color2': [], 'tint_clamp': [], 'color_fade': []},
-    #     'neutral': {'color1': [], 'color2': [], 'tint_clamp': [], 'color_fade': []}
-    # }
     colors = {
         'red': {'color1': [], 'color2': [], 'color_fade': []},
         'blue': {'color1': [], 'color2': [], 'color_fade': []},
@@ -119,7 +113,6 @@ def analyze_pcf_colors(pcf: PCFFile) -> Dict[str, Dict[str, List[tuple[RGB, byte
         elif current_element:
             r, g, b, a = rgba
 
-            # if (r + g + b) == 765 or (r + g + b) == 0 or (r == g == b):
             if (r + g + b) == 765 or (r + g + b) == 0:
                 continue
 
@@ -129,8 +122,6 @@ def analyze_pcf_colors(pcf: PCFFile) -> Dict[str, Dict[str, List[tuple[RGB, byte
             team = 'red' if is_red else 'blue' if is_blue else 'neutral'
 
             # Determine category
-            # if b'tint clamp' in attr_name:
-            #     category = 'tint_clamp'
             if b'color_fade' in attr_name:
                 category = 'color_fade'
             elif b'color1' in attr_name:
@@ -170,7 +161,6 @@ def transform_with_shift(pcf: PCFFile,
             r, g, b, a = rgba
             rgb = (r, g, b)
 
-            # if (r + g + b) == 765 or (r + g + b) == 0 or (r == g == b):
             if (r + g + b) == 765 or (r + g + b) == 0:
                 continue
 
@@ -193,15 +183,11 @@ def transform_team_colors(pcf: PCFFile, colors: Dict[str, Dict[str, List[tuple[R
 
     if has_red or has_blue or has_neutral:
         for team in ['red', 'blue', 'neutral']:
-            # for category in ['color1', 'color2', 'tint_clamp', 'color_fade']:
             for category in ['color1', 'color2', 'color_fade']:
                 if colors[team][category] and targets[team][category]:
                     original_colors_with_context = colors[team][category]
                     original_colors = [c[0] for c in original_colors_with_context]
                     shifted = color_shift(original_colors, targets[team][category], color_mode)
-                    # print("WARN: WILL BE IDENTICAL ON CONSECUTIVE RUNS")
-                    # print("OlD:", original_colors)
-                    # print("NEW:", shifted)
 
                     current_pcf = transform_with_shift(
                         current_pcf,

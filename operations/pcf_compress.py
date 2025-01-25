@@ -17,6 +17,7 @@ def get_element_hash(element: PCFElement):
 
 
 def fix_child_references(pcf: PCFFile) -> bool:
+    # this is just in case there are some invalid references, I only saw this once but better safe than sorry
     # first map all particle system definitions by name
     system_indices = {}
     for i, element in enumerate(pcf.elements):
@@ -42,6 +43,7 @@ def fix_child_references(pcf: PCFFile) -> bool:
 
 
 def clean_children_arrays(pcf: PCFFile) -> bool:
+    # this removes any duplicate children from the array, if they exist, also only saw this once
     changes_made = False
 
     for element in pcf.elements:
@@ -56,46 +58,6 @@ def clean_children_arrays(pcf: PCFFile) -> bool:
                     changes_made = True
 
     return changes_made
-
-
-def clean_string_dictionary(pcf: PCFFile):
-    # create set of all used indices and strings
-    used_strings = set()
-    used_indices = set()
-
-    # collect type_name_index values and attribute names
-    for element in pcf.elements:
-        # add type names
-        used_indices.add(element.type_name_index)
-        used_strings.add(pcf.string_dictionary[element.type_name_index])
-
-        # add attribute names
-        for attr_name in element.attributes.keys():
-            used_strings.add(attr_name)
-
-    # create new dictionary and mapping
-    new_dictionary = []
-    old_to_new = {}  # maps old indices to new positions
-
-    # first add strings that are used as type names (maintain their original order)
-    for old_idx in sorted(used_indices):
-        string = pcf.string_dictionary[old_idx]
-        old_to_new[old_idx] = len(new_dictionary)
-        new_dictionary.append(string)
-
-    # then add remaining strings used as attribute names
-    for string in sorted(used_strings):  # Sort for consistency
-        if string not in new_dictionary:
-            new_dictionary.append(string)
-
-    # update all element type_name_indices
-    for element in pcf.elements:
-        element.type_name_index = old_to_new[element.type_name_index]
-
-    removed_count = len(pcf.string_dictionary) - len(new_dictionary)
-    pcf.string_dictionary = new_dictionary
-
-    return removed_count
 
 
 def find_duplicate_array_elements(pcf: PCFFile):
@@ -184,6 +146,7 @@ def reorder_elements(pcf: PCFFile, duplicates):
 
 
 def rename_operators(pcf: PCFFile):
+    # this sets the operators name to '' because the name doesn't matter, only the index does
     for i, element in enumerate(pcf.elements):
         type_name = pcf.string_dictionary[element.type_name_index].decode('ascii')
         if type_name == 'DmeParticleOperator':
@@ -191,6 +154,7 @@ def rename_operators(pcf: PCFFile):
 
 
 def check_and_remove_defaults(pcf: PCFFile):
+    # this removes all redundant default attributes, the defaults can be found in core/constants.py
     removed_count = 0
 
     for element in pcf.elements:
@@ -237,9 +201,10 @@ def check_and_remove_defaults(pcf: PCFFile):
 
 
 def remove_duplicate_elements(pcf: PCFFile) -> PCFFile:
-    # create copy to avoid modifying original
+    # work with copy
     result_pcf = copy.deepcopy(pcf)
 
+    # just in case
     fix_child_references(result_pcf)
 
     # find duplicates
@@ -253,10 +218,5 @@ def remove_duplicate_elements(pcf: PCFFile) -> PCFFile:
         clean_children_arrays(result_pcf)
     else:
         print("No duplicates found")
-
-    # Clean up string dictionary
-    # strings_removed = clean_string_dictionary(result_pcf)
-    # if strings_removed > 0:
-    #     print(f"Removed {strings_removed} unused type strings")
 
     return result_pcf

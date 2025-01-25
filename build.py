@@ -2,6 +2,7 @@ import PyInstaller.__main__
 import os
 from pathlib import Path
 
+# just a generator so I don't need two files to build
 
 def create_executable():
     script_dir = Path(__file__).parent

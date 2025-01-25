@@ -7,7 +7,7 @@ def copy_element(element: PCFElement, offset: int, source_pcf: PCFFile,
     # get the type name string from the source PCF
     type_name = source_pcf.string_dictionary[element.type_name_index]
 
-    # handle DmeElement special case and find/add type name in target PCF's string dictionary
+    # handle DmeElement root and find/add type name in target PCF's string dictionary
     try:
         if type_name == b'DmeElement':
             new_type_name_index = 0
@@ -37,7 +37,7 @@ def copy_element(element: PCFElement, offset: int, source_pcf: PCFFile,
             # add new attribute name if it doesn't exist
             target_pcf.string_dictionary.append(attr_name)
 
-        # Now handle the attribute value based on type
+        # now handle the attribute value based on type
         if attr_type == AttributeType.ELEMENT:
             # update single element reference
             new_value = value + offset if value != 4294967295 else value

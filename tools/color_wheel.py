@@ -29,7 +29,7 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
     ax.set_xlim(-1.2, 1.2)
     ax.set_ylim(-1.2, 1.2)
 
-    # Calculate shifts for all colors
+    # calculate shifts for all colors
     shifted_colors = {}
     for team in ['red', 'blue', 'neutral']:
         shifted_colors[team] = {}
@@ -43,12 +43,12 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
             else:
                 shifted_colors[team][category] = []
 
-    # Pre-compute and create background
+    # pre-compute and create background
     for s in np.linspace(0.2, 1.0, 5):
         circle = Circle((0, 0), s, fill=True, color='black', alpha=1, linewidth=0)
         ax.add_patch(circle)
 
-    # Calculate total number of lines needed
+    # calculate total number of lines needed
     total_lines = sum(len(colors[team][cat])
                      for team in colors
                      for cat in colors[team])
@@ -62,7 +62,7 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
                                    capstyle='round')
     ax.add_collection(line_collection)
 
-    # Pre-compute color data
+    # pre-compute color data
     color_data = []
     for team in ['red', 'blue', 'neutral']:
         for category in ['color1', 'color2', 'color_fade']:
@@ -70,7 +70,7 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
                 continue
 
             for color_tuple in colors[team][category]:
-                rgb = color_tuple[0]  # Get the RGB value from the tuple
+                rgb = color_tuple[0]  # get the RGB value from the tuple
                 h1, s1, v1 = rgb_to_hsv(*rgb)
                 shifted_index = colors[team][category].index(color_tuple)
                 shifted = shifted_colors[team][category][shifted_index]
@@ -86,10 +86,10 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
                     'dh': dh,
                     'start_rgb': np.array(rgb),
                     'target_rgb': np.array(shifted),
-                    'context': color_tuple[1]  # Store the context bytes
+                    'context': color_tuple[1]  # store the context bytes
                 })
 
-    # Add target indicators
+    # add target indicators
     target_segments = []
     target_colors = []
     for team in targets:
@@ -109,7 +109,7 @@ def animate_color_shift(colors: Dict[str, Dict[str, List[tuple[RGB, bytes]]]],
                                          alpha=0.5)
         ax.add_collection(target_collection)
 
-    # Pre-allocate arrays for the update function
+    # pre-allocate arrays for the update function
     new_segments = np.zeros((total_lines, 2, 2))
     new_colors = np.zeros((total_lines, 4))
 

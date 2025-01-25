@@ -79,18 +79,18 @@ class ParticleManagerGUI(QMainWindow):
 
         lists_splitter = QSplitter(Qt.Orientation.Vertical)
 
-        # presets Group
+        # presets group
         presets_group = QGroupBox("Available Presets, pick one.")
         presets_layout = QVBoxLayout()
         self.presets_list = QListWidget()
         self.presets_list.itemSelectionChanged.connect(self.on_preset_select)
 
-        # presets List
+        # presets list
         self.presets_list = QListWidget()
         self.presets_list.itemSelectionChanged.connect(self.on_preset_select)
         presets_layout.addWidget(self.presets_list)
 
-        # customize Button
+        # customize button
         controls_layout = QHBoxLayout()
         self.customize_button = QPushButton("Customize Selected Preset")
         self.customize_button.clicked.connect(self.open_customizer)
@@ -101,7 +101,7 @@ class ParticleManagerGUI(QMainWindow):
         presets_group.setLayout(presets_layout)
         lists_splitter.addWidget(presets_group)
 
-        # addons Group
+        # addons group
         addons_group = QGroupBox("Available Addons, add as many as you'd like, be sure to preload.")
         addons_layout = QVBoxLayout()
         self.addons_list = QListWidget()
@@ -199,17 +199,9 @@ class ParticleManagerGUI(QMainWindow):
             addons_dir.mkdir(exist_ok=True)
             return
 
-        recommended_file = Path("recommended.txt")
-        recommended_addons = set()
-        if recommended_file.exists():
-            with open(recommended_file, 'r') as f:
-                recommended_addons = {line.strip() for line in f}
-
         self.addons_list.clear()
         for addon in addons_dir.glob("*.zip"):
             item = QListWidgetItem(addon.stem)
-            # if addon.stem in recommended_addons:
-            #     item.setText(f"{addon.stem} (recommended!)")
             if addon.stem in self.tooltips:
                 item.setToolTip(self.tooltips[addon.stem])
             self.addons_list.addItem(item)
@@ -223,17 +215,9 @@ class ParticleManagerGUI(QMainWindow):
             self.show_error("Presets directory not found!")
             return
 
-        recommended_file = Path("recommended.txt")
-        recommended_presets = set()
-        if recommended_file.exists():
-            with open(recommended_file, 'r') as f:
-                recommended_presets = {line.strip() for line in f}
-
         self.presets_list.clear()
         for preset in presets_dir.glob("*.zip"):
             item = QListWidgetItem(preset.stem)
-            # if preset.stem in recommended_presets:
-            #     item.setText(f"{preset.stem} (recommended!)")
             if preset.stem in self.tooltips:
                 item.setToolTip(self.tooltips[preset.stem])
             self.presets_list.addItem(item)

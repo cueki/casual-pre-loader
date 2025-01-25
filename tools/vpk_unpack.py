@@ -10,7 +10,7 @@ class VPKExtractor:
 
     def extract_files(self, patterns: Optional[List[str]] = None) -> List[str]:
         if patterns is None:
-            patterns = ["particles/*.pcf", "materials/"]
+            patterns = ["particles/*", "materials/*", "effects/*", "models/*"]
 
         extracted_files = []
 

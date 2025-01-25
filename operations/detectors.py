@@ -27,19 +27,19 @@ def quote_detector(content: str) -> Iterator[WastedBytes]:
                     can_remove_quotes(attr) and
                     can_remove_quotes(quoted_value) and not
                     line.lstrip().startswith('//')):
-                # Calculate quote positions
+                # calculate quote positions
                 attr_start = match.start(1) - 1
                 attr_end = match.end(1)
                 value_start = match.start(2) - 1
                 value_end = match.end(2)
 
-                # Yield positions relative to file start
+                # yield positions relative to file start
                 yield WastedBytes(pos + attr_start, 1, '"')
                 yield WastedBytes(pos + attr_end, 1, '"')
                 yield WastedBytes(pos + value_start, 1, '"')
                 yield WastedBytes(pos + value_end, 1, '"')
 
-            # Same as above but handles instances where the attribute is quoted while the value is not
+            # same as above but handles instances where the attribute is quoted while the value is not
             elif (unquoted_value is not None and
                     can_remove_quotes(attr) and not
                     line.lstrip().startswith('//')):

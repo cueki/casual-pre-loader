@@ -1,6 +1,6 @@
 import struct
 from dataclasses import dataclass
-from typing import Dict, List, Optional, BinaryIO
+from typing import Dict, Optional, BinaryIO
 
 
 @dataclass
