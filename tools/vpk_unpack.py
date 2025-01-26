@@ -29,7 +29,7 @@ class VPKExtractor:
 
                 # ensure the output directory exists
                 output_path.parent.mkdir(parents=True, exist_ok=True)
-                print(output_path)
+
                 # extract the file
                 if self.vpk.extract_file(file_path, str(output_path)):
                     extracted_files.append(str(output_path))
