@@ -126,7 +126,7 @@ class ParticleOperations(QObject):
 
             # handle custom folder
             if folder_setup.mods_everything_else_dir.exists():
-                replace_game_type(Path(tf_path) / 'gameinfo.txt')
+                replace_game_type(Path(tf_path) / 'gameinfo.txt', uninstall=False)
                 custom_dir = Path(tf_path) / 'custom'
                 custom_dir.mkdir(exist_ok=True)
 
@@ -166,6 +166,7 @@ class ParticleOperations(QObject):
                 self.error_signal.emit("Failed to restore backup")
                 return
 
+            replace_game_type(Path(tf_path) / 'gameinfo.txt', uninstall=True)
             custom_dir = Path(tf_path) / 'custom'
             custom_dir.mkdir(exist_ok=True)
 

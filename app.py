@@ -10,6 +10,7 @@ from PyQt6.QtCore import pyqtSignal, Qt
 from gui.interface import ParticleOperations
 from gui.preset_customizer import PresetSelectionManager, PresetCustomizer
 from gui.preset_descriptor import PresetDescription
+from operations.game_type import check_game_type
 
 
 class ParticleManagerGUI(QMainWindow):
@@ -133,9 +134,10 @@ class ParticleManagerGUI(QMainWindow):
         button_layout = QHBoxLayout()
         self.install_button = QPushButton("Install Selected Preset and Addons")
         self.install_button.clicked.connect(self.start_install_thread)
-        self.restore_button = QPushButton("Restore Backup")
-        self.restore_button.clicked.connect(self.start_restore_thread)
         button_layout.addWidget(self.install_button)
+
+        self.restore_button = QPushButton("Uninstall Mods")
+        self.restore_button.clicked.connect(self.start_restore_thread)
         button_layout.addWidget(self.restore_button)
         main_layout.addLayout(button_layout)
 
@@ -162,6 +164,7 @@ class ParticleManagerGUI(QMainWindow):
                     if Path(last_dir).exists():
                         self.tf_path = last_dir
                         self.tf_path_edit.setText(last_dir)
+                        self.update_restore_button_state()
         except Exception as e:
             print(f"Error loading last directory: {e}")
 
@@ -178,6 +181,7 @@ class ParticleManagerGUI(QMainWindow):
             self.tf_path = directory
             self.tf_path_edit.setText(directory)
             self.save_last_directory()
+            self.update_restore_button_state()
 
     def initialize_preset_selections(self):
         presets_dir = Path("presets")
@@ -292,6 +296,15 @@ class ParticleManagerGUI(QMainWindow):
 
         return True
 
+    def update_restore_button_state(self):
+        if not self.tf_path:
+            self.restore_button.setEnabled(False)
+            return
+
+        gameinfo_path = Path(self.tf_path) / 'gameinfo.txt'
+        is_modded = check_game_type(gameinfo_path) if gameinfo_path.exists() else False
+        self.restore_button.setEnabled(is_modded)
+
     def update_progress(self, progress, message):
         self.progress_bar.setValue(progress)
         self.status_label.setText(message)
@@ -300,8 +313,11 @@ class ParticleManagerGUI(QMainWindow):
         enabled = not processing
         self.browse_button.setEnabled(enabled)
         self.install_button.setEnabled(enabled)
-        self.restore_button.setEnabled(enabled)
         self.customize_button.setEnabled(enabled)
+        if not processing:
+            self.update_restore_button_state()
+        else:
+            self.restore_button.setEnabled(False)
 
     def show_error(self, message):
         QMessageBox.critical(self, "Error", message)
@@ -352,6 +368,14 @@ class ParticleManagerGUI(QMainWindow):
             self.show_error("Please select tf/ directory!")
             return
 
+        if QMessageBox.question(
+                self,
+                "Confirm Uninstall",
+                "This will revert all changes that have been made to TF2 with this app. \nAre you sure?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        ) != QMessageBox.StandardButton.Yes:
+            return
+
         self.set_processing_state(True)
         thread = threading.Thread(
             target=self.operations.restore_backup,
@@ -359,7 +383,6 @@ class ParticleManagerGUI(QMainWindow):
         )
         thread.daemon = True
         thread.start()
-
 
 def main():
     app = QApplication([])
