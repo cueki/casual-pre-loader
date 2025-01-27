@@ -1,5 +1,8 @@
-# Over 100MB limit
+last_directory.txt
+preset_selections.json
 tf2_misc_000.vpk
+tf2_misc_017.vpk
+tf2_misc_dir.vpk
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -10,6 +10,8 @@ class FolderConfig:
     # main folder names
     backup_folder = "backup"
     temp_folder = "temp"
+    presets_folder = "presets"
+    addons_folder = "addons"
 
     # temp nested folder (to be cleared every run)
     working_folder = "working"
@@ -24,6 +26,8 @@ class FolderConfig:
     def __post_init__(self):
         self.backup_dir = self.project_dir /  self.backup_folder
         self.temp_dir = self.project_dir / self.temp_folder
+        self.presets_dir = self.project_dir / self.presets_folder
+        self.addons_dir = self.project_dir / self.addons_folder
 
         self.working_dir = self.temp_dir / self.working_folder
         self.output_dir = self.temp_dir / self.output_folder
@@ -37,6 +41,8 @@ class FolderConfig:
         folders = [
             self.backup_dir,
             self.temp_dir,
+            self.presets_dir,
+            self.addons_dir,
             self.working_dir,
             self.output_dir,
             self.mods_dir,

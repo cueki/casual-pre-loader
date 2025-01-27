@@ -5,11 +5,14 @@ from pathlib import Path
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLineEdit, QLabel, QProgressBar,
                              QListWidget, QFileDialog, QMessageBox,
-                             QGroupBox, QApplication, QSplitter, QListWidgetItem)
+                             QGroupBox, QApplication, QSplitter, QListWidgetItem, QTabWidget)
 from PyQt6.QtCore import pyqtSignal, Qt
+
+from core.folder_setup import folder_setup
+from gui.drag_and_drop import DragDropZone
 from gui.interface import ParticleOperations
 from gui.preset_customizer import PresetSelectionManager, PresetCustomizer
-from gui.preset_descriptor import PresetDescription
+from gui.mod_descriptor import PresetDescription, AddonDescription
 from operations.game_type import check_game_type
 
 
@@ -20,7 +23,7 @@ class ParticleManagerGUI(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        # waking up in the morning gotta thank god
+        # just waking up in the morning gotta thank god
         self.preset_description = None
         self.status_label = None
         self.progress_bar = None
@@ -31,6 +34,7 @@ class ParticleManagerGUI(QMainWindow):
         self.tf_path_edit = None
         self.presets_list = None
         self.addons_list = None
+        self.addon_description = None
 
         self.current_phase = ""
         self.current_phase_number = 0
@@ -62,6 +66,7 @@ class ParticleManagerGUI(QMainWindow):
 
     def setup_ui(self):
         central_widget = QWidget()
+        tab_widget = QTabWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
 
@@ -69,6 +74,7 @@ class ParticleManagerGUI(QMainWindow):
         tf_group = QGroupBox("tf/ Directory")
         tf_layout = QHBoxLayout()
         self.tf_path_edit = QLineEdit()
+        self.tf_path_edit.setReadOnly(True)
         self.browse_button = QPushButton("Browse")
         self.browse_button.clicked.connect(self.browse_tf_dir)
         tf_layout.addWidget(self.tf_path_edit)
@@ -76,72 +82,96 @@ class ParticleManagerGUI(QMainWindow):
         tf_group.setLayout(tf_layout)
         main_layout.addWidget(tf_group)
 
-        # Upper section (presets and description)
-        upper_widget = QWidget()
-        upper_layout = QHBoxLayout(upper_widget)
-        upper_layout.setContentsMargins(0, 0, 0, 0)
+        # presets Tab
+        presets_tab = QWidget()
+        presets_tab_layout = QVBoxLayout(presets_tab)
+        presets_tab_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Presets Group
+        # presets and Description in Splitter
+        preset_splitter = QSplitter(Qt.Orientation.Horizontal)
+
+        # presets Group
         presets_group = QGroupBox("Available Presets")
         presets_layout = QVBoxLayout()
         self.presets_list = QListWidget()
         self.presets_list.itemSelectionChanged.connect(self.on_preset_select)
         presets_layout.addWidget(self.presets_list)
 
-        # Customize Button
+        # customize button
         self.customize_button = QPushButton("Customize Selected Preset")
         self.customize_button.clicked.connect(self.open_customizer)
         self.customize_button.setEnabled(False)
         presets_layout.addWidget(self.customize_button)
         presets_group.setLayout(presets_layout)
 
-        # Description Panel
+        # description panel
         description_group = QGroupBox("Preset Details")
         description_layout = QVBoxLayout()
         self.preset_description = PresetDescription()
         description_layout.addWidget(self.preset_description)
         description_group.setLayout(description_layout)
 
-        # Add to upper layout with splitter
-        upper_splitter = QSplitter(Qt.Orientation.Horizontal)
-        upper_splitter.addWidget(presets_group)
-        upper_splitter.addWidget(description_group)
-        upper_splitter.setSizes([200, 800])
-        upper_splitter.handle(1).setEnabled(False)
-        upper_layout.addWidget(upper_splitter)
+        # add to splitter
+        preset_splitter.addWidget(presets_group)
+        preset_splitter.addWidget(description_group)
+        preset_splitter.setSizes([200, 800])
+        preset_splitter.setChildrenCollapsible(False)
+        presets_tab_layout.addWidget(preset_splitter)
 
-        # Main content splitter
-        content_splitter = QSplitter(Qt.Orientation.Vertical)
+        addon_splitter = QSplitter(Qt.Orientation.Horizontal)
 
-        # Add upper section to content splitter
-        content_splitter.addWidget(upper_widget)
+        # addons tab
+        addons_tab = QWidget()
+        addons_layout = QVBoxLayout(addons_tab)
 
-        # Addons Group
-        addons_group = QGroupBox("Available Addons")
-        addons_layout = QVBoxLayout()
+        # addons list group
+        addons_group = QGroupBox("Available Mods")
+        addons_list_layout = QVBoxLayout()
         self.addons_list = QListWidget()
         self.addons_list.setSelectionMode(QListWidget.SelectionMode.MultiSelection)
-        addons_layout.addWidget(self.addons_list)
-        addons_group.setLayout(addons_layout)
+        self.addons_list.itemSelectionChanged.connect(self.on_addon_select)
+        addons_list_layout.addWidget(self.addons_list)
 
-        # Add content splitter to main layout
-        content_splitter.addWidget(addons_group)
-        content_splitter.handle(1).setEnabled(False)
-        content_splitter.setSizes([500, 200])
-        main_layout.addWidget(content_splitter)
+        # description panel for addons
+        description_group = QGroupBox("Mod Details")
+        description_layout = QVBoxLayout()
+        self.addon_description = AddonDescription()
+        description_layout.addWidget(self.addon_description)
+        description_group.setLayout(description_layout)
 
-        # Buttons
+        # add to splitter
+        addon_splitter.addWidget(addons_group)
+        addon_splitter.addWidget(description_group)
+        addon_splitter.setSizes([200, 800])
+        addon_splitter.setChildrenCollapsible(False)
+        addons_layout.addWidget(addon_splitter)
+
+        # drag and drop zone
+        drag_zone = DragDropZone(self)
+        drag_zone.addon_dropped.connect(lambda _: self.load_addons())
+        addons_list_layout.addWidget(drag_zone)
+        addons_group.setLayout(addons_list_layout)
+
+        # install Tab
+        install_tab = QWidget()
+        install_layout = QVBoxLayout(install_tab)
+
+        # installation controls group
+        install_controls = QGroupBox("Installation")
+        controls_layout = QVBoxLayout()
+
+        # buttons
         button_layout = QHBoxLayout()
-        self.install_button = QPushButton("Install Selected Preset and Addons")
+        self.install_button = QPushButton("Install Selected Preset and Mods")
         self.install_button.clicked.connect(self.start_install_thread)
         button_layout.addWidget(self.install_button)
 
         self.restore_button = QPushButton("Uninstall Mods")
         self.restore_button.clicked.connect(self.start_restore_thread)
         button_layout.addWidget(self.restore_button)
-        main_layout.addLayout(button_layout)
+        controls_layout.addLayout(button_layout)
 
-        # Progress Group
+        # progress Group
         progress_group = QGroupBox("Progress")
         progress_layout = QVBoxLayout()
         self.progress_bar = QProgressBar()
@@ -149,7 +179,19 @@ class ParticleManagerGUI(QMainWindow):
         progress_layout.addWidget(self.progress_bar)
         progress_layout.addWidget(self.status_label)
         progress_group.setLayout(progress_layout)
-        main_layout.addWidget(progress_group)
+        controls_layout.addWidget(progress_group)
+
+        install_controls.setLayout(controls_layout)
+        install_layout.addWidget(install_controls)
+        install_layout.addStretch()
+
+        # add tabs to tab widget
+        tab_widget.addTab(presets_tab, "Presets")
+        tab_widget.addTab(addons_tab, "Mods")
+        tab_widget.addTab(install_tab, "Install")
+
+        # add tab widget to main layout
+        main_layout.addWidget(tab_widget)
 
         # connect signals directly to UI updates
         self.progress_signal.connect(self.update_progress)
@@ -207,28 +249,43 @@ class ParticleManagerGUI(QMainWindow):
                     print(f"Error initializing selections for {preset_name}: {e}")
 
     def load_addons(self):
-        addons_dir = Path("addons")
-        if not addons_dir.exists():
-            addons_dir.mkdir(exist_ok=True)
-            return
-
+        addons_dir = folder_setup.addons_dir
         self.addons_list.clear()
+        addon_groups = {"texture": [], "model": [], "misc": [], "custom": [], "unknown": []}
+
         for addon in addons_dir.glob("*.zip"):
-            item = QListWidgetItem(addon.stem)
-            self.addons_list.addItem(item)
+            addon_info = self.load_addon_info(addon.stem)
+            addon_type = addon_info.get("type", "unknown").lower()
+            addon_groups[addon_type].append(addon.stem)
+
+        # add regular addons first
+        regular_types = ["texture", "model", "misc", "unknown"]
+        for addon_type in regular_types:
+            if addon_groups[addon_type]:
+                for addon_name in sorted(addon_groups[addon_type]):
+                    item = QListWidgetItem(addon_name)
+                    self.addons_list.addItem(item)
+
+        # add splitter if there are custom addons
+        if addon_groups["custom"]:
+            splitter = QListWidgetItem("──── Custom Addons ────")
+            splitter.setFlags(Qt.ItemFlag.NoItemFlags)
+            splitter.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.addons_list.addItem(splitter)
+
+            # add custom addons
+            for addon_name in sorted(addon_groups["custom"]):
+                item = QListWidgetItem(addon_name)
+                self.addons_list.addItem(item)
 
     def get_selected_addons(self):
         return [item.text() for item in self.addons_list.selectedItems()]
 
     def load_presets(self):
-        presets_dir = Path("presets")
-        if not presets_dir.exists():
-            self.show_error("Presets directory not found!")
-            return
-
+        presets_dir = folder_setup.presets_dir
         self.presets_list.clear()
 
-        # Group presets by type
+        # group presets by type
         preset_groups = {"vanilla": [], "fun": [], "friend": [], "unknown": []}
 
         for preset in presets_dir.glob("*.zip"):
@@ -279,6 +336,33 @@ class ParticleManagerGUI(QMainWindow):
                 "type": "Unknown",
                 "description": "Error loading preset information.",
                 "features": []
+            }
+
+    def on_addon_select(self):
+        selected_items = self.addons_list.selectedItems()
+        if selected_items:
+            selected_addon = selected_items[-1].text()  # Get last selected item
+            addon_info = self.load_addon_info(selected_addon)
+            self.addon_description.update_content(selected_addon, addon_info)
+        else:
+            self.addon_description.clear()
+
+    @staticmethod
+    def load_addon_info(addon_name: str) -> dict:
+        try:
+            with open("addons/info.json", "r") as f:
+                all_addons = json.load(f)
+                return all_addons.get(addon_name, {
+                    "type": "Custom",
+                    "description": "This addon was added by you.",
+                    "contents": ["Custom content"]
+                })
+        except Exception as e:
+            print(f"Error loading addon info: {e}")
+            return {
+                "type": "Misc",
+                "description": "Information unavailable.",
+                "contents": []
             }
 
     def validate_inputs(self):
@@ -385,14 +469,15 @@ class ParticleManagerGUI(QMainWindow):
         thread.start()
 
 def main():
+    folder_setup.create_required_folders()
     app = QApplication([])
-    app.setStyle("windowsvista")
     font = app.font()
     font.setPointSize(10)
     app.setFont(font)
     window = ParticleManagerGUI()
     window.show()
     app.exec()
+    folder_setup.cleanup_temp_folders()
 
 if __name__ == "__main__":
     main()

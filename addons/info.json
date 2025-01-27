@@ -1,0 +1,14 @@
+{
+    "NoBurningOverlay": {
+      "type": "Misc",
+      "description": "Removes first person burning effect while on fire."
+    },
+    "NoSentryShieldOverlay": {
+      "type": "Model",
+      "description": "Removes the opaque shield for wrangled sentries."
+    },
+    "UltimateVisualFixPack (Recommended!!)": {
+      "type": "Texture",
+      "description": "Fixes various visual bugs, will add more info here later..."
+    }
+}
