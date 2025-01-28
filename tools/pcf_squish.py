@@ -50,7 +50,8 @@ class ParticleMerger:
 
         # excluded patterns for special handling
         self.excluded_patterns = ['dx80', 'dx90', 'default', 'unusual', 'test', '_high', '_slow',
-                                  'smoke_blackbillow', "level_fx"]
+                                  'smoke_blackbillow', "level_fx", "_dev", "dxhr_fx", "drg_engineer", "drg_bison",
+                                  "halloween", "crit", "speech"]
 
         print("\nInitializing ParticleMerger...")
         print(f"Mod folder: {folder_setup.mods_dir}")
