@@ -11,6 +11,21 @@ from operations.pcf_compress import remove_duplicate_elements
 from core.folder_setup import folder_setup
 
 
+def create_dx8_copies(file_handler, mods_dir: Path):
+    # quick hack to generate dx8 files? might be an awful idea. (DISABLED FOR NOW)
+    dx8_list = [f[:-9] for f in file_handler.list_pcf_files() if '_dx80' in f.lower()]
+    dx8_list = [f for f in dx8_list if f != 'particles/explosion']
+
+    for mod_file in mods_dir.glob('*.pcf'):
+        mod_base = "particles/" + str(mod_file.stem)
+        if mod_base in dx8_list:
+            dx8_path = mod_file.parent / f"{mod_file.stem}_dx80.pcf"
+            print(f"Creating dx8 copy: {dx8_path}")
+            try:
+                shutil.copy2(mod_file, dx8_path)
+            except Exception as e:
+                print(f"Error creating dx8 copy for {mod_file}: {e}")
+
 def check_compressed_size(pcf: PCFFile):
     # check the size of the compressed pcf to make sure it fits
     compressed_path = folder_setup.get_temp_path("temp_size_check.pcf")
@@ -50,11 +65,11 @@ class ParticleMerger:
 
         # excluded patterns for special handling
         self.excluded_patterns = ['dx80', 'dx90', 'default', 'unusual', 'test', '_high', '_slow',
-                                  'smoke_blackbillow', "level_fx", "_dev", "dxhr_fx", "drg_engineer", "drg_bison",
-                                  "halloween", "crit", "speech"]
+                                  'smoke_blackbillow', "level_fx", "_dev"]
 
         print("\nInitializing ParticleMerger...")
         print(f"Mod folder: {folder_setup.mods_dir}")
+        # create_dx8_copies(file_handler, folder_setup.mods_particle_dir)
 
         # process mod files
         self.mod_files = []

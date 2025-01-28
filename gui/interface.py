@@ -63,7 +63,7 @@ class ParticleOperations(QObject):
                         path for path in all_files
                         if not path.endswith('.pcf')
                     ]
-                else:  # "default" or "custom" state
+                else:  # "default" state
                     selected_paths = [
                         path for path in all_files
                         if path.endswith('.pcf') and path.split('/')[-1] in selected_files
@@ -86,19 +86,19 @@ class ParticleOperations(QObject):
             file_handler = FileHandler(vpk_handler)
 
             # phase 1: ParticleMerger
-            self.phase_signal.emit("Merge Particles...")
+            # self.phase_signal.emit("Merge Particles...")
             particle_merger = ParticleMerger(file_handler, vpk_handler, lambda p, m: self.update_phase_progress(p, m))
             particle_merger.process()
 
             # phase 2: Clean Particle Roots
             self.update_phase("Cleaning Up Particle Roots")
             excluded_patterns = ['dx80', 'dx90', 'default', 'unusual', 'test', '_high', '_slow',
-                                  'smoke_blackbillow', "level_fx", "_dev", "dxhr_fx", "drg_engineer", "drg_bison",
-                                  "halloween", "crit", "speech"]
+                                  'smoke_blackbillow', "level_fx", "_dev"]
             # "dxhr_fx", "drg_engineer", "drg_bison", "halloween", "crit", "taunt_fx", "speech" dx81??? idk
 
             pcf_files = [f for f in file_handler.list_pcf_files()
                          if not any(pattern in f.lower() for pattern in excluded_patterns)]
+
             for i, file in enumerate(pcf_files):
                 base_name = Path(file).name
                 progress = (i / len(pcf_files)) * 100

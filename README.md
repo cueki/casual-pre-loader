@@ -16,7 +16,9 @@ python app.py
 
 ### <s> Dx80 doesn't work (any particle with dx80 in its name) because they are special, this may be resolved in the future if enough people ask for it. </s>
 
-works now for the presets that support it (minecraft).
+<s> works now for the presets that support it (minecraft). </s>
+
+### NVM dx80 is a NIGHTMARE I will try and fix later, for now it does not work...
 
 This, of course, may make your game unstable, the presets I provide will be tested by me and others vigorously to ensure as few crashes as possible.
 
