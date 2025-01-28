@@ -14,9 +14,9 @@ python app.py
 
 ### Simply put, <ins> any custom particle you want can now work in casual. </ins>
 
-### Dx80 doesn't work (any particle with dx80 in its name) because they are special, this may be resolved in the future if enough people ask for it.
+### <s> Dx80 doesn't work (any particle with dx80 in its name) because they are special, this may be resolved in the future if enough people ask for it. </s>
 
-### IF YOU GET ANY WEIRD ERRORS LIKE "an error occured: 8" IT'S BECAUSE THE BACKUP IS CORRUPT, DELETE THE BACKUP FOLDER AND VERIFY GAME FILES, THEN TRY AGAIN :).
+works now for the presets that support it (minecraft).
 
 This, of course, may make your game unstable, the presets I provide will be tested by me and others vigorously to ensure as few crashes as possible.
 
