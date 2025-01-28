@@ -49,7 +49,8 @@ class ParticleMerger:
         self.progress_callback = progress_callback
 
         # excluded patterns for special handling
-        self.excluded_patterns = ['dx80', 'dx90', 'default', 'unusual', 'test', '_high', '_slow']
+        self.excluded_patterns = ['dx80', 'dx90', 'default', 'unusual', 'test', '_high', '_slow',
+                                  'smoke_blackbillow', "level_fx"]
 
         print("\nInitializing ParticleMerger...")
         print(f"Mod folder: {folder_setup.mods_dir}")

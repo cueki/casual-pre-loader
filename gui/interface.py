@@ -92,7 +92,8 @@ class ParticleOperations(QObject):
 
             # phase 2: Clean Particle Roots
             self.update_phase("Cleaning Up Particle Roots")
-            excluded_patterns = ['dx80', 'dx90', 'default', 'unusual', 'test', '_high', '_slow']
+            excluded_patterns = ['dx80', 'dx90', 'default', 'unusual', 'test', '_high', '_slow',
+                                 'smoke_blackbillow', "level_fx"]
             pcf_files = [f for f in file_handler.list_pcf_files()
                          if not any(pattern in f.lower() for pattern in excluded_patterns)]
             for i, file in enumerate(pcf_files):

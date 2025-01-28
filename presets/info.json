@@ -36,5 +36,13 @@
             "Pink lightwarp"
         ],
         "preview": "image.jpg"
+    },
+    "TF2_Classic": {
+        "type": "vanilla",
+        "description": "TF2 Classic particle pack",
+        "features": [
+            "Too lazy right now but its the tf2 classic pack on gamebanana"
+        ],
+        "preview": "image.jpg"
     }
 }
