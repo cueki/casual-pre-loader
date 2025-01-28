@@ -1,5 +1,6 @@
 import os
 import copy
+import shutil
 from pathlib import Path
 from typing import List, Set, Dict
 from parsers.pcf_file import PCFFile
@@ -37,32 +38,45 @@ def save_merged_pcf(pcf: PCFFile, output_path: Path) -> bool:
         return False
 
 
+def should_exclude_file(filename: str, excluded_patterns: List[str]) -> bool:
+    return any(pattern in filename.lower() for pattern in excluded_patterns)
+
+
 class ParticleMerger:
     def __init__(self, file_handler: FileHandler, vpk_handler: VPKHandler, progress_callback=None):
         self.file_handler = file_handler
         self.vpk_handler = vpk_handler
         self.progress_callback = progress_callback
 
+        # excluded patterns for special handling
+        self.excluded_patterns = ['dx80', 'dx90', 'default', 'unusual', 'test', '_high', '_slow']
+
         print("\nInitializing ParticleMerger...")
         print(f"Mod folder: {folder_setup.mods_dir}")
 
-        # get mod files and normalize path for filtering
+        # process mod files
         self.mod_files = []
+        self.excluded_mod_files = []
+
+        # collect and categorize mod files
         for f in folder_setup.mods_particle_dir.glob('*.pcf'):
             if 'particles/' not in f.name:
                 normalized_path = f'particles/{f.name}'
             else:
                 normalized_path = f.name
-            self.mod_files.append(normalized_path)
-        print(f"Found {len(self.mod_files)} mod PCF files")
 
-        # create a list of (archive_index, filepath) tuples for game files
-        excluded_patterns = ['dx80', 'dx90', 'default', 'unusual', 'test', '_high', '_slow']
+            if should_exclude_file(normalized_path, self.excluded_patterns):
+                self.excluded_mod_files.append(normalized_path)
+            else:
+                self.mod_files.append(normalized_path)
 
+        print(f"Found {len(self.mod_files)} mod PCF files for merging")
+        print(f"Found {len(self.excluded_mod_files)} excluded mod PCF files for direct compression")
+
+        # process game files
         game_file_tuples = []
-
         for file in file_handler.list_pcf_files():
-            if any(pattern in file.lower() for pattern in excluded_patterns):
+            if should_exclude_file(file, self.excluded_patterns):
                 continue
 
             entry_info = vpk_handler.get_file_entry(file)
@@ -70,17 +84,14 @@ class ParticleMerger:
                 continue
 
             _, _, entry = entry_info
-
             game_file_tuples.append((entry.archive_index, file))
 
         # sort by archive index first, then by filepath
         game_file_tuples.sort(key=lambda x: (x[0], x[1]))
-
-        # just the filepaths pls
         self.game_files = [file for _, file in game_file_tuples]
         print(f"Found {len(self.game_files)} game PCF files")
 
-        self.total_files = len(self.game_files) + len(self.mod_files)
+        self.total_files = len(self.game_files) + len(self.mod_files) + len(self.excluded_mod_files)
         self.processed_files = 0
 
         # update initial progress
@@ -103,8 +114,23 @@ class ParticleMerger:
         self.ignore_list: Set[str] = set()
         self.merged_files: Dict[str, List[str]] = {}
 
+    def process_excluded_files(self):
+        print("\nMoving special mod files to output...")
+        for file_path in self.excluded_mod_files:
+            base_name = Path(file_path).name
+            self.update_progress(f"Moving special file {base_name}")
+
+            source_path = folder_setup.mods_particle_dir / base_name
+            output_path = folder_setup.output_dir / base_name
+
+            try:
+                shutil.copy2(source_path, output_path)
+                print(f"Moved special file: {base_name}")
+                self.processed_files += 1
+            except Exception as e:
+                print(f"Error moving special file {base_name}: {e}")
+
     def update_progress(self, message=""):
-        # loading bar callback
         if self.progress_callback:
             progress = (self.processed_files / self.total_files) * 100
             self.progress_callback(progress, message)
@@ -122,6 +148,9 @@ class ParticleMerger:
     def merge_particles(self):
         print("\nStarting particle merge process...")
 
+        # process excluded files first
+        self.process_excluded_files()
+
         # game files first, then mod files
         files_to_process = []
 
@@ -136,9 +165,9 @@ class ParticleMerger:
             else:
                 print(f"Failed to extract {game_file}")
 
-        # mod files
+        # add non-excluded mod files
         files_to_process.extend(self.mod_files)
-        print(f"\nTotal files to process: {len(files_to_process)}")
+        print(f"\nTotal files to process for merging: {len(files_to_process)}")
 
         output_number = 0
         current_idx = 0
@@ -147,10 +176,7 @@ class ParticleMerger:
             current_output = Path(self.get_sorted_game_files()[output_number][0]).name
             current_output_max_size = self.get_sorted_game_files()[output_number][2]
 
-            # keep track of successfully processed files
             successful_merges = []
-
-            # process first file
             file_name = files_to_process[current_idx]
             base_name = Path(file_name).name
             self.update_progress(f"Processing {base_name}")
@@ -160,7 +186,6 @@ class ParticleMerger:
             else:
                 source_path = folder_setup.game_files_dir / base_name
 
-            # double check if even the first file is too large
             potential_size = check_compressed_size(PCFFile(source_path).decode())
             if potential_size > current_output_max_size:
                 output_number += 1
@@ -171,7 +196,6 @@ class ParticleMerger:
             next_idx = current_idx + 1
 
             while next_idx < len(files_to_process):
-                # try merging next file
                 file_name = files_to_process[next_idx]
                 base_name = Path(file_name).name
                 if file_name in self.mod_files:
@@ -182,13 +206,11 @@ class ParticleMerger:
                 print(f"Processing file {next_idx + 1}/{len(files_to_process)}")
                 next_pcf = PCFFile(source_path).decode()
 
-                # try merging with current PCF
                 try:
                     merged_pcf = merge_pcf_files(current_pcf, next_pcf)
                     potential_size = check_compressed_size(merged_pcf)
 
                     if potential_size <= current_output_max_size:
-                        # merge was successful, update state
                         current_pcf = merged_pcf
                         successful_merges.append(source_path)
                         next_idx += 1
@@ -200,7 +222,6 @@ class ParticleMerger:
                     print(f"Error merging file {file_name}: {e}")
                     break
 
-            # save the last successful merge state
             if len(successful_merges) > 0:
                 output_path = folder_setup.output_dir / current_output
                 out_merge = PCFFile(successful_merges[0]).decode()
@@ -212,12 +233,10 @@ class ParticleMerger:
 
         return self.merged_files
 
-    def process(self) -> Dict[str, List[str]]:
+    def process(self):
         print("\n=== Starting Particle File Processing ===")
         print("----------------------------------------")
-
-        merged_results = self.merge_particles()
+        self.merge_particles()
 
         print("\n=== Merge Process Complete ===")
 
-        return merged_results

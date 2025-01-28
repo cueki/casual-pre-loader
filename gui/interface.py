@@ -86,7 +86,7 @@ class ParticleOperations(QObject):
             file_handler = FileHandler(vpk_handler)
 
             # phase 1: ParticleMerger
-            self.phase_signal.emit("To Merge Particles...")
+            self.phase_signal.emit("Merge Particles...")
             particle_merger = ParticleMerger(file_handler, vpk_handler, lambda p, m: self.update_phase_progress(p, m))
             particle_merger.process()
 
