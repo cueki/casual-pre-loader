@@ -3,6 +3,7 @@ preset_selections.json
 tf2_misc_000.vpk
 tf2_misc_017.vpk
 tf2_misc_dir.vpk
+*.pcf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
