@@ -7,9 +7,6 @@ class PCFVersion(StrEnum):
     DMX_BINARY2_DMX1 = "<!-- dmx encoding binary 2 format dmx 1 -->"
     DMX_BINARY2_PCF1 = "<!-- dmx encoding binary 2 format pcf 1 -->"
     DMX_BINARY3_PCF1 = "<!-- dmx encoding binary 3 format pcf 1 -->"
-    DMX_BINARY3_PCF2 = "<!-- dmx encoding binary 3 format pcf 2 -->"
-    DMX_BINARY4_PCF2 = "<!-- dmx encoding binary 4 format pcf 2 -->"
-    DMX_BINARY5_PCF2 = "<!-- dmx encoding binary 5 format pcf 2 -->"
 
 
 class AttributeType(IntEnum):

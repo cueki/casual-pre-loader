@@ -71,7 +71,7 @@ def find_duplicate_array_elements(pcf: PCFFile):
                     if idx < len(pcf.elements):
                         referenced_element = pcf.elements[idx]
                         ref_type_name = pcf.string_dictionary[referenced_element.type_name_index].decode('ascii')
-                        if ref_type_name not in ('DmeElement', 'DmeParticleSystemDefinition'):
+                        if ref_type_name not in ('DmeElement','DmElement', 'DmeParticleSystemDefinition'):
                             element_hash = get_element_hash(referenced_element)
                             if element_hash not in hash_to_indices:
                                 hash_to_indices[element_hash] = []

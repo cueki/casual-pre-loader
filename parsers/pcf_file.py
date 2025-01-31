@@ -15,7 +15,7 @@ class PCFElement:
 
 @dataclass
 class PCFFile:
-    def __init__(self, input_file: Union[Path, str], version: str = "DMX_BINARY4_PCF2"):
+    def __init__(self, input_file: Union[Path, str], version: str = "DMX_BINARY2_PCF1"):
         self.version = version
         self.string_dictionary: List[bytes] = []  # changed to explicitly store bytes
         self.elements: List[PCFElement] = []
@@ -47,11 +47,7 @@ class PCFFile:
             if isinstance(value, str):
                 value = value.encode('ascii', errors='replace')
 
-            if self.version == 'DMX_BINARY4_PCF2':
-                file.write(struct.pack(ATTRIBUTE_VALUES.get(attr_type), len(value)))
-                file.write(value)
-            else:
-                self.write_null_terminated_string(file, value)
+            self.write_null_terminated_string(file, value)
             return
 
         if attr_type == AttributeType.MATRIX:
@@ -80,9 +76,6 @@ class PCFFile:
             return bool(file.read(1)[0])
 
         if attr_type == AttributeType.STRING:
-            if self.version == 'DMX_BINARY4_PCF2':
-                length = struct.unpack(ATTRIBUTE_VALUES.get(attr_type), file.read(2))[0]
-                return file.read(length)
             return self.read_null_terminated_string(file)
 
         if attr_type == AttributeType.BINARY:
@@ -118,10 +111,8 @@ class PCFFile:
             self.write_null_terminated_string(file, f"{version_string}\n")
 
             # write string dictionary
-            if self.version == 'DMX_BINARY4_PCF2':
-                file.write(struct.pack('<I', len(self.string_dictionary)))
-            else:
-                file.write(struct.pack('<H', len(self.string_dictionary)))
+
+            file.write(struct.pack('<H', len(self.string_dictionary)))
 
             # write strings as raw bytes
             for string in self.string_dictionary:
@@ -161,10 +152,7 @@ class PCFFile:
                 raise ValueError(f"Unsupported PCF version: {header}")
 
             # read string dictionary
-            if self.version == 'DMX_BINARY4_PCF2':
-                count = struct.unpack('<I', file.read(4))[0]
-            else:
-                count = struct.unpack('<H', file.read(2))[0]
+            count = struct.unpack('<H', file.read(2))[0]
 
             # store strings as bytes
             for _ in range(count):
