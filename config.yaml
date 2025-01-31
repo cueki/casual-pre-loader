@@ -1,2 +1,0 @@
-color_shift:
-  mode: MATCH_TARGET  # Can be MATCH_TARGET, PRESERVE_FEEL, or RANDOM (default is MATCH_TARGET)

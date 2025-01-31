@@ -1,15 +1,5 @@
-from typing import Dict
 from parsers.pcf_file import PCFFile
-from operations.color import RGB, analyze_pcf_colors, transform_team_colors
 from operations.pcf_compress import remove_duplicate_elements
-
-
-def pcf_color_processor(targets: Dict[str, Dict[str, RGB]]):
-    def process_pcf(pcf: PCFFile) -> PCFFile:
-        colors = analyze_pcf_colors(pcf)
-        return transform_team_colors(pcf, colors, targets)
-
-    return process_pcf
 
 
 def pcf_empty_root_processor():
