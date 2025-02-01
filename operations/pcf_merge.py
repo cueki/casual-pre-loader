@@ -7,19 +7,12 @@ def copy_element(element: PCFElement, offset: int, source_pcf: PCFFile,
     # get the type name string from the source PCF
     type_name = source_pcf.string_dictionary[element.type_name_index]
 
-    # handle DmeElement root and find/add type name in target PCF's string dictionary
+    # find or add type name in target PCF's string dictionary
     try:
-        if type_name == b'DmeElement':
-            new_type_name_index = 0
-        else:
-            try:
-                new_type_name_index = target_pcf.string_dictionary.index(type_name)
-            except ValueError:
-                # add new type name to dictionary if it doesn't exist
-                new_type_name_index = len(target_pcf.string_dictionary)
-                target_pcf.string_dictionary.append(type_name)
-    except Exception as e:
-        raise ValueError(f"Error processing type name '{type_name.decode('ascii')}': {str(e)}")
+        new_type_name_index = target_pcf.string_dictionary.index(type_name)
+    except ValueError:
+        new_type_name_index = len(target_pcf.string_dictionary)
+        target_pcf.string_dictionary.append(type_name)
 
     new_element = PCFElement(
         type_name_index=new_type_name_index,
@@ -30,14 +23,13 @@ def copy_element(element: PCFElement, offset: int, source_pcf: PCFFile,
 
     # copy and update attributes
     for attr_name, (attr_type, value) in element.attributes.items():
-        # first ensure the attribute name exists in target PCF's string dictionary
+        # ensure attribute name exists in target PCF's string dictionary
         try:
             target_pcf.string_dictionary.index(attr_name)
         except ValueError:
-            # add new attribute name if it doesn't exist
             target_pcf.string_dictionary.append(attr_name)
 
-        # now handle the attribute value based on type
+        # handle the attribute value based on type
         if attr_type == AttributeType.ELEMENT:
             # update single element reference
             new_value = value + offset if value != 4294967295 else value
@@ -55,36 +47,56 @@ def copy_element(element: PCFElement, offset: int, source_pcf: PCFFile,
     return new_element
 
 
-def merge_pcf_files(pcf1: PCFFile, pcf2: PCFFile) -> PCFFile:
-    # get starting offset for element indices
-    element_offset = len(pcf1.elements)
+def merge_pcf_files(pcfs: [PCFFile, ...]) -> PCFFile:
+    if not pcfs:
+        raise ValueError("At least one PCF file must be provided")
 
-    # root is always index 0
-    root_idx = 0
-    root_element = pcf1.elements[root_idx]
+    # If only one PCF, return it
+    if len(pcfs) == 1:
+        return pcfs[0]
 
-    # copy and update non-root elements from pcf2
-    new_elements = []
-    new_system_indices = []
+    # Use the first PCF as the base
+    base_pcf = pcfs[0]
 
-    for i, element in enumerate(pcf2.elements):
-        # skip the root element from pcf2
-        if i == root_idx:
-            continue
+    # Initialize result PCF with properties from the first file
+    result_pcf = PCFFile(base_pcf.input_file, version=base_pcf.version)
+    result_pcf.string_dictionary = base_pcf.string_dictionary.copy()
 
-        new_element = copy_element(element, element_offset - 1, pcf2, pcf1)
-        new_elements.append(new_element)
+    # Start with the root element from the first PCF
+    result_pcf.elements = [base_pcf.elements[0]]
+    root_element = result_pcf.elements[0]
 
-        # track new particle system definitions
-        type_name = pcf2.string_dictionary[element.type_name_index]
-        if type_name == b'DmeParticleSystemDefinition':
-            new_system_indices.append(len(pcf1.elements) + len(new_elements) - 1)
+    # Track current offset and particle system indices
+    current_offset = len(result_pcf.elements)
+    all_system_indices = []
 
-    # update the root element's particleSystemDefinitions array with new system indices
-    attr_type, existing_systems = root_element.attributes[b'particleSystemDefinitions']
-    root_element.attributes[b'particleSystemDefinitions'] = (attr_type, existing_systems + new_system_indices)
+    # Get initial particle systems from the first PCF
+    attr_type, base_systems = root_element.attributes[b'particleSystemDefinitions']
+    all_system_indices.extend(base_systems)
 
-    # add all new elements to pcf1
-    pcf1.elements.extend(new_elements)
+    # Copy non-root elements from the first PCF
+    for i, element in enumerate(base_pcf.elements[1:], 1):
+        result_pcf.elements.append(copy_element(element, 0, base_pcf, result_pcf))
 
-    return pcf1
+    # Process each additional PCF file
+    for pcf in pcfs[1:]:
+        file_system_indices = []
+
+        # Copy and update non-root elements
+        for i, element in enumerate(pcf.elements[1:], 1):  # Skip root element
+            new_element = copy_element(element, current_offset - 1, pcf, result_pcf)
+            result_pcf.elements.append(new_element)
+
+            # Track particle system definitions
+            type_name = pcf.string_dictionary[element.type_name_index]
+            if type_name == b'DmeParticleSystemDefinition':
+                file_system_indices.append(len(result_pcf.elements) - 1)
+
+        # Update offset for next file
+        current_offset = len(result_pcf.elements)
+        all_system_indices.extend(file_system_indices)
+
+    # Update the root element's particleSystemDefinitions with all systems
+    root_element.attributes[b'particleSystemDefinitions'] = (attr_type, all_system_indices)
+
+    return result_pcf

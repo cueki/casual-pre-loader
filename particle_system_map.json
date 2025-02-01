@@ -395,16 +395,13 @@
     "hwn_bats_tent_blue",
     "hammer_bones_kickup",
     "bonzo_vomit_blue",
-    "blood_decap",
     "doomsday_tentpole_vanish01",
     "duck_pickup",
     "duck_collect_trail_red",
-    "rockettrail_airstrike_line",
     "duck_collect_trail_blue",
     "duck_collect_trail_special_blue",
     "duck_collect_trail_special_red",
-    "soul_trail",
-    "taunt_gasblast_steam"
+    "soul_trail"
   ],
   "particles/doomsday_fx.pcf": [
     "rockettrail_doomsday",
@@ -738,8 +735,6 @@
     "ghost_glow_red"
   ],
   "particles/dirty_explode.pcf": [
-    "cinefx_goldrush_burningbarrel",
-    "cinefx_goldrush",
     "asplode_hoodoo",
     "asplode_hoodoo_smoke"
   ],
@@ -908,7 +903,6 @@
     "unusual_steaming",
     "unusual_robot_orbit_binary_fall",
     "unusual_robot_orbit_binary",
-    "speech_mediccall",
     "unusual_orbit_fire",
     "superrare_beams1_newstyle",
     "birthday_player_circling",
@@ -931,8 +925,6 @@
     "unusual_robot_orbiting_sparks2",
     "unusual_orbit_cash",
     "foot_stamp",
-    "halloween_boss_foot_impact_customcolor",
-    "halloween_boss_foot_fire_customcolor",
     "unusual_hearts_bubbling",
     "unusual_robot_orbit_binary2",
     "unusual_robot_time_warp2",
@@ -1186,9 +1178,7 @@
     "explosionTrail_seeds_mvm",
     "fireSmoke_Collumn_mvmAcres",
     "fireSmoke_Collumn_mvmAcres_sm",
-    "woodSplinter_standee",
-    "taunt_flip_land_dust2",
-    "ExplosionCore_MidAir"
+    "woodSplinter_standee"
   ],
   "particles/medicgun_beam.pcf": [
     "dispenser_heal_red",
@@ -1519,5 +1509,26 @@
     "rockettrail_airstrike_line",
     "rockettrail_RocketJumper",
     "furious_flyer_activated"
+  ],
+  "particles/smoke_blackbillow.pcf": [
+    "smoke_blackbillow",
+    "smoke_blackbillow_dustbowl_skybox",
+    "smoke_blackbillow_gravelpit_skybox",
+    "smoke_blackbillow_hydro_skybox",
+    "smoke_blackbillow_skybox",
+    "smoke_campfire",
+    "smoke_pipeline_001",
+    "smoke_rocket_steam",
+    "smoke_rocket_steam_dustbowl",
+    "smoke_steam",
+    "smoke_train",
+    "smoke_whitebillow",
+    "smoke_whitebillow_skybox",
+    "smoke_whitebillow_steamship_skybox",
+    "smoke_wispy_black_2fort",
+    "smoke_wispy_black_dustbowl",
+    "smoke_wispy_black_granary",
+    "smoke_wispy_black_gravelpit",
+    "smoke_wispy_black_skybox"
   ]
 }

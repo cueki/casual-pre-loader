@@ -104,7 +104,6 @@ def reorder_elements(pcf: PCFFile, duplicates):
     duplicate_indices = set()
     for indices in duplicates.values():
         duplicate_indices.update(indices[1:])
-
     # create new list without duplicates and mapping of old to new indices
     new_elements = []
     old_to_new = {}
@@ -218,5 +217,8 @@ def remove_duplicate_elements(pcf: PCFFile) -> PCFFile:
         clean_children_arrays(result_pcf)
     else:
         print("No duplicates found")
+        rename_operators(result_pcf)
+        check_and_remove_defaults(result_pcf)
+        clean_children_arrays(result_pcf)
 
     return result_pcf
