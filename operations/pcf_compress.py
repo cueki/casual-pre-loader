@@ -199,12 +199,47 @@ def check_and_remove_defaults(pcf: PCFFile):
     return removed_count
 
 
+def optimize_string_dictionary(pcf: PCFFile):
+    # collect used strings
+    used_strings = set()
+    optimized = copy.deepcopy(pcf)
+
+    # add type names
+    for element in pcf.elements:
+        used_strings.add(pcf.string_dictionary[element.type_name_index])
+
+    # add attribute names
+    for element in pcf.elements:
+        used_strings.update(element.attributes.keys())
+
+    # create new minimal dictionary
+    new_dictionary = sorted(list(used_strings))  # Sort for consistency
+    old_to_new = {old_str: i for i, old_str in enumerate(new_dictionary)}
+
+    # update element references
+    for element in optimized.elements:
+        # update type name index
+        old_type = pcf.string_dictionary[element.type_name_index]
+        element.type_name_index = old_to_new[old_type]
+
+        # update attribute dictionary
+        new_attributes = {}
+        for attr_name, value in element.attributes.items():
+            new_attributes[attr_name] = value
+        element.attributes = new_attributes
+
+    # set new dictionary
+    optimized.string_dictionary = new_dictionary
+
+    return optimized
+
 def remove_duplicate_elements(pcf: PCFFile) -> PCFFile:
     # work with copy
     result_pcf = copy.deepcopy(pcf)
 
     # just in case
     fix_child_references(result_pcf)
+    clean_children_arrays(result_pcf)
 
     # find duplicates
     duplicates = find_duplicate_array_elements(result_pcf)
@@ -212,13 +247,9 @@ def remove_duplicate_elements(pcf: PCFFile) -> PCFFile:
     if duplicates:
         update_array_indices(result_pcf, duplicates)
         reorder_elements(result_pcf, duplicates)
-        rename_operators(result_pcf)
-        check_and_remove_defaults(result_pcf)
-        clean_children_arrays(result_pcf)
-    else:
-        print("No duplicates found")
-        rename_operators(result_pcf)
-        check_and_remove_defaults(result_pcf)
-        clean_children_arrays(result_pcf)
 
-    return result_pcf
+    rename_operators(result_pcf)
+    check_and_remove_defaults(result_pcf)
+    final_result = optimize_string_dictionary(result_pcf)
+
+    return final_result

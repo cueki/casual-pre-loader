@@ -11,26 +11,19 @@ def load_particle_system_map(map_path: str) -> Dict[str, List[str]]:
 
 
 def find_child_elements(pcf: PCFFile, element_idx: int, visited: Set[int]) -> Set[int]:
-    # find all child elements of a given element index
     if element_idx in visited:
         return set()
 
     visited.add(element_idx)
     children = set()
     element = pcf.elements[element_idx]
+    children.add(element_idx)
 
-    # check if this is a DmeParticleChild which uses a single ELEMENT type for child reference
-    type_name = pcf.string_dictionary[element.type_name_index]
-    if type_name == b'DmeParticleChild':
-        for attr_name, (attr_type, value) in element.attributes.items():
-            if attr_type == AttributeType.ELEMENT:
-                if value != 4294967295:
-                    children.add(value)
-                    children.update(find_child_elements(pcf, value, visited))
-
-    # handle regular ELEMENT_ARRAY attributes for all elements
     for attr_name, (attr_type, value) in element.attributes.items():
-        if attr_type == AttributeType.ELEMENT_ARRAY:
+        if attr_type == AttributeType.ELEMENT and value != 4294967295:
+            children.add(value)
+            children.update(find_child_elements(pcf, value, visited))
+        elif attr_type == AttributeType.ELEMENT_ARRAY:
             for child_idx in value:
                 if child_idx != 4294967295:
                     children.add(child_idx)
@@ -48,15 +41,9 @@ def find_element_by_name(pcf: PCFFile, element_name: str):
 
 
 def get_element_tree(pcf: PCFFile, element_idx: int) -> Dict[int, PCFElement]:
-    # extract an element and all its children from a PCF file.
     visited = set()
-    tree = {element_idx: pcf.elements[element_idx]}
-    children = find_child_elements(pcf, element_idx, visited)
-
-    for child_idx in children:
-        tree[child_idx] = pcf.elements[child_idx]
-
-    return tree
+    indices = find_child_elements(pcf, element_idx, visited)
+    return {idx: pcf.elements[idx] for idx in indices}
 
 
 def get_pcf_element_names(pcf: PCFFile) -> List[str]:
