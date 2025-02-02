@@ -21,8 +21,8 @@ class FolderConfig:
     game_files_folder = "game_files"
 
     # two folders nested in mods
-    # mods_particle_folder = "particles"
-    # mods_everything_else_folder = "everything_else"
+    mods_particle_folder = "particles"
+    mods_everything_else_folder = "everything_else"
 
     def __post_init__(self):
         self.backup_dir = self.project_dir /  self.backup_folder
@@ -36,8 +36,8 @@ class FolderConfig:
         self.mods_dir = self.temp_dir / self.mods_folder
         self.game_files_dir = self.temp_dir / self.game_files_folder
 
-        # self.mods_particle_dir = self.mods_dir / self.mods_particle_folder
-        # self.mods_everything_else_dir = self.mods_dir / self.mods_everything_else_folder
+        self.mods_particle_dir = self.mods_dir / self.mods_particle_folder
+        self.mods_everything_else_dir = self.mods_dir / self.mods_everything_else_folder
 
     def create_required_folders(self) -> None:
         folders = [
@@ -49,9 +49,9 @@ class FolderConfig:
             self.working_dir,
             self.output_dir,
             self.mods_dir,
-            self.game_files_dir
-            # self.mods_particle_dir,
-            # self.mods_everything_else_dir
+            self.game_files_dir,
+            self.mods_particle_dir,
+            self.mods_everything_else_dir
         ]
 
         for folder in folders:

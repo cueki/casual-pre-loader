@@ -1,8 +1,6 @@
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
-
-from handlers.vpk_handler import VPKHandler
 from parsers.pcf_file import PCFFile
 from operations.pcf_rebuild import (
     load_particle_system_map,
@@ -49,20 +47,11 @@ class AdvancedParticleMerger:
 
     def preprocess_vpk(self, vpk_path: Path) -> None:
         vpk_folder_name = vpk_path.stem
-        out_dir = folder_setup.mods_dir / vpk_folder_name
-        out_dir.mkdir(parents=True, exist_ok=True)
-
-        vpk_handler = VPKHandler(str(vpk_path))
-        file_list = vpk_handler.list_files()
-
-        for file_path in file_list:
-            relative_path = Path(file_path)
-            output_path = out_dir / relative_path
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            vpk_handler.extract_file(file_path, str(output_path))
+        out_dir = folder_setup.user_mods_dir / vpk_folder_name
 
         # group files by their target particle file
-        for particle in Path(out_dir / "particles/").iterdir():
+        for particle in Path(out_dir /"particles").iterdir():
+            print(particle)
             for particle_file_target, elements_to_extract, source_pcf in (
                     rebuild_particle_files(particle, self.particle_map)):
                 output_path = folder_setup.get_output_path(
@@ -112,13 +101,3 @@ class AdvancedParticleMerger:
 
         for file in folder_setup.output_dir.iterdir():
             file.unlink()
-
-    def process(self) -> None:
-        vpk_files = list(folder_setup.user_mods_dir.glob('*.vpk'))
-
-        for i, vpk_path in enumerate(vpk_files):
-            self.update_progress(
-                (i / len(vpk_files)) * 100,
-                f"Processing VPK: {vpk_path.name}"
-            )
-            self.preprocess_vpk(vpk_path)

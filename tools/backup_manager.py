@@ -3,7 +3,8 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 from core.folder_setup import folder_setup
-
+from handlers.vpk_handler import VPKHandler
+from handlers.file_handler import FileHandler
 
 class BackupManager:
     def __init__(self, tf_dir: str):
@@ -79,20 +80,29 @@ class BackupManager:
             return False
 
     def prepare_working_copy(self) -> bool:
-        try:
-            print("Preparing working copy from backup...")
-            for vpk_name in self.required_vpks:
-                backup_file = folder_setup.get_backup_path(vpk_name)
-                if not backup_file.exists():
-                    print(f"ERROR: Backup file missing: {vpk_name}")
-                    return False
-                shutil.copy2(backup_file, folder_setup.working_dir / vpk_name)
+        print("Preparing working copy from backup...")
+        for vpk_name in self.required_vpks:
+            backup_file = folder_setup.get_backup_path(vpk_name)
+            if not backup_file.exists():
+                print(f"ERROR: Backup file missing: {vpk_name}")
+                return False
+            shutil.copy2(backup_file, folder_setup.working_dir / vpk_name)
 
-            return True
+        working_vpk_path = self.get_working_vpk_path()
+        vpk_handler = VPKHandler(str(working_vpk_path))
+        file_handler = FileHandler(vpk_handler)
 
-        except Exception as e:
-            print(f"Error preparing working copy: {e}")
-            return False
+        excluded_patterns = ['unusual']
+
+        pcf_files = [f for f in file_handler.list_pcf_files()
+                    if not any(pattern in f.lower() for pattern in excluded_patterns)]
+
+        for file in pcf_files:
+            base_name = Path(file).name
+            output_path = folder_setup.game_files_dir / base_name
+            file_handler.vpk.extract_file(file, str(output_path))
+
+        return True
 
     def deploy_to_game(self) -> bool:
         try:
