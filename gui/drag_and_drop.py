@@ -135,6 +135,7 @@ class ModDropZone(QFrame):
     def dropEvent(self, event):
         self.setProperty('dragOver', False)
         self.style().polish(self)
+        folder_setup.create_required_folders()
 
         for url in event.mimeData().urls():
             file_path = url.toLocalFile()
