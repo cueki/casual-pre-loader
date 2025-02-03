@@ -26,11 +26,10 @@ python_files = [
     ('operations/pcf_merge.py', 'operations'),
     ('operations/game_type.py', 'operations'),
     ('tools/backup_manager.py', 'tools'),
-    ('tools/pcf_squish.py', 'tools'),
-    ('gui/preset_customizer.py', 'gui'),
     ('gui/mod_descriptor.py', 'gui'),
     ('gui/interface.py', 'gui'),
-    ('gui/drag_and_drop.py', 'gui')
+    ('gui/drag_and_drop.py', 'gui'),
+    ('gui/conflict_matrix.py', 'gui')
 ]
 
 a = Analysis(
