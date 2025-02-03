@@ -10,7 +10,7 @@ from core.folder_setup import folder_setup
 from gui.drag_and_drop import ModDropZone
 from gui.interface import ParticleOperations
 from gui.mod_descriptor import AddonDescription
-from operations.game_type import check_game_type
+from operations.file_processors import check_game_type
 from tools.backup_manager import BackupManager
 
 

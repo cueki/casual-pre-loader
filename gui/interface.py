@@ -1,7 +1,5 @@
-import shutil
 import zipfile
 from typing import List
-
 from PyQt6.QtCore import QObject, pyqtSignal
 from pathlib import Path
 import vpk
@@ -10,9 +8,8 @@ from core.constants import CUSTOM_VPK_NAMES
 from core.folder_setup import folder_setup
 from handlers.file_handler import FileHandler
 from handlers.vpk_handler import VPKHandler
-from operations.file_processors import pcf_mod_processor
+from operations.file_processors import pcf_mod_processor, game_type, get_from_vpk
 from tools.backup_manager import BackupManager
-from operations.game_type import replace_game_type
 
 
 class ParticleOperations(QObject):
@@ -70,7 +67,7 @@ class ParticleOperations(QObject):
             # handle custom folder
             custom_dir = Path(tf_path) / 'custom'
             custom_dir.mkdir(exist_ok=True)
-            replace_game_type(Path(tf_path) / 'gameinfo.txt', uninstall=False)
+            game_type(Path(tf_path) / 'gameinfo.txt', uninstall=False)
 
             for custom_vpk in CUSTOM_VPK_NAMES:
                 vpk_path = custom_dir / custom_vpk
@@ -85,6 +82,9 @@ class ParticleOperations(QObject):
             if custom_content_dir.exists() and any(custom_content_dir.iterdir()):
                 new_pak = vpk.new(str(custom_content_dir))
                 new_pak.save(custom_dir / random.choice(CUSTOM_VPK_NAMES))
+
+            for file in custom_dir.glob("*.vpk"):
+                get_from_vpk(Path(file))
 
             self.update_progress(100, "Installation complete")
             self.success_signal.emit("Mods installed successfully!")
@@ -110,7 +110,7 @@ class ParticleOperations(QObject):
                 self.error_signal.emit("Failed to restore backup")
                 return
 
-            replace_game_type(Path(tf_path) / 'gameinfo.txt', uninstall=True)
+            game_type(Path(tf_path) / 'gameinfo.txt', uninstall=True)
             custom_dir = Path(tf_path) / 'custom'
             custom_dir.mkdir(exist_ok=True)
 

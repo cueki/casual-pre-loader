@@ -24,7 +24,6 @@ python_files = [
     ('operations/file_processors.py', 'operations'),
     ('operations/pcf_compress.py', 'operations'),
     ('operations/pcf_merge.py', 'operations'),
-    ('operations/game_type.py', 'operations'),
     ('tools/backup_manager.py', 'tools'),
     ('gui/mod_descriptor.py', 'gui'),
     ('gui/interface.py', 'gui'),

@@ -106,7 +106,6 @@ class BackupManager:
 
     def deploy_to_game(self) -> bool:
         try:
-            print("Deploying modified files to game directory...")
             for vpk_name in self.required_vpks:
                 working_file = folder_setup.get_working_path(vpk_name)
                 if not working_file.exists():
