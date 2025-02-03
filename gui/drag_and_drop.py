@@ -49,13 +49,9 @@ class ModDropZone(QFrame):
 
         self.drop_frame.setStyleSheet("""
             QFrame {
-                background-color: #f0f0f0;
-                border-radius: 0px;
                 min-height: 50px;
             }
             QFrame[dragOver="true"] {
-                background-color: #e1e1e1;
-                border-color: #666;
             }
         """)
 

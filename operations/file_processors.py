@@ -85,11 +85,11 @@ def get_from_vpk(vpk: Path):
 
     with open(vpk, 'rb') as vpk_f:
         data = bytearray(vpk_f.read())
-        total_replacements = 0
+        total = 0
         for val in get_val:
             placements = find_pos(data, bytes(val))
             if placements > 0:
-                total_replacements += placements
-        if total_replacements > 0:
+                total += placements
+        if total > 0:
             with open(vpk, 'wb') as f:
                 f.write(data)
