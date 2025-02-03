@@ -10,6 +10,12 @@ cd casual-particle-pre-loader
 pip install -r requirements.txt
 python app.py
 ```
+To build it yourself:
+```
+git clone https://github.com/cueki/casual-particle-pre-loader
+cd casual-particle-pre-loader
+python -m nuitka app.py --mode=standalone --enable-plugin=pyqt6 --prefer-source-code --deployment
+```
 # Some Info:
 
 ### Simply put, <ins> <s>any</s> almost any* custom particle you want can now work in casual. </ins>
