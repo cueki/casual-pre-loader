@@ -1,3 +1,2 @@
 vpk~=1.4.0
-PyInstaller~=6.4.0
 PyQt6~=6.8.0
