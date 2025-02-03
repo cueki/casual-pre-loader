@@ -3,7 +3,7 @@ tf2_misc_000.vpk
 tf2_misc_017.vpk
 tf2_misc_dir.vpk
 *.pcf
-
+user_mods/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
