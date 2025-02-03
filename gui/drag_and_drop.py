@@ -1,52 +1,57 @@
+import os
+import zipfile
 from pathlib import Path
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QLabel, QMessageBox, QTableWidget, QHeaderView, QTableWidgetItem, \
-    QCheckBox, QWidget, QHBoxLayout
+from PyQt6.QtWidgets import QFrame, QVBoxLayout, QLabel, QMessageBox
 from core.folder_setup import folder_setup
+from gui.conflict_matrix import ConflictMatrix
 from handlers.vpk_handler import VPKHandler
 import shutil
 from tools.advanced_particle_merger import AdvancedParticleMerger
 
 
-class ConflictMatrix(QTableWidget):
-    def __init__(self):
-       super().__init__()
-       self.setStyleSheet("QTableWidget { border: 1px solid #ccc; }")
-       self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-       self.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-       self.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
+def get_mod_particle_files():
+    mod_particles = {}
+    all_particles = set()
 
-    def update_matrix(self, mods, pcf_files):
-        self.setColumnCount(len(pcf_files))
-        self.setRowCount(len(mods))
-        self.setHorizontalHeaderLabels(pcf_files)
+    # scan directories
+    for vpk_dir in folder_setup.user_mods_dir.iterdir():
+        if vpk_dir.is_dir():
+            particle_dir = vpk_dir / "actual_particles"
+            if particle_dir.exists():
+                particles = [pcf.stem for pcf in particle_dir.glob("*.pcf")]
+                mod_particles[vpk_dir.name] = particles
+                all_particles.update(particles)
 
-        for row, mod in enumerate(mods):
-            name_item = QTableWidgetItem(mod)
-            self.setVerticalHeaderItem(row, name_item)
-
-            for col, _ in enumerate(pcf_files):
-                cell_widget = QCheckBox()
-                self.setCellWidget(row, col, cell_widget)
+    return mod_particles, sorted(list(all_particles))
 
 
 class ModDropZone(QFrame):
     mod_dropped = pyqtSignal(str)
+
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.drop_frame = None
+        self.conflict_matrix = None
         self.setAcceptDrops(True)
-        layout = QVBoxLayout(self)
+        self.setup_ui()
 
-        # original drop zone
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
         self.drop_frame = QFrame()
-        self.drop_frame.setAcceptDrops(True)
-        self.drop_frame.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Sunken)
+
+        drop_layout = QVBoxLayout(self.drop_frame)
+        title = QLabel("Drag and drop VPKs here (do not try and install them manually, it will break.)\n"
+                       "Non-particle mods will appear in the addons section under the install tab.")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title.setStyleSheet("font-size: 14px; font-weight: bold;")
+        drop_layout.addWidget(title)
+
         self.drop_frame.setStyleSheet("""
             QFrame {
                 background-color: #f0f0f0;
-                border: 2px dashed #aaa;
-                border-radius: 5px;
-                min-height: 100px;
+                border-radius: 0px;
+                min-height: 50px;
             }
             QFrame[dragOver="true"] {
                 background-color: #e1e1e1;
@@ -54,17 +59,65 @@ class ModDropZone(QFrame):
             }
         """)
 
-        drop_layout = QVBoxLayout(self.drop_frame)
-        title = QLabel("Drag and drop VPK mods here")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        title.setStyleSheet("font-size: 14px; font-weight: bold;")
-        drop_layout.addWidget(title)
-
         # conflict matrix
         self.conflict_matrix = ConflictMatrix()
 
         layout.addWidget(self.drop_frame)
         layout.addWidget(self.conflict_matrix)
+
+    def apply_particle_selections(self):
+        selections = self.conflict_matrix.get_selected_particles()
+
+        folder_setup.cleanup_temp_folders()
+        folder_setup.create_required_folders()
+
+        # process each mod that has selected particles
+        used_mods = set(selections.values())
+        for mod_name in used_mods:
+            mod_dir = folder_setup.user_mods_dir / mod_name
+
+            # copy selected particles
+            source_particles_dir = mod_dir / "actual_particles"
+            if source_particles_dir.exists():
+                for particle_file, selected_mod in selections.items():
+                    if selected_mod == mod_name:
+                        source_file = source_particles_dir / (particle_file + ".pcf")
+                        if source_file.exists():
+                            shutil.copy2(source_file, folder_setup.mods_particle_dir / (particle_file + ".pcf"))
+
+            # Copy all other non-particle content
+            for item in mod_dir.iterdir():
+                if item.name not in ['particles', 'actual_particles']:
+                    destination = folder_setup.mods_everything_else_dir / item.relative_to(mod_dir)
+                    if item.is_file():
+                        destination.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(item, destination)
+                    elif item.is_dir():
+                        shutil.copytree(item, destination, dirs_exist_ok=True)
+
+        return len(selections) > 0
+
+    def update_matrix(self):
+        # get mod information and all unique particle files
+        mod_particles, all_particles = get_mod_particle_files()
+
+        if not mod_particles:
+            # clear the matrix if there are no mods
+            self.conflict_matrix.setRowCount(0)
+            self.conflict_matrix.setColumnCount(0)
+            return
+
+        mods = list(mod_particles.keys())
+        self.conflict_matrix.update_matrix(mods, all_particles)
+
+        # enable/disable checkboxes based on which mods have which particles
+        for row, mod_name in enumerate(mods):
+            mod_particles_set = set(mod_particles[mod_name])
+            for col, particle in enumerate(all_particles):
+                cell_widget = self.conflict_matrix.cellWidget(row, col + 1)  # Add +1 for Select All column
+                if cell_widget:
+                    checkbox = cell_widget.layout().itemAt(0).widget()
+                    checkbox.setEnabled(particle in mod_particles_set)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -74,43 +127,6 @@ class ModDropZone(QFrame):
                     self.setProperty('dragOver', True)
                     self.style().polish(self)
                     return
-        event.ignore()
-
-    def update_matrix(self):
-        mods = []
-        pcf_files = set()
-
-        # scan directories
-        for vpk_dir in folder_setup.user_mods_dir.iterdir():
-            if vpk_dir.is_dir():
-                particle_dir = vpk_dir / "actual_particles"
-                if particle_dir.exists():
-                    mods.append(vpk_dir.name)
-                    for pcf in particle_dir.glob("*.pcf"):
-                        pcf_files.add(pcf.name)
-
-        pcf_files = sorted(list(pcf_files))
-
-        # set up matrix
-        self.conflict_matrix.setColumnCount(len(pcf_files))
-        self.conflict_matrix.setRowCount(len(mods))
-
-        # set headers without .pcf extension
-        header_labels = [pcf.replace('.pcf', '') for pcf in pcf_files]
-        self.conflict_matrix.setHorizontalHeaderLabels(header_labels)
-        self.conflict_matrix.setVerticalHeaderLabels(mods)
-
-        # add centered checkboxes
-        for row in range(len(mods)):
-            for col in range(len(pcf_files)):
-                cell_widget = QWidget()
-                layout = QHBoxLayout(cell_widget)
-                layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                layout.setContentsMargins(0, 0, 0, 0)
-
-                checkbox = QCheckBox()
-                layout.addWidget(checkbox)
-                self.conflict_matrix.setCellWidget(row, col, cell_widget)
 
     def dragLeaveEvent(self, event):
         self.setProperty('dragOver', False)
@@ -124,8 +140,9 @@ class ModDropZone(QFrame):
             file_path = url.toLocalFile()
             try:
                 vpk_name = Path(file_path).stem
-                extracted_dir = folder_setup.user_mods_dir / vpk_name
-                extracted_dir.mkdir(parents=True, exist_ok=True)
+                extracted_user_mods_dir = folder_setup.user_mods_dir / vpk_name
+                extracted_addons_dir = folder_setup.addons_dir / vpk_name
+                extracted_user_mods_dir.mkdir(parents=True, exist_ok=True)
 
                 # extract VPK contents
                 vpk_handler = VPKHandler(file_path)
@@ -137,28 +154,36 @@ class ModDropZone(QFrame):
                 # extract all files
                 for file_path in file_list:
                     relative_path = Path(file_path)
-                    output_path = extracted_dir / relative_path
+                    output_path = extracted_user_mods_dir / relative_path
                     output_path.parent.mkdir(parents=True, exist_ok=True)
                     vpk_handler.extract_file(file_path, str(output_path))
 
                 # process with AdvancedParticleMerger if it has particles
                 if has_particles:
                     particle_merger = AdvancedParticleMerger()
-                    particle_merger.preprocess_vpk(extracted_dir)
+                    particle_merger.preprocess_vpk(extracted_user_mods_dir)
                 else:
-                    # for non-particle mods, copy to everything_else
-                    everything_else = folder_setup.mods_everything_else_dir
-                    everything_else.mkdir(parents=True, exist_ok=True)
-                    for item in extracted_dir.iterdir():
-                        if item.is_file():
-                            shutil.copy2(item, everything_else / item.name)
-                        else:
-                            shutil.copytree(item, everything_else / item.name, dirs_exist_ok=True)
+                    # for non-particle mods, zip and move to addons
+                    zip_path = extracted_addons_dir.with_suffix('.zip')
+
+                    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_f:
+                        # walk through all files in the extracted directory
+                        for root, _, files in os.walk(extracted_user_mods_dir):
+                            for file in files:
+                                file_path = Path(root) / file
+                                # calculate relative path for the archive
+                                arc_path = file_path.relative_to(extracted_user_mods_dir)
+                                # add file to the archive
+                                zip_f.write(file_path, arc_path)
+
+                    # clean up the extracted directory after zipping
+                    shutil.rmtree(extracted_user_mods_dir)
+                    # hacky refresh
+                    main_window = self.window()
+                    main_window.load_addons()
+
                 self.update_matrix()
                 self.mod_dropped.emit(str(file_path))
 
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to process VPK: {str(e)}")
-                # Clean up on error
-                if 'extracted_dir' in locals() and extracted_dir.exists():
-                    shutil.rmtree(extracted_dir)

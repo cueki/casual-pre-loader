@@ -9,8 +9,7 @@ from PyQt6.QtCore import pyqtSignal, Qt
 from core.folder_setup import folder_setup
 from gui.drag_and_drop import ModDropZone
 from gui.interface import ParticleOperations
-from gui.preset_customizer import PresetSelectionManager
-from gui.mod_descriptor import PresetDescription, AddonDescription
+from gui.mod_descriptor import AddonDescription
 from operations.game_type import check_game_type
 from tools.backup_manager import BackupManager
 
@@ -22,31 +21,27 @@ class ParticleManagerGUI(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.preset_description = None
         self.status_label = None
         self.progress_bar = None
         self.restore_button = None
         self.install_button = None
         self.browse_button = None
         self.tf_path_edit = None
-        self.presets_list = None
         self.addons_list = None
         self.addon_description = None
         self.mod_drop_zone = None
-        self.selection_manager = PresetSelectionManager()
 
         self.setWindowTitle("cukei's custom casual particle pre-loader :)")
         self.setFixedSize(1200, 600)
 
         self.tf_path = ""
-        self.selected_preset_files = set()
         self.selected_addons = []
         self.processing = False
 
         self.operations = ParticleOperations()
         self.setup_ui()
         self.load_last_directory()
-        self.load_presets_and_addons()
+        self.load_addons()
 
         self.operations.progress_signal.connect(self.update_progress)
         self.operations.error_signal.connect(self.show_error)
@@ -72,26 +67,29 @@ class ParticleManagerGUI(QMainWindow):
 
         tab_widget = QTabWidget()
 
-        # Mods Tab (Combined Presets and Addons)
-        mods_tab = QWidget()
-        mods_layout = QVBoxLayout(mods_tab)
+        # mods
+        custom_tab = QWidget()
+        custom_layout = QVBoxLayout(custom_tab)
+        self.mod_drop_zone = ModDropZone(self)
+        custom_layout.addWidget(self.mod_drop_zone)
+        self.mod_drop_zone.update_matrix()
+        tab_widget.addTab(custom_tab, "mods")
 
-        mod_splitter = QSplitter(Qt.Orientation.Horizontal)
+        # install
+        install_tab = QWidget()
+        install_layout = QVBoxLayout(install_tab)
 
-        # Left side: Lists
-        lists_widget = QWidget()
-        lists_layout = QVBoxLayout(lists_widget)
+        # vertical splitter for install tab
+        install_splitter = QSplitter(Qt.Orientation.Vertical)
 
-        # Presets Group
-        presets_group = QGroupBox("Presets")
-        presets_layout = QVBoxLayout()
-        self.presets_list = QListWidget()
-        self.presets_list.itemSelectionChanged.connect(self.on_preset_select)
-        presets_layout.addWidget(self.presets_list)
-        presets_group.setLayout(presets_layout)
-        lists_layout.addWidget(presets_group)
+        # addons list and description
+        left_widget = QWidget()
+        left_layout = QVBoxLayout(left_widget)
 
-        # Addons Group
+        # horizontal splitter for description
+        addons_splitter = QSplitter(Qt.Orientation.Horizontal)
+
+        # addons Group
         addons_group = QGroupBox("Addons")
         addons_layout = QVBoxLayout()
         self.addons_list = QListWidget()
@@ -99,48 +97,37 @@ class ParticleManagerGUI(QMainWindow):
         self.addons_list.itemSelectionChanged.connect(self.on_addon_select)
         addons_layout.addWidget(self.addons_list)
         addons_group.setLayout(addons_layout)
-        lists_layout.addWidget(addons_group)
+        addons_splitter.addWidget(addons_group)
+        addons_splitter.setChildrenCollapsible(False)
 
-        mod_splitter.addWidget(lists_widget)
-
-        # Right side: Description
+        # description
         description_group = QGroupBox("Details")
         description_layout = QVBoxLayout()
-        self.preset_description = PresetDescription()
         self.addon_description = AddonDescription()
-        description_layout.addWidget(self.preset_description)
         description_layout.addWidget(self.addon_description)
         description_group.setLayout(description_layout)
+        addons_splitter.addWidget(description_group)
 
-        mod_splitter.addWidget(description_group)
-        mod_splitter.setSizes([300, 500])
-        mods_layout.addWidget(mod_splitter)
+        # set initial split sizes (300 pixels for addons list, rest for description)
+        addons_splitter.setSizes([300, 300])
 
-        tab_widget.addTab(mods_tab, "Mods")
+        left_layout.addWidget(addons_splitter)
 
-        # Custom Mods Tab
-        custom_tab = QWidget()
-        custom_layout = QVBoxLayout(custom_tab)
+        install_splitter.addWidget(left_widget)
+        install_splitter.setChildrenCollapsible(False)
 
-        self.mod_drop_zone = ModDropZone(self)
-        self.mod_drop_zone.mod_dropped.connect(self.on_mod_dropped)
-        custom_layout.addWidget(self.mod_drop_zone)
-
-        tab_widget.addTab(custom_tab, "Custom Mods")
-
-        # Install Tab
-        install_tab = QWidget()
-        install_layout = QVBoxLayout(install_tab)
-
+        # installation controls
+        right_widget = QWidget()
+        right_layout = QVBoxLayout(right_widget)
         install_controls = QGroupBox("Installation")
         controls_layout = QVBoxLayout()
 
         button_layout = QHBoxLayout()
-        self.install_button = QPushButton("Install Selected Mods")
+        self.install_button = QPushButton("Install")
         self.install_button.clicked.connect(self.start_install_thread)
         button_layout.addWidget(self.install_button)
 
-        self.restore_button = QPushButton("Uninstall Mods")
+        self.restore_button = QPushButton("Uninstall")
         self.restore_button.clicked.connect(self.start_restore_thread)
         button_layout.addWidget(self.restore_button)
         controls_layout.addLayout(button_layout)
@@ -155,19 +142,16 @@ class ParticleManagerGUI(QMainWindow):
         controls_layout.addWidget(progress_group)
 
         install_controls.setLayout(controls_layout)
-        install_layout.addWidget(install_controls)
-        install_layout.addStretch()
+        right_layout.addWidget(install_controls)
+        right_layout.addStretch()
 
+        install_splitter.addWidget(right_widget)
+        install_splitter.setSizes([600, 300])  # Set initial split sizes
+
+        install_layout.addWidget(install_splitter)
         tab_widget.addTab(install_tab, "Install")
 
         main_layout.addWidget(tab_widget)
-
-    def on_mod_dropped(self):
-        self.load_presets_and_addons()
-
-    def load_presets_and_addons(self):
-        self.load_presets()
-        self.load_addons()
 
     def load_last_directory(self):
         try:
@@ -185,7 +169,6 @@ class ParticleManagerGUI(QMainWindow):
     def prepare_game_files(self):
         if not self.tf_path:
             return
-
         try:
             backup_manager = BackupManager(self.tf_path)
             if backup_manager.create_initial_backup():
@@ -209,16 +192,6 @@ class ParticleManagerGUI(QMainWindow):
         except Exception as e:
             print(f"Error saving last directory: {e}")
 
-    def on_preset_select(self):
-        selected_items = self.presets_list.selectedItems()
-        if selected_items:
-            selected_preset = selected_items[0].text()
-            self.selected_preset_files = self.selection_manager.get_selection(selected_preset)
-            preset_info = self.load_preset_info(selected_preset)
-            self.preset_description.update_content(selected_preset, preset_info)
-        else:
-            self.preset_description.clear()
-
     def on_addon_select(self):
         selected_items = self.addons_list.selectedItems()
         if selected_items:
@@ -227,30 +200,6 @@ class ParticleManagerGUI(QMainWindow):
             self.addon_description.update_content(selected_addon, addon_info)
         else:
             self.addon_description.clear()
-
-    def load_presets(self):
-        presets_dir = folder_setup.presets_dir
-        self.presets_list.clear()
-
-        preset_groups = {"vanilla": [], "fun": [], "friend": [], "unknown": []}
-
-        for preset in presets_dir.glob("*.zip"):
-            preset_info = self.load_preset_info(preset.stem)
-            preset_type = preset_info.get("type", "unknown").lower()
-            preset_groups[preset_type].append(preset.stem)
-
-        type_order = ["vanilla", "fun", "friend", "unknown"]
-        first_item = None
-        for preset_type in type_order:
-            if preset_groups[preset_type]:
-                for preset_name in sorted(preset_groups[preset_type]):
-                    item = QListWidgetItem(preset_name)
-                    self.presets_list.addItem(item)
-                    if first_item is None:
-                        first_item = item
-
-        if first_item:
-            self.presets_list.setCurrentItem(first_item)
 
     def load_addons(self):
         addons_dir = folder_setup.addons_dir
@@ -279,6 +228,9 @@ class ParticleManagerGUI(QMainWindow):
                 item = QListWidgetItem(addon_name)
                 self.addons_list.addItem(item)
 
+    def get_selected_addons(self):
+        return [item.text() for item in self.addons_list.selectedItems()]
+
     def validate_inputs(self):
         if not self.tf_path:
             self.show_error("Please select tf/ directory!")
@@ -294,10 +246,13 @@ class ParticleManagerGUI(QMainWindow):
         if not self.validate_inputs():
             return
 
+        self.mod_drop_zone.apply_particle_selections()
+        selected_addons = self.get_selected_addons()
+
         self.set_processing_state(True)
         thread = threading.Thread(
             target=self.operations.install,
-            args=(self.tf_path,)
+            args=(self.tf_path, selected_addons)
         )
         thread.daemon = True
         thread.start()
@@ -350,24 +305,6 @@ class ParticleManagerGUI(QMainWindow):
 
     def show_success(self, message):
         QMessageBox.information(self, "Success", message)
-
-    @staticmethod
-    def load_preset_info(preset_name: str) -> dict:
-        try:
-            with open("presets/info.json", "r") as f:
-                all_presets = json.load(f)
-                return all_presets.get(preset_name, {
-                    "type": "Unknown",
-                    "description": "No description available.",
-                    "features": []
-                })
-        except Exception as e:
-            print(f"Error loading preset info: {e}")
-            return {
-                "type": "Unknown",
-                "description": "Error loading preset information.",
-                "features": []
-            }
 
     @staticmethod
     def load_addon_info(addon_name: str) -> dict:
