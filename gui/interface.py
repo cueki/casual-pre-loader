@@ -9,7 +9,7 @@ from core.folder_setup import folder_setup
 from handlers.file_handler import FileHandler
 from handlers.vpk_handler import VPKHandler
 from operations.file_processors import pcf_mod_processor, game_type, get_from_vpk
-from tools.backup_manager import BackupManager
+from tools.backup_manager import BackupManager, get_working_vpk_path, prepare_working_copy
 
 
 class ParticleOperations(QObject):
@@ -26,18 +26,8 @@ class ParticleOperations(QObject):
 
     def install(self, tf_path: str, selected_addons: List[str]):
         try:
-            folder_setup.create_required_folders()
             backup_manager = BackupManager(tf_path)
-
-            if not backup_manager.create_initial_backup():
-                self.error_signal.emit("Failed to create/verify backup")
-                return
-
-            if not backup_manager.prepare_working_copy():
-                self.error_signal.emit("Failed to create working copy")
-                return
-
-            working_vpk_path = backup_manager.get_working_vpk_path()
+            working_vpk_path = get_working_vpk_path()
             vpk_handler = VPKHandler(str(working_vpk_path))
             file_handler = FileHandler(vpk_handler)
 
@@ -58,13 +48,8 @@ class ParticleOperations(QObject):
                     create_backup=False
                 )
 
-            # deploy mods
-            self.update_progress(75, "Deploying mods...")
-            if not backup_manager.deploy_to_game():
-                self.error_signal.emit("Failed to deploy to game directory")
-                return
-
             # handle custom folder
+            self.update_progress(75, "Deploying mods...")
             custom_dir = Path(tf_path) / 'custom'
             custom_dir.mkdir(exist_ok=True)
             game_type(Path(tf_path) / 'gameinfo.txt', uninstall=False)
@@ -83,6 +68,11 @@ class ParticleOperations(QObject):
                 new_pak = vpk.new(str(custom_content_dir))
                 new_pak.save(custom_dir / random.choice(CUSTOM_VPK_NAMES))
 
+            # deploy particles
+            if not backup_manager.deploy_to_game():
+                self.error_signal.emit("Failed to deploy to game directory")
+                return
+
             for file in custom_dir.glob("*.vpk"):
                 get_from_vpk(Path(file))
 
@@ -91,20 +81,14 @@ class ParticleOperations(QObject):
 
         except Exception as e:
             self.error_signal.emit(f"An error occurred: {str(e)}")
-            folder_setup.cleanup_temp_folders()
         finally:
-            folder_setup.cleanup_temp_folders()
+            prepare_working_copy()
             self.operation_finished.emit()
 
     def restore_backup(self, tf_path: str):
         try:
-            folder_setup.cleanup_temp_folders()
-            folder_setup.create_required_folders()
+            prepare_working_copy()
             backup_manager = BackupManager(tf_path)
-
-            if not backup_manager.prepare_working_copy():
-                self.error_signal.emit("Failed to prepare working copy")
-                return
 
             if not backup_manager.deploy_to_game():
                 self.error_signal.emit("Failed to restore backup")
@@ -126,7 +110,7 @@ class ParticleOperations(QObject):
 
         except Exception as e:
             self.error_signal.emit(f"An error occurred while restoring backup: {str(e)}")
-            folder_setup.cleanup_temp_folders()
         finally:
             folder_setup.cleanup_temp_folders()
+            prepare_working_copy()
             self.operation_finished.emit()

@@ -64,9 +64,6 @@ class ModDropZone(QFrame):
     def apply_particle_selections(self):
         selections = self.conflict_matrix.get_selected_particles()
 
-        folder_setup.cleanup_temp_folders()
-        folder_setup.create_required_folders()
-
         # process each mod that has selected particles
         used_mods = set(selections.values())
         for mod_name in used_mods:

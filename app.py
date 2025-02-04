@@ -11,7 +11,7 @@ from gui.drag_and_drop import ModDropZone
 from gui.interface import ParticleOperations
 from gui.mod_descriptor import AddonDescription
 from operations.file_processors import check_game_type
-from tools.backup_manager import BackupManager
+from tools.backup_manager import prepare_working_copy
 
 
 class ParticleManagerGUI(QMainWindow):
@@ -162,19 +162,9 @@ class ParticleManagerGUI(QMainWindow):
                         self.tf_path = last_dir
                         self.tf_path_edit.setText(last_dir)
                         self.update_restore_button_state()
-                        self.prepare_game_files()
         except Exception as e:
             print(f"Error loading last directory: {e}")
 
-    def prepare_game_files(self):
-        if not self.tf_path:
-            return
-        try:
-            backup_manager = BackupManager(self.tf_path)
-            if backup_manager.create_initial_backup():
-                backup_manager.prepare_working_copy()
-        except Exception as e:
-            self.show_error(f"Failed to prepare game files: {str(e)}")
 
     def browse_tf_dir(self):
         directory = QFileDialog.getExistingDirectory(self, "Select tf/ Directory")
@@ -183,7 +173,6 @@ class ParticleManagerGUI(QMainWindow):
             self.tf_path_edit.setText(directory)
             self.save_last_directory()
             self.update_restore_button_state()
-            self.prepare_game_files()
 
     def save_last_directory(self):
         try:
@@ -327,6 +316,7 @@ class ParticleManagerGUI(QMainWindow):
 
 def main():
     folder_setup.create_required_folders()
+    prepare_working_copy()
     app = QApplication([])
     font = app.font()
     font.setPointSize(10)

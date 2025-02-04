@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QTableWidget, QHeaderView, QTableWidgetItem, QCheckBox, QHBoxLayout, QWidget, QPushButton
+from PyQt6.QtWidgets import QTableWidget, QHeaderView, QCheckBox, QHBoxLayout, QWidget, QPushButton
 
 
 class ConflictMatrix(QTableWidget):
@@ -32,16 +32,16 @@ class ConflictMatrix(QTableWidget):
          select_all_layout.addWidget(select_all_button)
          self.setCellWidget(row, 0, select_all_widget)
 
-         # Add checkboxes for each particle file
+         # add checkboxes for each particle file
          for col, _ in enumerate(pcf_files):
             cell_widget = QWidget()
             layout = QHBoxLayout(cell_widget)
             layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             layout.setContentsMargins(0, 0, 0, 0)
 
-            checkbox = self.create_checkbox(row, col + 1)  # Shift column index by 1
+            checkbox = self.create_checkbox(row, col + 1)  # shift column index by 1
             layout.addWidget(checkbox)
-            self.setCellWidget(row, col + 1, cell_widget)  # Shift column index by 1
+            self.setCellWidget(row, col + 1, cell_widget)  # shift column index by 1
 
          # connect Select All button
          select_all_button.clicked.connect(lambda checked, r=row: self.select_all_row(r))
