@@ -183,7 +183,7 @@ class VPKHandler:
             print(f"Error extracting file: {e}")
             return False
 
-    def patch_file(self, filepath: str, new_data: bytes, create_backup: bool = True) -> bool:
+    def patch_file(self, filepath: str, new_data: bytes, create_backup: bool = False) -> bool:
         # patch a file in the VPK with new data (ONLY WORKS WITH _DIR.VPK)
         entry_info = self.get_file_entry(filepath)
         if not entry_info:

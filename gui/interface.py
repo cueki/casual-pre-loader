@@ -1,10 +1,11 @@
+import shutil
 import zipfile
 from typing import List
 from PyQt6.QtCore import QObject, pyqtSignal
 from pathlib import Path
 import vpk
 import random
-from core.constants import CUSTOM_VPK_NAMES
+from core.constants import CUSTOM_VPK_NAMES, DX8_LIST
 from core.folder_setup import folder_setup
 from handlers.file_handler import FileHandler
 from handlers.vpk_handler import VPKHandler
@@ -42,6 +43,16 @@ class ParticleOperations(QObject):
             particle_files = folder_setup.mods_particle_dir.iterdir()
             for pcf_file in particle_files:
                 base_name = pcf_file.name
+                if pcf_file.stem in DX8_LIST:
+                    # dx80 first
+                    dx_80_ver = Path(pcf_file.stem + "_dx80.pcf")
+                    shutil.copy2(pcf_file, folder_setup.mods_particle_dir / dx_80_ver)
+                    file_handler.process_file(
+                        dx_80_ver.name,
+                        pcf_mod_processor(str(folder_setup.mods_particle_dir / dx_80_ver)),
+                        create_backup=False
+                    )
+                # now the rest
                 file_handler.process_file(
                     base_name,
                     pcf_mod_processor(str(pcf_file)),

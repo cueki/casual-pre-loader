@@ -41,7 +41,7 @@ class AdvancedParticleMerger:
         self.particle_map = load_particle_system_map(folder_setup.project_dir / "particle_system_map.json")
         self.vpk_groups = defaultdict(lambda: defaultdict(list))  # {vpk_name: {particle_file: [paths]}}
 
-    def update_progress(self, progress: float, message: str):
+    def update_progress(self, progress, message: str):
         if self.progress_callback:
             self.progress_callback(progress, message)
 
@@ -49,8 +49,13 @@ class AdvancedParticleMerger:
         vpk_folder_name = vpk_path.stem
         out_dir = folder_setup.user_mods_dir / vpk_folder_name
 
+        # lazy copy whatever
+        excluded_patterns = ['unusual', 'dx80', 'dx90']
+        particles_filter = [f for f in Path(out_dir /"particles").glob("*.pcf")
+                    if not any(pattern in str(f).lower() for pattern in excluded_patterns)]
+
         # group files by their target particle file
-        for particle in Path(out_dir /"particles").iterdir():
+        for particle in particles_filter:
             print(particle)
             for particle_file_target, elements_to_extract, source_pcf in (
                     rebuild_particle_files(particle, self.particle_map)):

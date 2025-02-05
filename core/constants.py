@@ -103,6 +103,31 @@ ATTRIBUTE_DEFAULTS = [
     ("Visibility Camera Depth Bias", 0.0)
 ]
 
+DX8_LIST = [
+    "burningplayer",
+    "cig_smoke",
+    "bigboom",
+    "player_recent_teleport",
+    "water",
+    "bl_killtaunt",
+    "blood_trail",
+    "class_fx",
+    "drg_cowmangler",
+    "drg_pyro",
+    "explosion",
+    "eyeboss",
+    "firstperson_weapon_fx",
+    "flamethrower",
+    "harbor_fx",
+    "medicgun_beam",
+    "muzzle_flash",
+    "rockettrail",
+    "shellejection",
+    "smoke_blackbillow",
+    "soldierbuff",
+    "stickybomb"
+]
+
 
 CUSTOM_VPK_NAMES = [
     "_wermware_2025.vpk",
