@@ -45,8 +45,7 @@ class FileHandler:
             # process based on file type
             file_type = Path(file_name).suffix.lower()
             if file_type == '.pcf':
-                pcf = PCFFile(temp_path)
-                pcf.decode()
+                pcf = PCFFile(temp_path).decode()
                 processed = processor(pcf)
                 processed.encode(temp_path)
 

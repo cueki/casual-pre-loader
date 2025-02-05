@@ -1,11 +1,16 @@
 from pathlib import Path
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Optional
+from handlers.pcf_handler import get_parent_elements
+from parsers.pcf_file import PCFFile
 
 
 @dataclass
 class FolderConfig:
     # configuration class for managing folder paths
     project_dir = Path.cwd()
+    base_default_pcf: Optional[PCFFile] = field(default=None)
+    base_default_parents: Optional[set[str]] = field(default=None)
 
     # main folder names
     backup_folder = "backup"
@@ -54,6 +59,13 @@ class FolderConfig:
         for folder in folders:
             folder.mkdir(parents=True, exist_ok=True)
 
+    def initialize_pcf(self):
+        if self.game_files_dir.exists():
+            default_base_path = self.game_files_dir / "disguise.pcf"
+            if default_base_path.exists():
+                self.base_default_pcf = PCFFile(default_base_path).decode()
+                self.base_default_parents = get_parent_elements(self.base_default_pcf)
+
     def cleanup_temp_folders(self) -> None:
         if self.temp_dir.exists():
             for file in self.temp_dir.glob('**/*'):
@@ -63,6 +75,8 @@ class FolderConfig:
                 if subfolder.is_dir():
                     subfolder.rmdir()
             self.temp_dir.rmdir()
+            self.base_default_pcf = None
+            self.base_default_parents = None
 
     def get_temp_path(self, filename: str) -> Path:
         return self.temp_dir / filename

@@ -8,8 +8,10 @@ import random
 from core.constants import CUSTOM_VPK_NAMES, DX8_LIST
 from core.folder_setup import folder_setup
 from handlers.file_handler import FileHandler
+from handlers.pcf_handler import check_parents, update_materials
 from handlers.vpk_handler import VPKHandler
 from operations.file_processors import pcf_mod_processor, game_type, get_from_vpk
+from parsers.pcf_file import PCFFile
 from tools.backup_manager import BackupManager, get_working_vpk_path, prepare_working_copy
 
 
@@ -31,6 +33,7 @@ class ParticleOperations(QObject):
             working_vpk_path = get_working_vpk_path()
             vpk_handler = VPKHandler(str(working_vpk_path))
             file_handler = FileHandler(vpk_handler)
+            folder_setup.initialize_pcf()
 
             for addon_name in selected_addons:
                 addon_path = Path("addons") / f"{addon_name}.zip"
@@ -43,6 +46,11 @@ class ParticleOperations(QObject):
             particle_files = folder_setup.mods_particle_dir.iterdir()
             for pcf_file in particle_files:
                 base_name = pcf_file.name
+                if (base_name != folder_setup.base_default_pcf.input_file.name and
+                        check_parents(PCFFile(pcf_file).decode(), folder_setup.base_default_parents)):
+                    continue
+                if base_name == folder_setup.base_default_pcf.input_file.name:
+                    update_materials(folder_setup.base_default_pcf, PCFFile(pcf_file).decode()).encode(pcf_file)
                 if pcf_file.stem in DX8_LIST:
                     # dx80 first
                     dx_80_ver = Path(pcf_file.stem + "_dx80.pcf")
