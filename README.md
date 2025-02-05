@@ -20,13 +20,7 @@ python -m nuitka app.py --mode=standalone --enable-plugin=pyqt6 --prefer-source-
 
 ### Simply put, <ins> <s>any</s> almost any* custom particle you want can now work in casual. </ins>
 
-### <s> Dx80 doesn't work (any particle with dx80 in its name) because they are special, this may be resolved in the future if enough people ask for it. </s>
-
-<s> works now for the presets that support it (minecraft). </s>
-
-<s> ### NVM dx80 is a NIGHTMARE I will try and fix later, for now it does not work...</s>
-
-### DX8 should work? idk haven't tested it myself... (no reason it shouldn't if the mod has support for it)
+### dx8 should work now
 
 This, of course, may make your game unstable, the presets I provide will be tested by me and others vigorously to ensure as few crashes as possible.
 
@@ -35,10 +29,6 @@ If at any point the game is too unstable, and you cannot figure out why, I have 
 As for performance, I only tested this locally with my own config and saw little to no difference (nothing outside the range of random distribution). Your result may vary with different configs / settings.
 
 Is this VAC safe? Yes. Could Valve patch this out of the game easily? Also yes. Enjoy it while you can :).
-
-This is my love letter to TF2, thank you for 15 years.
-
-If you have any questions, my discord is @cukei
 
 # Thank you <3:
 ### Mod makers
