@@ -59,10 +59,11 @@ class FileHandler:
                         print(f"Adding {padding_needed} bytes of padding")
                         new_data = new_data[:-1] + b' ' * padding_needed + new_data[-1:]
                     else:
-                        print(f"ERROR: New PCF is {len(new_data) - original_size} bytes larger than original!")
+                        print(f"ERROR: {processed.input_file} is {len(new_data) - original_size} bytes larger than original! "
+                              f"This can be ignored unless you know what you are doing")
                         return False
 
-            elif file_type == '.vmt':
+            elif file_type == '.vmt' or '.txt' or '.res':
                 with open(temp_path, 'rb') as f:
                     content = f.read()
                 new_data = processor(content)

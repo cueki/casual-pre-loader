@@ -56,7 +56,6 @@ class AdvancedParticleMerger:
 
         # group files by their target particle file
         for particle in particles_filter:
-            print(particle)
             for particle_file_target, elements_to_extract, source_pcf in (
                     rebuild_particle_files(particle, self.particle_map)):
                 output_path = folder_setup.get_output_path(

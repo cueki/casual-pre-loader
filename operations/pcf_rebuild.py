@@ -153,7 +153,7 @@ def rebuild_particle_files(mod_pcf_path: str, particle_system_map):
                 pcf_to_elements[target_pcf] = set()
             pcf_to_elements[target_pcf].add(element)
 
-    # jesus fuck ive been here for 20 hours
+    # jesus fuck ive been here for 20 hours, fun challenge though :)
     list_of_shit_to_extract = []
     for filepath, particle_set in pcf_to_elements.items():
         list_of_shit_to_extract.append((Path(filepath).name, particle_set, mod_pcf))
