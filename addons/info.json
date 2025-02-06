@@ -1,14 +1,22 @@
 {
-    "NoBurningOverlay": {
+    "No Burning Overlay": {
       "type": "Misc",
       "description": "Removes first person burning effect while on fire."
     },
-    "NoSentryShieldOverlay": {
-      "type": "Model",
+    "No Sentry Shield Overlay": {
+      "type": "Misc",
       "description": "Removes the opaque shield for wrangled sentries."
     },
-    "UltimateVisualFixPack (Recommended!!)": {
+    "Ultimate Visual Fix Pack": {
       "type": "Texture",
       "description": "Fixes various visual bugs, will add more info here later..."
+    },
+    "Developer Textures Overhaul v2": {
+      "type": "Texture",
+      "description": "Makes the game look grey. Like cp_orange_3x but everywhere."
+    },
+    "Flat Textures v1": {
+      "type": "Texture",
+      "description": "Makes the game look potato."
     }
 }

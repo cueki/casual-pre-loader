@@ -11,6 +11,7 @@ from handlers.file_handler import FileHandler
 from handlers.pcf_handler import check_parents, update_materials
 from handlers.vpk_handler import VPKHandler
 from operations.file_processors import pcf_mod_processor, game_type, get_from_vpk
+from operations.pcf_rebuild import rebuild_particle_files, load_particle_system_map, extract_elements
 from parsers.pcf_file import PCFFile
 from tools.backup_manager import BackupManager, get_working_vpk_path, prepare_working_copy
 
@@ -41,6 +42,32 @@ class ParticleOperations(QObject):
                     with zipfile.ZipFile(addon_path, 'r') as zip_ref:
                         for file in zip_ref.namelist():
                             zip_ref.extract(file, folder_setup.mods_everything_else_dir)
+
+            # these 5 particle files contain duplicate elements that are found elsewhere, this is an oversight by valve.
+            # what im doing is simply fixing this oversight using context from the elements themselves
+            # they now should only appear once in the game, and in the correct file :)
+            # previous code dictates that if any custom particle effect is chosen, it is already fixed, this is to fix if they are not chosen
+            duplicate_effects = [
+                "halloween.pcf",
+                "scary_ghost.pcf",
+                "dirty_explode.pcf",
+                "bigboom.pcf",
+                "item_fx.pcf"
+            ]
+
+            for duplicate_effect in duplicate_effects:
+                target_path = folder_setup.mods_particle_dir / duplicate_effect
+                if not target_path.exists():
+                    # copy from game_files if not in
+                    source_path = folder_setup.game_files_dir / duplicate_effect
+                    if source_path.exists():
+                        extract_elements(PCFFile(source_path).decode(),
+                                         load_particle_system_map('particle_system_map.json')
+                                         [f'particles/{target_path.name}']).encode(target_path)
+
+            if (folder_setup.mods_particle_dir / "blood_trail.pcf").exists():
+                # hacky fix for blood_trail
+                shutil.move((folder_setup.mods_particle_dir / "blood_trail.pcf"), (folder_setup.mods_particle_dir / "npc_fx.pcf"))
 
             self.update_progress(25, "Patching in...")
             particle_files = folder_setup.mods_particle_dir.iterdir()

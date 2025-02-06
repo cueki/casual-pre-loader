@@ -4,7 +4,7 @@ from pathlib import Path
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLineEdit, QLabel, QProgressBar,
                              QListWidget, QFileDialog, QMessageBox,
-                             QGroupBox, QApplication, QSplitter, QListWidgetItem, QTabWidget)
+                             QGroupBox, QApplication, QSplitter, QListWidgetItem, QTabWidget, QAbstractItemView)
 from PyQt6.QtCore import pyqtSignal, Qt
 from core.folder_setup import folder_setup
 from gui.drag_and_drop import ModDropZone
@@ -32,7 +32,8 @@ class ParticleManagerGUI(QMainWindow):
         self.mod_drop_zone = None
 
         self.setWindowTitle("cukei's custom casual particle pre-loader :)")
-        self.setFixedSize(1200, 600)
+        self.setMinimumSize(800, 400)
+        self.resize(1200, 600)
 
         self.tf_path = ""
         self.selected_addons = []
