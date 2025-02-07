@@ -74,7 +74,7 @@ class ParticleManagerGUI(QMainWindow):
         self.mod_drop_zone = ModDropZone(self)
         custom_layout.addWidget(self.mod_drop_zone)
         self.mod_drop_zone.update_matrix()
-        tab_widget.addTab(custom_tab, "mods")
+        tab_widget.addTab(custom_tab, "Mods")
 
         # install
         install_tab = QWidget()
