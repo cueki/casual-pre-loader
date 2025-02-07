@@ -11,7 +11,7 @@ from handlers.file_handler import FileHandler
 from handlers.pcf_handler import check_parents, update_materials
 from handlers.vpk_handler import VPKHandler
 from operations.file_processors import pcf_mod_processor, game_type, get_from_vpk
-from operations.pcf_rebuild import rebuild_particle_files, load_particle_system_map, extract_elements
+from operations.pcf_rebuild import load_particle_system_map, extract_elements
 from parsers.pcf_file import PCFFile
 from tools.backup_manager import BackupManager, get_working_vpk_path, prepare_working_copy
 

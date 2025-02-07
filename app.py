@@ -184,10 +184,26 @@ class ParticleManagerGUI(QMainWindow):
 
     def on_addon_select(self):
         selected_items = self.addons_list.selectedItems()
+
+        # reset all items to their original text
+        for i in range(self.addons_list.count()):
+            item = self.addons_list.item(i)
+            if item.flags() & Qt.ItemFlag.ItemIsSelectable:
+                original_text = item.text().split(' [#')[0]
+                item.setText(original_text)
+
+        # load order number
+        for pos, item in enumerate(selected_items, 1):
+            original_text = item.text().split(' [#')[0]
+            item.setText(f"{original_text} [#{pos}]")
+
+        # description update
         if selected_items:
-            selected_addon = selected_items[-1].text()
-            addon_info = self.load_addon_info(selected_addon)
-            self.addon_description.update_content(selected_addon, addon_info)
+            selected_item = selected_items[-1]
+            addon_name = selected_item.text().split(' [#')[0]
+
+            addon_info = self.load_addon_info(addon_name)
+            self.addon_description.update_content(addon_name, addon_info)
         else:
             self.addon_description.clear()
 
@@ -219,7 +235,7 @@ class ParticleManagerGUI(QMainWindow):
                 self.addons_list.addItem(item)
 
     def get_selected_addons(self):
-        return [item.text() for item in self.addons_list.selectedItems()]
+        return [item.text().split(' [#')[0] for item in self.addons_list.selectedItems()]
 
     def validate_inputs(self):
         if not self.tf_path:
