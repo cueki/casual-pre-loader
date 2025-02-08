@@ -10,12 +10,6 @@ cd casual-particle-pre-loader
 pip install -r requirements.txt
 python app.py
 ```
-To build it yourself:
-```
-git clone https://github.com/cueki/casual-particle-pre-loader
-cd casual-particle-pre-loader
-python -m nuitka app.py --mode=standalone --enable-plugin=pyqt6 --prefer-source-code --deployment
-```
 # Some Info:
 
 ### Simply put, <ins> <s>any</s> almost any* custom particle you want can now work in casual. </ins>
@@ -33,17 +27,17 @@ Is this VAC safe? Yes. Could Valve patch this out of the game easily? Also yes. 
 # Thank you <3:
 ### Mod makers
 
-[THE GOAT](https://gamebanana.com/members/2133251) This person made both the [minecraft_preset](https://gamebanana.com/mods/435309) and the [ghytd_preset](https://gamebanana.com/mods/451166). Very talented, has a good vision, and still updates his packs monthly. 
+[THE GOAT](https://gamebanana.com/members/2133251) This person made both the [minecraft_preset](https://gamebanana.com/mods/435309) and the [ghytd_preset](https://gamebanana.com/mods/451166). Still updates his packs monthly. 
 
-[Skeleton Hotel](https://gamebanana.com/members/1414545) This guy also has some crazy good effects, his short circuit being the first particle file working in this project.
+[Skeleton Hotel](https://gamebanana.com/members/1414545) This guy also has some crazy good effects.
 
-[Taxicat](https://gamebanana.com/members/1333549) and [Qorange](https://gamebanana.com/members/2060075) for the [transparent_flamethrower](https://gamebanana.com/mods/348622) and x64 update, these were the first particle files I ever looked at, as well as the original intention of this idea.
+[Taxicat](https://gamebanana.com/members/1333549) and [Qorange](https://gamebanana.com/members/2060075) for the [transparent_flamethrower](https://gamebanana.com/mods/348622), these were the original intention of this idea.
 
 [Ashe_tf](https://gamebanana.com/members/1932153) for fixing the [medicgun_beam](https://gamebanana.com/mods/437447) and its invisible nonsense.
 
-[SonOfDiscordiA](https://gamebanana.com/members/2670597) for such a simple change to the [short_circuit](https://gamebanana.com/mods/446897), this taught me how the files worked internally. 
+[SonOfDiscordiA](https://gamebanana.com/members/2670597) for such a simple change to the [short_circuit](https://gamebanana.com/mods/446897). 
 
-[agrastiOs](https://github.com/agrastiOs) for the [UltimateVisualFixPack](https://github.com/agrastiOs/Ultimate-TF2-Visual-Fix-Pack), this should just be in the game already.
+[agrastiOs](https://github.com/agrastiOs) for the [UltimateVisualFixPack](https://github.com/agrastiOs/Ultimate-TF2-Visual-Fix-Pack).
 
 ### ALL THE HOMIES WHO TESTED IT OVER THE COURSE OF 3 MONTHS
 [Aslan](https://steamcommunity.com/id/caninecrucifix/)
