@@ -4,7 +4,7 @@ from pathlib import Path
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLineEdit, QLabel, QProgressBar,
                              QListWidget, QFileDialog, QMessageBox,
-                             QGroupBox, QApplication, QSplitter, QListWidgetItem, QTabWidget, QAbstractItemView)
+                             QGroupBox, QApplication, QSplitter, QListWidgetItem, QTabWidget)
 from PyQt6.QtCore import pyqtSignal, Qt
 from core.folder_setup import folder_setup
 from gui.drag_and_drop import ModDropZone
@@ -74,6 +74,22 @@ class ParticleManagerGUI(QMainWindow):
         self.mod_drop_zone = ModDropZone(self)
         custom_layout.addWidget(self.mod_drop_zone)
         self.mod_drop_zone.update_matrix()
+
+        nav_container = QWidget()
+        nav_layout = QHBoxLayout(nav_container)
+        nav_layout.setContentsMargins(0, 0, 0, 0)
+
+        # add spacer to push button to the right
+        nav_layout.addStretch()
+
+        # create Next button
+        next_button = QPushButton("Next")
+        next_button.setFixedWidth(100)
+        next_button.clicked.connect(lambda: tab_widget.setCurrentIndex(1))
+        nav_layout.addWidget(next_button)
+
+        # add navigation container to custom layout
+        custom_layout.addWidget(nav_container)
         tab_widget.addTab(custom_tab, "Mods")
 
         # install

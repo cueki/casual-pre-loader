@@ -43,7 +43,7 @@ class ConflictMatrix(QTableWidget):
             print(f"Error saving selections: {e}")
 
     def update_matrix(self, mods, pcf_files):
-        # dd one extra column for the Select All button
+        # add one extra column for the Select All button
         self.setColumnCount(len(pcf_files) + 1)
         self.setRowCount(len(mods))
 
