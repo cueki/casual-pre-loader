@@ -7,8 +7,25 @@ from core.folder_setup import folder_setup
 from gui.conflict_matrix import ConflictMatrix
 from handlers.vpk_handler import VPKHandler
 import shutil
+from parsers.pcf_file import PCFFile
 from tools.advanced_particle_merger import AdvancedParticleMerger
 
+
+def get_material_paths(pcf_file: Path) -> set[str]:
+    materials = set()
+    pcf = PCFFile(pcf_file).decode()
+
+    for element in pcf.elements:
+        if b'material' in element.attributes:
+            attr_type, value = element.attributes[b'material']
+            if isinstance(value, bytes):
+                # convert material path to a file path with .vmt extension
+                material_path = value.decode('ascii')
+                if not material_path.endswith('.vmt'):
+                    material_path += '.vmt'
+                materials.add(material_path)
+
+    return materials
 
 def get_mod_particle_files():
     mod_particles = {}
@@ -64,6 +81,9 @@ class ModDropZone(QFrame):
     def apply_particle_selections(self):
         selections = self.conflict_matrix.get_selected_particles()
 
+        # only copy what we care about
+        # required_materials = set()
+
         # process each mod that has selected particles
         used_mods = set(selections.values())
         for mod_name in used_mods:
@@ -77,6 +97,7 @@ class ModDropZone(QFrame):
                         source_file = source_particles_dir / (particle_file + ".pcf")
                         if source_file.exists():
                             shutil.copy2(source_file, folder_setup.mods_particle_dir / (particle_file + ".pcf"))
+                            # required_materials.update(get_material_paths(source_file))
 
             # Copy all other non-particle content
             for item in mod_dir.iterdir():
