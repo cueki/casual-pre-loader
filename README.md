@@ -7,6 +7,8 @@ Or if you want to run with python:
 ```
 git clone https://github.com/cueki/casual-particle-pre-loader
 cd casual-particle-pre-loader
+mkdir backup
+(copy the tf2_misc_dir.vpk, _000.vpk and _017.vpk from tf/ into backup)
 pip install -r requirements.txt
 python app.py
 ```
