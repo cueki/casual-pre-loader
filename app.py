@@ -1,6 +1,8 @@
 import json
 import threading
 from pathlib import Path
+
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLineEdit, QLabel, QProgressBar,
                              QListWidget, QFileDialog, QMessageBox,
@@ -355,6 +357,10 @@ def main():
     font.setPointSize(10)
     app.setFont(font)
     window = ParticleManagerGUI()
+    import ctypes
+    my_app_id = 'cool.app.id.yes'  # arbitrary string
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(my_app_id) # silly ctypes let me pick my icon !!
+    window.setWindowIcon(QIcon('gui/cueki_icon.ico'))
     window.show()
     app.exec()
     folder_setup.cleanup_temp_folders()
