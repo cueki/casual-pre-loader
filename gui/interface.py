@@ -66,7 +66,7 @@ class ParticleOperations(QObject):
                                          [f'particles/{target_path.name}']).encode(target_path)
 
             if (folder_setup.mods_particle_dir / "blood_trail.pcf").exists():
-                # hacky fix for blood_trail
+                # hacky fix for blood_trail being so small
                 shutil.move((folder_setup.mods_particle_dir / "blood_trail.pcf"), (folder_setup.mods_particle_dir / "npc_fx.pcf"))
 
             self.update_progress(25, "Patching in...")

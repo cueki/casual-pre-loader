@@ -357,9 +357,11 @@ def main():
     font.setPointSize(10)
     app.setFont(font)
     window = ParticleManagerGUI()
-    import ctypes
-    my_app_id = 'cool.app.id.yes'  # arbitrary string
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(my_app_id) # silly ctypes let me pick my icon !!
+    import platform
+    if platform.system() == 'Windows':
+        import ctypes
+        my_app_id = 'cool.app.id.yes'  # arbitrary string
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(my_app_id) # silly ctypes let me pick my icon !!
     window.setWindowIcon(QIcon('gui/cueki_icon.ico'))
     window.show()
     app.exec()
