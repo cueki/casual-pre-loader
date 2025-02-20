@@ -1,5 +1,6 @@
 import json
 import threading
+import zipfile
 from pathlib import Path
 
 from PyQt6.QtGui import QIcon
@@ -30,6 +31,7 @@ class ParticleManagerGUI(QMainWindow):
         self.browse_button = None
         self.tf_path_edit = None
         self.addons_list = None
+        self.addons_file_paths = {}
         self.addon_description = None
         self.mod_drop_zone = None
 
@@ -118,6 +120,7 @@ class ParticleManagerGUI(QMainWindow):
         addons_group.setLayout(addons_layout)
         addons_splitter.addWidget(addons_group)
         addons_splitter.setChildrenCollapsible(False)
+        addons_file_paths = {}
 
         # description
         description_group = QGroupBox("Details")
@@ -202,7 +205,6 @@ class ParticleManagerGUI(QMainWindow):
 
     def on_addon_select(self):
         selected_items = self.addons_list.selectedItems()
-
         # reset all items to their original text
         for i in range(self.addons_list.count()):
             item = self.addons_list.item(i)
@@ -219,8 +221,7 @@ class ParticleManagerGUI(QMainWindow):
         if selected_items:
             selected_item = selected_items[-1]
             addon_name = selected_item.text().split(' [#')[0]
-
-            addon_info = self.load_addon_info(addon_name)
+            addon_info = self.addons_file_paths[addon_name]
             self.addon_description.update_content(addon_name, addon_info)
         else:
             self.addon_description.clear()
@@ -228,29 +229,47 @@ class ParticleManagerGUI(QMainWindow):
     def load_addons(self):
         addons_dir = folder_setup.addons_dir
         self.addons_list.clear()
-        addon_groups = {"texture": [], "model": [], "misc": [], "custom": [], "unknown": []}
+        addon_groups = {"texture": [], "model": [], "misc": [], "animation": [], "unknown": []}
+
 
         for addon in addons_dir.glob("*.zip"):
+#        for addon in self.addons_file_paths:
             addon_info = self.load_addon_info(addon.stem)
             addon_type = addon_info.get("type", "unknown").lower()
-            addon_groups[addon_type].append(addon.stem)
+            print(addon_type)
+            if addon_type not in addon_groups:
+                addon_groups[addon_type] = []
+            addon_groups[addon_type].append(addon_info)
+            
+        #sort the addon groups alphabetically
+        addon_groups = {group: addon_groups[group] for group in sorted(addon_groups)}
+        
+        #Go through the addon groups and sort addons. Add splitters for each group. Unknown remains at the bottom.
+        for addon_type in addon_groups:
+            if addon_type != "unknown":
+                splitter = QListWidgetItem("──── " + str.title(addon_type) + " ────")
+                splitter.setFlags(Qt.ItemFlag.NoItemFlags)
+                splitter.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.addons_list.addItem(splitter)
 
-        regular_types = ["texture", "model", "misc", "unknown"]
-        for addon_type in regular_types:
-            if addon_groups[addon_type]:
-                for addon_name in sorted(addon_groups[addon_type]):
-                    item = QListWidgetItem(addon_name)
+                for addon_info_dict in addon_groups[addon_type]:
+                    
+                    item = QListWidgetItem(addon_info_dict['addon_name'])
                     self.addons_list.addItem(item)
+                    self.addons_file_paths[addon_info_dict['addon_name']] = addon_info_dict
 
-        if addon_groups["custom"]:
-            splitter = QListWidgetItem("──── Custom Addons ────")
-            splitter.setFlags(Qt.ItemFlag.NoItemFlags)
-            splitter.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.addons_list.addItem(splitter)
+            if addon_type == 'unknown':
+                splitter = QListWidgetItem("──── Unknown Addons ────")
+                splitter.setFlags(Qt.ItemFlag.NoItemFlags)
+                splitter.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.addons_list.addItem(splitter)
 
-            for addon_name in sorted(addon_groups["custom"]):
-                item = QListWidgetItem(addon_name)
-                self.addons_list.addItem(item)
+
+                print(addon_groups)
+                for addon_info_dict in addon_groups[addon_type]:
+                    item = QListWidgetItem(addon_info_dict['addon_name'])
+                    self.addons_list.addItem(item)
+                    self.addons_file_paths[addon_info_dict['addon_name']] = addon_info_dict
 
     def get_selected_addons(self):
         return [item.text().split(' [#')[0] for item in self.addons_list.selectedItems()]
@@ -331,22 +350,30 @@ class ParticleManagerGUI(QMainWindow):
         QMessageBox.information(self, "Success", message)
 
     @staticmethod
-    def load_addon_info(addon_name: str) -> dict:
+    def load_addon_info(addon_stem: str) -> dict:
+        file_path = 'addons/' + addon_stem + '.zip'
         try:
-            with open("addons/info.json", "r") as f:
-                all_addons = json.load(f)
-                return all_addons.get(addon_name, {
-                    "type": "Custom",
-                    "description": "This addon was added by you.",
-                    "contents": ["Custom content"]
-                })
+            with zipfile.ZipFile(file_path, 'r') as addon_zip:
+                with addon_zip.open('mod.json') as addon_json:
+
+                    try:
+                        addon_info = json.load(addon_json)
+                        addon_info['file_path'] = addon_stem
+                    
+                    except Exception as e:
+                        print(f'Error reading json file: {e}')
+                    return addon_info
         except Exception as e:
-            print(f"Error loading addon info: {e}")
-            return {
-                "type": "Misc",
-                "description": "Information unavailable.",
-                "contents": []
+            print(f'Problem loading mod.json: {e}')
+            addon_info = {
+                "addon_name": addon_stem,
+                "type": "Unknown",
+                "description": "",
+                "contents": ["Custom content"],
+                "file_path": addon_stem
             }
+            return addon_info
+        
 
 
 def main():
@@ -357,11 +384,9 @@ def main():
     font.setPointSize(10)
     app.setFont(font)
     window = ParticleManagerGUI()
-    import platform
-    if platform.system() == 'Windows':
-        import ctypes
-        my_app_id = 'cool.app.id.yes'  # arbitrary string
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(my_app_id) # silly ctypes let me pick my icon !!
+    import ctypes
+    my_app_id = 'cool.app.id.yes'  # arbitrary string
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(my_app_id) # silly ctypes let me pick my icon !!
     window.setWindowIcon(QIcon('gui/cueki_icon.ico'))
     window.show()
     app.exec()

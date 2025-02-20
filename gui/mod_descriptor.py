@@ -195,7 +195,8 @@ class AddonDescription(QWidget):
             "model": "#2196F3",
             "texture": "#9C27B0",
             "misc": "#FF9800",
-            "error": "FF0000"
+            "animation": "#392C52",
+            "unknown": "#FF0000"
         }
 
         color = colors.get(addon_type.lower(), "#757575")
