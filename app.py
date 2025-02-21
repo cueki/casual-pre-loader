@@ -233,10 +233,8 @@ class ParticleManagerGUI(QMainWindow):
 
 
         for addon in addons_dir.glob("*.zip"):
-#        for addon in self.addons_file_paths:
             addon_info = self.load_addon_info(addon.stem)
             addon_type = addon_info.get("type", "unknown").lower()
-            print(addon_type)
             if addon_type not in addon_groups:
                 addon_groups[addon_type] = []
             addon_groups[addon_type].append(addon_info)
@@ -265,7 +263,6 @@ class ParticleManagerGUI(QMainWindow):
                 self.addons_list.addItem(splitter)
 
 
-                print(addon_groups)
                 for addon_info_dict in addon_groups[addon_type]:
                     item = QListWidgetItem(addon_info_dict['addon_name'])
                     self.addons_list.addItem(item)
@@ -351,28 +348,30 @@ class ParticleManagerGUI(QMainWindow):
 
     @staticmethod
     def load_addon_info(addon_stem: str) -> dict:
-        file_path = 'addons/' + addon_stem + '.zip'
+        file_path = f'addons/{addon_stem}.zip'
         try:
             with zipfile.ZipFile(file_path, 'r') as addon_zip:
-                with addon_zip.open('mod.json') as addon_json:
+                if 'mod.json' not in addon_zip.namelist():
+                    raise FileNotFoundError
 
+                with addon_zip.open('mod.json') as addon_json:
                     try:
                         addon_info = json.load(addon_json)
                         addon_info['file_path'] = addon_stem
-                    
-                    except Exception as e:
-                        print(f'Error reading json file: {e}')
-                    return addon_info
-        except Exception as e:
-            print(f'Problem loading mod.json: {e}')
-            addon_info = {
-                "addon_name": addon_stem,
-                "type": "Unknown",
-                "description": "",
-                "contents": ["Custom content"],
-                "file_path": addon_stem
-            }
-            return addon_info
+                        return addon_info
+                    except json.JSONDecodeError:
+                        pass 
+        except (FileNotFoundError, zipfile.BadZipFile):
+            pass
+
+        # Fallback return for any failure
+        return {
+            "addon_name": addon_stem,
+            "type": "Unknown",
+            "description": "",
+            "contents": ["Custom content"],
+            "file_path": addon_stem
+        }
         
 
 
