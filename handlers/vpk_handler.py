@@ -75,7 +75,7 @@ class VPKHandler:
                     continue
 
                 for filename in self.vpk_parser.directory[ext][p]:
-                    full_path = f"{p}/{filename}.{ext}" if p else f"{filename}.{ext}"
+                    full_path = f"{p}/{filename}.{ext}" if p != " " else f"{filename}.{ext}"
                     files.append(full_path)
 
         return files
@@ -110,9 +110,9 @@ class VPKHandler:
             filename = path.stem
             # ensure forward slashes and handle nested paths correctly
             directory = str(path.parent).replace('\\', '/')
-
+            # for some reason root directories become dots, we need them to be spaces as the key for the dictionary
             if directory == '.':
-                directory = ''
+                directory = ' '
 
             if (extension in self.vpk_parser.directory and
                     directory in self.vpk_parser.directory[extension] and
