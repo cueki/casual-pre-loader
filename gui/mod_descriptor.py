@@ -11,6 +11,7 @@ class PresetDescription(QWidget):
         self.features_list = None
         self.features_label = None
         self.description_label = None
+        self.version_label = None
         self.type_label = None
         self.name_label = None
         self.content_layout = None
@@ -47,6 +48,11 @@ class PresetDescription(QWidget):
         line.setFrameShape(QFrame.Shape.HLine)
         line.setFrameShadow(QFrame.Shadow.Sunken)
         self.content_layout.addWidget(line)
+
+        # release date
+        self.version_label = QLabel("Version:")
+        self.version_label.setWordWrap(True)
+        self.content_layout.addWidget(self.version_label)
 
         # description
         self.description_label = QLabel()
@@ -100,6 +106,16 @@ class PresetDescription(QWidget):
         self.type_label.setText(preset_type.upper())
         self.set_type_style(preset_type)
 
+        version = preset_info.get("version", [])
+        if version:
+            self.version_label.setText("Version: " + version)
+            self.version_label.setStyleSheet(f"""
+                color: #aaaaaa;
+                """)
+            self.version_label.show()
+        else:
+            self.version_label.hide()
+
         self.description_label.setText(preset_info.get("description", ""))
 
         features = preset_info.get("features", [])
@@ -124,6 +140,7 @@ class PresetDescription(QWidget):
     def clear(self):
         self.name_label.clear()
         self.type_label.clear()
+        self.version_label.clear()
         self.description_label.setText("Select a preset to view details")
         self.features_label.hide()
         self.features_list.hide()
@@ -137,6 +154,7 @@ class AddonDescription(QWidget):
         self.content_layout = None
         self.name_label = None
         self.type_label = None
+        self.version_label = None
         self.description_label = None
         self.features_label = None
         self.features_list = None
@@ -169,6 +187,10 @@ class AddonDescription(QWidget):
         line.setFrameShape(QFrame.Shape.HLine)
         line.setFrameShadow(QFrame.Shadow.Sunken)
         self.content_layout.addWidget(line)
+
+        self.version_label = QLabel()
+        self.version_label.setWordWrap(True)
+        self.content_layout.addWidget(self.version_label)
 
         self.description_label = QLabel()
         self.description_label.setWordWrap(True)
@@ -213,6 +235,16 @@ class AddonDescription(QWidget):
         addon_type = addon_info.get("type", "Unknown")
         self.type_label.setText(addon_type.upper())
         self.set_type_style(addon_type)
+
+        version = addon_info.get("version", [])
+        if version:
+            self.version_label.setText("Version: " + version)
+            self.version_label.setStyleSheet(f"""
+                color: #aaaaaa;
+                """)
+            self.version_label.show()
+        else:
+            self.version_label.hide()
 
         self.description_label.setText(addon_info.get("description", ""))
 
