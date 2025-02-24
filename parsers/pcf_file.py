@@ -111,7 +111,6 @@ class PCFFile:
             self.write_null_terminated_string(file, f"{version_string}\n")
 
             # write string dictionary
-
             file.write(struct.pack('<H', len(self.string_dictionary)))
 
             # write strings as raw bytes

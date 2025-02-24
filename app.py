@@ -239,10 +239,10 @@ class ParticleManagerGUI(QMainWindow):
                 addon_groups[addon_type] = []
             addon_groups[addon_type].append(addon_info)
             
-        #sort the addon groups alphabetically
+        # sort the addon groups alphabetically
         addon_groups = {group: addon_groups[group] for group in sorted(addon_groups)}
         
-        #Go through the addon groups and sort addons. Add splitters for each group. Unknown remains at the bottom.
+        # go through the addon groups and sort addons. Add splitters for each group. Unknown remains at the bottom.
         for addon_type in addon_groups:
             if addon_type != "unknown":
                 splitter = QListWidgetItem("──── " + str.title(addon_type) + " ────")
@@ -364,7 +364,7 @@ class ParticleManagerGUI(QMainWindow):
         except (FileNotFoundError, zipfile.BadZipFile):
             pass
 
-        # Fallback return for any failure
+        # fallback return for any failure
         return {
             "addon_name": addon_stem,
             "type": "Unknown",
@@ -383,9 +383,11 @@ def main():
     font.setPointSize(10)
     app.setFont(font)
     window = ParticleManagerGUI()
-    import ctypes
-    my_app_id = 'cool.app.id.yes'  # arbitrary string
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(my_app_id) # silly ctypes let me pick my icon !!
+    import platform
+    if platform.system() == 'Windows':
+        import ctypes
+        my_app_id = 'cool.app.id.yes' # arbitrary string
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(my_app_id) # silly ctypes let me pick my icon !!
     window.setWindowIcon(QIcon('gui/cueki_icon.ico'))
     window.show()
     app.exec()
