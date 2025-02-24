@@ -120,7 +120,6 @@ class ParticleManagerGUI(QMainWindow):
         addons_group.setLayout(addons_layout)
         addons_splitter.addWidget(addons_group)
         addons_splitter.setChildrenCollapsible(False)
-        addons_file_paths = {}
 
         # description
         description_group = QGroupBox("Details")
