@@ -161,10 +161,11 @@ class ModDropZone(QFrame):
                     shutil.copy2(Path(full_material_path), material_destination)
                     texture_path = parse_vmt_texture(full_material_path)
                     if texture_path:
-                        full_texture_path = mod_dir / 'materials' / texture_path
-                        texture_destination = folder_setup.mods_everything_else_dir / Path(full_texture_path).relative_to(mod_dir)
-                        texture_destination.parent.mkdir(parents=True, exist_ok=True)
-                        shutil.copy2(Path(full_texture_path), texture_destination)
+                        full_texture_path = Path(mod_dir / 'materials' / texture_path)
+                        if full_texture_path.exists():
+                            texture_destination = folder_setup.mods_everything_else_dir / Path(full_texture_path).relative_to(mod_dir)
+                            texture_destination.parent.mkdir(parents=True, exist_ok=True)
+                            shutil.copy2(Path(full_texture_path), texture_destination)
 
         return len(selections) > 0
 
