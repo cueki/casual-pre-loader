@@ -1,11 +1,8 @@
-#!/usr/bin/env python3
 import os
-import sys
 import shutil
 import zipfile
 import argparse
 from pathlib import Path
-import subprocess
 
 
 def parse_arguments():
@@ -67,10 +64,9 @@ def extract_user_mods(zip_path, target_dir):
         print(f"Warning: {zip_file} not found")
         return False
 
-    target_user_mods = Path(target_dir) / 'user_mods'
-    target_user_mods.mkdir(exist_ok=True, parents=True)
+    target_user_mods = Path(target_dir)
 
-    print(f"Extracting {zip_file} to {target_user_mods}...")
+    print(f"Extracting {zip_file}...")
     try:
         with zipfile.ZipFile(zip_file, 'r') as zip_ref:
             zip_ref.extractall(target_user_mods)
@@ -96,6 +92,7 @@ def main():
         extract_user_mods(user_mods_zip, target_dir)
 
     print(f"Build completed successfully to {target_dir}")
+    print('feathers wuz here')
 
 
 if __name__ == "__main__":
