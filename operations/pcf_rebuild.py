@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from typing import Set, List, Dict
-from parsers.pcf_file import PCFFile, PCFElement
+from core.parsers.pcf_file import PCFFile, PCFElement
 from core.constants import AttributeType
 
 

@@ -7,13 +7,13 @@ import vpk
 import random
 from core.constants import CUSTOM_VPK_NAMES, DX8_LIST
 from core.folder_setup import folder_setup
-from handlers.file_handler import FileHandler
-from handlers.pcf_handler import check_parents, update_materials
-from handlers.vpk_handler import VPKHandler
+from core.handlers.file_handler import FileHandler
+from core.handlers.pcf_handler import check_parents, update_materials
+from core.handlers.vpk_handler import VPKHandler
 from operations.file_processors import pcf_mod_processor, game_type, get_from_vpk
 from operations.pcf_rebuild import load_particle_system_map, extract_elements
-from parsers.pcf_file import PCFFile
-from tools.backup_manager import BackupManager, get_working_vpk_path, prepare_working_copy
+from core.parsers.pcf_file import PCFFile
+from backup.backup_manager import BackupManager, get_working_vpk_path, prepare_working_copy
 
 
 class ParticleOperations(QObject):

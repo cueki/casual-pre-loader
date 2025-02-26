@@ -2,7 +2,7 @@ import os
 import traceback
 from typing import List
 from pathlib import Path
-from parsers.pcf_file import PCFFile
+from core.parsers.pcf_file import PCFFile
 from core.folder_setup import folder_setup
 
 

@@ -1,8 +1,8 @@
 import shutil
 from pathlib import Path
 from core.folder_setup import folder_setup
-from handlers.vpk_handler import VPKHandler
-from handlers.file_handler import FileHandler
+from core.handlers.vpk_handler import VPKHandler
+from core.handlers.file_handler import FileHandler
 
 
 def prepare_working_copy() -> bool:

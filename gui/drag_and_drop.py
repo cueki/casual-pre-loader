@@ -5,27 +5,65 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QLabel, QMessageBox
 from core.folder_setup import folder_setup
 from gui.conflict_matrix import ConflictMatrix
-from handlers.vpk_handler import VPKHandler
+from core.handlers.vpk_handler import VPKHandler
 import shutil
-from parsers.pcf_file import PCFFile
-from tools.advanced_particle_merger import AdvancedParticleMerger
+from core.parsers.pcf_file import PCFFile
+from operations.advanced_particle_merger import AdvancedParticleMerger
 
 
-def get_material_paths(pcf_file: Path) -> set[str]:
-    materials = set()
-    pcf = PCFFile(pcf_file).decode()
+def parse_vmt_texture(vmt_path):
+    texture_path = None
+    texture_param = '$basetexture'
 
-    for element in pcf.elements:
-        if b'material' in element.attributes:
-            attr_type, value = element.attributes[b'material']
-            if isinstance(value, bytes):
-                # convert material path to a file path with .vmt extension
-                material_path = value.decode('ascii')
-                if not material_path.endswith('.vmt'):
-                    material_path += '.vmt'
-                materials.add(material_path)
+    try:
+        with open(vmt_path, 'r', encoding='utf-8') as f:
+            # Read file line by line to properly handle comments
+            lines = []
+            for line in f:
+                # skip commented lines
+                if not line.strip().startswith('//'):
+                    lines.append(line.lower())
 
-    return materials
+            # join non-commented lines
+            content = ''.join(lines)
+
+        # simple parsing for texture path
+        if texture_param in content:
+            # find the $basetexture
+            pos = content.find(texture_param)
+            if pos != -1:
+                # find the end of the line
+                line_end = content.find('\n', pos)
+
+                # spec ops: the line
+                line = content[pos:line_end]
+
+                # check if the line ends with a quote
+                if line.rstrip().endswith('"') or line.rstrip().endswith("'"):
+                    # if it does, find the matching opening quote
+                    quote_char = line.rstrip()[-1]
+                    value_end = line.rstrip().rfind(quote_char)
+                    value_start = line.rfind(quote_char, 0, value_end - 1)
+                    if value_start != -1:
+                        texture_path = line[value_start + 1:value_end].strip()
+                else:
+                    # look for tab or space after the parameter
+                    param_end = pos + len(texture_param)
+                    # skip initial whitespace after parameter name
+                    while param_end < len(line) and line[param_end].isspace():
+                        param_end += 1
+
+                    # find the value - everything after whitespace until end of line
+                    value_start = param_end
+                    texture_path = line[value_start:].strip()
+
+        if texture_path:
+            return Path(texture_path + '.vtf')
+
+    except Exception as e:
+        print(f"Error parsing VMT file {vmt_path}: {e}")
+        return None
+
 
 def get_mod_particle_files():
     mod_particles = {}
@@ -82,7 +120,7 @@ class ModDropZone(QFrame):
         selections = self.conflict_matrix.get_selected_particles()
 
         # only copy what we care about
-        # required_materials = set()
+        required_materials = set()
 
         # process each mod that has selected particles
         used_mods = set(selections.values())
@@ -96,18 +134,38 @@ class ModDropZone(QFrame):
                     if selected_mod == mod_name:
                         source_file = source_particles_dir / (particle_file + ".pcf")
                         if source_file.exists():
+                            # copy particle file
                             shutil.copy2(source_file, folder_setup.mods_particle_dir / (particle_file + ".pcf"))
-                            # required_materials.update(get_material_paths(source_file))
 
-            # Copy all other non-particle content
-            for item in mod_dir.iterdir():
-                if item.name not in ['particles', 'actual_particles']:
-                    destination = folder_setup.mods_everything_else_dir / item.relative_to(mod_dir)
-                    if item.is_file():
-                        destination.parent.mkdir(parents=True, exist_ok=True)
-                        shutil.copy2(item, destination)
-                    elif item.is_dir():
-                        shutil.copytree(item, destination, dirs_exist_ok=True)
+                            # get particle file mats from attrib
+                            pcf = PCFFile(source_file).decode()
+                            for element in pcf.elements:
+                                type_name = pcf.string_dictionary[element.type_name_index]
+                                if type_name == b'DmeParticleSystemDefinition':
+                                    if b'material' in element.attributes:
+                                        attr_type, value = element.attributes[b'material']
+                                        if isinstance(value, bytes):
+                                            material_path = value.decode('ascii')
+                                            # ignore non vmt files for now
+                                            if material_path.endswith('.vmt'):
+                                                required_materials.add(material_path)
+
+        for mod_name in used_mods:
+            mod_dir = folder_setup.user_mods_dir / mod_name
+            # process each required material
+            for material_path in required_materials:
+                full_material_path = mod_dir / 'materials' / material_path
+                if full_material_path.exists():
+                    material_destination = folder_setup.mods_everything_else_dir / Path(full_material_path).relative_to(mod_dir)
+                    material_destination.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(Path(full_material_path), material_destination)
+                    texture_path = parse_vmt_texture(full_material_path)
+                    if texture_path:
+                        full_texture_path = Path(mod_dir / 'materials' / texture_path)
+                        if full_texture_path.exists():
+                            texture_destination = folder_setup.mods_everything_else_dir / Path(full_texture_path).relative_to(mod_dir)
+                            texture_destination.parent.mkdir(parents=True, exist_ok=True)
+                            shutil.copy2(Path(full_texture_path), texture_destination)
 
         return len(selections) > 0
 
