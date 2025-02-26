@@ -1,8 +1,8 @@
 from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional
-from handlers.pcf_handler import get_parent_elements
-from parsers.pcf_file import PCFFile
+from core.handlers.pcf_handler import get_parent_elements
+from core.parsers.pcf_file import PCFFile
 
 
 @dataclass

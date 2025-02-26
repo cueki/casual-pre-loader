@@ -1,4 +1,4 @@
-from parsers.pcf_file import PCFFile, PCFElement
+from core.parsers.pcf_file import PCFFile, PCFElement
 
 
 def get_parent_elements(pcf: PCFFile) -> set[str]:

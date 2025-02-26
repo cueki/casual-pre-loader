@@ -14,7 +14,7 @@ from gui.drag_and_drop import ModDropZone
 from gui.interface import ParticleOperations
 from gui.mod_descriptor import AddonDescription
 from operations.file_processors import check_game_type
-from tools.backup_manager import prepare_working_copy
+from backup.backup_manager import prepare_working_copy
 
 
 class ParticleManagerGUI(QMainWindow):

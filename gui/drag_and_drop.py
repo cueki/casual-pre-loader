@@ -5,10 +5,10 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QLabel, QMessageBox
 from core.folder_setup import folder_setup
 from gui.conflict_matrix import ConflictMatrix
-from handlers.vpk_handler import VPKHandler
+from core.handlers.vpk_handler import VPKHandler
 import shutil
-from parsers.pcf_file import PCFFile
-from tools.advanced_particle_merger import AdvancedParticleMerger
+from core.parsers.pcf_file import PCFFile
+from operations.advanced_particle_merger import AdvancedParticleMerger
 
 
 def parse_vmt_texture(vmt_path):

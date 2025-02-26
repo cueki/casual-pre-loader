@@ -22,7 +22,6 @@ def copy_project_files(source_dir, target_dir):
         'handlers',
         'operations',
         'parsers',
-        'tools',
         'addons',
         'backup'
     ]
