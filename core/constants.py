@@ -140,3 +140,13 @@ CUSTOM_VPK_NAMES = [
     "_4_year_ban_for_this_btw.vpk",
     "_rgl_anti_anticheat.vpk"
 ]
+
+
+QUICKPRECACHE_FILE_SUFFIXES = [
+    ".dx80.vtx",
+    ".dx90.vtx",
+    ".mdl",
+    ".phy",
+    ".sw.vtx",
+    ".vvd"
+]
