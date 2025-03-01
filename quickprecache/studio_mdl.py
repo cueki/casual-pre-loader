@@ -18,7 +18,7 @@ class StudioMDL:
         if self.studio_mdl_version == StudioMDLVersion.MISSING:
             raise RuntimeError(
                 "StudioMDL.exe not found, you probably installed the mod wrong.\n"
-                "!!! IF YOU ARE ON LINUX, YOU NEED THE BIN/ FOLDER FROM A WINDOWS VERSION OF THE GAME !!!"
+                "!!! IF YOU ARE ON LINUX, YOU NEED THE NEKOMDL OR STUDOMDL FROM A WINDOWS VERSION OF THE GAME !!!"
             )
 
     def _get_studio_mdl_version(self) -> StudioMDLVersion:
@@ -64,7 +64,7 @@ class StudioMDL:
                 text=True
             )
         else:
-            # for windows use a list of arguments
+            # for windows, use a list of arguments
             cmd_args = [
                 exe_path,
                 "-game", tf_path,

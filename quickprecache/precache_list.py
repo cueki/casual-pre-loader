@@ -33,7 +33,7 @@ def manage_folder(folder_path: Path) -> List[str]:
                     model_path = Path(entry).with_suffix('.mdl').as_posix().lower()
                     model_list.append(model_path)
                     break
-
+    print(model_list)
     return model_list
 
 
