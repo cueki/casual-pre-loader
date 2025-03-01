@@ -110,7 +110,6 @@ class VPKHandler:
             filename = path.stem
             # ensure forward slashes and handle nested paths correctly
             directory = str(path.parent).replace('\\', '/')
-            # for some reason root directories become dots, we need them to be spaces as the key for the dictionary
             if directory == '.':
                 directory = ' '
 

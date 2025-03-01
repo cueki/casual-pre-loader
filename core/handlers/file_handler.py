@@ -52,23 +52,24 @@ class FileHandler:
                 # read processed PCF data and check size
                 with open(temp_path, 'rb') as f:
                     new_data = f.read()
-
-                if len(new_data) != original_size:
-                    if len(new_data) < original_size:
-                        padding_needed = original_size - len(new_data)
-                        print(f"Adding {padding_needed} bytes of padding")
-                        new_data = new_data[:-1] + b' ' * padding_needed + new_data[-1:]
-                    else:
-                        print(f"ERROR: {processed.input_file} is {len(new_data) - original_size} bytes larger than original! "
-                              f"This can be ignored unless you know what you are doing")
-                        return False
-
-            elif file_type == '.vmt' or '.txt' or '.res':
+            elif file_type in ['.vmt', '.txt', '.res']:
                 with open(temp_path, 'rb') as f:
                     content = f.read()
                 new_data = processor(content)
             else:
                 raise ValueError(f"Unsupported file type: {file_type}")
+
+            # check if the processed file size matches the original size
+            if len(new_data) != original_size:
+                if len(new_data) < original_size:
+                    # maintain proper termination
+                    padding_needed = original_size - len(new_data)
+                    print(f"Adding {padding_needed} bytes of padding to {file_name}")
+                    new_data = new_data[:-1] + b' ' * padding_needed + new_data[-1:]
+                else:
+                    print(f"ERROR: {file_name} is {len(new_data) - original_size} bytes larger than original! "
+                          f"This should be ignored unless you know what you are doing")
+                    return False
 
             # patch back into VPK
             return self.vpk.patch_file(full_path, new_data, create_backup)
