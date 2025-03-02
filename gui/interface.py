@@ -41,7 +41,8 @@ class ParticleOperations(QObject):
                 if addon_path.exists():
                     with zipfile.ZipFile(addon_path, 'r') as zip_ref:
                         for file in zip_ref.namelist():
-                            zip_ref.extract(file, folder_setup.mods_everything_else_dir)
+                            if Path(file).name != 'mod.json':
+                                zip_ref.extract(file, folder_setup.mods_everything_else_dir)
 
             # these 5 particle files contain duplicate elements that are found elsewhere, this is an oversight by valve.
             # what im doing is simply fixing this oversight using context from the elements themselves
@@ -111,6 +112,7 @@ class ParticleOperations(QObject):
             # create new VPK for custom content
             custom_content_dir = folder_setup.mods_everything_else_dir
             if custom_content_dir.exists() and any(custom_content_dir.iterdir()):
+                shutil.copytree("backup/cfg", custom_content_dir / "cfg", dirs_exist_ok=True)
                 new_pak = vpk.new(str(custom_content_dir))
                 new_pak.save(custom_dir / random.choice(CUSTOM_VPK_NAMES))
 
