@@ -39,10 +39,6 @@ class VPKHandler:
             else:
                 raise ValueError(f"Could not find VPK file: {vpk_path} or directory VPK: {possible_dir_path}")
 
-        print(f"VPK Type: {'Directory' if self.is_dir_vpk else 'Single file'}")
-        print(f"Directory path: {self.dir_path}")
-        print(f"Base path: {self.base_path}")
-
         self.vpk_parser = VPKParser(self.dir_path)
         self.vpk_parser.parse_directory()
 

@@ -39,7 +39,6 @@ class PresetDescription(QWidget):
             padding: 2px 8px;
             border-radius: 4px;
             font-weight: bold;
-            display: inline-block;
         """)
         self.content_layout.addWidget(self.type_label)
 
