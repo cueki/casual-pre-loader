@@ -18,10 +18,10 @@ def copy_project_files(source_dir, target_dir):
     # list of directories to copy
     dirs_to_copy = [
         'core',
+        'core/handlers',
+        'core/parsers',
         'gui',
-        'handlers',
         'operations',
-        'parsers',
         'addons',
         'backup'
     ]
@@ -30,6 +30,7 @@ def copy_project_files(source_dir, target_dir):
     files_to_copy = [
         'app.py',
         'particle_system_map.json',
+        'mod_urls.json',
         'LICENSE',
         'README.md'
     ]

@@ -39,10 +39,6 @@ class VPKHandler:
             else:
                 raise ValueError(f"Could not find VPK file: {vpk_path} or directory VPK: {possible_dir_path}")
 
-        print(f"VPK Type: {'Directory' if self.is_dir_vpk else 'Single file'}")
-        print(f"Directory path: {self.dir_path}")
-        print(f"Base path: {self.base_path}")
-
         self.vpk_parser = VPKParser(self.dir_path)
         self.vpk_parser.parse_directory()
 
@@ -110,7 +106,6 @@ class VPKHandler:
             filename = path.stem
             # ensure forward slashes and handle nested paths correctly
             directory = str(path.parent).replace('\\', '/')
-            # for some reason root directories become dots, we need them to be spaces as the key for the dictionary
             if directory == '.':
                 directory = ' '
 

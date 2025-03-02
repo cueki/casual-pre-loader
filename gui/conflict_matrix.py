@@ -1,7 +1,20 @@
 import json
 from pathlib import Path
+import webbrowser
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QTableWidget, QHeaderView, QCheckBox, QHBoxLayout, QWidget, QPushButton
+
+
+def load_mod_urls():
+    # load saved URLs from a file
+    urls_file = Path("mod_urls.json")
+    if urls_file.exists():
+        try:
+            with open(urls_file, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error loading mod URLs: {e}")
+    return {}
 
 
 class ConflictMatrix(QTableWidget):
@@ -13,6 +26,21 @@ class ConflictMatrix(QTableWidget):
         self.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
         self.selections_file = Path("matrix_selections.json")
         self.saved_selections = self.load_selections()
+        self.mod_urls = {}
+        self.verticalHeader().sectionClicked.connect(self.on_mod_name_clicked)
+
+    def on_mod_name_clicked(self, index):
+        mod_name = self.verticalHeaderItem(index).text()
+        if mod_name in self.mod_urls and self.mod_urls[mod_name]:
+            self.open_mod_url(mod_name)
+
+    def open_mod_url(self, mod_name):
+        # open the URL for the mod in the default web browser
+        if mod_name in self.mod_urls and self.mod_urls[mod_name]:
+            try:
+                webbrowser.open(self.mod_urls[mod_name])
+            except Exception as e:
+                print(f"Error opening URL for {mod_name}: {e}")
 
     def load_selections(self):
         try:
@@ -43,6 +71,9 @@ class ConflictMatrix(QTableWidget):
             print(f"Error saving selections: {e}")
 
     def update_matrix(self, mods, pcf_files):
+        # load mod URLs
+        self.mod_urls = load_mod_urls()
+
         # add one extra column for the Select All button
         self.setColumnCount(len(pcf_files) + 1)
         self.setRowCount(len(mods))
@@ -51,6 +82,22 @@ class ConflictMatrix(QTableWidget):
         headers = ["Select All"] + pcf_files
         self.setHorizontalHeaderLabels(headers)
         self.setVerticalHeaderLabels(mods)
+
+        # make vertical header interactive
+        self.verticalHeader().setStyleSheet("""
+            QHeaderView::section { 
+                background-color: lightgray; 
+                border-style: outset; 
+                border-width: 2px; 
+                border-color: gray;
+                color: black;
+            }
+            QHeaderView::section:hover { 
+                color: blue; 
+                text-decoration: underline;
+                background-color: #e0e0e0;
+            }
+        """)
 
         for row, mod in enumerate(mods):
             # Select All button
