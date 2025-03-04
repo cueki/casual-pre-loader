@@ -23,7 +23,9 @@ def copy_project_files(source_dir, target_dir):
         'gui',
         'operations',
         'addons',
-        'backup'
+        'backup',
+        'backup/cfg',
+        'backup/cfg/w'
     ]
 
     # list of files to copy
