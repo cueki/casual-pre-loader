@@ -1,43 +1,65 @@
 [![Join Our Discord!](https://img.shields.io/badge/Discord-Join%20Us-7289DA.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/2SZbfXzKYQ)
 
 # Download the latest release [Here](https://github.com/cueki/casual-particle-pre-loader/releases/).
+# Most up-to-date tutorial [Here](https://gamebanana.com/tuts/18436)
 
-Or if you want to run with python:
+If you want to run with python:
 
 ```
 git clone https://github.com/cueki/casual-particle-pre-loader
 cd casual-particle-pre-loader
 mkdir backup
-(copy the tf2_misc_dir.vpk, _000.vpk and _017.vpk from tf/ into backup)
+(copy the tf2_misc_dir.vpk, _000.vpk and _017.vpk from tf/ into backup/)
+(unzip user_mods.zip)
 pip install -r requirements.txt
 python app.py
 ```
-# Some Info:
+# How does this work?
 
-### Simply put, <ins> <s>any</s> almost any* custom particle you want can now work in casual. </ins>
+There are two exploits im using to get this to work, one that many are familiar with, being the game_info change (nothing really noteworthy here, known widely since at least 2018-2019), and the second being that the game doesn't actually check the md5 hashes outlined in the directory vpk.
+I combine both of these in order to "replace" the particles already present in the game with modded ones, which then point to the custom directory for their material files.
 
-### dx8 should work now
+When first approaching this, I had no idea what about the md5 hash being unchecked, I stumbled across that fact by accident some time in August 2023. Surely this has no correlation to any events whatsoever.
 
-This, of course, may make your game unstable, the presets I provide will be tested by me and others vigorously to ensure as few crashes as possible.
+While the game may not enforce the hashes, it does enforce the file sizes, therefore, in order to replace any of the files in the game, I need to ensure that the replacement is the same size or less as what is already there, if it's smaller, I can simply pad it out with whitespace bytes to keep the dir vpk happy.
+This means that, in order to get custom particles working, I had to learn how particle files were structured, and then use that knowledge to remove any redundant data so that I could use that extra space for modded data.
 
-If at any point the game is too unstable, and you cannot figure out why, I have included an "uninstall" feature that should return the game to its original state. **If this does not work for whatever reason, verify the game's integrity in Steam, and it will all go back to normal.**
+So fundamentally, the process works as follows:
+- Step 1: Figure out what mods the user is actually adding(`operations/advanced_particle_merger.py`). Mod makers will sometimes cluster their particle effects into one giant file for simplicity's sake, and to force the load order of the game. This works, and is actually pretty clever, but unfortunately goes directly against what I am trying to accomplish because it assumes that whatever particle effects are not being modified are contained within the games files, and I am replacing those directly. Therefore, I must look at the files being presented to the application and use a reverse lookup to figure out what particles are actually being referenced, the mapping is found inside of `particle_map.json` 
+- Step 2: Rebuild the particle files (`operations/pcf_rebuild.py`). Now that we know what particle elements are actually being modified, we now need to make sure that the particle files we put in the game are not missing anything. If, for example, you just want to replace the short circuits blinding awful no good very bad flashbang by modifying just the `dxhr_lightningball`, you could patch that back into the game no issue, but then the machina would no longer have any tracers and the widowmaker would lose its shell ejections, because they are all part of the same particle file. So we use the same mapping of `particle_map.json` to get the rest of the particle elements from the games base files, and combine them all into one `dxhr_fx.pcf` then patch that back into the game. This is worse than it looks because the tree structure of the particle files is annoying to traverse. Sometimes the names in the string dictionary are different, sometimes Valve has duplicate elements in different files by mistake. All part of the process.
+- Step 3: Compress the particle files (`operations/pcf_compress.py`). Once the files have been rebuilt there is a new problem, they are too big to fit within the vpks. As mentioned above, my solution to this problem was to find any redundant data within the particle files that I could remove. Turns out, the particle files are about 3.5x larger than they need to be. You can look at the code to see exactly what I'm doing, mostly just removing duplicate data, updating references, and making the internal structure more efficient. This ratio is not linear, the larger the file the better the compression, while smaller files have much less to work with.
+- Step 4: Patch the files back into the vpk (`core/handlers/file_handler.py`). Once we have the compressed particle files, we then need to patch them back into the game's multi-file misc vpks. Most vpk tools do not allow for direct modification of vpks without unpacking and repacking, so I wrote my own parser and handler.
+- Step 5: Move files into game (various scripts). Then we need to get the specified effect materials into the games custom dir, as well as whatever else is needed. I get only the files needed from looking inside the pcf at the materials attribute path. Then, I pack them back into a vpk just for better load times. I also add a config file that loads the itemtest map on startup, so that all the custom stuff gets loaded.
 
-As for performance, I only tested this locally with my own config and saw little to no difference (nothing outside the range of random distribution). Your result may vary with different configs / settings.
+There are many details of the problem-solving process that I may elaborate on in the future. 
 
-Is this VAC safe? Yes. Could Valve patch this out of the game easily? Also yes. Enjoy it while you can :).
+Therefore, skipping over the details of me slowly figuring this all out, the most difficult problem I wanted to solve was providing a solution that actually worked for the average TF2 player, and that's how we got here.
 
+
+
+
+
+
+
+Is this VAC safe? Yes. 
+
+Could Valve patch this out of the game easily? Also yes. 
+
+Enjoy it while you can :).
+
+-cukei
 # Thank you <3:
 ### Mod makers
 
-[THE GOAT](https://gamebanana.com/members/2133251) This person made both the [minecraft_preset](https://gamebanana.com/mods/435309) and the [ghytd_preset](https://gamebanana.com/mods/451166). Still updates his packs monthly. 
+[THE GOAT](https://gamebanana.com/members/2133251) This person made the [square_series](https://gamebanana.com/mods/435309) preset.
 
-[Skeleton Hotel](https://gamebanana.com/members/1414545) This guy also has some crazy good effects.
+[Skeleton Hotel](https://gamebanana.com/members/1414545).
 
-[Taxicat](https://gamebanana.com/members/1333549) and [Qorange](https://gamebanana.com/members/2060075) for the [transparent_flamethrower](https://gamebanana.com/mods/348622), these were the original intention of this idea.
+[Taxicat](https://gamebanana.com/members/1333549) and [Qorange](https://gamebanana.com/members/2060075) for the [transparent_flamethrower](https://gamebanana.com/mods/348622).
 
-[Ashe_tf](https://gamebanana.com/members/1932153) for fixing the [medicgun_beam](https://gamebanana.com/mods/437447) and its invisible nonsense.
+[Ashe_tf](https://gamebanana.com/members/1932153) for fixing the [medicgun_beam](https://gamebanana.com/mods/437447).
 
-[SonOfDiscordiA](https://gamebanana.com/members/2670597) for such a simple change to the [short_circuit](https://gamebanana.com/mods/446897). 
+[SonOfDiscordiA](https://gamebanana.com/members/2670597) for the [short_circuit](https://gamebanana.com/mods/446897).
 
 [agrastiOs](https://github.com/agrastiOs) for the [UltimateVisualFixPack](https://github.com/agrastiOs/Ultimate-TF2-Visual-Fix-Pack).
 
