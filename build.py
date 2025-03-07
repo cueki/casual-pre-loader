@@ -25,7 +25,8 @@ def copy_project_files(source_dir, target_dir):
         'addons',
         'backup',
         'backup/cfg',
-        'backup/cfg/w'
+        'backup/cfg/w',
+        'quickprecache'
     ]
 
     # list of files to copy

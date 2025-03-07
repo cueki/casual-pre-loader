@@ -17,7 +17,7 @@ def parse_vmt_texture(vmt_path):
 
     try:
         with open(vmt_path, 'r', encoding='utf-8') as f:
-            # Read file line by line to properly handle comments
+            # read file line by line to properly handle comments
             lines = []
             for line in f:
                 # skip commented lines
@@ -136,7 +136,6 @@ class ModDropZone(QFrame):
                         if source_file.exists():
                             # copy particle file
                             shutil.copy2(source_file, folder_setup.mods_particle_dir / (particle_file + ".pcf"))
-
                             # get particle file mats from attrib
                             pcf = PCFFile(source_file).decode()
                             for element in pcf.elements:
@@ -146,9 +145,13 @@ class ModDropZone(QFrame):
                                         attr_type, value = element.attributes[b'material']
                                         if isinstance(value, bytes):
                                             material_path = value.decode('ascii')
-                                            # ignore non vmt files for now
+                                            # ignore vgui/white
+                                            if material_path == 'vgui/white':
+                                                continue
                                             if material_path.endswith('.vmt'):
                                                 required_materials.add(material_path)
+                                            else:
+                                                required_materials.add(material_path + ".vmt")
 
         for mod_name in used_mods:
             mod_dir = folder_setup.user_mods_dir / mod_name
