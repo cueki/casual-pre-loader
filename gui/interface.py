@@ -14,6 +14,8 @@ from operations.file_processors import pcf_mod_processor, game_type, get_from_vp
 from operations.pcf_rebuild import load_particle_system_map, extract_elements
 from core.parsers.pcf_file import PCFFile
 from backup.backup_manager import BackupManager, get_working_vpk_path, prepare_working_copy
+from quickprecache.precache_list import make_precache_list
+from quickprecache.quick_precache import QuickPrecache
 
 
 class ParticleOperations(QObject):
@@ -121,6 +123,19 @@ class ParticleOperations(QObject):
                 self.error_signal.emit("Failed to deploy to game directory")
                 return
 
+            # flush quick precache every install
+            QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
+            quick_precache_path = custom_dir / "QuickPrecache.vpk"
+            if quick_precache_path.exists():
+                quick_precache_path.unlink()
+
+            # run quick precache if prop files detected
+            precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]))
+            if precache_prop_set:
+                precache = QuickPrecache(str(Path(tf_path).parents[0]), debug=False)
+                precache.run(auto=True)
+                shutil.copy2("quickprecache/QuickPrecache.vpk", custom_dir)
+
             for file in custom_dir.glob("*.vpk"):
                 get_from_vpk(Path(file))
 
@@ -145,6 +160,12 @@ class ParticleOperations(QObject):
             game_type(Path(tf_path) / 'gameinfo.txt', uninstall=True)
             custom_dir = Path(tf_path) / 'custom'
             custom_dir.mkdir(exist_ok=True)
+
+            # flush quick precache files
+            QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
+            quick_precache_path = custom_dir / "QuickPrecache.vpk"
+            if quick_precache_path.exists():
+                quick_precache_path.unlink()
 
             for custom_vpk in CUSTOM_VPK_NAMES:
                 vpk_path = custom_dir / custom_vpk

@@ -19,7 +19,7 @@ python app.py
 There are two exploits im using to get this to work, one that many are familiar with, being the game_info change (nothing really noteworthy here, known widely since at least 2018-2019), and the second being that the game doesn't actually check the md5 hashes outlined in the directory vpk.
 I combine both of these in order to "replace" the particles already present in the game with modded ones, which then point to the custom directory for their material files.
 
-When first approaching this, I had no idea what about the md5 hash being unchecked, I stumbled across that fact by accident some time in August 2023. Surely this has no correlation to any events whatsoever.
+When first approaching this, I had no idea about the md5 hash being unchecked, I stumbled across that fact by accident some time in August 2023. Surely this has no correlation to any events whatsoever.
 
 While the game may not enforce the hashes, it does enforce the file sizes, therefore, in order to replace any of the files in the game, I need to ensure that the replacement is the same size or less as what is already there, if it's smaller, I can simply pad it out with whitespace bytes to keep the dir vpk happy.
 This means that, in order to get custom particles working, I had to learn how particle files were structured, and then use that knowledge to remove any redundant data so that I could use that extra space for modded data.
@@ -34,12 +34,6 @@ So fundamentally, the process works as follows:
 There are many details of the problem-solving process that I may elaborate on in the future. 
 
 Therefore, skipping over the details of me slowly figuring this all out, the most difficult problem I wanted to solve was providing a solution that actually worked for the average TF2 player, and that's how we got here.
-
-
-
-
-
-
 
 Is this VAC safe? Yes. 
 
