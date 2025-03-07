@@ -24,17 +24,17 @@ def manage_folder(folder_path: Path) -> List[str]:
     model_list = []
 
     for file_path in folder_path.glob("**/*"):
-        # only precache props
-        if "prop" in str(file_path):
-            if file_path.is_file():
-                entry = str(file_path.relative_to(folder_path))
+        # only precache props (disabled for now, needs more testing)
+        # if "prop" in str(file_path):
+        if file_path.is_file():
+            entry = str(file_path.relative_to(folder_path))
 
-                for suffix in QUICKPRECACHE_FILE_SUFFIXES:
-                    if entry.endswith(suffix):
-                        # replace the suffix with .mdl
-                        model_path = Path(entry).with_suffix('.mdl').as_posix().lower()
-                        model_list.append(model_path)
-                        break
+            for suffix in QUICKPRECACHE_FILE_SUFFIXES:
+                if entry.endswith(suffix):
+                    # replace the suffix with .mdl
+                    model_path = Path(entry).with_suffix('.mdl').as_posix().lower()
+                    model_list.append(model_path)
+                    break
 
     return model_list
 
@@ -51,17 +51,17 @@ def manage_vpk(vpk_path: Path) -> List[str]:
         model_files = vpk_handler.find_files("models/")
 
         for file_path in model_files:
-            # only precache props
-            if "prop" in file_path:
-                for suffix in QUICKPRECACHE_FILE_SUFFIXES:
-                    if file_path.endswith(suffix):
-                        # extract the model path, removing the models/ prefix
-                        if file_path.startswith("models/"):
-                            model_path = file_path[7:].lower()
-                            # normalize to MDL format
-                            model_path = model_path[:-(len(suffix))] + ".mdl"
-                            model_list.append(model_path)
-                        break
+            # only precache props (disabled for now, needs more testing)
+            # if "prop" in file_path:
+            for suffix in QUICKPRECACHE_FILE_SUFFIXES:
+                if file_path.endswith(suffix):
+                    # extract the model path, removing the models/ prefix
+                    if file_path.startswith("models/"):
+                        model_path = file_path[7:].lower()
+                        # normalize to MDL format
+                        model_path = model_path[:-(len(suffix))] + ".mdl"
+                        model_list.append(model_path)
+                    break
 
     except Exception as e:
         print(f"Failed to process VPK {vpk_path}: {e}")
