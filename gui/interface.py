@@ -111,10 +111,10 @@ class ParticleOperations(QObject):
                 if cache_path.exists():
                     cache_path.unlink()
 
-            # create new VPK for custom content
+            # create new VPK for custom content & config
             custom_content_dir = folder_setup.mods_everything_else_dir
+            shutil.copytree("backup/cfg", custom_content_dir / "cfg", dirs_exist_ok=True)
             if custom_content_dir.exists() and any(custom_content_dir.iterdir()):
-                shutil.copytree("backup/cfg", custom_content_dir / "cfg", dirs_exist_ok=True)
                 new_pak = vpk.new(str(custom_content_dir))
                 new_pak.save(custom_dir / random.choice(CUSTOM_VPK_NAMES))
 
