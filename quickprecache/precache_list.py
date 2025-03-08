@@ -4,7 +4,7 @@ from core.handlers.vpk_handler import VPKHandler
 from core.constants import QUICKPRECACHE_FILE_SUFFIXES
 
 
-def make_precache_list(game_path: str) -> Set[str]:
+def make_precache_list(game_path: str, prop_filter: bool = False) -> Set[str]:
     # get list of files to precache from custom
     model_list = set()
     custom_folder = Path(game_path) / "tf" / "custom"
@@ -12,20 +12,22 @@ def make_precache_list(game_path: str) -> Set[str]:
     if custom_folder.is_dir():
         for file in custom_folder.iterdir():
             if file.is_dir() and "disabled" not in file.name:
-                model_list.update(manage_folder(file))
+                model_list.update(manage_folder(file, prop_filter))
             elif file.is_file() and file.name.endswith(".vpk"):
-                model_list.update(manage_vpk(file))
+                model_list.update(manage_vpk(file, prop_filter))
 
     # filter for "decompiled " and "competitive_badge"
     return {model for model in model_list if "decompiled " not in model and "competitive_badge" not in model}
 
 
-def manage_folder(folder_path: Path) -> List[str]:
+def manage_folder(folder_path: Path, prop_filter: bool = False) -> List[str]:
     model_list = []
 
     for file_path in folder_path.glob("**/*"):
-        # only precache props (disabled for now, needs more testing)
-        # if "prop" in str(file_path):
+        # apply prop filter if enabled
+        if prop_filter and "prop" not in str(file_path).lower():
+            continue
+
         if file_path.is_file():
             entry = str(file_path.relative_to(folder_path))
 
@@ -39,7 +41,7 @@ def manage_folder(folder_path: Path) -> List[str]:
     return model_list
 
 
-def manage_vpk(vpk_path: Path) -> List[str]:
+def manage_vpk(vpk_path: Path, prop_filter: bool = False) -> List[str]:
     # extract model paths from a VPK file (using my vpk handler)
     model_list = []
     failed_vpks = []
@@ -51,8 +53,10 @@ def manage_vpk(vpk_path: Path) -> List[str]:
         model_files = vpk_handler.find_files("models/")
 
         for file_path in model_files:
-            # only precache props (disabled for now, needs more testing)
-            # if "prop" in file_path:
+            # apply prop filter if enabled
+            if prop_filter and "prop" not in file_path.lower():
+                continue
+
             for suffix in QUICKPRECACHE_FILE_SUFFIXES:
                 if file_path.endswith(suffix):
                     # extract the model path, removing the models/ prefix

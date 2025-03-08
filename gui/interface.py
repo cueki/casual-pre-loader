@@ -30,7 +30,7 @@ class ParticleOperations(QObject):
     def update_progress(self, progress: int, message: str):
         self.progress_signal.emit(progress, message)
 
-    def install(self, tf_path: str, selected_addons: List[str]):
+    def install(self, tf_path: str, selected_addons: List[str], prop_filter: bool = False):
         try:
             backup_manager = BackupManager(tf_path)
             working_vpk_path = get_working_vpk_path()
@@ -124,15 +124,15 @@ class ParticleOperations(QObject):
                 return
 
             # flush quick precache every install
-            QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
+            QuickPrecache(str(Path(tf_path).parents[0]), debug=False, prop_filter=prop_filter).run(flush=True)
             quick_precache_path = custom_dir / "QuickPrecache.vpk"
             if quick_precache_path.exists():
                 quick_precache_path.unlink()
 
             # run quick precache if prop files detected
-            precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]))
+            precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]), prop_filter)
             if precache_prop_set:
-                precache = QuickPrecache(str(Path(tf_path).parents[0]), debug=False)
+                precache = QuickPrecache(str(Path(tf_path).parents[0]), debug=False, prop_filter=prop_filter)
                 precache.run(auto=True)
                 shutil.copy2("quickprecache/QuickPrecache.vpk", custom_dir)
 
@@ -162,7 +162,7 @@ class ParticleOperations(QObject):
             custom_dir.mkdir(exist_ok=True)
 
             # flush quick precache files
-            QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
+            QuickPrecache(str(Path(tf_path).parents[0]), debug=False, prop_filter=False).run(flush=True)
             quick_precache_path = custom_dir / "QuickPrecache.vpk"
             if quick_precache_path.exists():
                 quick_precache_path.unlink()
