@@ -70,10 +70,12 @@ class QuickPrecache:
     # maximum size for QC file content (in chars)
     MAX_SPLIT_SIZE = 2048
 
-    def __init__(self, game_path: str, debug: bool = False):
+    def __init__(self, game_path: str, debug: bool = False, prop_filter: bool = False):
         # debug keeps temp files
+        # prop_filter limits precaching to only props
         self.game_path = game_path
         self.debug = debug
+        self.prop_filter = prop_filter
         self.model_list = set()
         self.failed_vpks = []
         self.builder_index = 0
@@ -215,7 +217,8 @@ class QuickPrecache:
             # step 3: get the model list
             if auto:
                 print("Auto-scanning for models...")
-                self.model_list = make_precache_list(self.game_path)
+                # pass the prop_filter baton
+                self.model_list = make_precache_list(self.game_path, self.prop_filter)
 
                 # save the list if requested
                 if list_file:

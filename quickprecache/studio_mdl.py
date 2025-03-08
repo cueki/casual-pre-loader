@@ -53,8 +53,8 @@ class StudioMDL:
 
         # use wine on not windows
         if platform.system() != "Windows":
-            # for wine, use shell=True
-            cmd_str = f'wine "{exe_path}" -game "{tf_path}" -nop4 -verbose "{qc_file}"'
+            # for wine, use shell=True and use Z:path maybe ???
+            cmd_str = f'wine "{exe_path}" -game "Z:{tf_path}" -nop4 -verbose "{qc_file}"'
             print(f"Executing with wine: {cmd_str}")
             process = subprocess.Popen(
                 cmd_str,

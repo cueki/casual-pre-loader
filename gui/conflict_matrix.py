@@ -99,6 +99,8 @@ class ConflictMatrix(QTableWidget):
             }
         """)
 
+        saved_checkboxes = []
+
         for row, mod in enumerate(mods):
             # Select All button
             select_all_widget = QWidget()
@@ -120,15 +122,20 @@ class ConflictMatrix(QTableWidget):
 
                 checkbox = self.create_checkbox(row, col + 1)
 
-                # restore saved selection
+                # store saved selections
                 if pcf_file in self.saved_selections and self.saved_selections[pcf_file] == mod:
-                    checkbox.setChecked(True)
+                    saved_checkboxes.append((checkbox, row, col + 1))
 
                 layout.addWidget(checkbox)
                 self.setCellWidget(row, col + 1, cell_widget)
 
             # connect Select All button
             select_all_button.clicked.connect(lambda checked, r=row: self.select_all_row(r))
+
+        # apply saved selections after all cells are created and event handlers are connected
+        for checkbox, row, col in saved_checkboxes:
+            self.uncheck_column_except(col, row)
+            checkbox.setChecked(True)
 
     def select_all_row(self, row):
         any_checked = False

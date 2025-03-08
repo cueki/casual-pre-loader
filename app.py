@@ -7,7 +7,7 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLineEdit, QLabel, QProgressBar,
                              QListWidget, QFileDialog, QMessageBox,
-                             QGroupBox, QApplication, QSplitter, QListWidgetItem, QTabWidget)
+                             QGroupBox, QApplication, QSplitter, QListWidgetItem, QTabWidget, QCheckBox)
 from PyQt6.QtCore import pyqtSignal, Qt
 from core.folder_setup import folder_setup
 from gui.drag_and_drop import ModDropZone
@@ -34,8 +34,9 @@ class ParticleManagerGUI(QMainWindow):
         self.addons_file_paths = {}
         self.addon_description = None
         self.mod_drop_zone = None
+        self.prop_filter_checkbox = None
 
-        self.setWindowTitle("cukei's custom casual particle pre-loader :)")
+        self.setWindowTitle("cukei's casual pre-loader :)")
         self.setMinimumSize(800, 400)
         self.resize(1200, 600)
 
@@ -143,6 +144,11 @@ class ParticleManagerGUI(QMainWindow):
         install_controls = QGroupBox("Installation")
         controls_layout = QVBoxLayout()
 
+        # add prop filter checkbox
+        self.prop_filter_checkbox = QCheckBox("Only precache prop models, enable this to maybe fix the 'black cosmetic' bug (Experimental)")
+        self.prop_filter_checkbox.setToolTip("When checked, only models with 'prop' in their name will be precached")
+        controls_layout.addWidget(self.prop_filter_checkbox)
+
         button_layout = QHBoxLayout()
         self.install_button = QPushButton("Install")
         self.install_button.clicked.connect(self.start_install_thread)
@@ -184,8 +190,7 @@ class ParticleManagerGUI(QMainWindow):
                         self.tf_path_edit.setText(last_dir)
                         self.update_restore_button_state()
         except Exception as e:
-            print(f"Error loading last directory: {e}")
-
+            print(f"Error loading saved settings: {e}")
 
     def browse_tf_dir(self):
         directory = QFileDialog.getExistingDirectory(self, "Select tf/ Directory")
@@ -200,7 +205,7 @@ class ParticleManagerGUI(QMainWindow):
             with open("last_directory.txt", "w") as f:
                 f.write(self.tf_path)
         except Exception as e:
-            print(f"Error saving last directory: {e}")
+            print(f"Error saving settings: {e}")
 
     def on_addon_select(self):
         selected_items = self.addons_list.selectedItems()
@@ -230,17 +235,16 @@ class ParticleManagerGUI(QMainWindow):
         self.addons_list.clear()
         addon_groups = {"texture": [], "model": [], "misc": [], "animation": [], "unknown": []}
 
-
         for addon in addons_dir.glob("*.zip"):
             addon_info = self.load_addon_info(addon.stem)
             addon_type = addon_info.get("type", "unknown").lower()
             if addon_type not in addon_groups:
                 addon_groups[addon_type] = []
             addon_groups[addon_type].append(addon_info)
-            
+
         # sort the addon groups alphabetically
         addon_groups = {group: addon_groups[group] for group in sorted(addon_groups)}
-        
+
         # go through the addon groups and sort addons. Add splitters for each group. Unknown remains at the bottom.
         for addon_type in addon_groups:
             if addon_type != "unknown":
@@ -250,7 +254,6 @@ class ParticleManagerGUI(QMainWindow):
                 self.addons_list.addItem(splitter)
 
                 for addon_info_dict in addon_groups[addon_type]:
-                    
                     item = QListWidgetItem(addon_info_dict['addon_name'])
                     self.addons_list.addItem(item)
                     self.addons_file_paths[addon_info_dict['addon_name']] = addon_info_dict
@@ -260,7 +263,6 @@ class ParticleManagerGUI(QMainWindow):
                 splitter.setFlags(Qt.ItemFlag.NoItemFlags)
                 splitter.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.addons_list.addItem(splitter)
-
 
                 for addon_info_dict in addon_groups[addon_type]:
                     item = QListWidgetItem(addon_info_dict['addon_name'])
@@ -287,11 +289,12 @@ class ParticleManagerGUI(QMainWindow):
 
         self.mod_drop_zone.apply_particle_selections()
         selected_addons = self.get_selected_addons()
+        prop_filter = self.prop_filter_checkbox.isChecked()
 
         self.set_processing_state(True)
         thread = threading.Thread(
             target=self.operations.install,
-            args=(self.tf_path, selected_addons)
+            args=(self.tf_path, selected_addons, prop_filter)
         )
         thread.daemon = True
         thread.start()
