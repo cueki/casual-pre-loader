@@ -214,6 +214,14 @@ class ModDropZone(QFrame):
 
         for url in event.mimeData().urls():
             file_path = url.toLocalFile()
+
+            # disallow any files that have more than 1 '.' in its name (stinky)
+            if Path(file_path).name.count('.') > 1:
+                QMessageBox.warning(self, "Invalid Filename",
+                                   f"File '{Path(file_path).name}' contains multiple periods in its name.\n\n"
+                                   f"Please rename the file to contain only one period (for the extension) and try again.")
+                continue
+
             try:
                 vpk_name = Path(file_path).stem
                 extracted_user_mods_dir = folder_setup.user_mods_dir / vpk_name
@@ -247,10 +255,12 @@ class ModDropZone(QFrame):
                         for root, _, files in os.walk(extracted_user_mods_dir):
                             for file in files:
                                 file_path = Path(root) / file
-                                # calculate relative path for the archive
-                                arc_path = file_path.relative_to(extracted_user_mods_dir)
-                                # add file to the archive
-                                zip_f.write(file_path, arc_path)
+                                # make sure the file has an extension (the vpk module cant handle them later on)
+                                if file_path.suffix:
+                                    # calculate relative path for the archive
+                                    arc_path = file_path.relative_to(extracted_user_mods_dir)
+                                    # add file to the archive
+                                    zip_f.write(file_path, arc_path)
 
                     # clean up the extracted directory after zipping
                     shutil.rmtree(extracted_user_mods_dir)

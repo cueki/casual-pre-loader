@@ -7,10 +7,10 @@ import vpk
 import random
 from core.constants import CUSTOM_VPK_NAMES, DX8_LIST
 from core.folder_setup import folder_setup
-from core.handlers.file_handler import FileHandler
+from core.handlers.file_handler import FileHandler, copy_config_files
 from core.handlers.pcf_handler import check_parents, update_materials
 from core.handlers.vpk_handler import VPKHandler
-from operations.file_processors import pcf_mod_processor, game_type, get_from_vpk
+from operations.file_processors import pcf_mod_processor, game_type, get_from_custom_dir
 from operations.pcf_rebuild import load_particle_system_map, extract_elements
 from core.parsers.pcf_file import PCFFile
 from backup.backup_manager import BackupManager, get_working_vpk_path, prepare_working_copy
@@ -113,7 +113,8 @@ class ParticleOperations(QObject):
 
             # create new VPK for custom content & config
             custom_content_dir = folder_setup.mods_everything_else_dir
-            shutil.copytree("backup/cfg", custom_content_dir / "cfg", dirs_exist_ok=True)
+            copy_config_files(custom_content_dir, prop_filter)
+
             if custom_content_dir.exists() and any(custom_content_dir.iterdir()):
                 new_pak = vpk.new(str(custom_content_dir))
                 new_pak.save(custom_dir / random.choice(CUSTOM_VPK_NAMES))
@@ -136,8 +137,7 @@ class ParticleOperations(QObject):
                 precache.run(auto=True)
                 shutil.copy2("quickprecache/QuickPrecache.vpk", custom_dir)
 
-            for file in custom_dir.glob("*.vpk"):
-                get_from_vpk(Path(file))
+            get_from_custom_dir(custom_dir)
 
             self.update_progress(100, "Installation complete")
             self.success_signal.emit("Mods installed successfully!")

@@ -145,7 +145,7 @@ class ParticleManagerGUI(QMainWindow):
         controls_layout = QVBoxLayout()
 
         # add prop filter checkbox
-        self.prop_filter_checkbox = QCheckBox("Only precache prop models, enable this to maybe fix the 'black cosmetic' bug (Experimental)")
+        self.prop_filter_checkbox = QCheckBox("Enable this to maybe fix the 'black cosmetic' bug with quick precache (Experimental, slower TF2 load times)")
         self.prop_filter_checkbox.setToolTip("When checked, only models with 'prop' in their name will be precached")
         controls_layout.addWidget(self.prop_filter_checkbox)
 
@@ -378,6 +378,7 @@ class ParticleManagerGUI(QMainWindow):
 
 
 def main():
+    folder_setup.cleanup_temp_folders()
     folder_setup.create_required_folders()
     prepare_working_copy()
     app = QApplication([])
