@@ -1,9 +1,29 @@
 import os
+import shutil
 import traceback
 from typing import List
 from pathlib import Path
 from core.parsers.pcf_file import PCFFile
 from core.folder_setup import folder_setup
+
+
+def copy_config_files(custom_content_dir, prop_filter=False):
+    # create destination directory if it doesn't exist
+    config_dest_dir = custom_content_dir / "cfg" / "w"
+    config_dest_dir.mkdir(parents=True, exist_ok=True)
+
+    # choose source config based on prop_filter
+    source_config = "slow.cfg" if prop_filter else "fast.cfg"
+    source_path = Path("backup/cfg/w") / source_config
+    dest_path = config_dest_dir / "config.cfg"
+    shutil.copy2(source_path, dest_path)
+
+    # copy any other files from backup/cfg that aren't in the w directory
+    for file_path in Path("backup/cfg").glob("*"):
+        if file_path.is_file() and file_path.name != "w":
+            shutil.copy2(file_path, custom_content_dir / "cfg" / file_path.name)
+
+    return dest_path
 
 
 class FileHandler:
