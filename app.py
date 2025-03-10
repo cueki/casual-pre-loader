@@ -2,7 +2,6 @@ import json
 import threading
 import zipfile
 from pathlib import Path
-
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLineEdit, QLabel, QProgressBar,
@@ -13,6 +12,7 @@ from core.folder_setup import folder_setup
 from gui.drag_and_drop import ModDropZone
 from gui.interface import ParticleOperations
 from gui.mod_descriptor import AddonDescription
+from gui.settings_manager import SettingsManager
 from operations.file_processors import check_game_type
 from backup.backup_manager import prepare_working_copy
 
@@ -24,6 +24,7 @@ class ParticleManagerGUI(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self.saved_addon_selections = None
         self.status_label = None
         self.progress_bar = None
         self.restore_button = None
@@ -34,7 +35,7 @@ class ParticleManagerGUI(QMainWindow):
         self.addons_file_paths = {}
         self.addon_description = None
         self.mod_drop_zone = None
-        self.prop_filter_checkbox = None
+        self.prop_filter_checkbox = QCheckBox
 
         self.setWindowTitle("cukei's casual pre-loader :)")
         self.setMinimumSize(800, 400)
@@ -43,6 +44,9 @@ class ParticleManagerGUI(QMainWindow):
         self.tf_path = ""
         self.selected_addons = []
         self.processing = False
+
+        # save state
+        self.settings_manager = SettingsManager()
 
         self.operations = ParticleOperations()
         self.setup_ui()
@@ -53,6 +57,11 @@ class ParticleManagerGUI(QMainWindow):
         self.operations.error_signal.connect(self.show_error)
         self.operations.success_signal.connect(self.show_success)
         self.operations.operation_finished.connect(lambda: self.set_processing_state(False))
+
+        self.prop_filter_checkbox.setChecked(self.settings_manager.get_prop_filter_state())
+        self.prop_filter_checkbox.stateChanged.connect(
+            lambda state: self.settings_manager.set_prop_filter_state(bool(state))
+        )
 
     def setup_ui(self):
         central_widget = QWidget()
@@ -76,7 +85,7 @@ class ParticleManagerGUI(QMainWindow):
         # mods
         custom_tab = QWidget()
         custom_layout = QVBoxLayout(custom_tab)
-        self.mod_drop_zone = ModDropZone(self)
+        self.mod_drop_zone = ModDropZone(self, self.settings_manager)
         custom_layout.addWidget(self.mod_drop_zone)
         self.mod_drop_zone.update_matrix()
 
@@ -84,7 +93,13 @@ class ParticleManagerGUI(QMainWindow):
         nav_layout = QHBoxLayout(nav_container)
         nav_layout.setContentsMargins(0, 0, 0, 0)
 
-        # add spacer to push button to the right
+        # create Deselect All button
+        deselect_all_button = QPushButton("Deselect All")
+        deselect_all_button.setFixedWidth(100)
+        deselect_all_button.clicked.connect(lambda: self.mod_drop_zone.conflict_matrix.deselect_all())
+        nav_layout.addWidget(deselect_all_button)
+
+        # add spacer to push Next button to the right
         nav_layout.addStretch()
 
         # create Next button
@@ -95,7 +110,7 @@ class ParticleManagerGUI(QMainWindow):
 
         # add navigation container to custom layout
         custom_layout.addWidget(nav_container)
-        tab_widget.addTab(custom_tab, "Mods")
+        tab_widget.addTab(custom_tab, "Particles")
 
         # install
         install_tab = QWidget()
@@ -145,8 +160,10 @@ class ParticleManagerGUI(QMainWindow):
         controls_layout = QVBoxLayout()
 
         # add prop filter checkbox
-        self.prop_filter_checkbox = QCheckBox("Enable this to maybe fix the 'black cosmetic' bug with quick precache (Experimental, slower TF2 load times)")
-        self.prop_filter_checkbox.setToolTip("When checked, only models with 'prop' in their name will be precached")
+        self.prop_filter_checkbox = QCheckBox(
+            "Fast load (Experimental, less stable, may cause 'black cosmetic' bugs and other errors)")
+        self.prop_filter_checkbox.setToolTip(
+            "When unchecked (default), the game will load into itemtest + use the quick precache script")
         controls_layout.addWidget(self.prop_filter_checkbox)
 
         button_layout = QHBoxLayout()
@@ -173,24 +190,12 @@ class ParticleManagerGUI(QMainWindow):
         right_layout.addStretch()
 
         install_splitter.addWidget(right_widget)
-        install_splitter.setSizes([600, 300])  # Set initial split sizes
+        install_splitter.setSizes([600, 300])
 
         install_layout.addWidget(install_splitter)
         tab_widget.addTab(install_tab, "Install")
 
         main_layout.addWidget(tab_widget)
-
-    def load_last_directory(self):
-        try:
-            if Path("last_directory.txt").exists():
-                with open("last_directory.txt", "r") as f:
-                    last_dir = f.read().strip()
-                    if Path(last_dir).exists():
-                        self.tf_path = last_dir
-                        self.tf_path_edit.setText(last_dir)
-                        self.update_restore_button_state()
-        except Exception as e:
-            print(f"Error loading saved settings: {e}")
 
     def browse_tf_dir(self):
         directory = QFileDialog.getExistingDirectory(self, "Select tf/ Directory")
@@ -201,15 +206,18 @@ class ParticleManagerGUI(QMainWindow):
             self.update_restore_button_state()
 
     def save_last_directory(self):
-        try:
-            with open("last_directory.txt", "w") as f:
-                f.write(self.tf_path)
-        except Exception as e:
-            print(f"Error saving settings: {e}")
+        self.settings_manager.set_last_directory(self.tf_path)
+
+    def load_last_directory(self):
+        last_dir = self.settings_manager.get_last_directory()
+        if last_dir and Path(last_dir).exists():
+            self.tf_path = last_dir
+            self.tf_path_edit.setText(last_dir)
+            self.update_restore_button_state()
 
     def on_addon_select(self):
         selected_items = self.addons_list.selectedItems()
-        # reset all items to their original text
+        # reset all items
         for i in range(self.addons_list.count()):
             item = self.addons_list.item(i)
             if item.flags() & Qt.ItemFlag.ItemIsSelectable:
@@ -229,6 +237,35 @@ class ParticleManagerGUI(QMainWindow):
             self.addon_description.update_content(addon_name, addon_info)
         else:
             self.addon_description.clear()
+
+        # save selections
+        self.settings_manager.set_addon_selections([
+            item.text().split(' [#')[0] for item in selected_items
+        ])
+
+    def apply_saved_addon_selections(self):
+        saved_selections = self.settings_manager.get_addon_selections()
+        if not saved_selections:
+            return
+
+        # block signals temporarily
+        self.addons_list.blockSignals(True)
+
+        # clear current selections
+        self.addons_list.clearSelection()
+
+        # apply saved selections
+        for i in range(self.addons_list.count()):
+            item = self.addons_list.item(i)
+            if item and item.flags() & Qt.ItemFlag.ItemIsSelectable:
+                if item.text() in saved_selections:
+                    item.setSelected(True)
+
+        # re-enable signals
+        self.addons_list.blockSignals(False)
+
+        # trigger the on_addon_select manually to update UI
+        self.on_addon_select()
 
     def load_addons(self):
         addons_dir = folder_setup.addons_dir
@@ -269,6 +306,8 @@ class ParticleManagerGUI(QMainWindow):
                     self.addons_list.addItem(item)
                     self.addons_file_paths[addon_info_dict['addon_name']] = addon_info_dict
 
+        self.apply_saved_addon_selections()
+
     def get_selected_addons(self):
         return [item.text().split(' [#')[0] for item in self.addons_list.selectedItems()]
 
@@ -289,12 +328,12 @@ class ParticleManagerGUI(QMainWindow):
 
         self.mod_drop_zone.apply_particle_selections()
         selected_addons = self.get_selected_addons()
-        prop_filter = self.prop_filter_checkbox.isChecked()
+        prop_filter_state = not self.prop_filter_checkbox.isChecked()
 
         self.set_processing_state(True)
         thread = threading.Thread(
             target=self.operations.install,
-            args=(self.tf_path, selected_addons, prop_filter)
+            args=(self.tf_path, selected_addons, prop_filter_state)
         )
         thread.daemon = True
         thread.start()
@@ -374,7 +413,6 @@ class ParticleManagerGUI(QMainWindow):
             "contents": ["Custom content"],
             "file_path": addon_stem
         }
-        
 
 
 def main():

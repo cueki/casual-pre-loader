@@ -1,8 +1,9 @@
 import json
-from pathlib import Path
 import webbrowser
+from pathlib import Path
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QTableWidget, QHeaderView, QCheckBox, QHBoxLayout, QWidget, QPushButton
+from gui import settings_manager as sm
 
 
 def load_mod_urls():
@@ -18,14 +19,13 @@ def load_mod_urls():
 
 
 class ConflictMatrix(QTableWidget):
-    def __init__(self):
+    def __init__(self, settings_manager=None):
         super().__init__()
         self.setStyleSheet("QTableWidget { border: 1px solid #ccc; }")
         self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
-        self.selections_file = Path("matrix_selections.json")
-        self.saved_selections = self.load_selections()
+        self.settings_manager = settings_manager
         self.mod_urls = {}
         self.verticalHeader().sectionClicked.connect(self.on_mod_name_clicked)
 
@@ -43,32 +43,26 @@ class ConflictMatrix(QTableWidget):
                 print(f"Error opening URL for {mod_name}: {e}")
 
     def load_selections(self):
-        try:
-            if self.selections_file.exists():
-                with open(self.selections_file, "r") as f:
-                    return json.load(f)
-            return {}
-        except Exception as e:
-            print(f"Error loading selections: {e}")
-            return {}
+        if self.settings_manager:
+            return self.settings_manager.get_matrix_selections()
+        return {}
 
     def save_selections(self):
-        try:
-            selections = {}
-            for col in range(1, self.columnCount()):
-                particle_file = self.horizontalHeaderItem(col).text()
-                for row in range(self.rowCount()):
-                    cell_widget = self.cellWidget(row, col)
-                    if cell_widget:
-                        checkbox = cell_widget.layout().itemAt(0).widget()
-                        if checkbox and checkbox.isChecked():
-                            mod_name = self.verticalHeaderItem(row).text()
-                            selections[particle_file] = mod_name
+        if not self.settings_manager:
+            return
 
-            with open(self.selections_file, "w") as f:
-                json.dump(selections, f)
-        except Exception as e:
-            print(f"Error saving selections: {e}")
+        selections = {}
+        for col in range(1, self.columnCount()):
+            particle_file = self.horizontalHeaderItem(col).text()
+            for row in range(self.rowCount()):
+                cell_widget = self.cellWidget(row, col)
+                if cell_widget:
+                    checkbox = cell_widget.layout().itemAt(0).widget()
+                    if checkbox and checkbox.isChecked():
+                        mod_name = self.verticalHeaderItem(row).text()
+                        selections[particle_file] = mod_name
+
+        self.settings_manager.set_matrix_selections(selections)
 
     def update_matrix(self, mods, pcf_files):
         # load mod URLs
@@ -123,7 +117,8 @@ class ConflictMatrix(QTableWidget):
                 checkbox = self.create_checkbox(row, col + 1)
 
                 # store saved selections
-                if pcf_file in self.saved_selections and self.saved_selections[pcf_file] == mod:
+                saved_selections = self.load_selections()
+                if pcf_file in saved_selections and saved_selections[pcf_file] == mod:
                     saved_checkboxes.append((checkbox, row, col + 1))
 
                 layout.addWidget(checkbox)
@@ -158,7 +153,16 @@ class ConflictMatrix(QTableWidget):
                         checkbox.setChecked(True)
                     else:
                         checkbox.setChecked(False)
+        self.save_selections()
 
+    def deselect_all(self):
+        for row in range(self.rowCount()):
+            for col in range(1, self.columnCount()):  # skip the "Select All" column
+                cell_widget = self.cellWidget(row, col)
+                if cell_widget:
+                    checkbox = cell_widget.layout().itemAt(0).widget()
+                    if checkbox and checkbox.isChecked():
+                        checkbox.setChecked(False)
         self.save_selections()
 
     def uncheck_column_except(self, col, target_row):

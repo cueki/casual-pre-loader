@@ -1,13 +1,13 @@
 import os
 import zipfile
+import shutil
 from pathlib import Path
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QLabel, QMessageBox
 from core.folder_setup import folder_setup
-from gui.conflict_matrix import ConflictMatrix
 from core.handlers.vpk_handler import VPKHandler
-import shutil
 from core.parsers.pcf_file import PCFFile
+from gui.conflict_matrix import ConflictMatrix
 from operations.advanced_particle_merger import AdvancedParticleMerger
 
 
@@ -84,10 +84,11 @@ def get_mod_particle_files():
 class ModDropZone(QFrame):
     mod_dropped = pyqtSignal(str)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, settings_manager=None):
         super().__init__(parent)
         self.drop_frame = None
         self.conflict_matrix = None
+        self.settings_manager = settings_manager
         self.setAcceptDrops(True)
         self.setup_ui()
 
@@ -111,7 +112,7 @@ class ModDropZone(QFrame):
         """)
 
         # conflict matrix
-        self.conflict_matrix = ConflictMatrix()
+        self.conflict_matrix = ConflictMatrix(self.settings_manager)
 
         layout.addWidget(self.drop_frame)
         layout.addWidget(self.conflict_matrix)
