@@ -85,7 +85,7 @@ class ParticleManagerGUI(QMainWindow):
         # mods
         custom_tab = QWidget()
         custom_layout = QVBoxLayout(custom_tab)
-        self.mod_drop_zone = ModDropZone(self)
+        self.mod_drop_zone = ModDropZone(self, self.settings_manager)
         custom_layout.addWidget(self.mod_drop_zone)
         self.mod_drop_zone.update_matrix()
 

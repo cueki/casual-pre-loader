@@ -3,7 +3,7 @@ import webbrowser
 from pathlib import Path
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QTableWidget, QHeaderView, QCheckBox, QHBoxLayout, QWidget, QPushButton
-from gui.settings_manager import SettingsManager
+from gui import settings_manager as sm
 
 
 def load_mod_urls():
@@ -19,13 +19,13 @@ def load_mod_urls():
 
 
 class ConflictMatrix(QTableWidget):
-    def __init__(self):
+    def __init__(self, settings_manager=None):
         super().__init__()
         self.setStyleSheet("QTableWidget { border: 1px solid #ccc; }")
         self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
-        self.settings_manager = SettingsManager()
+        self.settings_manager = settings_manager
         self.mod_urls = {}
         self.verticalHeader().sectionClicked.connect(self.on_mod_name_clicked)
 
@@ -153,7 +153,6 @@ class ConflictMatrix(QTableWidget):
                         checkbox.setChecked(True)
                     else:
                         checkbox.setChecked(False)
-
         self.save_selections()
 
     def deselect_all(self):
