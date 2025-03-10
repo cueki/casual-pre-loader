@@ -1,13 +1,11 @@
-last_directory.txt
 tf2_misc_000.vpk
 tf2_misc_017.vpk
 tf2_misc_dir.vpk
-last_directory.txt
-matrix_selections.json
 *.pcf
 app.dist/
 app.build/
 user_mods/
+app_settings.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

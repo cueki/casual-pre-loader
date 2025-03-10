@@ -7,7 +7,7 @@ from core.parsers.pcf_file import PCFFile
 from core.folder_setup import folder_setup
 
 
-def copy_config_files(custom_content_dir, prop_filter=False):
+def copy_config_files(custom_content_dir, prop_filter=True):
     # create destination directory if it doesn't exist
     config_dest_dir = custom_content_dir / "cfg" / "w"
     config_dest_dir.mkdir(parents=True, exist_ok=True)

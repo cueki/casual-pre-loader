@@ -1,5 +1,4 @@
 from pathlib import Path
-
 from core.handlers.vpk_handler import VPKHandler
 from core.parsers.pcf_file import PCFFile
 from operations.pcf_compress import remove_duplicate_elements

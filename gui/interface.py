@@ -1,18 +1,18 @@
+import vpk
 import shutil
+import random
 import zipfile
+from pathlib import Path
 from typing import List
 from PyQt6.QtCore import QObject, pyqtSignal
-from pathlib import Path
-import vpk
-import random
 from core.constants import CUSTOM_VPK_NAMES, DX8_LIST
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler, copy_config_files
 from core.handlers.pcf_handler import check_parents, update_materials
 from core.handlers.vpk_handler import VPKHandler
-from operations.file_processors import pcf_mod_processor, game_type, get_from_custom_dir
-from operations.pcf_rebuild import load_particle_system_map, extract_elements
 from core.parsers.pcf_file import PCFFile
+from operations.pcf_rebuild import load_particle_system_map, extract_elements
+from operations.file_processors import pcf_mod_processor, game_type, get_from_custom_dir
 from backup.backup_manager import BackupManager, get_working_vpk_path, prepare_working_copy
 from quickprecache.precache_list import make_precache_list
 from quickprecache.quick_precache import QuickPrecache

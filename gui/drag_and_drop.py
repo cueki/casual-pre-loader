@@ -1,13 +1,13 @@
 import os
 import zipfile
+import shutil
 from pathlib import Path
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QLabel, QMessageBox
 from core.folder_setup import folder_setup
-from gui.conflict_matrix import ConflictMatrix
 from core.handlers.vpk_handler import VPKHandler
-import shutil
 from core.parsers.pcf_file import PCFFile
+from gui.conflict_matrix import ConflictMatrix
 from operations.advanced_particle_merger import AdvancedParticleMerger
 
 
