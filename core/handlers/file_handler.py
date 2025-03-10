@@ -18,6 +18,11 @@ def copy_config_files(custom_content_dir, prop_filter=True):
     dest_path = config_dest_dir / "config.cfg"
     shutil.copy2(source_path, dest_path)
 
+    if prop_filter:
+        vscript_dest_dir = custom_content_dir / "scripts" / "vscripts"
+        vscript_dest_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2('backup/scripts/vscripts/randommenumusic.nut', vscript_dest_dir)
+
     # copy any other files from backup/cfg that aren't in the w directory
     for file_path in Path("backup/cfg").glob("*"):
         if file_path.is_file() and file_path.name != "w":

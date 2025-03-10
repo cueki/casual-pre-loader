@@ -3,7 +3,6 @@ import webbrowser
 from pathlib import Path
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QTableWidget, QHeaderView, QCheckBox, QHBoxLayout, QWidget, QPushButton
-from gui import settings_manager as sm
 
 
 def load_mod_urls():
