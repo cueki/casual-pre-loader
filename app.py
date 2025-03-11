@@ -316,6 +316,10 @@ class ParticleManagerGUI(QMainWindow):
             self.show_error("Please select tf/ directory!")
             return False
 
+        if not self.tf_path.endswith("/tf"):
+            self.show_error("Please select tf/ directory!")
+            return False
+
         if not Path(self.tf_path).exists():
             self.show_error("Selected TF2 directory does not exist!")
             return False
