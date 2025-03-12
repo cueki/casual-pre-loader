@@ -12,12 +12,8 @@ from operations.advanced_particle_merger import AdvancedParticleMerger
 
 
 def parse_vmt_texture(vmt_path):
-    texture_path = None
-    texture_param = '$basetexture'
-
     try:
         with open(vmt_path, 'r', encoding='utf-8') as f:
-            # read file line by line to properly handle comments
             lines = []
             for line in f:
                 # skip commented lines
@@ -27,38 +23,69 @@ def parse_vmt_texture(vmt_path):
             # join non-commented lines
             content = ''.join(lines)
 
+        # this texture_paths_list should contain all the possible vtf files from a vmt that are mapped to these texture_params
+        # this may need to be updated in the future to handle more possible paths
+        texture_params = ['$basetexture', '$detail', '$ramptexture']
+        texture_paths_list = []
+
         # simple parsing for texture path
-        if texture_param in content:
-            # find the $basetexture
-            pos = content.find(texture_param)
-            if pos != -1:
-                # find the end of the line
-                line_end = content.find('\n', pos)
+        for texture_param in texture_params:
+            start_pos = 0
 
-                # spec ops: the line
-                line = content[pos:line_end]
+            while True:
+                if texture_param in content:
+                    # find the texture_params
+                    pos = content.find(texture_param, start_pos)
+                    if pos == -1:  # no more occurrences
+                        break
 
-                # check if the line ends with a quote
-                if line.rstrip().endswith('"') or line.rstrip().endswith("'"):
-                    # if it does, find the matching opening quote
-                    quote_char = line.rstrip()[-1]
-                    value_end = line.rstrip().rfind(quote_char)
-                    value_start = line.rfind(quote_char, 0, value_end - 1)
-                    if value_start != -1:
-                        texture_path = line[value_start + 1:value_end].strip()
-                else:
-                    # look for tab or space after the parameter
                     param_end = pos + len(texture_param)
-                    # skip initial whitespace after parameter name
-                    while param_end < len(line) and line[param_end].isspace():
-                        param_end += 1
+                    if param_end < len(content):
+                        # check if the parameter is followed by whitespace or quote
+                        if not (content[param_end].isspace() or content[param_end] in ['"', "'"]):
+                            start_pos = pos + 1
+                            continue
 
-                    # find the value - everything after whitespace until end of line
-                    value_start = param_end
-                    texture_path = line[value_start:].strip()
+                    # find the end of the line
+                    line_end = content.find('\n', pos)
+                    comment_pos = content.find('//', pos)
 
-        if texture_path:
-            return Path(texture_path + '.vtf')
+                    # if there's a comment before the end of line, use that as the line end
+                    if comment_pos != -1 and (comment_pos < line_end or line_end == -1):
+                        line_end = comment_pos
+
+                    # just in case no newline at end of file
+                    if line_end == -1:
+                        line_end = len(content)
+
+                    # spec ops: the line
+                    line = content[pos:line_end]
+
+                    # check if the line ends with a quote
+                    if line.rstrip().endswith('"') or line.rstrip().endswith("'"):
+                        # if it does, find the matching opening quote
+                        quote_char = line.rstrip()[-1]
+                        value_end = line.rstrip().rfind(quote_char)
+                        value_start = line.rfind(quote_char, 0, value_end - 1)
+                        if value_start != -1:
+                            texture_path = line[value_start + 1:value_end].strip()
+                            texture_paths_list.append(Path(texture_path + '.vtf'))
+                    else:
+                        # look for tab or space after the parameter
+                        param_end = pos + len(texture_param)
+                        # skip initial whitespace after parameter name
+                        while param_end < len(line) and line[param_end].isspace():
+                            param_end += 1
+                        # find the value - everything after whitespace until end of line
+                        value_start = param_end
+                        texture_path = line[value_start:].strip()
+                        texture_paths_list.append(Path(texture_path + '.vtf'))
+
+                    start_pos = line_end
+                else:
+                    break
+
+        return texture_paths_list
 
     except Exception as e:
         print(f"Error parsing VMT file {vmt_path}: {e}")
@@ -163,13 +190,14 @@ class ModDropZone(QFrame):
                     material_destination = folder_setup.mods_everything_else_dir / Path(full_material_path).relative_to(mod_dir)
                     material_destination.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(Path(full_material_path), material_destination)
-                    texture_path = parse_vmt_texture(full_material_path)
-                    if texture_path:
-                        full_texture_path = Path(mod_dir / 'materials' / texture_path)
-                        if full_texture_path.exists():
-                            texture_destination = folder_setup.mods_everything_else_dir / Path(full_texture_path).relative_to(mod_dir)
-                            texture_destination.parent.mkdir(parents=True, exist_ok=True)
-                            shutil.copy2(Path(full_texture_path), texture_destination)
+                    texture_paths = parse_vmt_texture(full_material_path)
+                    if texture_paths:
+                        for texture_path in texture_paths:
+                            full_texture_path = Path(mod_dir / 'materials' / texture_path)
+                            if full_texture_path.exists():
+                                texture_destination = folder_setup.mods_everything_else_dir / Path(full_texture_path).relative_to(mod_dir)
+                                texture_destination.parent.mkdir(parents=True, exist_ok=True)
+                                shutil.copy2(Path(full_texture_path), texture_destination)
 
         return len(selections) > 0
 
