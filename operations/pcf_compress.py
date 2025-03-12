@@ -4,7 +4,7 @@ from core.parsers.pcf_file import PCFFile, PCFElement
 
 
 def get_element_hash(element: PCFElement):
-    # first sort by name only
+    # sort by attribute names
     sorted_names = sorted(element.attributes.keys(), key=lambda x: x.decode('ascii'))
 
     # build hash using sorted names
@@ -232,6 +232,7 @@ def optimize_string_dictionary(pcf: PCFFile):
     optimized.string_dictionary = new_dictionary
 
     return optimized
+
 
 def remove_duplicate_elements(pcf: PCFFile) -> PCFFile:
     # work with copy
