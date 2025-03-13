@@ -25,7 +25,8 @@ def manage_folder(folder_path: Path, prop_filter: bool = False) -> List[str]:
 
     for file_path in folder_path.glob("**/*"):
         # apply prop filter if enabled
-        if prop_filter and "prop" not in str(file_path).lower():
+        if prop_filter and not ("prop" in str(file_path).lower() or "flag" in str(file_path).lower()
+                                or "models/items/" in str(file_path).lower().replace('\\', '/')):
             continue
 
         if file_path.is_file():

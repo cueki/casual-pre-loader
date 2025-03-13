@@ -44,6 +44,7 @@ class ParticleManagerGUI(QMainWindow):
         self.tf_path = ""
         self.selected_addons = []
         self.processing = False
+        self.scan_for_conflicting_files()
 
         # save state
         self.settings_manager = SettingsManager()
@@ -197,6 +198,43 @@ class ParticleManagerGUI(QMainWindow):
 
         main_layout.addWidget(tab_widget)
 
+    def scan_for_conflicting_files(self):
+        if not self.tf_path:
+            return
+
+        custom_dir = Path(self.tf_path) / 'custom'
+        if not custom_dir.exists():
+            return
+
+        conflicting_items = {
+            "folders": ["_modern casual preloader"],
+            "files": [
+                "_mcp hellfire hale fix.vpk",
+                "_mcp mvm victory screen fix.vpk",
+                "_mcp saxton hale fix.vpk"
+            ]
+        }
+
+        found_conflicts = []
+
+        for folder_name in conflicting_items["folders"]:
+            folder_path = custom_dir / folder_name
+            if folder_path.exists() and folder_path.is_dir():
+                found_conflicts.append(f"Folder: {folder_name}")
+
+        for file_name in conflicting_items["files"]:
+            file_path = custom_dir / file_name
+            if file_path.exists() and file_path.is_file():
+                found_conflicts.append(f"File: {file_name}")
+
+        if found_conflicts:
+            conflict_list = "\n• ".join(found_conflicts)
+            QMessageBox.warning(
+                self,
+                "Conflicting Files Detected",
+                f"The following items in your custom folder may conflict with this method:\n\n• {conflict_list}\n\nIt's recommended to remove these to avoid issues."
+            )
+
     def browse_tf_dir(self):
         directory = QFileDialog.getExistingDirectory(self, "Select tf/ Directory")
         if directory:
@@ -204,6 +242,7 @@ class ParticleManagerGUI(QMainWindow):
             self.tf_path_edit.setText(directory)
             self.save_last_directory()
             self.update_restore_button_state()
+            self.scan_for_conflicting_files()
 
     def save_last_directory(self):
         self.settings_manager.set_last_directory(self.tf_path)
@@ -214,6 +253,7 @@ class ParticleManagerGUI(QMainWindow):
             self.tf_path = last_dir
             self.tf_path_edit.setText(last_dir)
             self.update_restore_button_state()
+            self.scan_for_conflicting_files()
 
     def on_addon_select(self):
         selected_items = self.addons_list.selectedItems()
