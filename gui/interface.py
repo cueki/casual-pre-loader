@@ -130,7 +130,7 @@ class ParticleOperations(QObject):
             if quick_precache_path.exists():
                 quick_precache_path.unlink()
 
-            # run quick precache if prop files detected
+            # run quick precache if needed (either by having props or by using the fast load)
             precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]), prop_filter)
             if precache_prop_set:
                 precache = QuickPrecache(str(Path(tf_path).parents[0]), debug=False, prop_filter=prop_filter)
