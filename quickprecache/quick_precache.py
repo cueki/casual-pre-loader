@@ -72,7 +72,7 @@ class QuickPrecache:
 
     def __init__(self, game_path: str, debug: bool = False, prop_filter: bool = False):
         # debug keeps temp files
-        # prop_filter limits precaching to only props
+        # prop_filter limits precaching to only props and other stuff now idk
         self.game_path = game_path
         self.debug = debug
         self.prop_filter = prop_filter
