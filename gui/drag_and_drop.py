@@ -146,8 +146,6 @@ class ModDropZone(QFrame):
 
     def apply_particle_selections(self):
         selections = self.conflict_matrix.get_selected_particles()
-
-        # only copy what we care about
         required_materials = set()
 
         # process each mod that has selected particles
@@ -185,7 +183,7 @@ class ModDropZone(QFrame):
             mod_dir = folder_setup.user_mods_dir / mod_name
             # process each required material
             for material_path in required_materials:
-                full_material_path = mod_dir / 'materials' / material_path
+                full_material_path = mod_dir / 'materials' / material_path.replace('\\', '/')
                 if full_material_path.exists():
                     material_destination = folder_setup.mods_everything_else_dir / Path(full_material_path).relative_to(mod_dir)
                     material_destination.parent.mkdir(parents=True, exist_ok=True)
