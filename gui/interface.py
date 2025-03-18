@@ -1,11 +1,10 @@
 import vpk
 import shutil
-import random
 import zipfile
 from pathlib import Path
 from typing import List
 from PyQt6.QtCore import QObject, pyqtSignal
-from core.constants import CUSTOM_VPK_NAMES, DX8_LIST
+from core.constants import CUSTOM_VPK_NAMES, DX8_LIST, CUSTOM_VPK_NAME
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler, copy_config_files
 from core.handlers.pcf_handler import check_parents, update_materials
@@ -18,7 +17,7 @@ from quickprecache.precache_list import make_precache_list
 from quickprecache.quick_precache import QuickPrecache
 
 
-class ParticleOperations(QObject):
+class Interface(QObject):
     progress_signal = pyqtSignal(int, str)
     error_signal = pyqtSignal(str)
     success_signal = pyqtSignal(str)
@@ -38,10 +37,10 @@ class ParticleOperations(QObject):
             file_handler = FileHandler(vpk_handler)
             folder_setup.initialize_pcf()
 
-            for addon_name in selected_addons:
-                addon_path = Path("addons") / f"{addon_name}.zip"
-                if addon_path.exists():
-                    with zipfile.ZipFile(addon_path, 'r') as zip_ref:
+            for addon_path in selected_addons:
+                addon_zip = Path("addons") / f"{addon_path}.zip"
+                if addon_zip.exists():
+                    with zipfile.ZipFile(addon_zip, 'r') as zip_ref:
                         for file in zip_ref.namelist():
                             if Path(file).name != 'mod.json':
                                 zip_ref.extract(file, folder_setup.mods_everything_else_dir)
@@ -117,7 +116,7 @@ class ParticleOperations(QObject):
 
             if custom_content_dir.exists() and any(custom_content_dir.iterdir()):
                 new_pak = vpk.new(str(custom_content_dir))
-                new_pak.save(custom_dir / random.choice(CUSTOM_VPK_NAMES))
+                new_pak.save(custom_dir / CUSTOM_VPK_NAME)
 
             # deploy particles
             if not backup_manager.deploy_to_game():

@@ -128,8 +128,8 @@ DX8_LIST = [
     "stickybomb"
 ]
 
-
-CUSTOM_VPK_NAMES = [
+CUSTOM_VPK_NAME = "_casual_preloader.vpk"
+LEGACY_VPK_NAMES = [
     "_wermware_2025.vpk",
     "_fragaholic_config.vpk",
     "_cuekicuttersolution.vpk",
@@ -140,6 +140,7 @@ CUSTOM_VPK_NAMES = [
     "_4_year_ban_for_this_btw.vpk",
     "_rgl_anti_anticheat.vpk"
 ]
+CUSTOM_VPK_NAMES = [CUSTOM_VPK_NAME] + LEGACY_VPK_NAMES
 
 
 QUICKPRECACHE_FILE_SUFFIXES = [

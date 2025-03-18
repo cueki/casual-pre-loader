@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
 from PyQt6.QtCore import pyqtSignal, Qt
 from core.folder_setup import folder_setup
 from gui.drag_and_drop import ModDropZone
-from gui.interface import ParticleOperations
+from gui.interface import Interface
 from gui.mod_descriptor import AddonDescription
 from gui.settings_manager import SettingsManager
 from operations.file_processors import check_game_type
@@ -49,7 +49,7 @@ class ParticleManagerGUI(QMainWindow):
         # save state
         self.settings_manager = SettingsManager()
 
-        self.operations = ParticleOperations()
+        self.operations = Interface()
         self.setup_ui()
         self.load_last_directory()
         self.load_addons()
@@ -349,7 +349,8 @@ class ParticleManagerGUI(QMainWindow):
         self.apply_saved_addon_selections()
 
     def get_selected_addons(self):
-        return [item.text().split(' [#')[0] for item in self.addons_list.selectedItems()]
+        selected_addon_names = [item.text().split(' [#')[0] for item in self.addons_list.selectedItems()]
+        return [self.addons_file_paths[name]['file_path'] for name in selected_addon_names]
 
     def validate_inputs(self):
         if not self.tf_path:
