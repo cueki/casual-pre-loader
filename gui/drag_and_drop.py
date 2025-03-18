@@ -206,7 +206,7 @@ class ModDropZone(QFrame):
                     texture_paths = parse_vmt_texture(full_material_path)
                     if texture_paths:
                         for texture_path in texture_paths:
-                            full_texture_path = Path(mod_dir / 'materials' / texture_path)
+                            full_texture_path = mod_dir / 'materials' / str(texture_path).replace('\\', '/')
                             if full_texture_path.exists():
                                 texture_destination = folder_setup.mods_everything_else_dir / Path(full_texture_path).relative_to(mod_dir)
                                 texture_destination.parent.mkdir(parents=True, exist_ok=True)

@@ -125,16 +125,21 @@ class Interface(QObject):
 
             # flush quick precache every install
             QuickPrecache(str(Path(tf_path).parents[0]), debug=False, prop_filter=prop_filter).run(flush=True)
-            quick_precache_path = custom_dir / "QuickPrecache.vpk"
+            quick_precache_path = custom_dir / "_QuickPrecache.vpk"
             if quick_precache_path.exists():
                 quick_precache_path.unlink()
+
+            # legacy name
+            old_quick_precache_path = custom_dir / "QuickPrecache.vpk"
+            if old_quick_precache_path.exists():
+                old_quick_precache_path.unlink()
 
             # run quick precache if needed (either by having props or by using the fast load)
             precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]), prop_filter)
             if precache_prop_set:
                 precache = QuickPrecache(str(Path(tf_path).parents[0]), debug=False, prop_filter=prop_filter)
                 precache.run(auto=True)
-                shutil.copy2("quickprecache/QuickPrecache.vpk", custom_dir)
+                shutil.copy2("quickprecache/_QuickPrecache.vpk", custom_dir)
 
             get_from_custom_dir(custom_dir)
 
@@ -160,11 +165,16 @@ class Interface(QObject):
             custom_dir = Path(tf_path) / 'custom'
             custom_dir.mkdir(exist_ok=True)
 
-            # flush quick precache files
+            # flush quick precache
             QuickPrecache(str(Path(tf_path).parents[0]), debug=False, prop_filter=False).run(flush=True)
-            quick_precache_path = custom_dir / "QuickPrecache.vpk"
+            quick_precache_path = custom_dir / "_QuickPrecache.vpk"
             if quick_precache_path.exists():
                 quick_precache_path.unlink()
+
+            # legacy name
+            old_quick_precache_path = custom_dir / "QuickPrecache.vpk"
+            if old_quick_precache_path.exists():
+                old_quick_precache_path.unlink()
 
             for custom_vpk in CUSTOM_VPK_NAMES:
                 vpk_path = custom_dir / custom_vpk
