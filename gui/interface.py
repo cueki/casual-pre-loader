@@ -1,11 +1,10 @@
 import vpk
 import shutil
-import random
 import zipfile
 from pathlib import Path
 from typing import List
 from PyQt6.QtCore import QObject, pyqtSignal
-from core.constants import CUSTOM_VPK_NAMES, DX8_LIST
+from core.constants import CUSTOM_VPK_NAMES, DX8_LIST, CUSTOM_VPK_NAME
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler, copy_config_files
 from core.handlers.pcf_handler import check_parents, update_materials
@@ -117,7 +116,7 @@ class Interface(QObject):
 
             if custom_content_dir.exists() and any(custom_content_dir.iterdir()):
                 new_pak = vpk.new(str(custom_content_dir))
-                new_pak.save(custom_dir / random.choice(CUSTOM_VPK_NAMES))
+                new_pak.save(custom_dir / CUSTOM_VPK_NAME)
 
             # deploy particles
             if not backup_manager.deploy_to_game():
