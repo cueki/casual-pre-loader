@@ -309,6 +309,10 @@ class ModDropZone(QFrame):
 
                 shutil.rmtree(extracted_user_mods_dir)
 
+            # hacky refresh
+            main_window = self.window()
+            main_window.load_addons()
+
             self.worker.progress.emit(95, "Finalizing...")
             self.worker.success.emit(f"Successfully processed {vpk_name}")
             self.worker.finished.emit()

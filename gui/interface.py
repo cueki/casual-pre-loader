@@ -18,7 +18,7 @@ from quickprecache.precache_list import make_precache_list
 from quickprecache.quick_precache import QuickPrecache
 
 
-class ParticleOperations(QObject):
+class Interface(QObject):
     progress_signal = pyqtSignal(int, str)
     error_signal = pyqtSignal(str)
     success_signal = pyqtSignal(str)
@@ -38,10 +38,10 @@ class ParticleOperations(QObject):
             file_handler = FileHandler(vpk_handler)
             folder_setup.initialize_pcf()
 
-            for addon_name in selected_addons:
-                addon_path = Path("addons") / f"{addon_name}.zip"
-                if addon_path.exists():
-                    with zipfile.ZipFile(addon_path, 'r') as zip_ref:
+            for addon_path in selected_addons:
+                addon_zip = Path("addons") / f"{addon_path}.zip"
+                if addon_zip.exists():
+                    with zipfile.ZipFile(addon_zip, 'r') as zip_ref:
                         for file in zip_ref.namelist():
                             if Path(file).name != 'mod.json':
                                 zip_ref.extract(file, folder_setup.mods_everything_else_dir)
