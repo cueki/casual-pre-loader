@@ -22,7 +22,7 @@ class VPKHandler:
             # for non-dir VPKs, try to find the corresponding _dir.vpk
             path_without_ext = str(Path(vpk_path).with_suffix(''))
             # remove any _NNN suffix if present
-            if path_without_ext[-4:-1].isdigit() and path_without_ext[-4] == '_':
+            if path_without_ext[-3:].isdigit() and path_without_ext[-4] == '_':
                 path_without_ext = path_without_ext[:-4]
 
             possible_dir_path = f"{path_without_ext}_dir.vpk"

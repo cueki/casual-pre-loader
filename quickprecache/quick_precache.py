@@ -211,8 +211,8 @@ class QuickPrecache:
                 print(f"Removed {files_removed} existing precache files")
                 return True
 
-            # step 2: check config
-            check_root_lod(self.game_path)
+            # step 2: check config (is this actually needed)?
+            # check_root_lod(self.game_path)
 
             # step 3: get the model list
             if auto:
