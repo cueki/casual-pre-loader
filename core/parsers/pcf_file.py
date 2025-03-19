@@ -17,7 +17,7 @@ class PCFElement:
 class PCFFile:
     def __init__(self, input_file: Union[Path, str], version: str = "DMX_BINARY2_PCF1"):
         self.version = version
-        self.string_dictionary: List[bytes] = []  # changed to explicitly store bytes
+        self.string_dictionary: List[bytes] = []
         self.elements: List[PCFElement] = []
         self.input_file = Path(input_file)
 

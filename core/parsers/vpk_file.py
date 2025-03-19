@@ -16,7 +16,7 @@ class VPKDirectoryEntry:
     def from_file(cls, file: BinaryIO) -> 'VPKDirectoryEntry':
         # read CRC separately to handle endianness
         crc = struct.unpack('<I', file.read(4))[0]
-        # convert to big-endian for consistency with other tools
+        # convert to big-endian for consistency
         crc = int.from_bytes(crc.to_bytes(4, 'little'), 'big')
 
         # read remaining fields
@@ -40,7 +40,7 @@ def read_null_string(file: BinaryIO) -> str:
     result = bytearray()
     while True:
         char = file.read(1)
-        if char == b'\0' or not char:
+        if not char or char == b'\x00':
             break
         # only accept printable ASCII characters
         if 32 <= char[0] <= 126:
