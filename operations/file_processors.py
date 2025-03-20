@@ -1,6 +1,6 @@
 from pathlib import Path
-from core.handlers.vpk_handler import VPKHandler
 from core.parsers.pcf_file import PCFFile
+from core.parsers.vpk_file import VPKFile
 from operations.pcf_compress import remove_duplicate_elements
 
 
@@ -104,7 +104,8 @@ get_val = [
 def get_from_vpk(vpk_path: Path):
     try:
         # check if VPK contains target paths before processing
-        vpk_handler = VPKHandler(str(vpk_path))
+        vpk_handler = VPKFile(str(vpk_path))
+        vpk_handler.parse_directory()
         file_list = vpk_handler.list_files()
         should_process = any(should_process_file(file) for file in file_list)
 

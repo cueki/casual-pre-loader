@@ -4,6 +4,7 @@ import traceback
 from typing import List
 from pathlib import Path
 from core.parsers.pcf_file import PCFFile
+from core.parsers.vpk_file import VPKFile
 from core.folder_setup import folder_setup
 
 
@@ -32,8 +33,9 @@ def copy_config_files(custom_content_dir, prop_filter=True):
 
 
 class FileHandler:
-    def __init__(self, vpk_handler):
-        self.vpk = vpk_handler
+    def __init__(self, vpk_file_path: str):
+        self.vpk = VPKFile(str(vpk_file_path))
+        self.vpk.parse_directory()
 
     def list_pcf_files(self) -> List[str]:
         return self.vpk.find_files('*.pcf')
@@ -111,4 +113,3 @@ class FileHandler:
             # cleanup
             if os.path.exists(temp_path):
                 os.remove(temp_path)
-                

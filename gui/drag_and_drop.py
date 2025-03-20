@@ -6,7 +6,7 @@ from pathlib import Path
 from PyQt6.QtCore import Qt, pyqtSignal, QObject
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QLabel, QMessageBox, QProgressDialog
 from core.folder_setup import folder_setup
-from core.handlers.vpk_handler import VPKHandler
+from core.parsers.vpk_file import VPKFile
 from core.parsers.pcf_file import PCFFile
 from gui.conflict_matrix import ConflictMatrix
 from operations.advanced_particle_merger import AdvancedParticleMerger
@@ -263,7 +263,8 @@ class ModDropZone(QFrame):
             extracted_user_mods_dir.mkdir(parents=True, exist_ok=True)
 
             self.worker.progress.emit(10, f"Analyzing VPK: {vpk_name}")
-            vpk_handler = VPKHandler(file_path)
+            vpk_handler = VPKFile(str(file_path))
+            vpk_handler.parse_directory()
             file_list = vpk_handler.list_files()
 
             # check for particles folder

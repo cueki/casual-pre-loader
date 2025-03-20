@@ -212,7 +212,7 @@ class QuickPrecache:
                 return True
 
             # step 2: check config (is this actually needed)?
-            # check_root_lod(self.game_path)
+            check_root_lod(self.game_path)
 
             # step 3: get the model list
             if auto:

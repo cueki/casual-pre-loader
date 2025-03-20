@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Set, List
-from core.handlers.vpk_handler import VPKHandler
 from core.constants import QUICKPRECACHE_FILE_SUFFIXES
+from core.parsers.vpk_file import VPKFile
 
 
 def make_precache_list(game_path: str, prop_filter: bool = False) -> Set[str]:
@@ -49,10 +49,11 @@ def manage_vpk(vpk_path: Path, prop_filter: bool = False) -> List[str]:
     failed_vpks = []
 
     try:
-        vpk_handler = VPKHandler(str(vpk_path))
+        vpk_file = VPKFile(str(vpk_path))
+        vpk_file.parse_directory()
 
         # find all files in the models directory
-        model_files = vpk_handler.find_files("models/")
+        model_files = vpk_file.find_files("models/")
 
         for file_path in model_files:
             # apply prop filter if enabled

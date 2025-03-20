@@ -1,4 +1,3 @@
-import vpk
 import shutil
 import zipfile
 from pathlib import Path
@@ -8,7 +7,7 @@ from core.constants import CUSTOM_VPK_NAMES, DX8_LIST, CUSTOM_VPK_NAME
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler, copy_config_files
 from core.handlers.pcf_handler import check_parents, update_materials
-from core.handlers.vpk_handler import VPKHandler
+from core.parsers.vpk_file import VPKFile
 from core.parsers.pcf_file import PCFFile
 from operations.pcf_rebuild import load_particle_system_map, extract_elements
 from operations.file_processors import pcf_mod_processor, game_type, get_from_custom_dir
@@ -33,8 +32,9 @@ class Interface(QObject):
         try:
             backup_manager = BackupManager(tf_path)
             working_vpk_path = get_working_vpk_path()
-            vpk_handler = VPKHandler(str(working_vpk_path))
-            file_handler = FileHandler(vpk_handler)
+            vpk_file = VPKFile(str(working_vpk_path))
+            vpk_file.parse_directory()
+            file_handler = FileHandler(str(working_vpk_path))
             folder_setup.initialize_pcf()
 
             for addon_path in selected_addons:
@@ -115,8 +115,13 @@ class Interface(QObject):
             copy_config_files(custom_content_dir, prop_filter)
 
             if custom_content_dir.exists() and any(custom_content_dir.iterdir()):
-                new_pak = vpk.new(str(custom_content_dir))
-                new_pak.save(custom_dir / CUSTOM_VPK_NAME)
+                # 2GB split size
+                split_size = 2 ** 31
+                vpk_base_path = custom_dir / CUSTOM_VPK_NAME.replace('.vpk', '')
+
+                if not VPKFile.create(str(custom_content_dir), str(vpk_base_path), split_size):
+                    self.error_signal.emit("Failed to create custom VPK")
+                    return
 
             # deploy particles
             if not backup_manager.deploy_to_game():
