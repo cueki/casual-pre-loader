@@ -253,74 +253,89 @@ class ModDropZone(QFrame):
         self.processing = False
         self.update_matrix()
 
-    def process_vpk_file(self, file_path):
-        try:
-            vpk_name = Path(file_path).stem
-            if vpk_name[-3:].isdigit() and vpk_name[-4] == '_' or vpk_name[-4:] == '_dir':
-                vpk_name = vpk_name[:-4]
-            extracted_user_mods_dir = folder_setup.user_mods_dir / vpk_name
-            extracted_addons_dir = folder_setup.addons_dir / vpk_name
-            extracted_user_mods_dir.mkdir(parents=True, exist_ok=True)
+    def process_vpk_files(self, file_paths):
+        total_files = len(file_paths)
+        successful_files = []
 
-            self.worker.progress.emit(10, f"Analyzing VPK: {vpk_name}")
-            vpk_handler = VPKFile(str(file_path))
-            vpk_handler.parse_directory()
-            file_list = vpk_handler.list_files()
+        for index, file_path in enumerate(file_paths):
+            file_name = Path(file_path).name
+            self.worker.progress.emit(0, f"Processing file {index + 1}/{total_files}: {file_name}")
 
-            # check for particles folder
-            has_particles = any('particles/' in f for f in file_list)
+            try:
+                vpk_name = Path(file_path).stem
+                if vpk_name[-3:].isdigit() and vpk_name[-4] == '_' or vpk_name[-4:] == '_dir':
+                    vpk_name = vpk_name[:-4]
 
-            # extract all files
-            total_files = len(file_list)
-            for i, file_path in enumerate(file_list):
-                progress = 10 + int((i / total_files) * 40)
-                self.worker.progress.emit(progress, f"Extracting file {i + 1}/{total_files}")
+                extracted_user_mods_dir = folder_setup.user_mods_dir / vpk_name
+                extracted_addons_dir = folder_setup.addons_dir / vpk_name
+                extracted_user_mods_dir.mkdir(parents=True, exist_ok=True)
 
-                relative_path = Path(file_path)
-                output_path = extracted_user_mods_dir / relative_path
-                output_path.parent.mkdir(parents=True, exist_ok=True)
-                vpk_handler.extract_file(file_path, str(output_path))
+                self.worker.progress.emit(10, f"Analyzing VPK: {vpk_name}")
+                vpk_handler = VPKFile(str(file_path))
+                vpk_handler.parse_directory()
+                file_list = vpk_handler.list_files()
 
-            # process with AdvancedParticleMerger if it has particles
-            if has_particles:
-                self.worker.progress.emit(50, f"Processing particles for {vpk_name}")
-                particle_merger = AdvancedParticleMerger(
-                    progress_callback=lambda p, m: self.worker.progress.emit(50 + int(p / 2), m)
-                )
-                particle_merger.preprocess_vpk(extracted_user_mods_dir)
+                # check for particles folder
+                has_particles = any('particles/' in f for f in file_list)
+
+                # extract all files
+                total_files_in_vpk = len(file_list)
+                for i, file_path_in_vpk in enumerate(file_list):
+                    progress = 10 + int((i / total_files_in_vpk) * 40)
+                    self.worker.progress.emit(progress, f"Extracting file {i + 1}/{total_files_in_vpk}")
+
+                    relative_path = Path(file_path_in_vpk)
+                    output_path = extracted_user_mods_dir / relative_path
+                    output_path.parent.mkdir(parents=True, exist_ok=True)
+                    vpk_handler.extract_file(file_path_in_vpk, str(output_path))
+
+                # process with AdvancedParticleMerger if it has particles
+                if has_particles:
+                    self.worker.progress.emit(50, f"Processing particles for {vpk_name}")
+                    particle_merger = AdvancedParticleMerger(
+                        progress_callback=lambda p, m: self.worker.progress.emit(50 + int(p / 2), m)
+                    )
+                    particle_merger.preprocess_vpk(extracted_user_mods_dir)
+                else:
+                    # for non-particle mods, zip and move to addons
+                    self.worker.progress.emit(60, f"Creating addon for {vpk_name}")
+                    zip_path = extracted_addons_dir.with_suffix('.zip')
+
+                    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_f:
+                        # walk through all files in the extracted directory
+                        all_files = []
+                        for root, _, files in os.walk(extracted_user_mods_dir):
+                            for file in files:
+                                file_path_in_dir = Path(root) / file
+                                # make sure the file has an extension (for vpk module)
+                                if file_path_in_dir.suffix:
+                                    all_files.append(
+                                        (file_path_in_dir, file_path_in_dir.relative_to(extracted_user_mods_dir)))
+
+                        for i, (file_path_entry, arc_path) in enumerate(all_files):
+                            progress = 60 + int((i / len(all_files)) * 30)
+                            self.worker.progress.emit(progress, f"Adding to zip: {arc_path}")
+                            zip_f.write(file_path_entry, arc_path)
+
+                    shutil.rmtree(extracted_user_mods_dir)
+
+                # hacky refresh
+                main_window = self.window()
+                main_window.load_addons()
+
+                successful_files.append(vpk_name)
+
+            except Exception as e:
+                self.worker.error.emit(f"Error processing {file_name}: {str(e)}")
+
+        if successful_files:
+            if len(successful_files) == 1:
+                self.worker.success.emit(f"Successfully processed {successful_files[0]}")
             else:
-                # for non-particle mods, zip and move to addons
-                self.worker.progress.emit(60, f"Creating addon for {vpk_name}")
-                zip_path = extracted_addons_dir.with_suffix('.zip')
+                file_list_text = ",\n".join(successful_files)
+                self.worker.success.emit(f"Successfully processed {len(successful_files)} files:\n{file_list_text}")
 
-                with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_f:
-                    # walk through all files in the extracted directory
-                    all_files = []
-                    for root, _, files in os.walk(extracted_user_mods_dir):
-                        for file in files:
-                            file_path = Path(root) / file
-                            # make sure the file has an extension (for vpk module)
-                            if file_path.suffix:
-                                all_files.append((file_path, file_path.relative_to(extracted_user_mods_dir)))
-
-                    for i, (file_path, arc_path) in enumerate(all_files):
-                        progress = 60 + int((i / len(all_files)) * 30)
-                        self.worker.progress.emit(progress, f"Adding to zip: {arc_path}")
-                        zip_f.write(file_path, arc_path)
-
-                shutil.rmtree(extracted_user_mods_dir)
-
-            # hacky refresh
-            main_window = self.window()
-            main_window.load_addons()
-
-            self.worker.progress.emit(95, "Finalizing...")
-            self.worker.success.emit(f"Successfully processed {vpk_name}")
-            self.worker.finished.emit()
-
-        except Exception as e:
-            self.worker.error.emit(f"Failed to process VPK: {str(e)}")
-            self.worker.finished.emit()
+        self.worker.finished.emit()
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -345,6 +360,7 @@ class ModDropZone(QFrame):
         self.style().polish(self)
         folder_setup.create_required_folders()
 
+        valid_files = []
         for url in event.mimeData().urls():
             file_path = url.toLocalFile()
 
@@ -355,23 +371,26 @@ class ModDropZone(QFrame):
                                     f"Please rename the file and try again.")
                 continue
 
-            # start processing in a thread
-            self.processing = True
-            self.progress_dialog = QProgressDialog("Processing VPK...", "Cancel", 0, 100, self)
-            self.progress_dialog.setWindowTitle("Processing VPK")
-            self.progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
-            self.progress_dialog.setAutoClose(False)
-            self.progress_dialog.setMinimumDuration(0)
-            self.progress_dialog.setCancelButton(None)
-            self.progress_dialog.setFixedSize(600, 75)
-            self.progress_dialog.show()
+            valid_files.append(file_path)
 
-            # start processing thread
-            process_thread = threading.Thread(
-                target=self.process_vpk_file,
-                args=(file_path,),
-                daemon=True
-            )
-            process_thread.start()
+        if not valid_files:
+            return
 
-            break
+        # start processing in a thread
+        self.processing = True
+        self.progress_dialog = QProgressDialog("Processing VPK files...", "Cancel", 0, 100, self)
+        self.progress_dialog.setWindowTitle("Processing VPKs")
+        self.progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
+        self.progress_dialog.setAutoClose(False)
+        self.progress_dialog.setMinimumDuration(0)
+        self.progress_dialog.setCancelButton(None)
+        self.progress_dialog.setFixedSize(600, 75)
+        self.progress_dialog.show()
+
+        # start processing thread for all files
+        process_thread = threading.Thread(
+            target=self.process_vpk_files,
+            args=(valid_files,),
+            daemon=True
+        )
+        process_thread.start()
