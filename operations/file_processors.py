@@ -83,7 +83,9 @@ def should_process_file(file_path: str) -> bool:
         "materials/effects/",
         "materials/models/",
         "materials/particle/",
-        "materials/prediction/"
+        "materials/particles/",
+        "materials/prediction/",
+        "materials/sprites/healbeam"
     ]
 
     path_lower = file_path.lower()
@@ -155,7 +157,7 @@ def get_from_custom_dir(custom_dir: Path):
     for directory in custom_dir.glob("*"):
         if directory.is_dir():
             for pattern in ["materials/effects/**/*", "materials/models/**/*", "materials/particle/**/*",
-                            "materials/prediction/**/*"]:
+                            "materials/particles/", "materials/prediction/**/*", "materials/sprites/healbeam*"]:
                 for file_path in directory.glob(pattern):
                     if file_path.is_file():
                         get_from_file(file_path)

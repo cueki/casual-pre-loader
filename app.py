@@ -44,7 +44,7 @@ class ParticleManagerGUI(QMainWindow):
         self.tf_path = ""
         self.selected_addons = []
         self.processing = False
-        self.scan_for_conflicting_files()
+        self.scan_for_mcp_files()
 
         # save state
         self.settings_manager = SettingsManager()
@@ -63,6 +63,7 @@ class ParticleManagerGUI(QMainWindow):
         self.prop_filter_checkbox.stateChanged.connect(
             lambda state: self.settings_manager.set_prop_filter_state(bool(state))
         )
+        self.rescan_addon_contents()
 
     def setup_ui(self):
         central_widget = QWidget()
@@ -86,7 +87,7 @@ class ParticleManagerGUI(QMainWindow):
         # mods
         custom_tab = QWidget()
         custom_layout = QVBoxLayout(custom_tab)
-        self.mod_drop_zone = ModDropZone(self, self.settings_manager)
+        self.mod_drop_zone = ModDropZone(self, self.settings_manager, self.rescan_addon_contents)
         custom_layout.addWidget(self.mod_drop_zone)
         self.mod_drop_zone.update_matrix()
 
@@ -162,9 +163,9 @@ class ParticleManagerGUI(QMainWindow):
 
         # add prop filter checkbox
         self.prop_filter_checkbox = QCheckBox(
-            "Fast load (Experimental, less stable, may cause 'black cosmetic' bugs and other errors)")
+            "Fast load, just precache everything please! (Experimental, may cause 'black cosmetic' bugs and other errors)")
         self.prop_filter_checkbox.setToolTip(
-            "When unchecked (default), the game will load into itemtest + use the quick precache script")
+            "When unchecked (default), the game will load into itemtest (this might prevent some models from loading)")
         controls_layout.addWidget(self.prop_filter_checkbox)
 
         button_layout = QHBoxLayout()
@@ -198,7 +199,7 @@ class ParticleManagerGUI(QMainWindow):
 
         main_layout.addWidget(tab_widget)
 
-    def scan_for_conflicting_files(self):
+    def scan_for_mcp_files(self):
         if not self.tf_path:
             return
 
@@ -242,7 +243,7 @@ class ParticleManagerGUI(QMainWindow):
             self.tf_path_edit.setText(directory)
             self.save_last_directory()
             self.update_restore_button_state()
-            self.scan_for_conflicting_files()
+            self.scan_for_mcp_files()
 
     def save_last_directory(self):
         self.settings_manager.set_last_directory(self.tf_path)
@@ -253,35 +254,83 @@ class ParticleManagerGUI(QMainWindow):
             self.tf_path = last_dir
             self.tf_path_edit.setText(last_dir)
             self.update_restore_button_state()
-            self.scan_for_conflicting_files()
+            self.scan_for_mcp_files()
 
     def on_addon_select(self):
-        selected_items = self.addons_list.selectedItems()
-        # reset all items
-        for i in range(self.addons_list.count()):
-            item = self.addons_list.item(i)
-            if item.flags() & Qt.ItemFlag.ItemIsSelectable:
-                original_text = item.text().split(' [#')[0]
-                item.setText(original_text)
+        try:
+            selected_items = self.addons_list.selectedItems()
 
-        # load order number
-        for pos, item in enumerate(selected_items, 1):
-            original_text = item.text().split(' [#')[0]
-            item.setText(f"{original_text} [#{pos}]")
+            # first time setup - store original names (without all the extra stuff like load order number)
+            for i in range(self.addons_list.count()):
+                item = self.addons_list.item(i)
+                if item and item.flags() & Qt.ItemFlag.ItemIsSelectable:
+                    if not item.data(Qt.ItemDataRole.UserRole):
+                        item.setData(Qt.ItemDataRole.UserRole, item.text())
 
-        # description update
-        if selected_items:
-            selected_item = selected_items[-1]
-            addon_name = selected_item.text().split(' [#')[0]
-            addon_info = self.addons_file_paths[addon_name]
-            self.addon_description.update_content(addon_name, addon_info)
-        else:
-            self.addon_description.clear()
+            # reset all items to original names
+            for i in range(self.addons_list.count()):
+                item = self.addons_list.item(i)
+                if item and item.flags() & Qt.ItemFlag.ItemIsSelectable:
+                    original_name = item.data(Qt.ItemDataRole.UserRole)
+                    if original_name:
+                        item.setText(original_name)
+                    item.setToolTip("")
 
-        # save selections
-        self.settings_manager.set_addon_selections([
-            item.text().split(' [#')[0] for item in selected_items
-        ])
+            # mark selected items with order numbers and check conflicts
+            addon_contents = self.settings_manager.get_addon_contents()
+            for pos, item in enumerate(selected_items, 1):
+                original_name = item.data(Qt.ItemDataRole.UserRole) or item.text()
+                display_text = f"{original_name} [#{pos}]"
+
+                if addon_contents and original_name in addon_contents:
+                    conflicts = {}
+                    addon_files = set(addon_contents[original_name])
+
+                    # check against other addons
+                    for other_item in selected_items:
+                        if other_item != item:
+                            other_name = other_item.data(Qt.ItemDataRole.UserRole) or other_item.text()
+                            if other_name in addon_contents:
+                                other_files = set(addon_contents[other_name])
+                                common_files = addon_files.intersection(other_files)
+                                if common_files:
+                                    conflicts[other_name] = list(common_files)
+
+                    if conflicts:
+                        display_text += " ⚠️"
+                        tooltip = "Conflicts with:\n"
+                        for conflict_addon, conflict_files in conflicts.items():
+                            tooltip += f"• {conflict_addon}: "
+                            if conflict_files:
+                                tooltip += f"{len(conflict_files)} files including {conflict_files[0]}\n"
+                            else:
+                                tooltip += "Unknown files\n"
+
+                        item.setToolTip(tooltip)
+
+                item.setText(display_text)
+
+            if selected_items:
+                selected_item = selected_items[-1]
+                original_name = selected_item.data(Qt.ItemDataRole.UserRole) or selected_item.text()
+
+                if original_name in self.addons_file_paths:
+                    addon_info = self.addons_file_paths[original_name]
+                    self.addon_description.update_content(original_name, addon_info)
+                else:
+                    self.addon_description.clear()
+            else:
+                self.addon_description.clear()
+
+            self.settings_manager.set_addon_selections([
+                item.data(Qt.ItemDataRole.UserRole) or item.text()
+                for item in selected_items
+            ])
+
+        except Exception as e:
+            print(f"Error in on_addon_select: {e}")
+            import traceback
+            traceback.print_exc()
 
     def apply_saved_addon_selections(self):
         saved_selections = self.settings_manager.get_addon_selections()
@@ -347,6 +396,81 @@ class ParticleManagerGUI(QMainWindow):
                     self.addons_file_paths[addon_info_dict['addon_name']] = addon_info_dict
 
         self.apply_saved_addon_selections()
+
+    def scan_addon_contents(self):
+        addon_metadata = self.settings_manager.get_addon_metadata() or {}
+
+        addons_dir = folder_setup.addons_dir
+        addons = list(addons_dir.glob("*.zip"))
+        processed = 0
+        new_or_updated = 0
+
+        for addon in addons:
+            addon_name = addon.stem
+            last_modified = addon.stat().st_mtime
+            processed += 1
+
+            # check if addon has been scanned before and hasn't changed
+            if (addon_name in addon_metadata and
+                    addon_metadata[addon_name].get('last_modified') == last_modified):
+                continue
+
+            # addon is new or modified, scan it
+            try:
+                addon_files = []
+                with zipfile.ZipFile(addon, 'r') as zip_ref:
+                    for file in zip_ref.namelist():
+                        if not file.endswith('/') and file != 'mod.json':
+                            addon_files.append(file)
+
+                new_or_updated += 1
+
+                if addon_name not in addon_metadata:
+                    addon_metadata[addon_name] = {}
+
+                # update metadata
+                addon_metadata[addon_name].update({
+                    'last_modified': last_modified,
+                    'files': addon_files,
+                    'file_count': len(addon_files)
+                })
+
+            except Exception as e:
+                print(f"Error reading {addon}: {e}")
+
+        self.settings_manager.set_addon_metadata(addon_metadata)
+
+        return new_or_updated > 0
+
+    def check_for_conflicts(self, addon_name):
+        addon_contents = self.settings_manager.get_addon_contents()
+        if not addon_name in addon_contents:
+            return {}
+
+        addon_files = set(addon_contents[addon_name])
+        conflicts = {}
+
+        selected_addons = []
+        for i in range(self.addons_list.count()):
+            item = self.addons_list.item(i)
+            if item and item.isSelected() and item.text().split(' ')[0] != addon_name:
+                selected_addon = item.text().split(' ')[0]  # Remove any warning indicators
+                if selected_addon in addon_contents:
+                    selected_addons.append(selected_addon)
+
+        for other_addon in selected_addons:
+            other_files = set(addon_contents[other_addon])
+            common_files = addon_files.intersection(other_files)
+
+            if common_files:
+                conflicts[other_addon] = list(common_files)
+
+        return conflicts
+
+    def rescan_addon_contents(self):
+        thread = threading.Thread(target=self.scan_addon_contents)
+        thread.daemon = True
+        thread.start()
 
     def get_selected_addons(self):
         selected_addon_names = [item.text().split(' [#')[0] for item in self.addons_list.selectedItems()]

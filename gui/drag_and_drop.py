@@ -119,7 +119,7 @@ class VPKProcessWorker(QObject):
 class ModDropZone(QFrame):
     mod_dropped = pyqtSignal(str)
 
-    def __init__(self, parent=None, settings_manager=None):
+    def __init__(self, parent=None, settings_manager=None, rescan_callback=None):
         super().__init__(parent)
         self.drop_frame = None
         self.conflict_matrix = None
@@ -133,6 +133,7 @@ class ModDropZone(QFrame):
         self.worker.progress.connect(self.update_progress)
         self.worker.error.connect(self.show_error)
         self.worker.success.connect(self.show_success)
+        self.rescan_callback = rescan_callback
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
@@ -250,8 +251,9 @@ class ModDropZone(QFrame):
     def on_process_finished(self):
         if self.progress_dialog:
             self.progress_dialog.close()
-        self.processing = False
         self.update_matrix()
+        self.rescan_callback()
+        self.processing = False
 
     def process_vpk_files(self, file_paths):
         total_files = len(file_paths)
@@ -275,8 +277,8 @@ class ModDropZone(QFrame):
                 vpk_handler.parse_directory()
                 file_list = vpk_handler.list_files()
 
-                # check for particles folder
-                has_particles = any('particles/' in f for f in file_list)
+                # check for particles
+                has_particles = any('.pcf' in f for f in file_list)
 
                 # extract all files
                 total_files_in_vpk = len(file_list)
@@ -301,7 +303,7 @@ class ModDropZone(QFrame):
                     self.worker.progress.emit(60, f"Creating addon for {vpk_name}")
                     zip_path = extracted_addons_dir.with_suffix('.zip')
 
-                    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_f:
+                    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED, compresslevel=1) as zip_f:
                         # walk through all files in the extracted directory
                         all_files = []
                         for root, _, files in os.walk(extracted_user_mods_dir):
@@ -313,7 +315,7 @@ class ModDropZone(QFrame):
                                         (file_path_in_dir, file_path_in_dir.relative_to(extracted_user_mods_dir)))
 
                         for i, (file_path_entry, arc_path) in enumerate(all_files):
-                            progress = 60 + int((i / len(all_files)) * 30)
+                            progress = 60 + int((i / len(all_files)) * 40)
                             self.worker.progress.emit(progress, f"Adding to zip: {arc_path}")
                             zip_f.write(file_path_entry, arc_path)
 
@@ -360,7 +362,9 @@ class ModDropZone(QFrame):
         self.style().polish(self)
         folder_setup.create_required_folders()
 
-        valid_files = []
+        # Use a dictionary to store normalized paths and their original files
+        normalized_files = {}
+
         for url in event.mimeData().urls():
             file_path = url.toLocalFile()
 
@@ -371,7 +375,16 @@ class ModDropZone(QFrame):
                                     f"Please rename the file and try again.")
                 continue
 
-            valid_files.append(file_path)
+            path = Path(file_path)
+            vpk_name = path.stem
+
+            if vpk_name[-3:].isdigit() and vpk_name[-4] == '_' or vpk_name[-4:] == "_dir":
+                base_name = vpk_name[:-4]
+                normalized_files[base_name] = str(path.parent / f"{base_name}_dir.vpk")
+            else:
+                normalized_files[vpk_name] = file_path
+
+        valid_files = normalized_files.values()
 
         if not valid_files:
             return
@@ -387,7 +400,6 @@ class ModDropZone(QFrame):
         self.progress_dialog.setFixedSize(600, 75)
         self.progress_dialog.show()
 
-        # start processing thread for all files
         process_thread = threading.Thread(
             target=self.process_vpk_files,
             args=(valid_files,),

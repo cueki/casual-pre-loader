@@ -59,3 +59,14 @@ class SettingsManager:
     def set_prop_filter_state(self, enabled):
         self.settings["prop_filter_checkbox"] = enabled
         self.save_settings()
+
+    def get_addon_contents(self):
+        metadata = self.get_addon_metadata()
+        return {name: data.get('files', []) for name, data in metadata.items()}
+
+    def get_addon_metadata(self):
+        return self.settings.get("addon_metadata", {})
+
+    def set_addon_metadata(self, metadata):
+        self.settings["addon_metadata"] = metadata
+        self.save_settings()
