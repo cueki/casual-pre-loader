@@ -129,6 +129,7 @@ DX8_LIST = [
 ]
 
 CUSTOM_VPK_NAME = "_casual_preloader.vpk"
+CUSTOM_VPK_SPLIT_PATTERN = "_casual_preloader_"
 LEGACY_VPK_NAMES = [
     "_wermware_2025.vpk",
     "_fragaholic_config.vpk",

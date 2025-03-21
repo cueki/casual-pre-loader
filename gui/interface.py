@@ -1,14 +1,13 @@
-import vpk
 import shutil
 import zipfile
 from pathlib import Path
 from typing import List
 from PyQt6.QtCore import QObject, pyqtSignal
-from core.constants import CUSTOM_VPK_NAMES, DX8_LIST, CUSTOM_VPK_NAME
+from core.constants import CUSTOM_VPK_NAMES, DX8_LIST, CUSTOM_VPK_NAME, CUSTOM_VPK_SPLIT_PATTERN
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler, copy_config_files
 from core.handlers.pcf_handler import check_parents, update_materials
-from core.handlers.vpk_handler import VPKHandler
+from core.parsers.vpk_file import VPKFile
 from core.parsers.pcf_file import PCFFile
 from operations.pcf_rebuild import load_particle_system_map, extract_elements
 from operations.file_processors import pcf_mod_processor, game_type, get_from_custom_dir
@@ -29,12 +28,13 @@ class Interface(QObject):
     def update_progress(self, progress: int, message: str):
         self.progress_signal.emit(progress, message)
 
-    def install(self, tf_path: str, selected_addons: List[str], prop_filter: bool = False):
+    def install(self, tf_path: str, selected_addons: List[str], prop_filter: bool=False, mod_drop_zone=None):
         try:
             backup_manager = BackupManager(tf_path)
             working_vpk_path = get_working_vpk_path()
-            vpk_handler = VPKHandler(str(working_vpk_path))
-            file_handler = FileHandler(vpk_handler)
+            vpk_file = VPKFile(str(working_vpk_path))
+            vpk_file.parse_directory()
+            file_handler = FileHandler(str(working_vpk_path))
             folder_setup.initialize_pcf()
 
             for addon_path in selected_addons:
@@ -44,6 +44,9 @@ class Interface(QObject):
                         for file in zip_ref.namelist():
                             if Path(file).name != 'mod.json':
                                 zip_ref.extract(file, folder_setup.mods_everything_else_dir)
+
+            if mod_drop_zone:
+                mod_drop_zone.apply_particle_selections()
 
             # these 5 particle files contain duplicate elements that are found elsewhere, this is an oversight by valve.
             # what im doing is simply fixing this oversight using context from the elements themselves
@@ -114,9 +117,21 @@ class Interface(QObject):
             custom_content_dir = folder_setup.mods_everything_else_dir
             copy_config_files(custom_content_dir, prop_filter)
 
+            for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
+                split_file.unlink()
+                # Also remove any cache files
+                cache_file = custom_dir / (split_file.name + ".sound.cache")
+                if cache_file.exists():
+                    cache_file.unlink()
+
             if custom_content_dir.exists() and any(custom_content_dir.iterdir()):
-                new_pak = vpk.new(str(custom_content_dir))
-                new_pak.save(custom_dir / CUSTOM_VPK_NAME)
+                # 2GB split size
+                split_size = 2 ** 31
+                vpk_base_path = custom_dir / CUSTOM_VPK_NAME.replace('.vpk', '')
+
+                if not VPKFile.create(str(custom_content_dir), str(vpk_base_path), split_size):
+                    self.error_signal.emit("Failed to create custom VPK")
+                    return
 
             # deploy particles
             if not backup_manager.deploy_to_game():
@@ -125,16 +140,21 @@ class Interface(QObject):
 
             # flush quick precache every install
             QuickPrecache(str(Path(tf_path).parents[0]), debug=False, prop_filter=prop_filter).run(flush=True)
-            quick_precache_path = custom_dir / "QuickPrecache.vpk"
+            quick_precache_path = custom_dir / "_QuickPrecache.vpk"
             if quick_precache_path.exists():
                 quick_precache_path.unlink()
+
+            # legacy name
+            old_quick_precache_path = custom_dir / "QuickPrecache.vpk"
+            if old_quick_precache_path.exists():
+                old_quick_precache_path.unlink()
 
             # run quick precache if needed (either by having props or by using the fast load)
             precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]), prop_filter)
             if precache_prop_set:
                 precache = QuickPrecache(str(Path(tf_path).parents[0]), debug=False, prop_filter=prop_filter)
                 precache.run(auto=True)
-                shutil.copy2("quickprecache/QuickPrecache.vpk", custom_dir)
+                shutil.copy2("quickprecache/_QuickPrecache.vpk", custom_dir)
 
             get_from_custom_dir(custom_dir)
 
@@ -160,11 +180,20 @@ class Interface(QObject):
             custom_dir = Path(tf_path) / 'custom'
             custom_dir.mkdir(exist_ok=True)
 
-            # flush quick precache files
+            # flush quick precache
             QuickPrecache(str(Path(tf_path).parents[0]), debug=False, prop_filter=False).run(flush=True)
-            quick_precache_path = custom_dir / "QuickPrecache.vpk"
+            quick_precache_path = custom_dir / "_QuickPrecache.vpk"
             if quick_precache_path.exists():
                 quick_precache_path.unlink()
+
+            quick_precache_cache = custom_dir / "_quickprecache.vpk.sound.cache"
+            if quick_precache_cache.exists():
+                quick_precache_cache.unlink()
+
+            # legacy name
+            old_quick_precache_path = custom_dir / "QuickPrecache.vpk"
+            if old_quick_precache_path.exists():
+                old_quick_precache_path.unlink()
 
             for custom_vpk in CUSTOM_VPK_NAMES:
                 vpk_path = custom_dir / custom_vpk
@@ -173,6 +202,12 @@ class Interface(QObject):
                     vpk_path.unlink()
                 if cache_path.exists():
                     cache_path.unlink()
+
+            for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
+                split_file.unlink()
+                cache_file = custom_dir / (split_file.name + ".sound.cache")
+                if cache_file.exists():
+                    cache_file.unlink()
 
             self.success_signal.emit("Backup restored successfully!")
 

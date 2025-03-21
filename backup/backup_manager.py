@@ -1,7 +1,7 @@
 import shutil
 from pathlib import Path
 from core.folder_setup import folder_setup
-from core.handlers.vpk_handler import VPKHandler
+from core.parsers.vpk_file import VPKFile
 from core.handlers.file_handler import FileHandler
 
 
@@ -23,8 +23,9 @@ def prepare_working_copy() -> bool:
 
         # setup VPK handler for file extraction
         working_vpk_path = folder_setup.get_working_path("tf2_misc_dir.vpk")
-        vpk_handler = VPKHandler(str(working_vpk_path))
-        file_handler = FileHandler(vpk_handler)
+        vpk_file = VPKFile(str(working_vpk_path))
+        vpk_file.parse_directory()
+        file_handler = FileHandler(working_vpk_path)
 
         # extract PCF files, excluding unusual particles
         excluded_patterns = ['unusual']
@@ -34,7 +35,7 @@ def prepare_working_copy() -> bool:
         for file in pcf_files:
             base_name = Path(file).name
             output_path = folder_setup.game_files_dir / base_name
-            file_handler.vpk.extract_file(file, str(output_path))
+            vpk_file.extract_file(file, str(output_path))
 
         return True
 

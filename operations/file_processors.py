@@ -1,6 +1,6 @@
 from pathlib import Path
-from core.handlers.vpk_handler import VPKHandler
 from core.parsers.pcf_file import PCFFile
+from core.parsers.vpk_file import VPKFile
 from operations.pcf_compress import remove_duplicate_elements
 
 
@@ -83,7 +83,9 @@ def should_process_file(file_path: str) -> bool:
         "materials/effects/",
         "materials/models/",
         "materials/particle/",
-        "materials/prediction/"
+        "materials/particles/",
+        "materials/prediction/",
+        "materials/sprites/healbeam"
     ]
 
     path_lower = file_path.lower()
@@ -104,7 +106,8 @@ get_val = [
 def get_from_vpk(vpk_path: Path):
     try:
         # check if VPK contains target paths before processing
-        vpk_handler = VPKHandler(str(vpk_path))
+        vpk_handler = VPKFile(str(vpk_path))
+        vpk_handler.parse_directory()
         file_list = vpk_handler.list_files()
         should_process = any(should_process_file(file) for file in file_list)
 
@@ -154,7 +157,7 @@ def get_from_custom_dir(custom_dir: Path):
     for directory in custom_dir.glob("*"):
         if directory.is_dir():
             for pattern in ["materials/effects/**/*", "materials/models/**/*", "materials/particle/**/*",
-                            "materials/prediction/**/*"]:
+                            "materials/particles/", "materials/prediction/**/*", "materials/sprites/healbeam*"]:
                 for file_path in directory.glob(pattern):
                     if file_path.is_file():
                         get_from_file(file_path)
