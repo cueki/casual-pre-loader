@@ -3,7 +3,7 @@ import zipfile
 from pathlib import Path
 from typing import List
 from PyQt6.QtCore import QObject, pyqtSignal
-from core.constants import CUSTOM_VPK_NAMES, DX8_LIST, CUSTOM_VPK_NAME
+from core.constants import CUSTOM_VPK_NAMES, DX8_LIST, CUSTOM_VPK_NAME, CUSTOM_VPK_SPLIT_PATTERN
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler, copy_config_files
 from core.handlers.pcf_handler import check_parents, update_materials
@@ -117,6 +117,13 @@ class Interface(QObject):
             custom_content_dir = folder_setup.mods_everything_else_dir
             copy_config_files(custom_content_dir, prop_filter)
 
+            for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
+                split_file.unlink()
+                # Also remove any cache files
+                cache_file = custom_dir / (split_file.name + ".sound.cache")
+                if cache_file.exists():
+                    cache_file.unlink()
+
             if custom_content_dir.exists() and any(custom_content_dir.iterdir()):
                 # 2GB split size
                 split_size = 2 ** 31
@@ -179,6 +186,10 @@ class Interface(QObject):
             if quick_precache_path.exists():
                 quick_precache_path.unlink()
 
+            quick_precache_cache = custom_dir / "_quickprecache.vpk.sound.cache"
+            if quick_precache_cache.exists():
+                quick_precache_cache.unlink()
+
             # legacy name
             old_quick_precache_path = custom_dir / "QuickPrecache.vpk"
             if old_quick_precache_path.exists():
@@ -191,6 +202,12 @@ class Interface(QObject):
                     vpk_path.unlink()
                 if cache_path.exists():
                     cache_path.unlink()
+
+            for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
+                split_file.unlink()
+                cache_file = custom_dir / (split_file.name + ".sound.cache")
+                if cache_file.exists():
+                    cache_file.unlink()
 
             self.success_signal.emit("Backup restored successfully!")
 
