@@ -353,7 +353,7 @@ class ParticleManagerGUI(QMainWindow):
         # re-enable signals
         self.addons_list.blockSignals(False)
 
-        # trigger the on_addon_select manually to update UI
+        # refresh UI
         self.on_addon_select()
 
     def load_addons(self):
@@ -495,14 +495,13 @@ class ParticleManagerGUI(QMainWindow):
         if not self.validate_inputs():
             return
 
-        self.mod_drop_zone.apply_particle_selections()
         selected_addons = self.get_selected_addons()
         prop_filter_state = not self.prop_filter_checkbox.isChecked()
 
         self.set_processing_state(True)
         thread = threading.Thread(
             target=self.operations.install,
-            args=(self.tf_path, selected_addons, prop_filter_state)
+            args=(self.tf_path, selected_addons, prop_filter_state, self.mod_drop_zone)
         )
         thread.daemon = True
         thread.start()

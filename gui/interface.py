@@ -28,7 +28,7 @@ class Interface(QObject):
     def update_progress(self, progress: int, message: str):
         self.progress_signal.emit(progress, message)
 
-    def install(self, tf_path: str, selected_addons: List[str], prop_filter: bool = False):
+    def install(self, tf_path: str, selected_addons: List[str], prop_filter: bool=False, mod_drop_zone=None):
         try:
             backup_manager = BackupManager(tf_path)
             working_vpk_path = get_working_vpk_path()
@@ -44,6 +44,9 @@ class Interface(QObject):
                         for file in zip_ref.namelist():
                             if Path(file).name != 'mod.json':
                                 zip_ref.extract(file, folder_setup.mods_everything_else_dir)
+
+            if mod_drop_zone:
+                mod_drop_zone.apply_particle_selections()
 
             # these 5 particle files contain duplicate elements that are found elsewhere, this is an oversight by valve.
             # what im doing is simply fixing this oversight using context from the elements themselves
