@@ -8,7 +8,7 @@ from pathlib import Path
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Build script')
     parser.add_argument('--target_dir', help='Target directory to deploy the application')
-    parser.add_argument('--user-mods-zip', help='Path to user_mods.zip file', default='user_mods.zip')
+    parser.add_argument('--user-mods-zip', help='Path to user_mods.zip file', default='mods.zip')
     return parser.parse_args()
 
 
@@ -22,7 +22,6 @@ def copy_project_files(source_dir, target_dir):
         'core/parsers',
         'gui',
         'operations',
-        'addons',
         'backup',
         'backup/cfg',
         'backup/cfg/w',
@@ -61,7 +60,7 @@ def copy_project_files(source_dir, target_dir):
             print(f"Warning: Missing {file_name}")
 
 
-def extract_user_mods(zip_path, target_dir):
+def extract_mods(zip_path, target_dir):
     zip_file = Path(zip_path)
     if not zip_file.exists():
         print(f"Warning: {zip_file} not found")
@@ -92,7 +91,7 @@ def main():
 
     # extract user_mods.zip
     if Path(user_mods_zip).exists():
-        extract_user_mods(user_mods_zip, target_dir)
+        extract_mods(user_mods_zip, target_dir)
 
     print(f"Build completed successfully to {target_dir}")
     print('feathers wuz here')

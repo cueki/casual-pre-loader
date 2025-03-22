@@ -557,7 +557,7 @@ class ParticleManagerGUI(QMainWindow):
 
     @staticmethod
     def load_addon_info(addon_stem: str) -> dict:
-        file_path = f'addons/{addon_stem}.zip'
+        file_path = str(folder_setup.addons_dir / f"{addon_stem}.zip")
         try:
             with zipfile.ZipFile(file_path, 'r') as addon_zip:
                 if 'mod.json' not in addon_zip.namelist():
@@ -569,7 +569,7 @@ class ParticleManagerGUI(QMainWindow):
                         addon_info['file_path'] = addon_stem
                         return addon_info
                     except json.JSONDecodeError:
-                        pass 
+                        pass
         except (FileNotFoundError, zipfile.BadZipFile):
             pass
 

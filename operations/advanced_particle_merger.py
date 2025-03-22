@@ -47,12 +47,12 @@ class AdvancedParticleMerger:
 
     def preprocess_vpk(self, vpk_path: Path) -> None:
         vpk_folder_name = vpk_path.stem
-        out_dir = folder_setup.user_mods_dir / vpk_folder_name
+        out_dir = folder_setup.particles_dir / vpk_folder_name
 
         # lazy copy whatever
         excluded_patterns = ['unusual', 'dx80', 'dx90']
-        particles_filter = [f for f in Path(out_dir /"particles").glob("*.pcf")
-                    if not any(pattern in str(f).lower() for pattern in excluded_patterns)]
+        particles_filter = [f for f in Path(out_dir / "particles").glob("*.pcf")
+                            if not any(pattern in str(f).lower() for pattern in excluded_patterns)]
 
         # group files by their target particle file
         for particle in particles_filter:

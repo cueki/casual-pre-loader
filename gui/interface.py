@@ -28,7 +28,7 @@ class Interface(QObject):
     def update_progress(self, progress: int, message: str):
         self.progress_signal.emit(progress, message)
 
-    def install(self, tf_path: str, selected_addons: List[str], prop_filter: bool=False, mod_drop_zone=None):
+    def install(self, tf_path: str, selected_addons: List[str], prop_filter: bool = False, mod_drop_zone=None):
         try:
             backup_manager = BackupManager(tf_path)
             working_vpk_path = get_working_vpk_path()
@@ -38,12 +38,12 @@ class Interface(QObject):
             folder_setup.initialize_pcf()
 
             for addon_path in selected_addons:
-                addon_zip = Path("addons") / f"{addon_path}.zip"
+                addon_zip = folder_setup.addons_dir / f"{addon_path}.zip"
                 if addon_zip.exists():
                     with zipfile.ZipFile(addon_zip, 'r') as zip_ref:
                         for file in zip_ref.namelist():
                             if Path(file).name != 'mod.json':
-                                zip_ref.extract(file, folder_setup.mods_everything_else_dir)
+                                zip_ref.extract(file, folder_setup.temp_mods_dir)
 
             if mod_drop_zone:
                 mod_drop_zone.apply_particle_selections()
@@ -61,7 +61,7 @@ class Interface(QObject):
             ]
 
             for duplicate_effect in duplicate_effects:
-                target_path = folder_setup.mods_particle_dir / duplicate_effect
+                target_path = folder_setup.temp_mods_dir / duplicate_effect
                 if not target_path.exists():
                     # copy from game_files if not in
                     source_path = folder_setup.game_files_dir / duplicate_effect
@@ -70,12 +70,13 @@ class Interface(QObject):
                                          load_particle_system_map('particle_system_map.json')
                                          [f'particles/{target_path.name}']).encode(target_path)
 
-            if (folder_setup.mods_particle_dir / "blood_trail.pcf").exists():
+            if (folder_setup.temp_mods_dir / "blood_trail.pcf").exists():
                 # hacky fix for blood_trail being so small
-                shutil.move((folder_setup.mods_particle_dir / "blood_trail.pcf"), (folder_setup.mods_particle_dir / "npc_fx.pcf"))
+                shutil.move((folder_setup.temp_mods_dir / "blood_trail.pcf"),
+                            (folder_setup.temp_mods_dir / "npc_fx.pcf"))
 
             self.update_progress(25, "Patching in...")
-            particle_files = folder_setup.mods_particle_dir.iterdir()
+            particle_files = folder_setup.temp_mods_dir.glob("*.pcf")
             for pcf_file in particle_files:
                 base_name = pcf_file.name
                 if (base_name != folder_setup.base_default_pcf.input_file.name and
@@ -86,10 +87,10 @@ class Interface(QObject):
                 if pcf_file.stem in DX8_LIST:
                     # dx80 first
                     dx_80_ver = Path(pcf_file.stem + "_dx80.pcf")
-                    shutil.copy2(pcf_file, folder_setup.mods_particle_dir / dx_80_ver)
+                    shutil.copy2(pcf_file, folder_setup.temp_mods_dir / dx_80_ver)
                     file_handler.process_file(
                         dx_80_ver.name,
-                        pcf_mod_processor(str(folder_setup.mods_particle_dir / dx_80_ver)),
+                        pcf_mod_processor(str(folder_setup.temp_mods_dir / dx_80_ver)),
                         create_backup=False
                     )
                 # now the rest
@@ -114,7 +115,7 @@ class Interface(QObject):
                     cache_path.unlink()
 
             # create new VPK for custom content & config
-            custom_content_dir = folder_setup.mods_everything_else_dir
+            custom_content_dir = folder_setup.temp_mods_dir
             copy_config_files(custom_content_dir, prop_filter)
 
             for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):

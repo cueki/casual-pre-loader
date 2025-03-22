@@ -4,7 +4,7 @@ tf2_misc_dir.vpk
 *.pcf
 app.dist/
 app.build/
-user_mods/
+mods/
 app_settings.json
 
 # Byte-compiled / optimized / DLL files

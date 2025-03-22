@@ -15,45 +15,42 @@ class FolderConfig:
     # main folder names
     backup_folder = "backup"
     temp_folder = "temp"
-    addons_folder = "addons"
-    user_mods_folder = "user_mods"
+    mods_folder = "mods"
 
-    # temp nested folder (to be cleared every run)
+    # temp nested folders (to be cleared every run)
     working_folder = "working"
     output_folder = "output"
-    mods_folder = "mods"
+    temp_mods_folder = "mods"
     game_files_folder = "game_files"
 
-    # two folders nested in mods
-    mods_particle_folder = "particles"
-    mods_everything_else_folder = "everything_else"
+    # mods subfolders
+    mods_particles_folder = "particles"
+    mods_addons_folder = "addons"
 
     def __post_init__(self):
-        self.backup_dir = self.project_dir /  self.backup_folder
+        self.backup_dir = self.project_dir / self.backup_folder
         self.temp_dir = self.project_dir / self.temp_folder
-        self.addons_dir = self.project_dir / self.addons_folder
-        self.user_mods_dir = self.project_dir / self.user_mods_folder
+        self.mods_dir = self.project_dir / self.mods_folder
 
         self.working_dir = self.temp_dir / self.working_folder
         self.output_dir = self.temp_dir / self.output_folder
-        self.mods_dir = self.temp_dir / self.mods_folder
+        self.temp_mods_dir = self.temp_dir / self.temp_mods_folder
         self.game_files_dir = self.temp_dir / self.game_files_folder
 
-        self.mods_particle_dir = self.mods_dir / self.mods_particle_folder
-        self.mods_everything_else_dir = self.mods_dir / self.mods_everything_else_folder
+        self.particles_dir = self.mods_dir / self.mods_particles_folder
+        self.addons_dir = self.mods_dir / self.mods_addons_folder
 
     def create_required_folders(self) -> None:
         folders = [
             self.backup_dir,
             self.temp_dir,
+            self.mods_dir,
+            self.particles_dir,
             self.addons_dir,
-            self.user_mods_dir,
             self.working_dir,
             self.output_dir,
-            self.mods_dir,
-            self.game_files_dir,
-            self.mods_particle_dir,
-            self.mods_everything_else_dir
+            self.temp_mods_dir,
+            self.game_files_dir
         ]
 
         for folder in folders:
@@ -90,11 +87,17 @@ class FolderConfig:
     def get_backup_path(self, filename: str) -> Path:
         return self.backup_dir / filename
 
-    def get_mods_path(self, filename: str) -> Path:
-        return self.mods_dir / filename
+    def get_temp_mods_path(self, filename: str) -> Path:
+        return self.temp_mods_dir / filename
 
     def get_game_files_path(self, filename: str) -> Path:
         return self.game_files_dir / filename
+
+    def get_particles_path(self, filename: str) -> Path:
+        return self.particles_dir / filename
+
+    def get_addons_path(self, filename: str) -> Path:
+        return self.addons_dir / filename
 
 
 # create a default instance for import
