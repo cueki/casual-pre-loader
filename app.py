@@ -420,7 +420,7 @@ class ParticleManagerGUI(QMainWindow):
                 addon_files = []
                 with zipfile.ZipFile(addon, 'r') as zip_ref:
                     for file in zip_ref.namelist():
-                        if not file.endswith('/') and file != 'mod.json':
+                        if not file.endswith('/') and file != 'mod.json' and file != 'sound/sound.cache':
                             addon_files.append(file)
 
                 new_or_updated += 1
@@ -454,7 +454,7 @@ class ParticleManagerGUI(QMainWindow):
         for i in range(self.addons_list.count()):
             item = self.addons_list.item(i)
             if item and item.isSelected() and item.text().split(' ')[0] != addon_name:
-                selected_addon = item.text().split(' ')[0]  # Remove any warning indicators
+                selected_addon = item.text().split(' ')[0]
                 if selected_addon in addon_contents:
                     selected_addons.append(selected_addon)
 

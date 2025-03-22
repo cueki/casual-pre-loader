@@ -304,7 +304,7 @@ class VPKFile:
                 extension = rel_path.suffix[1:] if rel_path.suffix else ''
                 path = str(rel_path.parent).replace('\\', '/')
                 if path == '.':
-                    path = ' '  # VPK uses space for root directory
+                    path = ' '
                 filename = rel_path.stem
 
                 if extension not in vpk_structure:

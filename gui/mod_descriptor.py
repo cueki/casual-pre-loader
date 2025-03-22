@@ -84,9 +84,9 @@ class PresetDescription(QWidget):
 
     def set_type_style(self, preset_type: str):
         colors = {
-            "vanilla": "#4CAF50",  # Green
-            "fun": "#9C27B0",  # Purple
-            "friend": "#2196F3"  # Blue
+            "vanilla": "#4CAF50",
+            "fun": "#9C27B0",
+            "friend": "#2196F3"
         }
 
         color = colors.get(preset_type.lower(), "#757575")
