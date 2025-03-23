@@ -28,7 +28,7 @@ class Interface(QObject):
     def update_progress(self, progress: int, message: str):
         self.progress_signal.emit(progress, message)
 
-    def install(self, tf_path: str, selected_addons: List[str], prop_filter: bool = False, mod_drop_zone=None):
+    def install(self, tf_path: str, selected_addons: List[str], prop_filter: bool=False, mod_drop_zone=None):
         try:
             backup_manager = BackupManager(tf_path)
             working_vpk_path = get_working_vpk_path()
