@@ -6,7 +6,7 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLineEdit, QLabel, QProgressBar,
                              QListWidget, QFileDialog, QMessageBox,
-                             QGroupBox, QApplication, QSplitter, QListWidgetItem, QTabWidget, QCheckBox)
+                             QGroupBox, QApplication, QSplitter, QListWidgetItem, QTabWidget)
 from PyQt6.QtCore import pyqtSignal, Qt
 from core.folder_setup import folder_setup
 from gui.drag_and_drop import ModDropZone
@@ -154,6 +154,9 @@ class ParticleManagerGUI(QMainWindow):
         addons_group.setLayout(addons_layout)
         addons_splitter.addWidget(addons_group)
         addons_splitter.setChildrenCollapsible(False)
+        delete_button = QPushButton("Delete Selected Addons")
+        delete_button.clicked.connect(self.delete_selected_addons)
+        addons_layout.addWidget(delete_button)
 
         # description
         description_group = QGroupBox("Details")
@@ -486,6 +489,46 @@ class ParticleManagerGUI(QMainWindow):
         selected_addon_names = [item.text().split(' [#')[0] for item in self.addons_list.selectedItems()]
         return [self.addons_file_paths[name]['file_path'] for name in selected_addon_names]
 
+    def delete_selected_addons(self):
+        selected_items = self.addons_list.selectedItems()
+        if not selected_items:
+            QMessageBox.information(self, "No Selection", "Please select addons to delete.")
+            return
+
+        selected_addon_names = []
+        for item in selected_items:
+            addon_name = item.data(Qt.ItemDataRole.UserRole) or item.text().split(' [#')[0]
+            selected_addon_names.append(addon_name)
+
+        addon_list = "\n• ".join(selected_addon_names)
+        result = QMessageBox.warning(
+            self,
+            "Confirm Deletion",
+            f"The following addons will be permanently deleted:\n\n• {addon_list}\n\nAre you sure?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+
+        if result != QMessageBox.StandardButton.Yes:
+            return
+
+        for addon_name in selected_addon_names:
+            addon_path = folder_setup.addons_dir / addon_name
+            if addon_path.exists() and addon_path.is_dir():
+                try:
+                    import shutil
+                    shutil.rmtree(addon_path)
+                except Exception as e:
+                    QMessageBox.critical(
+                        self,
+                        "Error",
+                        f"Failed to delete {addon_name}: {str(e)}"
+                    )
+
+        # refresh addon list
+        self.load_addons()
+        QMessageBox.information(self, "Success", "Selected addons have been deleted.")
+
     def validate_inputs(self):
         if not self.tf_path:
             self.show_error("Please select tf/ directory!")
@@ -591,7 +634,7 @@ class ParticleManagerGUI(QMainWindow):
 
 
 def main():
-    initial_setup()
+    # initial_setup()
     folder_setup.cleanup_temp_folders()
     folder_setup.create_required_folders()
     prepare_working_copy()
