@@ -64,11 +64,12 @@ class Interface(QObject):
                 target_path = folder_setup.temp_mods_dir / duplicate_effect
                 if not target_path.exists():
                     # copy from game_files if not in
-                    source_path = folder_setup.game_files_dir / duplicate_effect
+                    source_path = folder_setup.temp_game_files_dir / duplicate_effect
                     if source_path.exists():
                         extract_elements(PCFFile(source_path).decode(),
                                          load_particle_system_map('particle_system_map.json')
                                          [f'particles/{target_path.name}']).encode(target_path)
+                        shutil.copy2(target_path, target_path.name)
 
             if (folder_setup.temp_mods_dir / "blood_trail.pcf").exists():
                 # hacky fix for blood_trail being so small
@@ -93,12 +94,16 @@ class Interface(QObject):
                         pcf_mod_processor(str(folder_setup.temp_mods_dir / dx_80_ver)),
                         create_backup=False
                     )
+                    # get them out of temp mods/ since they are patched directly into game the vpk
+                    (folder_setup.temp_mods_dir / dx_80_ver).unlink()
                 # now the rest
                 file_handler.process_file(
                     base_name,
                     pcf_mod_processor(str(pcf_file)),
                     create_backup=False
                 )
+                # get them out of temp mods/ since they are patched directly into game the vpk
+                pcf_file.unlink()
 
             # handle custom folder
             self.update_progress(75, "Deploying mods...")
@@ -120,7 +125,7 @@ class Interface(QObject):
 
             for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
                 split_file.unlink()
-                # Also remove any cache files
+                # also remove any cache files
                 cache_file = custom_dir / (split_file.name + ".sound.cache")
                 if cache_file.exists():
                     cache_file.unlink()

@@ -84,7 +84,7 @@ class AdvancedParticleMerger:
                     elements_we_still_need.add(element)
 
             if elements_we_still_need:
-                game_file_path = folder_setup.game_files_dir / particle_group
+                game_file_path = folder_setup.temp_game_files_dir / particle_group
                 game_file_in = PCFFile(game_file_path).decode()
                 game_file_out = folder_setup.get_output_path(f"game_{particle_group}")
                 extract_elements(game_file_in, elements_we_still_need).encode(game_file_out)

@@ -84,7 +84,7 @@ class VPKFile:
         if not self.is_dir_vpk:
             self._calculate_header_offset()
 
-    def parse_directory(self) -> None:
+    def parse_directory(self) -> 'VPKFile':
         with open(self.dir_path, 'rb') as f:
             # read beyond the header
             tree_offset = struct.calcsize('<7I')
@@ -113,6 +113,7 @@ class VPKFile:
                             self.directory[extension][path] = {}
 
                         self.directory[extension][path][filename] = entry
+        return self
 
     def _calculate_header_offset(self) -> int:
         try:
@@ -199,7 +200,7 @@ class VPKFile:
     def get_file_entry(self, filepath: str) -> Optional[Tuple[str, str, VPKDirectoryEntry]]:
         try:
             path = Path(filepath)
-            extension = path.suffix[1:]  # removes the dot
+            extension = path.suffix[1:]
             filename = path.stem
             # ensure forward slashes and handle nested paths correctly
             directory = str(path.parent).replace('\\', '/')

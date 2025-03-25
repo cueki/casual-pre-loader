@@ -13,52 +13,50 @@ class FolderConfig:
     base_default_parents: Optional[set[str]] = field(default=None)
 
     # main folder names
-    backup_folder = "backup"
-    temp_folder = "temp"
-    mods_folder = "mods"
+    _backup_folder = "backup"
+    _mods_folder = "mods"
+    _mods_particles_folder = "particles"
+    _mods_addons_folder = "addons"
 
-    # temp nested folders (to be cleared every run)
-    working_folder = "working"
-    output_folder = "output"
-    temp_mods_folder = "mods"
-    game_files_folder = "game_files"
-
-    # mods subfolders
-    mods_particles_folder = "particles"
-    mods_addons_folder = "addons"
+    # temp and it's nested folders (to be cleared every run)
+    _temp_folder = "temp"
+    _temp_working_folder = "working"
+    _temp_output_folder = "output"
+    _temp_mods_folder = "mods"
+    _temp_game_files_folder = "game_files"
 
     def __post_init__(self):
-        self.backup_dir = self.project_dir / self.backup_folder
-        self.temp_dir = self.project_dir / self.temp_folder
-        self.mods_dir = self.project_dir / self.mods_folder
+        self.backup_dir = self.project_dir / self._backup_folder
 
-        self.working_dir = self.temp_dir / self.working_folder
-        self.output_dir = self.temp_dir / self.output_folder
-        self.temp_mods_dir = self.temp_dir / self.temp_mods_folder
-        self.game_files_dir = self.temp_dir / self.game_files_folder
+        self.mods_dir = self.project_dir / self._mods_folder
+        self.particles_dir = self.mods_dir / self._mods_particles_folder
+        self.addons_dir = self.mods_dir / self._mods_addons_folder
 
-        self.particles_dir = self.mods_dir / self.mods_particles_folder
-        self.addons_dir = self.mods_dir / self.mods_addons_folder
+        self.temp_dir = self.project_dir / self._temp_folder
+        self.temp_working_dir = self.temp_dir / self._temp_working_folder
+        self.temp_output_dir = self.temp_dir / self._temp_output_folder
+        self.temp_mods_dir = self.temp_dir / self._temp_mods_folder
+        self.temp_game_files_dir = self.temp_dir / self._temp_game_files_folder
 
     def create_required_folders(self) -> None:
         folders = [
             self.backup_dir,
-            self.temp_dir,
             self.mods_dir,
-            self.particles_dir,
             self.addons_dir,
-            self.working_dir,
-            self.output_dir,
+            self.particles_dir,
+            self.temp_dir,
+            self.temp_working_dir,
+            self.temp_output_dir,
             self.temp_mods_dir,
-            self.game_files_dir
+            self.temp_game_files_dir
         ]
 
         for folder in folders:
             folder.mkdir(parents=True, exist_ok=True)
 
     def initialize_pcf(self):
-        if self.game_files_dir.exists():
-            default_base_path = self.game_files_dir / "disguise.pcf"
+        if self.temp_game_files_dir.exists():
+            default_base_path = self.temp_game_files_dir / "disguise.pcf"
             if default_base_path.exists():
                 self.base_default_pcf = PCFFile(default_base_path).decode()
                 self.base_default_parents = get_parent_elements(self.base_default_pcf)
@@ -79,10 +77,10 @@ class FolderConfig:
         return self.temp_dir / filename
 
     def get_working_path(self, filename: str) -> Path:
-        return self.working_dir / filename
+        return self.temp_working_dir / filename
 
     def get_output_path(self, filename: str) -> Path:
-        return self.output_dir / filename
+        return self.temp_output_dir / filename
 
     def get_backup_path(self, filename: str) -> Path:
         return self.backup_dir / filename
@@ -91,13 +89,7 @@ class FolderConfig:
         return self.temp_mods_dir / filename
 
     def get_game_files_path(self, filename: str) -> Path:
-        return self.game_files_dir / filename
-
-    def get_particles_path(self, filename: str) -> Path:
-        return self.particles_dir / filename
-
-    def get_addons_path(self, filename: str) -> Path:
-        return self.addons_dir / filename
+        return self.temp_game_files_dir / filename
 
 
 # create a default instance for import
