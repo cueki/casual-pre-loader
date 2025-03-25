@@ -1,6 +1,5 @@
-import os
+import json
 import threading
-import zipfile
 import shutil
 from pathlib import Path
 from PyQt6.QtCore import Qt, pyqtSignal, QObject
@@ -300,27 +299,27 @@ class ModDropZone(QFrame):
                     )
                     particle_merger.preprocess_vpk(extracted_particles_dir)
                 else:
-                    # for non-particle mods, zip and move to addons
-                    self.worker.progress.emit(60, f"Creating addon for {vpk_name}")
-                    zip_path = extracted_addons_dir.with_suffix('.zip')
+                    # for non-particle mods, create addon folder
+                    self.worker.progress.emit(60, f"Creating addon folder for {vpk_name}")
 
-                    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED, compresslevel=1) as zip_f:
-                        # walk through all files in the extracted directory
-                        all_files = []
-                        for root, _, files in os.walk(extracted_particles_dir):
-                            for file in files:
-                                file_path_in_dir = Path(root) / file
-                                # make sure the file has an extension (for vpk module)
-                                if file_path_in_dir.suffix:
-                                    all_files.append(
-                                        (file_path_in_dir, file_path_in_dir.relative_to(extracted_particles_dir)))
+                    # if extracted_addons_dir already exists, remove it first
+                    if extracted_addons_dir.exists():
+                        shutil.rmtree(extracted_addons_dir)
 
-                        for i, (file_path_entry, arc_path) in enumerate(all_files):
-                            progress = 60 + int((i / len(all_files)) * 40)
-                            self.worker.progress.emit(progress, f"Adding to zip: {arc_path}")
-                            zip_f.write(file_path_entry, arc_path)
+                    # move the extracted files to the addons directory
+                    shutil.move(extracted_particles_dir, extracted_addons_dir)
 
-                    shutil.rmtree(extracted_particles_dir)
+                    # create mod.json if it doesn't exist
+                    mod_json_path = extracted_addons_dir / "mod.json"
+                    if not mod_json_path.exists():
+                        default_mod_info = {
+                            "addon_name": vpk_name,
+                            "type": "Unknown",
+                            "description": f"Content extracted from {file_name}",
+                            "contents": ["Custom content"]
+                        }
+                        with open(mod_json_path, 'w') as f:
+                            json.dump(default_mod_info, f, indent=2)
 
                 # hacky refresh
                 main_window = self.window()

@@ -370,12 +370,13 @@ class ParticleManagerGUI(QMainWindow):
         self.addons_list.clear()
         addon_groups = {"texture": [], "model": [], "misc": [], "animation": [], "unknown": []}
 
-        for addon in addons_dir.glob("*.zip"):
-            addon_info = self.load_addon_info(addon.stem)
-            addon_type = addon_info.get("type", "unknown").lower()
-            if addon_type not in addon_groups:
-                addon_groups[addon_type] = []
-            addon_groups[addon_type].append(addon_info)
+        for addon_path in addons_dir.iterdir():
+            if addon_path.is_dir():
+                addon_info = self.load_addon_info(addon_path.name)
+                addon_type = addon_info.get("type", "unknown").lower()
+                if addon_type not in addon_groups:
+                    addon_groups[addon_type] = []
+                addon_groups[addon_type].append(addon_info)
 
         # sort the addon groups alphabetically
         addon_groups = {group: addon_groups[group] for group in sorted(addon_groups)}
@@ -410,13 +411,14 @@ class ParticleManagerGUI(QMainWindow):
         addon_metadata = self.settings_manager.get_addon_metadata() or {}
 
         addons_dir = folder_setup.addons_dir
-        addons = list(addons_dir.glob("*.zip"))
+        addons = [d for d in addons_dir.iterdir() if d.is_dir()]
         processed = 0
         new_or_updated = 0
 
-        for addon in addons:
-            addon_name = addon.stem
-            last_modified = addon.stat().st_mtime
+        for addon_dir in addons:
+            addon_name = addon_dir.name
+            # get the last modified time of the most recently changed file
+            last_modified = max((f.stat().st_mtime for f in addon_dir.glob('**/*') if f.is_file()), default=0)
             processed += 1
 
             # check if addon has been scanned before and hasn't changed
@@ -427,17 +429,16 @@ class ParticleManagerGUI(QMainWindow):
             # addon is new or modified, scan it
             try:
                 addon_files = []
-                with zipfile.ZipFile(addon, 'r') as zip_ref:
-                    for file in zip_ref.namelist():
-                        if not file.endswith('/') and file != 'mod.json' and file != 'sound/sound.cache':
-                            addon_files.append(file)
+                for file_path in addon_dir.glob('**/*'):
+                    if file_path.is_file() and file_path.name != 'mod.json' and file_path.name != 'sound.cache':
+                        rel_path = str(file_path.relative_to(addon_dir))
+                        addon_files.append(rel_path)
 
                 new_or_updated += 1
 
                 if addon_name not in addon_metadata:
                     addon_metadata[addon_name] = {}
 
-                # update metadata
                 addon_metadata[addon_name].update({
                     'last_modified': last_modified,
                     'files': addon_files,
@@ -445,7 +446,7 @@ class ParticleManagerGUI(QMainWindow):
                 })
 
             except Exception as e:
-                print(f"Error reading {addon}: {e}")
+                print(f"Error scanning {addon_name}: {e}")
 
         self.settings_manager.set_addon_metadata(addon_metadata)
 
@@ -564,35 +565,33 @@ class ParticleManagerGUI(QMainWindow):
         QMessageBox.information(self, "Success", message)
 
     @staticmethod
-    def load_addon_info(addon_stem: str) -> dict:
-        file_path = str(folder_setup.addons_dir / f"{addon_stem}.zip")
+    def load_addon_info(addon_name: str) -> dict:
+        addon_path = folder_setup.addons_dir / addon_name
         try:
-            with zipfile.ZipFile(file_path, 'r') as addon_zip:
-                if 'mod.json' not in addon_zip.namelist():
-                    raise FileNotFoundError
-
-                with addon_zip.open('mod.json') as addon_json:
+            mod_json_path = addon_path / 'mod.json'
+            if mod_json_path.exists():
+                with open(mod_json_path, 'r') as addon_json:
                     try:
                         addon_info = json.load(addon_json)
-                        addon_info['file_path'] = addon_stem
+                        addon_info['file_path'] = addon_name
                         return addon_info
                     except json.JSONDecodeError:
                         pass
-        except (FileNotFoundError, zipfile.BadZipFile):
+        except FileNotFoundError:
             pass
 
         # fallback return for any failure
         return {
-            "addon_name": addon_stem,
+            "addon_name": addon_name,
             "type": "Unknown",
             "description": "",
             "contents": ["Custom content"],
-            "file_path": addon_stem
+            "file_path": addon_name
         }
 
 
 def main():
-    # initial_setup()
+    initial_setup()
     folder_setup.cleanup_temp_folders()
     folder_setup.create_required_folders()
     prepare_working_copy()

@@ -1,5 +1,4 @@
 import shutil
-import zipfile
 from pathlib import Path
 from typing import List
 from PyQt6.QtCore import QObject, pyqtSignal
@@ -38,12 +37,15 @@ class Interface(QObject):
             folder_setup.initialize_pcf()
 
             for addon_path in selected_addons:
-                addon_zip = folder_setup.addons_dir / f"{addon_path}.zip"
-                if addon_zip.exists():
-                    with zipfile.ZipFile(addon_zip, 'r') as zip_ref:
-                        for file in zip_ref.namelist():
-                            if Path(file).name != 'mod.json':
-                                zip_ref.extract(file, folder_setup.temp_mods_dir)
+                addon_dir = folder_setup.addons_dir / addon_path
+                if addon_dir.exists() and addon_dir.is_dir():
+                    for src_path in addon_dir.glob('**/*'):
+                        if src_path.is_file() and src_path.name != 'mod.json':
+                            # relative path from addon directory
+                            rel_path = src_path.relative_to(addon_dir)
+                            dest_path = folder_setup.temp_mods_dir / rel_path
+                            dest_path.parent.mkdir(parents=True, exist_ok=True)
+                            shutil.copy2(src_path, dest_path)
 
             if mod_drop_zone:
                 mod_drop_zone.apply_particle_selections()
@@ -220,6 +222,6 @@ class Interface(QObject):
         except Exception as e:
             self.error_signal.emit(f"An error occurred while restoring backup: {str(e)}")
         finally:
-            folder_setup.cleanup_temp_folders()
+            # folder_setup.cleanup_temp_folders()
             prepare_working_copy()
             self.operation_finished.emit()
