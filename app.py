@@ -56,7 +56,6 @@ class ParticleManagerGUI(QMainWindow):
         self.addons_file_paths = {}
         self.addon_description = None
         self.mod_drop_zone = None
-        self.prop_filter_checkbox = QCheckBox
 
         self.setWindowTitle("cukei's casual pre-loader :)")
         self.setMinimumSize(800, 400)
@@ -80,10 +79,6 @@ class ParticleManagerGUI(QMainWindow):
         self.operations.success_signal.connect(self.show_success)
         self.operations.operation_finished.connect(lambda: self.set_processing_state(False))
 
-        self.prop_filter_checkbox.setChecked(self.settings_manager.get_prop_filter_state())
-        self.prop_filter_checkbox.stateChanged.connect(
-            lambda state: self.settings_manager.set_prop_filter_state(bool(state))
-        )
         self.rescan_addon_contents()
 
     def setup_ui(self):
@@ -181,13 +176,6 @@ class ParticleManagerGUI(QMainWindow):
         right_layout = QVBoxLayout(right_widget)
         install_controls = QGroupBox("Installation")
         controls_layout = QVBoxLayout()
-
-        # add prop filter checkbox
-        self.prop_filter_checkbox = QCheckBox(
-            "Fast load, just precache everything please! (Experimental, may cause 'black cosmetic' bugs and other errors)")
-        self.prop_filter_checkbox.setToolTip(
-            "When unchecked (default), the game will load into itemtest (this might prevent some models from loading)")
-        controls_layout.addWidget(self.prop_filter_checkbox)
 
         button_layout = QHBoxLayout()
         self.install_button = QPushButton("Install")
@@ -517,12 +505,11 @@ class ParticleManagerGUI(QMainWindow):
             return
 
         selected_addons = self.get_selected_addons()
-        prop_filter_state = not self.prop_filter_checkbox.isChecked()
 
         self.set_processing_state(True)
         thread = threading.Thread(
             target=self.operations.install,
-            args=(self.tf_path, selected_addons, prop_filter_state, self.mod_drop_zone)
+            args=(self.tf_path, selected_addons, self.mod_drop_zone)
         )
         thread.daemon = True
         thread.start()
@@ -605,7 +592,7 @@ class ParticleManagerGUI(QMainWindow):
 
 
 def main():
-    initial_setup()
+    # initial_setup()
     folder_setup.cleanup_temp_folders()
     folder_setup.create_required_folders()
     prepare_working_copy()

@@ -4,7 +4,7 @@ from core.constants import QUICKPRECACHE_FILE_SUFFIXES
 from core.parsers.vpk_file import VPKFile
 
 
-def make_precache_list(game_path: str, prop_filter: bool = False) -> Set[str]:
+def make_precache_list(game_path: str) -> Set[str]:
     # get list of files to precache from custom
     model_list = set()
     custom_folder = Path(game_path) / "tf" / "custom"
@@ -12,23 +12,20 @@ def make_precache_list(game_path: str, prop_filter: bool = False) -> Set[str]:
     if custom_folder.is_dir():
         for file in custom_folder.iterdir():
             if file.is_dir() and "disabled" not in file.name:
-                model_list.update(manage_folder(file, prop_filter))
+                model_list.update(manage_folder(file))
             elif file.is_file() and file.name.endswith(".vpk"):
-                model_list.update(manage_vpk(file, prop_filter))
+                model_list.update(manage_vpk(file))
 
     # filter for "decompiled " and "competitive_badge"
     return {model for model in model_list if "decompiled " not in model and "competitive_badge" not in model}
 
 
-def manage_folder(folder_path: Path, prop_filter: bool = False) -> List[str]:
+def manage_folder(folder_path: Path) -> List[str]:
     model_list = []
 
     for file_path in folder_path.glob("**/*"):
         # apply prop filter if enabled
-        if prop_filter and not ("prop" in str(file_path).lower()
-                                or "flag" in str(file_path).lower()
-                                or "workshop" in str(file_path).lower()
-                                or "models/items/" in str(file_path).lower().replace('\\', '/')):
+        if not ("prop" in str(file_path).lower() or "flag" in str(file_path).lower()):
             continue
 
         if file_path.is_file():
@@ -44,7 +41,7 @@ def manage_folder(folder_path: Path, prop_filter: bool = False) -> List[str]:
     return model_list
 
 
-def manage_vpk(vpk_path: Path, prop_filter: bool = False) -> List[str]:
+def manage_vpk(vpk_path: Path) -> List[str]:
     # extract model paths from a VPK file (using my vpk handler)
     model_list = []
     failed_vpks = []
@@ -57,11 +54,7 @@ def manage_vpk(vpk_path: Path, prop_filter: bool = False) -> List[str]:
         model_files = vpk_file.find_files("models/")
 
         for file_path in model_files:
-            # apply prop filter if enabled
-            if prop_filter and not ("prop" in str(file_path).lower()
-                                    or "flag" in str(file_path).lower()
-                                    or "workshop" in str(file_path).lower()
-                                    or "models/items/" in str(file_path).lower().replace('\\', '/')):
+            if not ("prop" in str(file_path).lower() or "flag" in str(file_path).lower()):
                 continue
 
             for suffix in QUICKPRECACHE_FILE_SUFFIXES:

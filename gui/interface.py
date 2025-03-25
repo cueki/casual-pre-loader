@@ -28,7 +28,7 @@ class Interface(QObject):
     def update_progress(self, progress: int, message: str):
         self.progress_signal.emit(progress, message)
 
-    def install(self, tf_path: str, selected_addons: List[str], prop_filter: bool=False, mod_drop_zone=None):
+    def install(self, tf_path: str, selected_addons: List[str], mod_drop_zone=None):
         try:
             backup_manager = BackupManager(tf_path)
             working_vpk_path = get_working_vpk_path()
@@ -121,7 +121,7 @@ class Interface(QObject):
 
             # create new VPK for custom content & config
             custom_content_dir = folder_setup.temp_mods_dir
-            copy_config_files(custom_content_dir, prop_filter)
+            copy_config_files(custom_content_dir)
 
             for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
                 split_file.unlink()
@@ -145,7 +145,7 @@ class Interface(QObject):
                 return
 
             # flush quick precache every install
-            QuickPrecache(str(Path(tf_path).parents[0]), debug=False, prop_filter=prop_filter).run(flush=True)
+            QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
             quick_precache_path = custom_dir / "_QuickPrecache.vpk"
             if quick_precache_path.exists():
                 quick_precache_path.unlink()
@@ -156,9 +156,9 @@ class Interface(QObject):
                 old_quick_precache_path.unlink()
 
             # run quick precache if needed (either by having props or by using the fast load)
-            precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]), prop_filter)
+            precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]))
             if precache_prop_set:
-                precache = QuickPrecache(str(Path(tf_path).parents[0]), debug=False, prop_filter=prop_filter)
+                precache = QuickPrecache(str(Path(tf_path).parents[0]), debug=False)
                 precache.run(auto=True)
                 shutil.copy2("quickprecache/_QuickPrecache.vpk", custom_dir)
 
@@ -187,7 +187,7 @@ class Interface(QObject):
             custom_dir.mkdir(exist_ok=True)
 
             # flush quick precache
-            QuickPrecache(str(Path(tf_path).parents[0]), debug=False, prop_filter=False).run(flush=True)
+            QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
             quick_precache_path = custom_dir / "_QuickPrecache.vpk"
             if quick_precache_path.exists():
                 quick_precache_path.unlink()
