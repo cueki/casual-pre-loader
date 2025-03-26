@@ -103,5 +103,5 @@ class AdvancedParticleMerger:
             actual_particles.parent.mkdir(parents=True, exist_ok=True)
             result.encode(actual_particles)
 
-        for file in folder_setup.output_dir.iterdir():
+        for file in folder_setup.temp_output_dir.iterdir():
             file.unlink()
