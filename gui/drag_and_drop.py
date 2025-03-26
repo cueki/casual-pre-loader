@@ -321,11 +321,18 @@ class ModDropZone(QFrame):
                         with open(mod_json_path, 'w') as f:
                             json.dump(default_mod_info, f, indent=2)
 
-                # hacky refresh
                 main_window = self.window()
+                saved_selections = main_window.settings_manager.get_addon_selections()
+
+                # refresh the addon list
                 main_window.load_addons()
 
+                # re-apply the saved selections
+                main_window.settings_manager.set_addon_selections(saved_selections)
+                main_window.apply_saved_addon_selections()
+
                 successful_files.append(vpk_name)
+
 
             except Exception as e:
                 self.worker.error.emit(f"Error processing {file_name}: {str(e)}")

@@ -1,6 +1,6 @@
 Hi.
 Thank you for installing my preloader. (Ver 1.3.0)
-Simply double click either RUNME or RUNME_NO_CLI (if you don't want the cli window)
+Simply double click RUNME
 I recommend checking this file every update as there might be some extra info regarding upgrading from version to version.
 
 NON-VPK MODS:

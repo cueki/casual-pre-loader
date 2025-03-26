@@ -384,7 +384,7 @@ class ParticleManagerGUI(QMainWindow):
         # sort the addon groups alphabetically
         addon_groups = {group: addon_groups[group] for group in sorted(addon_groups)}
 
-        # go through the addon groups and sort addons. Add splitters for each group. Unknown remains at the bottom.
+        # go through the addon groups and sort addons, add splitters for each group, unknown remains at the bottom
         for addon_type in addon_groups:
             if addon_type != "unknown":
                 splitter = QListWidgetItem("──── " + str.title(addon_type) + " ────")
