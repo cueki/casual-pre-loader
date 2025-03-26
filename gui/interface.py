@@ -201,6 +201,8 @@ class Interface(QObject):
 
             self.update_progress(100, "Installation complete")
             self.success_signal.emit("Mods installed successfully!")
+            # reset progress bar
+            self.update_progress(0, "Installation complete")
 
         except Exception as e:
             self.error_signal.emit(f"An error occurred: {str(e)}")

@@ -2,11 +2,11 @@ import json
 import threading
 import zipfile
 from pathlib import Path
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLineEdit, QLabel, QProgressBar,
                              QListWidget, QFileDialog, QMessageBox,
-                             QGroupBox, QApplication, QSplitter, QListWidgetItem, QTabWidget)
+                             QGroupBox, QApplication, QSplitter, QListWidgetItem, QTabWidget, QSplashScreen)
 from PyQt6.QtCore import pyqtSignal, Qt
 from core.folder_setup import folder_setup
 from gui.drag_and_drop import ModDropZone
@@ -525,6 +525,13 @@ class ParticleManagerGUI(QMainWindow):
                         f"Failed to delete {addon_name}: {str(e)}"
                     )
 
+        addon_metadata = self.settings_manager.get_addon_metadata()
+        for addon_name in selected_addon_names:
+            if addon_name in addon_metadata:
+                del addon_metadata[addon_name]
+
+        self.settings_manager.set_addon_metadata(addon_metadata)
+
         # refresh addon list
         self.load_addons()
         QMessageBox.information(self, "Success", "Selected addons have been deleted.")
@@ -634,14 +641,32 @@ class ParticleManagerGUI(QMainWindow):
 
 
 def main():
-    # initial_setup()
-    folder_setup.cleanup_temp_folders()
-    folder_setup.create_required_folders()
-    prepare_working_copy()
+    # app startup
     app = QApplication([])
     font = app.font()
     font.setPointSize(10)
     app.setFont(font)
+
+    splash_pixmap = QPixmap('gui/cueki_icon.png')
+    splash = QSplashScreen(splash_pixmap)
+    splash.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint |
+                         Qt.WindowType.FramelessWindowHint)
+    splash.show()
+
+    # init temp
+    splash.showMessage("Initial setup...",
+                       Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
+                       Qt.GlobalColor.white)
+    initial_setup()
+
+    folder_setup.cleanup_temp_folders()
+    folder_setup.create_required_folders()
+    splash.showMessage("Preparing working copy...",
+                       Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
+                       Qt.GlobalColor.white)
+    prepare_working_copy()
+
+    # draw window
     window = ParticleManagerGUI()
     import platform
     if platform.system() == 'Windows':
@@ -649,7 +674,10 @@ def main():
         my_app_id = 'cool.app.id.yes' # arbitrary string
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(my_app_id) # silly ctypes let me pick my icon !!
     window.setWindowIcon(QIcon('gui/cueki_icon.ico'))
+
+    splash.finish(window)
     window.show()
+
     app.exec()
     folder_setup.cleanup_temp_folders()
 

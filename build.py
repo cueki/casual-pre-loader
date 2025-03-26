@@ -34,7 +34,7 @@ def copy_project_files(source_dir, target_dir):
         'particle_system_map.json',
         'mod_urls.json',
         'LICENSE',
-        'README.md'
+        'README.md',
     ]
 
     # copy directories
@@ -89,7 +89,7 @@ def main():
     target_dir.mkdir(exist_ok=True, parents=True)
     copy_project_files(source_dir, target_dir)
     zip_mods_directory(source_dir, target_dir)
-
+    shutil.copy2("READ_THIS.txt", target_dir.parent)
     print(f"Build completed successfully to {target_dir}")
     print('feathers wuz here')
 
