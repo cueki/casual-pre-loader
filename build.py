@@ -8,7 +8,7 @@ from pathlib import Path
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Build script')
     parser.add_argument('--target_dir', help='Target directory to deploy the application')
-    parser.add_argument('--user-mods-zip', help='Path to user_mods.zip file', default='user_mods.zip')
+    parser.add_argument('--user-mods-zip', help='Path to user_mods.zip file', default='mods.zip')
     return parser.parse_args()
 
 
@@ -22,7 +22,6 @@ def copy_project_files(source_dir, target_dir):
         'core/parsers',
         'gui',
         'operations',
-        'addons',
         'backup',
         'backup/cfg',
         'backup/cfg/w',
@@ -35,7 +34,7 @@ def copy_project_files(source_dir, target_dir):
         'particle_system_map.json',
         'mod_urls.json',
         'LICENSE',
-        'README.md'
+        'README.md',
     ]
 
     # copy directories
@@ -61,22 +60,23 @@ def copy_project_files(source_dir, target_dir):
             print(f"Warning: Missing {file_name}")
 
 
-def extract_user_mods(zip_path, target_dir):
-    zip_file = Path(zip_path)
-    if not zip_file.exists():
-        print(f"Warning: {zip_file} not found")
-        return False
+def zip_mods_directory(source_dir, target_dir):
+    mods_dir = Path(source_dir) / "mods"
+    zip_path = Path(target_dir) / "mods.zip"
 
-    target_user_mods = Path(target_dir)
+    if not mods_dir.exists():
+        print(f"Warning: Mods directory {mods_dir} not found")
+        return
 
-    print(f"Extracting {zip_file}...")
-    try:
-        with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-            zip_ref.extractall(target_user_mods)
-        return True
-    except Exception as e:
-        print(f"Error extracting user_mods.zip: {e}")
-        return False
+    print(f"Creating {zip_path} from {mods_dir}...")
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, _, files in os.walk(mods_dir):
+            for file in files:
+                file_path = os.path.join(root, file)
+                archive_name = os.path.relpath(file_path, mods_dir)
+                zipf.write(file_path, archive_name)
+
+    print(f"Successfully created {zip_path}")
 
 
 def main():
@@ -84,16 +84,12 @@ def main():
 
     source_dir = os.path.dirname(os.path.abspath(__file__))
     target_dir = Path(args.target_dir)
-    user_mods_zip = Path(args.user_mods_zip)
 
     # copy project files
     target_dir.mkdir(exist_ok=True, parents=True)
     copy_project_files(source_dir, target_dir)
-
-    # extract user_mods.zip
-    if Path(user_mods_zip).exists():
-        extract_user_mods(user_mods_zip, target_dir)
-
+    zip_mods_directory(source_dir, target_dir)
+    shutil.copy2("READ_THIS.txt", target_dir.parent)
     print(f"Build completed successfully to {target_dir}")
     print('feathers wuz here')
 

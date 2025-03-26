@@ -1,6 +1,5 @@
-import os
+import json
 import threading
-import zipfile
 import shutil
 from pathlib import Path
 from PyQt6.QtCore import Qt, pyqtSignal, QObject
@@ -98,7 +97,7 @@ def get_mod_particle_files():
     all_particles = set()
 
     # scan directories
-    for vpk_dir in folder_setup.user_mods_dir.iterdir():
+    for vpk_dir in folder_setup.particles_dir.iterdir():
         if vpk_dir.is_dir():
             particle_dir = vpk_dir / "actual_particles"
             if particle_dir.exists():
@@ -167,7 +166,7 @@ class ModDropZone(QFrame):
         # process each mod that has selected particles
         used_mods = set(selections.values())
         for mod_name in used_mods:
-            mod_dir = folder_setup.user_mods_dir / mod_name
+            mod_dir = folder_setup.particles_dir / mod_name
 
             # copy selected particles
             source_particles_dir = mod_dir / "actual_particles"
@@ -177,7 +176,7 @@ class ModDropZone(QFrame):
                         source_file = source_particles_dir / (particle_file + ".pcf")
                         if source_file.exists():
                             # copy particle file
-                            shutil.copy2(source_file, folder_setup.mods_particle_dir / (particle_file + ".pcf"))
+                            shutil.copy2(source_file, folder_setup.temp_mods_dir / (particle_file + ".pcf"))
                             # get particle file mats from attrib
                             pcf = PCFFile(source_file).decode()
                             for element in pcf.elements:
@@ -196,12 +195,12 @@ class ModDropZone(QFrame):
                                                 required_materials.add(material_path + ".vmt")
 
         for mod_name in used_mods:
-            mod_dir = folder_setup.user_mods_dir / mod_name
+            mod_dir = folder_setup.particles_dir / mod_name
             # process each required material
             for material_path in required_materials:
                 full_material_path = mod_dir / 'materials' / material_path.replace('\\', '/')
                 if full_material_path.exists():
-                    material_destination = folder_setup.mods_everything_else_dir / Path(full_material_path).relative_to(mod_dir)
+                    material_destination = folder_setup.temp_mods_dir / Path(full_material_path).relative_to(mod_dir)
                     material_destination.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(Path(full_material_path), material_destination)
                     texture_paths = parse_vmt_texture(full_material_path)
@@ -209,7 +208,8 @@ class ModDropZone(QFrame):
                         for texture_path in texture_paths:
                             full_texture_path = mod_dir / 'materials' / str(texture_path).replace('\\', '/')
                             if full_texture_path.exists():
-                                texture_destination = folder_setup.mods_everything_else_dir / Path(full_texture_path).relative_to(mod_dir)
+                                texture_destination = folder_setup.temp_mods_dir / Path(full_texture_path).relative_to(
+                                    mod_dir)
                                 texture_destination.parent.mkdir(parents=True, exist_ok=True)
                                 shutil.copy2(Path(full_texture_path), texture_destination)
 
@@ -268,9 +268,9 @@ class ModDropZone(QFrame):
                 if vpk_name[-3:].isdigit() and vpk_name[-4] == '_' or vpk_name[-4:] == '_dir':
                     vpk_name = vpk_name[:-4]
 
-                extracted_user_mods_dir = folder_setup.user_mods_dir / vpk_name
+                extracted_particles_dir = folder_setup.particles_dir / vpk_name
                 extracted_addons_dir = folder_setup.addons_dir / vpk_name
-                extracted_user_mods_dir.mkdir(parents=True, exist_ok=True)
+                extracted_particles_dir.mkdir(parents=True, exist_ok=True)
 
                 self.worker.progress.emit(10, f"Analyzing VPK: {vpk_name}")
                 vpk_handler = VPKFile(str(file_path))
@@ -287,7 +287,7 @@ class ModDropZone(QFrame):
                     self.worker.progress.emit(progress, f"Extracting file {i + 1}/{total_files_in_vpk}")
 
                     relative_path = Path(file_path_in_vpk)
-                    output_path = extracted_user_mods_dir / relative_path
+                    output_path = extracted_particles_dir / relative_path
                     output_path.parent.mkdir(parents=True, exist_ok=True)
                     vpk_handler.extract_file(file_path_in_vpk, str(output_path))
 
@@ -297,29 +297,29 @@ class ModDropZone(QFrame):
                     particle_merger = AdvancedParticleMerger(
                         progress_callback=lambda p, m: self.worker.progress.emit(50 + int(p / 2), m)
                     )
-                    particle_merger.preprocess_vpk(extracted_user_mods_dir)
+                    particle_merger.preprocess_vpk(extracted_particles_dir)
                 else:
-                    # for non-particle mods, zip and move to addons
-                    self.worker.progress.emit(60, f"Creating addon for {vpk_name}")
-                    zip_path = extracted_addons_dir.with_suffix('.zip')
+                    # for non-particle mods, create addon folder
+                    self.worker.progress.emit(60, f"Creating addon folder for {vpk_name}")
 
-                    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED, compresslevel=1) as zip_f:
-                        # walk through all files in the extracted directory
-                        all_files = []
-                        for root, _, files in os.walk(extracted_user_mods_dir):
-                            for file in files:
-                                file_path_in_dir = Path(root) / file
-                                # make sure the file has an extension (for vpk module)
-                                if file_path_in_dir.suffix:
-                                    all_files.append(
-                                        (file_path_in_dir, file_path_in_dir.relative_to(extracted_user_mods_dir)))
+                    # if extracted_addons_dir already exists, remove it first
+                    if extracted_addons_dir.exists():
+                        shutil.rmtree(extracted_addons_dir)
 
-                        for i, (file_path_entry, arc_path) in enumerate(all_files):
-                            progress = 60 + int((i / len(all_files)) * 40)
-                            self.worker.progress.emit(progress, f"Adding to zip: {arc_path}")
-                            zip_f.write(file_path_entry, arc_path)
+                    # move the extracted files to the addons directory
+                    shutil.move(extracted_particles_dir, extracted_addons_dir)
 
-                    shutil.rmtree(extracted_user_mods_dir)
+                    # create mod.json if it doesn't exist
+                    mod_json_path = extracted_addons_dir / "mod.json"
+                    if not mod_json_path.exists():
+                        default_mod_info = {
+                            "addon_name": vpk_name,
+                            "type": "Unknown",
+                            "description": f"Content extracted from {file_name}",
+                            "contents": ["Custom content"]
+                        }
+                        with open(mod_json_path, 'w') as f:
+                            json.dump(default_mod_info, f, indent=2)
 
                 # hacky refresh
                 main_window = self.window()

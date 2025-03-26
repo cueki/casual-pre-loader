@@ -19,7 +19,7 @@ def prepare_working_copy() -> bool:
         # copy VPK files from backup to working directory
         for vpk_name in required_vpks:
             backup_file = folder_setup.get_backup_path(vpk_name)
-            shutil.copy2(backup_file, folder_setup.working_dir / vpk_name)
+            shutil.copy2(backup_file, folder_setup.temp_working_dir / vpk_name)
 
         # setup VPK handler for file extraction
         working_vpk_path = folder_setup.get_working_path("tf2_misc_dir.vpk")
@@ -34,7 +34,7 @@ def prepare_working_copy() -> bool:
 
         for file in pcf_files:
             base_name = Path(file).name
-            output_path = folder_setup.game_files_dir / base_name
+            output_path = folder_setup.temp_game_files_dir / base_name
             vpk_file.extract_file(file, str(output_path))
 
         return True

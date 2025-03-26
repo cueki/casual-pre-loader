@@ -8,21 +8,21 @@ from core.parsers.vpk_file import VPKFile
 from core.folder_setup import folder_setup
 
 
-def copy_config_files(custom_content_dir, prop_filter=True):
+def copy_config_files(custom_content_dir):
     # create destination directory if it doesn't exist
     config_dest_dir = custom_content_dir / "cfg" / "w"
     config_dest_dir.mkdir(parents=True, exist_ok=True)
 
-    # choose source config based on prop_filter
-    source_config = "slow.cfg" if prop_filter else "fast.cfg"
+    # config copy
+    source_config = "config.cfg"
     source_path = Path("backup/cfg/w") / source_config
     dest_path = config_dest_dir / "config.cfg"
     shutil.copy2(source_path, dest_path)
 
-    if prop_filter:
-        vscript_dest_dir = custom_content_dir / "scripts" / "vscripts"
-        vscript_dest_dir.mkdir(parents=True, exist_ok=True)
-        shutil.copy2('backup/scripts/vscripts/randommenumusic.nut', vscript_dest_dir)
+    # vscript copy
+    vscript_dest_dir = custom_content_dir / "scripts" / "vscripts"
+    vscript_dest_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2('backup/scripts/vscripts/randommenumusic.nut', vscript_dest_dir)
 
     # copy any other files from backup/cfg that aren't in the w directory
     for file_path in Path("backup/cfg").glob("*"):

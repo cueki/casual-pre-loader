@@ -14,8 +14,7 @@ class SettingsManager:
         default_settings = {
             "last_directory": "",
             "addon_selections": [],
-            "matrix_selections": {},
-            "prop_filter_checkbox": False
+            "matrix_selections": {}
         }
 
         if self.settings_file.exists():
@@ -75,13 +74,6 @@ class SettingsManager:
 
     def set_matrix_selections(self, selections):
         self.settings["matrix_selections"] = selections
-        self.save_settings()
-
-    def get_prop_filter_state(self):
-        return self.settings.get("prop_filter_checkbox", False)
-
-    def set_prop_filter_state(self, enabled):
-        self.settings["prop_filter_checkbox"] = enabled
         self.save_settings()
 
     def get_addon_metadata(self):

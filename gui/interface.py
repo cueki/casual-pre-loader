@@ -1,5 +1,4 @@
 import shutil
-import zipfile
 from pathlib import Path
 from typing import List
 from PyQt6.QtCore import QObject, pyqtSignal
@@ -28,7 +27,7 @@ class Interface(QObject):
     def update_progress(self, progress: int, message: str):
         self.progress_signal.emit(progress, message)
 
-    def install(self, tf_path: str, selected_addons: List[str], prop_filter: bool=False, mod_drop_zone=None):
+    def install(self, tf_path: str, selected_addons: List[str], mod_drop_zone=None):
         try:
             backup_manager = BackupManager(tf_path)
             working_vpk_path = get_working_vpk_path()
@@ -36,14 +35,35 @@ class Interface(QObject):
             vpk_file.parse_directory()
             file_handler = FileHandler(str(working_vpk_path))
             folder_setup.initialize_pcf()
+            self.update_progress(0, "Installing addons...")
+
+            total_files = 0
+            files_to_copy = []
 
             for addon_path in selected_addons:
-                addon_zip = Path("addons") / f"{addon_path}.zip"
-                if addon_zip.exists():
-                    with zipfile.ZipFile(addon_zip, 'r') as zip_ref:
-                        for file in zip_ref.namelist():
-                            if Path(file).name != 'mod.json':
-                                zip_ref.extract(file, folder_setup.mods_everything_else_dir)
+                addon_dir = folder_setup.addons_dir / addon_path
+                if addon_dir.exists() and addon_dir.is_dir():
+                    for src_path in addon_dir.glob('**/*'):
+                        if src_path.is_file() and src_path.name != 'mod.json':
+                            total_files += 1
+                            files_to_copy.append((src_path, addon_dir))
+
+            # progress bar
+            progress_range = 40
+            completed_files = 0
+            self.update_progress(10, f"Installing addons... (0/{total_files} files)")
+
+            for src_path, addon_dir in files_to_copy:
+                # relative path from addon directory
+                rel_path = src_path.relative_to(addon_dir)
+                dest_path = folder_setup.temp_mods_dir / rel_path
+                dest_path.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(src_path, dest_path)
+
+                # progress bar update
+                completed_files += 1
+                current_progress = 10 + int((completed_files / total_files) * progress_range)
+                self.update_progress(current_progress, f"Installing addons... ({completed_files}/{total_files} files)")
 
             if mod_drop_zone:
                 mod_drop_zone.apply_particle_selections()
@@ -59,23 +79,31 @@ class Interface(QObject):
                 "bigboom.pcf",
                 "item_fx.pcf"
             ]
-
             for duplicate_effect in duplicate_effects:
-                target_path = folder_setup.mods_particle_dir / duplicate_effect
+                target_path = folder_setup.temp_mods_dir / duplicate_effect
                 if not target_path.exists():
                     # copy from game_files if not in
-                    source_path = folder_setup.game_files_dir / duplicate_effect
+                    source_path = folder_setup.temp_game_files_dir / duplicate_effect
                     if source_path.exists():
                         extract_elements(PCFFile(source_path).decode(),
                                          load_particle_system_map('particle_system_map.json')
                                          [f'particles/{target_path.name}']).encode(target_path)
 
-            if (folder_setup.mods_particle_dir / "blood_trail.pcf").exists():
+            if (folder_setup.temp_mods_dir / "blood_trail.pcf").exists():
                 # hacky fix for blood_trail being so small
-                shutil.move((folder_setup.mods_particle_dir / "blood_trail.pcf"), (folder_setup.mods_particle_dir / "npc_fx.pcf"))
+                shutil.move((folder_setup.temp_mods_dir / "blood_trail.pcf"),
+                            (folder_setup.temp_mods_dir / "npc_fx.pcf"))
 
-            self.update_progress(25, "Patching in...")
-            particle_files = folder_setup.mods_particle_dir.iterdir()
+            # more progress bar math yippee
+            particle_files = list(folder_setup.temp_mods_dir.glob("*.pcf"))
+            dx8_files = sum(1 for pcf_file in particle_files if pcf_file.stem in DX8_LIST)
+            total_files = len(particle_files) + dx8_files
+            start_progress = 50
+            progress_range = 30
+            completed_files = 0
+            self.update_progress(start_progress, f"Processing particle files... (0/{total_files})")
+
+            particle_files = folder_setup.temp_mods_dir.glob("*.pcf")
             for pcf_file in particle_files:
                 base_name = pcf_file.name
                 if (base_name != folder_setup.base_default_pcf.input_file.name and
@@ -86,21 +114,33 @@ class Interface(QObject):
                 if pcf_file.stem in DX8_LIST:
                     # dx80 first
                     dx_80_ver = Path(pcf_file.stem + "_dx80.pcf")
-                    shutil.copy2(pcf_file, folder_setup.mods_particle_dir / dx_80_ver)
+                    shutil.copy2(pcf_file, folder_setup.temp_mods_dir / dx_80_ver)
                     file_handler.process_file(
                         dx_80_ver.name,
-                        pcf_mod_processor(str(folder_setup.mods_particle_dir / dx_80_ver)),
+                        pcf_mod_processor(str(folder_setup.temp_mods_dir / dx_80_ver)),
                         create_backup=False
                     )
+                    # get them out of temp mods/ since they are patched directly into game vpk
+                    (folder_setup.temp_mods_dir / dx_80_ver).unlink()
+                    # update progress bar
+                    completed_files += 1
+                    current_progress = start_progress + int((completed_files / total_files) * progress_range)
+                    self.update_progress(current_progress, f"Processing particle files... ({completed_files}/{total_files})")
                 # now the rest
                 file_handler.process_file(
                     base_name,
                     pcf_mod_processor(str(pcf_file)),
                     create_backup=False
                 )
+                # get them out of temp mods/ since they are patched directly into game vpk
+                pcf_file.unlink()
+                # update progress bar
+                completed_files += 1
+                current_progress = start_progress + int((completed_files / total_files) * progress_range)
+                self.update_progress(current_progress,f"Processing particle files... ({completed_files}/{total_files})")
 
             # handle custom folder
-            self.update_progress(75, "Deploying mods...")
+            self.update_progress(80, "Making custom VPK")
             custom_dir = Path(tf_path) / 'custom'
             custom_dir.mkdir(exist_ok=True)
             game_type(Path(tf_path) / 'gameinfo.txt', uninstall=False)
@@ -114,12 +154,12 @@ class Interface(QObject):
                     cache_path.unlink()
 
             # create new VPK for custom content & config
-            custom_content_dir = folder_setup.mods_everything_else_dir
-            copy_config_files(custom_content_dir, prop_filter)
+            custom_content_dir = folder_setup.temp_mods_dir
+            copy_config_files(custom_content_dir)
 
             for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
                 split_file.unlink()
-                # Also remove any cache files
+                # also remove any cache files
                 cache_file = custom_dir / (split_file.name + ".sound.cache")
                 if cache_file.exists():
                     cache_file.unlink()
@@ -139,7 +179,7 @@ class Interface(QObject):
                 return
 
             # flush quick precache every install
-            QuickPrecache(str(Path(tf_path).parents[0]), debug=False, prop_filter=prop_filter).run(flush=True)
+            QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
             quick_precache_path = custom_dir / "_QuickPrecache.vpk"
             if quick_precache_path.exists():
                 quick_precache_path.unlink()
@@ -149,17 +189,20 @@ class Interface(QObject):
             if old_quick_precache_path.exists():
                 old_quick_precache_path.unlink()
 
-            # run quick precache if needed (either by having props or by using the fast load)
-            precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]), prop_filter)
+            # run quick precache if needed (by having props)
+            precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]))
             if precache_prop_set:
-                precache = QuickPrecache(str(Path(tf_path).parents[0]), debug=False, prop_filter=prop_filter)
+                precache = QuickPrecache(str(Path(tf_path).parents[0]), debug=False)
                 precache.run(auto=True)
                 shutil.copy2("quickprecache/_QuickPrecache.vpk", custom_dir)
+                self.update_progress(90, f"QuickPrecaching some models...")
 
             get_from_custom_dir(custom_dir)
 
             self.update_progress(100, "Installation complete")
             self.success_signal.emit("Mods installed successfully!")
+            # reset progress bar
+            self.update_progress(0, "Installation complete")
 
         except Exception as e:
             self.error_signal.emit(f"An error occurred: {str(e)}")
@@ -181,7 +224,7 @@ class Interface(QObject):
             custom_dir.mkdir(exist_ok=True)
 
             # flush quick precache
-            QuickPrecache(str(Path(tf_path).parents[0]), debug=False, prop_filter=False).run(flush=True)
+            QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
             quick_precache_path = custom_dir / "_QuickPrecache.vpk"
             if quick_precache_path.exists():
                 quick_precache_path.unlink()
@@ -214,6 +257,6 @@ class Interface(QObject):
         except Exception as e:
             self.error_signal.emit(f"An error occurred while restoring backup: {str(e)}")
         finally:
-            folder_setup.cleanup_temp_folders()
+            # folder_setup.cleanup_temp_folders()
             prepare_working_copy()
             self.operation_finished.emit()
