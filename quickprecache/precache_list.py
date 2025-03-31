@@ -24,8 +24,11 @@ def manage_folder(folder_path: Path) -> List[str]:
     model_list = []
 
     for file_path in folder_path.glob("**/*"):
-        # apply prop filter if enabled
-        if not ("prop" in str(file_path).lower() or "flag" in str(file_path).lower()):
+        # we quickprecache these because they won't stay loaded between map changes
+        if (not ("prop" in str(file_path).lower()
+                or "flag" in str(file_path).lower())
+                or "ammo_box" in str(file_path).lower()
+                or "medkit" in str(file_path).lower()):
             continue
 
         if file_path.is_file():
@@ -50,11 +53,15 @@ def manage_vpk(vpk_path: Path) -> List[str]:
         vpk_file = VPKFile(str(vpk_path))
         vpk_file.parse_directory()
 
-        # find all files in the models directory
+        # find all files in the models directory in the vpk
         model_files = vpk_file.find_files("models/")
 
         for file_path in model_files:
-            if not ("prop" in str(file_path).lower() or "flag" in str(file_path).lower()):
+            # we quickprecache these because they won't stay loaded between map changes
+            if not ("prop" in str(file_path).lower()
+                    or "flag" in str(file_path).lower()
+                    or "ammo_box" in str(file_path).lower()
+                    or "medkit" in str(file_path).lower()):
                 continue
 
             for suffix in QUICKPRECACHE_FILE_SUFFIXES:

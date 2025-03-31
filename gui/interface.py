@@ -68,16 +68,15 @@ class Interface(QObject):
             if mod_drop_zone:
                 mod_drop_zone.apply_particle_selections()
 
-            # these 5 particle files contain duplicate elements that are found elsewhere, this is an oversight by valve.
+            # these 4 particle files contain duplicate elements that are found elsewhere, this is an oversight by valve.
             # what im doing is simply fixing this oversight using context from the elements themselves
             # they now should only appear once in the game, and in the correct file :)
             # previous code dictates that if any custom particle effect is chosen, it is already fixed, this is to fix if they are not chosen
             duplicate_effects = [
+                "item_fx.pcf",
                 "halloween.pcf",
-                "scary_ghost.pcf",
-                "dirty_explode.pcf",
                 "bigboom.pcf",
-                "item_fx.pcf"
+                "dirty_explode.pcf",
             ]
             for duplicate_effect in duplicate_effects:
                 target_path = folder_setup.temp_mods_dir / duplicate_effect

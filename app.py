@@ -654,10 +654,11 @@ def main():
     splash.show()
 
     # init temp
-    splash.showMessage("Initial setup...",
-                       Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
-                       Qt.GlobalColor.white)
-    initial_setup()
+    if not Path("mods/").exists():
+        splash.showMessage("Initial setup...",
+                           Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
+                           Qt.GlobalColor.white)
+        initial_setup()
 
     folder_setup.cleanup_temp_folders()
     folder_setup.create_required_folders()
