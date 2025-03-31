@@ -27,6 +27,7 @@ def manage_folder(folder_path: Path) -> List[str]:
         # we quickprecache these because they won't stay loaded between map changes
         if (not ("prop" in str(file_path).lower()
                 or "flag" in str(file_path).lower())
+                or "models/bots" in str(file_path).lower()
                 or "ammo_box" in str(file_path).lower()
                 or "medkit" in str(file_path).lower()):
             continue
@@ -60,6 +61,7 @@ def manage_vpk(vpk_path: Path) -> List[str]:
             # we quickprecache these because they won't stay loaded between map changes
             if not ("prop" in str(file_path).lower()
                     or "flag" in str(file_path).lower()
+                    or "models/bots" in str(file_path).lower()
                     or "ammo_box" in str(file_path).lower()
                     or "medkit" in str(file_path).lower()):
                 continue
