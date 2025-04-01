@@ -356,11 +356,15 @@ class ParticleManagerGUI(QMainWindow):
         self.addons_list.clearSelection()
 
         # apply saved selections
+        item_map = {}
         for i in range(self.addons_list.count()):
             item = self.addons_list.item(i)
             if item and item.flags() & Qt.ItemFlag.ItemIsSelectable:
-                if item.text() in saved_selections:
-                    item.setSelected(True)
+                item_map[item.text()] = item
+
+        for addon_name in saved_selections:
+            if addon_name in item_map:
+                item_map[addon_name].setSelected(True)
 
         # re-enable signals
         self.addons_list.blockSignals(False)
