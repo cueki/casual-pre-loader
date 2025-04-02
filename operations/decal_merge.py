@@ -96,6 +96,7 @@ def paste_with_full_transparency(base_img, overlay_img, position):
 
 def modify_blood_sprite_sheet(decal_vtfs, sprite_sheet_vtf, output_vtf):
     # this is the main logic loop
+    # TODO: switch to pathlib and use our file manager
     working_dir = "working_files"
     os.makedirs(working_dir, exist_ok=True)
     sprite_sheet_png = os.path.join(working_dir, "sprite_sheet.png")
@@ -109,6 +110,7 @@ def modify_blood_sprite_sheet(decal_vtfs, sprite_sheet_vtf, output_vtf):
         sprite_sheet = Image.open(sprite_sheet_png)
 
         # hardcoded coordinates for placing each splatter
+        # TODO: make this dynamic somehow?
         coordinates = [
             (384, 128),
             (512, 128),
@@ -146,6 +148,7 @@ def modify_blood_sprite_sheet(decal_vtfs, sprite_sheet_vtf, output_vtf):
 
 
 def main():
+    # TODO: get this shit outta here lol
     if len(sys.argv) < 8:
         print("Usage: python modify_blood_sprite.py <sprite_sheet.vtf> <output.vtf> <splatter1.vtf> <splatter2.vtf> <splatter3.vtf> <splatter4.vtf> <splatter5.vtf> <splatter6.vtf>")
         return
