@@ -26,11 +26,11 @@ def manage_folder(folder_path: Path) -> List[str]:
     for file_path in folder_path.glob("**/*"):
         # we quickprecache these because they won't stay loaded between map changes
         if (not ("prop" in str(file_path).lower()
-                or "flag" in str(file_path).lower())
-                or "models/bots" in str(file_path).lower()
+                or "flag" in str(file_path).lower()
+                or "bots" in str(file_path).lower()
                 or "ammo_box" in str(file_path).lower()
                 or "ammopack" in str(file_path).lower()
-                or "medkit" in str(file_path).lower()):
+                or "medkit" in str(file_path).lower())):
             continue
 
         if file_path.is_file():
@@ -60,12 +60,12 @@ def manage_vpk(vpk_path: Path) -> List[str]:
 
         for file_path in model_files:
             # we quickprecache these because they won't stay loaded between map changes
-            if not ("prop" in str(file_path).lower()
+            if (not ("prop" in str(file_path).lower()
                     or "flag" in str(file_path).lower()
-                    or "models/bots" in str(file_path).lower()
+                    or "bots" in str(file_path).lower()
                     or "ammo_box" in str(file_path).lower()
                     or "ammopack" in str(file_path).lower()
-                    or "medkit" in str(file_path).lower()):
+                    or "medkit" in str(file_path).lower())):
                 continue
 
             for suffix in QUICKPRECACHE_FILE_SUFFIXES:
