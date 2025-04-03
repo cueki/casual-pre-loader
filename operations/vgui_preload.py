@@ -10,17 +10,15 @@ def patch_mainmenuoverride(tf_path: str):
     for item in custom_dir.iterdir():
         if "_casual_preloader" in item.name.lower():
             continue
-        # VPK files will convert to folders first before we process folders
+
         if (item.is_file() and
               item.suffix.lower() == ".vpk" and
               "casual_preloader" not in item.name.lower()):
-            print(f"Patching VPK {item.name}")
             _process_vpk(item)
 
         elif item.is_dir():
             mainmenuoverride_file = item / "resource" / "ui" / "mainmenuoverride.res"
             if mainmenuoverride_file.exists():
-                print(f"Patching file {item.name}")
                 _add_vguipreload_string(mainmenuoverride_file)
 
 
@@ -49,7 +47,6 @@ def _process_vpk(vpk_path):
         vpk_name = vpk_path.stem
         extract_dir = custom_dir / vpk_name
         extract_dir.mkdir(parents=True, exist_ok=True)
-        print(f"Extracting {vpk_path} to {extract_dir}")
 
         file_list = vpk_file.list_files()
         for file_path in file_list:
@@ -57,11 +54,11 @@ def _process_vpk(vpk_path):
             out_path.parent.mkdir(parents=True, exist_ok=True)
             vpk_file.extract_file(file_path, str(out_path))
 
-        print(f"Successfully extracted {len(file_list)} files from {vpk_path}")
+        extracted_mainmenuoverride_file = extract_dir / "resource" / "ui" / "mainmenuoverride.res"
+        _add_vguipreload_string(extracted_mainmenuoverride_file)
 
         # delete the original VPK file
         vpk_path.unlink()
-        print(f"Deleted original VPK: {vpk_path}")
 
     except Exception as e:
         print(f"Error extracting VPK {vpk_path}: {e}")
