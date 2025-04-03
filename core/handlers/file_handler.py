@@ -22,7 +22,12 @@ def copy_config_files(custom_content_dir):
     # vscript copy
     vscript_dest_dir = custom_content_dir / "scripts" / "vscripts"
     vscript_dest_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2('backup/scripts/vscripts/randommenumusic.nut', vscript_dest_dir)
+    shutil.copy2("backup/scripts/vscripts/randommenumusic.nut", vscript_dest_dir)
+
+    # vgui copy
+    vgui_dest_dir = custom_content_dir / "resource" / "ui"
+    vgui_dest_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2("backup/resource/ui/vguipreload.res", vgui_dest_dir)
 
     # copy any other files from backup/cfg that aren't in the w directory
     for file_path in Path("backup/cfg").glob("*"):
