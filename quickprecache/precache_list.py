@@ -29,6 +29,7 @@ def manage_folder(folder_path: Path) -> List[str]:
                 or "flag" in str(file_path).lower())
                 or "models/bots" in str(file_path).lower()
                 or "ammo_box" in str(file_path).lower()
+                or "ammopack" in str(file_path).lower()
                 or "medkit" in str(file_path).lower()):
             continue
 
@@ -63,6 +64,7 @@ def manage_vpk(vpk_path: Path) -> List[str]:
                     or "flag" in str(file_path).lower()
                     or "models/bots" in str(file_path).lower()
                     or "ammo_box" in str(file_path).lower()
+                    or "ammopack" in str(file_path).lower()
                     or "medkit" in str(file_path).lower()):
                 continue
 
