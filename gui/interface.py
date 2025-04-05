@@ -258,6 +258,6 @@ class Interface(QObject):
         except Exception as e:
             self.error_signal.emit(f"An error occurred while restoring backup: {str(e)}")
         finally:
-            # folder_setup.cleanup_temp_folders()
+            folder_setup.cleanup_temp_folders()
             prepare_working_copy()
             self.operation_finished.emit()
