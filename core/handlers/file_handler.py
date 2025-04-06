@@ -37,6 +37,40 @@ def copy_config_files(custom_content_dir):
     return dest_path
 
 
+def scan_for_valve_rc_files(tf_path):
+    if not tf_path:
+        return
+
+    custom_dir = Path(tf_path) / 'custom'
+    if not custom_dir.exists():
+        return
+
+    found_files = []
+
+    for item in custom_dir.iterdir():
+        if "_casual_preloader" in item.name.lower():
+            continue
+
+        if item.is_dir():
+            valve_rc_file = item / "cfg" / "valve.rc"
+            if valve_rc_file.exists():
+                found_files.append(f"Folder: {item.name}/cfg/valve.rc")
+
+        elif (item.is_file() and
+              item.suffix.lower() == ".vpk" and
+              "_casual_preloader" not in item.name.lower()):
+            try:
+                vpk_file = VPKFile(str(item))
+                vpk_file.parse_directory()
+                valve_path = vpk_file.find_file_path("cfg/valve.rc")
+                if valve_path or vpk_file.find_file_path("valve.rc"):
+                    found_files.append(f"VPK: {item.name}")
+            except Exception as e:
+                print(f"Error checking VPK {item}: {e}")
+
+    return found_files
+
+
 class FileHandler:
     def __init__(self, vpk_file_path: str):
         self.vpk = VPKFile(str(vpk_file_path))

@@ -116,7 +116,6 @@ class ConflictMatrix(QTableWidget):
                 border-width: 2px;
                 border-color: gray;
                 color: black;
-                padding: 4px; /* Add some padding */
             }
             QHeaderView::section:hover {
                 color: blue;

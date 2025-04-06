@@ -3,6 +3,8 @@ from pathlib import Path
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit,
                              QLabel, QProgressBar, QFileDialog, QMessageBox, QGroupBox, QSplitter, QTabWidget)
 from PyQt6.QtCore import Qt
+
+from core.handlers.file_handler import scan_for_valve_rc_files
 from gui.settings_manager import SettingsManager
 from gui.drag_and_drop import ModDropZone
 from gui.addon_manager import AddonManager
@@ -172,6 +174,7 @@ class ParticleManagerGUI(QMainWindow):
             self.settings_manager.set_last_directory(directory)
             self.update_restore_button_state()
             self.scan_for_mcp_files()
+            self.scan_for_valve_rc(directory)
 
     def load_last_directory(self):
         last_dir = self.settings_manager.get_last_directory()
@@ -179,6 +182,7 @@ class ParticleManagerGUI(QMainWindow):
             self.install_manager.set_tf_path(last_dir)
             self.tf_path_edit.setText(last_dir)
             self.update_restore_button_state()
+            self.scan_for_valve_rc(last_dir)
 
     def load_addons(self):
         self.addon_manager.load_addons(self.addons_list)
@@ -331,6 +335,19 @@ class ParticleManagerGUI(QMainWindow):
                 self,
                 "Conflicting Files Detected",
                 f"The following items in your custom folder may conflict with this method:\n\n• {conflict_list}\n\nIt's recommended to remove these to avoid issues."
+            )
+
+    def scan_for_valve_rc(self, directory):
+        found_files = scan_for_valve_rc_files(directory)
+        if found_files:
+            conflict_list = "\n• ".join(found_files)
+            QMessageBox.warning(
+                self,
+                "valve.rc found (most likely in HUD)",
+                f"The following valve.rc files were found in your custom folder:\n• {conflict_list}\n\n"
+                "You have two options.\n"
+                "   1. Add +exec w/config.cfg to your launch options\n"
+                "   2. Remove the file from the HUD"
             )
 
     def rescan_addon_contents(self):
