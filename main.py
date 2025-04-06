@@ -20,13 +20,14 @@ def main():
                           Qt.WindowType.FramelessWindowHint)
     splash.show()
 
-    # Init temp
+    # initial setup
     if not Path("mods/").exists():
         splash.showMessage("Initial setup...",
                            Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
                            Qt.GlobalColor.white)
         initial_setup()
 
+    # temp
     folder_setup.cleanup_temp_folders()
     folder_setup.create_required_folders()
     splash.showMessage("Preparing working copy...",

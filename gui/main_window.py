@@ -118,7 +118,6 @@ class ParticleManagerGUI(QMainWindow):
         # install
         controls_widget = QWidget()
         controls_layout = QVBoxLayout(controls_widget)
-
         install_group = QGroupBox("Installation")
         install_controls_layout = QVBoxLayout()
 

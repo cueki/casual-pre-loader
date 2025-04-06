@@ -321,6 +321,7 @@ class ModDropZone(QFrame):
                         with open(mod_json_path, 'w') as f:
                             json.dump(default_mod_info, f, indent=2)
 
+                # this is kinda dumb but it works
                 main_window = self.window()
                 saved_selections = main_window.settings_manager.get_addon_selections()
 
@@ -369,7 +370,7 @@ class ModDropZone(QFrame):
         self.style().polish(self)
         folder_setup.create_required_folders()
 
-        # Use a dictionary to store normalized paths and their original files
+        # use a dictionary to store normalized paths and their original files
         normalized_files = {}
 
         for url in event.mimeData().urls():
