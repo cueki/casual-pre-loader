@@ -32,8 +32,7 @@ class ParticleManagerGUI(QMainWindow):
         # setup UI and connect signals
         self.setWindowTitle("cukei's casual pre-loader :)")
         self.setMinimumSize(800, 400)
-        self.resize(1200, 600)
-
+        self.resize(1200, 700)
         self.setup_ui()
         self.setup_signals()
 
@@ -77,7 +76,7 @@ class ParticleManagerGUI(QMainWindow):
         layout.addWidget(self.mod_drop_zone)
         self.mod_drop_zone.update_matrix()
 
-        # Navigation buttons
+        # nav buttons
         nav_container = QWidget()
         nav_layout = QHBoxLayout(nav_container)
         nav_layout.setContentsMargins(0, 0, 0, 0)
@@ -145,7 +144,7 @@ class ParticleManagerGUI(QMainWindow):
         controls_layout.addStretch()
 
         install_splitter.addWidget(controls_widget)
-        install_splitter.setSizes([600, 300])
+        install_splitter.setSizes([1000, 300]) # forces install widget to bottom on resize
 
         layout.addWidget(install_splitter)
         return tab

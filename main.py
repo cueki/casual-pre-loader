@@ -14,6 +14,7 @@ def main():
     font.setPointSize(10)
     app.setFont(font)
 
+    # splash screen
     splash_pixmap = QPixmap('gui/cueki_icon.png')
     splash = QSplashScreen(splash_pixmap)
     splash.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint |
