@@ -8,16 +8,17 @@ from core.parsers.vpk_file import VPKFile
 from core.folder_setup import folder_setup
 
 
-def copy_config_files(custom_content_dir):
-    # create destination directory if it doesn't exist
+def copy_config_files(custom_content_dir, skip_valve_rc=False):
+    # config copy
     config_dest_dir = custom_content_dir / "cfg" / "w"
     config_dest_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2("backup/cfg/w/config.cfg", config_dest_dir)
 
-    # config copy
-    source_config = "config.cfg"
-    source_path = Path("backup/cfg/w") / source_config
-    dest_path = config_dest_dir / "config.cfg"
-    shutil.copy2(source_path, dest_path)
+    # valve.rc copy
+    if not skip_valve_rc:
+        valverc_dest_dir = custom_content_dir / "cfg"
+        valverc_dest_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2("backup/cfg/valve.rc", valverc_dest_dir)
 
     # vscript copy
     vscript_dest_dir = custom_content_dir / "scripts" / "vscripts"
@@ -29,21 +30,14 @@ def copy_config_files(custom_content_dir):
     vgui_dest_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2("backup/resource/ui/vguipreload.res", vgui_dest_dir)
 
-    # copy any other files from backup/cfg that aren't in the w directory
-    for file_path in Path("backup/cfg").glob("*"):
-        if file_path.is_file() and file_path.name != "w":
-            shutil.copy2(file_path, custom_content_dir / "cfg" / file_path.name)
-
-    return dest_path
-
 
 def scan_for_valve_rc_files(tf_path):
     if not tf_path:
-        return
+        return [], False
 
     custom_dir = Path(tf_path) / 'custom'
     if not custom_dir.exists():
-        return
+        return [], False
 
     found_files = []
 
@@ -57,8 +51,7 @@ def scan_for_valve_rc_files(tf_path):
                 found_files.append(f"Folder: {item.name}/cfg/valve.rc")
 
         elif (item.is_file() and
-              item.suffix.lower() == ".vpk" and
-              "_casual_preloader" not in item.name.lower()):
+              item.suffix.lower() == ".vpk"):
             try:
                 vpk_file = VPKFile(str(item))
                 vpk_file.parse_directory()
@@ -68,7 +61,9 @@ def scan_for_valve_rc_files(tf_path):
             except Exception as e:
                 print(f"Error checking VPK {item}: {e}")
 
-    return found_files
+    valve_rc_found = len(found_files) > 0
+
+    return found_files, valve_rc_found
 
 
 class FileHandler:

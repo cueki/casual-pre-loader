@@ -39,7 +39,7 @@ class InstallationManager(QObject):
 
         return True, ""
 
-    def install(self, selected_addons, mod_drop_zone=None):
+    def install(self, selected_addons, mod_drop_zone=None, valve_rc_found=False):
         valid, message = self.validate_tf_path()
         if not valid:
             self.operation_error.emit(message)
@@ -48,7 +48,7 @@ class InstallationManager(QObject):
         self.processing = True
         thread = threading.Thread(
             target=self.interface.install,
-            args=(self.tf_path, selected_addons, mod_drop_zone)
+            args=(self.tf_path, selected_addons, mod_drop_zone, valve_rc_found)
         )
         thread.daemon = True
         thread.start()

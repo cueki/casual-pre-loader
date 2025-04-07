@@ -1,9 +1,8 @@
 import threading
 from pathlib import Path
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit,
                              QLabel, QProgressBar, QFileDialog, QMessageBox, QGroupBox, QSplitter, QTabWidget)
-from PyQt6.QtCore import Qt
-
 from core.handlers.file_handler import scan_for_valve_rc_files
 from gui.settings_manager import SettingsManager
 from gui.drag_and_drop import ModDropZone
@@ -43,6 +42,9 @@ class ParticleManagerGUI(QMainWindow):
         self.load_addons()
         self.scan_for_mcp_files()
         self.rescan_addon_contents()
+
+        # valve.rc flag
+        self.valve_rc_found = None
 
     def setup_ui(self):
         # main layout
@@ -198,9 +200,8 @@ class ParticleManagerGUI(QMainWindow):
 
     def on_addon_select(self):
         try:
-            selected_items = self.addons_list.selectedItems()
-
             # first time setup - store original names
+            selected_items = self.addons_list.selectedItems()
             for i in range(self.addons_list.count()):
                 item = self.addons_list.item(i)
                 if item and item.flags() & Qt.ItemFlag.ItemIsSelectable:
@@ -338,7 +339,7 @@ class ParticleManagerGUI(QMainWindow):
             )
 
     def scan_for_valve_rc(self, directory):
-        found_files = scan_for_valve_rc_files(directory)
+        found_files, self.valve_rc_found = scan_for_valve_rc_files(directory)
         if found_files:
             conflict_list = "\n• ".join(found_files)
             QMessageBox.warning(
@@ -358,7 +359,7 @@ class ParticleManagerGUI(QMainWindow):
     def start_install(self):
         selected_addons = self.get_selected_addons()
         self.set_processing_state(True)
-        self.install_manager.install(selected_addons, self.mod_drop_zone)
+        self.install_manager.install(selected_addons, self.mod_drop_zone, self.valve_rc_found)
 
     def start_restore(self):
         if self.install_manager.restore():

@@ -28,7 +28,7 @@ class Interface(QObject):
     def update_progress(self, progress: int, message: str):
         self.progress_signal.emit(progress, message)
 
-    def install(self, tf_path: str, selected_addons: List[str], mod_drop_zone=None):
+    def install(self, tf_path: str, selected_addons: List[str], mod_drop_zone=None, valve_rc_found=False):
         try:
             backup_manager = BackupManager(tf_path)
             working_vpk_path = get_working_vpk_path()
@@ -155,7 +155,7 @@ class Interface(QObject):
 
             # create new VPK for custom content & config
             custom_content_dir = folder_setup.temp_mods_dir
-            copy_config_files(custom_content_dir)
+            copy_config_files(custom_content_dir, valve_rc_found)
             patch_mainmenuoverride(tf_path)
 
             for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
