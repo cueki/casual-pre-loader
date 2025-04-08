@@ -277,6 +277,14 @@ class ModDropZone(QFrame):
                 vpk_handler.parse_directory()
                 file_list = vpk_handler.list_files()
 
+                # check for hud vpk
+                is_hud_vpk = any('info.vdf' in f for f in file_list)
+
+                if is_hud_vpk:
+                    self.worker.error.emit(
+                        f"File '{file_name}' appears to be a hud. Huds should not be installed with this app. Please install hud files directly in your tf/custom folder.")
+                    continue
+
                 # check for particles
                 has_particles = any('.pcf' in f for f in file_list)
 
@@ -333,7 +341,6 @@ class ModDropZone(QFrame):
                 main_window.apply_saved_addon_selections()
 
                 successful_files.append(vpk_name)
-
 
             except Exception as e:
                 self.worker.error.emit(f"Error processing {file_name}: {str(e)}")
