@@ -1098,20 +1098,6 @@
 			"image"	"../decals/flesh/blood5_subrect.vmt"
 		}
 
-		"flesh_blood2_world"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/flesh/blood2world.vmt"
-		}
-
-		"flesh_blood3_world"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/flesh/blood3world.vmt"
-		}
-
 		"flesh_blood3"
 		{
 			"ControlName"	"ImagePanel"
@@ -1154,20 +1140,6 @@
 			"image"	"../decals/flesh/blood2.vmt"
 		}
 
-		"flesh_blood4_world"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/flesh/blood4world.vmt"
-		}
-
-		"flesh_blood5_world"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/flesh/blood5world.vmt"
-		}
-
 		"flesh_blood4_subrect"
 		{
 			"ControlName"	"ImagePanel"
@@ -1187,55 +1159,6 @@
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood3_subrect.vmt"
-		}
-
-		"flesh_blood1_world"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/flesh/blood1world.vmt"
-		}
-
-		"blood1_world"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/blood1world.vmt"
-		}
-
-		"blood2_world"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/blood2world.vmt"
-		}
-
-		"blood3_world"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/blood3world.vmt"
-		}
-
-		"blood4_world"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/blood4world.vmt"
-		}
-
-		"blood5_world"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/blood5world.vmt"
-		}
-
-		"flesh_blood6_world"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/blood6world.vmt"
 		}
 	}
 }
