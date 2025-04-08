@@ -65,12 +65,13 @@ class AddonDescription(QWidget):
 
     def set_type_style(self, addon_type: str):
         colors = {
-            "custom": "#4CAF50",
-            "model": "#2196F3",
-            "texture": "#9C27B0",
-            "misc": "#FF9800",
-            "animation": "#392C52",
-            "unknown": "#FF0000"
+            "custom": "#4CAF50", # green
+            "model": "#2196F3", # blue
+            "texture": "#9C27B0", # magenta
+            "misc": "#FF9800", # orange
+            "animation": "#392C52", # purple
+            "experimental": "#EED202", # yellow
+            "unknown": "#FF0000" # red
         }
 
         color = colors.get(addon_type.lower(), "#757575")

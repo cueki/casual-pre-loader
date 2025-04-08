@@ -30,7 +30,7 @@ def copy_project_files(source_dir, target_dir):
 
     # list of files to copy
     files_to_copy = [
-        'app.py',
+        'main.py',
         'particle_system_map.json',
         'mod_urls.json',
         'LICENSE',

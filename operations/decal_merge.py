@@ -1,25 +1,22 @@
 from pathlib import Path
 from typing import Dict
-
 from PIL import Image, ImageFilter
 from core.handlers.vtf_handler import VTFHandler
 from core.constants import DECAL_MAPPING
 
 
-def create_shadow_effect(image, shadow_size=3, shadow_color=(127, 127, 127, 255)):
+def create_shadow_effect(image, shadow_color=(127, 127, 127, 255)):
     if image.mode != 'RGBA':
         image = image.convert('RGBA')
 
     # create a mask from the alpha channel
     alpha = image.split()[3]
-
-    # create a shadow by applying MaxFilter multiple times
     shadow_mask = alpha.copy()
     shadow_mask = shadow_mask.filter(ImageFilter.MaxFilter(3))
     shadow = Image.new('RGBA', image.size, shadow_color)
     shadow.putalpha(shadow_mask)
 
-    # shadow first, then original image
+    # bg, then shadow, then original image
     result = Image.new('RGBA', image.size, (125, 127, 125, 0))
     result = Image.alpha_composite(result, shadow)
     result = Image.alpha_composite(result, image)
@@ -83,7 +80,7 @@ class DecalMerge:
         self.debug = debug
         self.temp_files = []
 
-    def modify_mod2x_sprite_sheet(self, decal_vtfs: Dict[str, str], sprite_sheet_png, output_vtf):
+    def modify_mod2x_sprite_sheet(self, decal_vtfs: Dict[str, str], sprite_sheet_png):
         try:
             sprite_sheet = Image.open(sprite_sheet_png)
             # process each decal
@@ -100,7 +97,7 @@ class DecalMerge:
                 # process the decal image
                 splatter = Image.open(splatter_png_path)
                 splatter = splatter.resize(decal_info["size"])
-                splatter = create_shadow_effect(splatter, shadow_size=4)
+                splatter = create_shadow_effect(splatter)
                 splatter_out = self.working_dir / str(Path(decal_path).name + ".png")
                 splatter.save(splatter_out)
 
