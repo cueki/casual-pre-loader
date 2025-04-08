@@ -1,5 +1,6 @@
 import platform
 import subprocess
+import shutil
 from pathlib import Path
 
 
@@ -10,7 +11,7 @@ class VTFHandler:
         self.vtf_cmd_path = Path("vtfedit/VTFCmd.exe").absolute()
 
         if not self.vtf_cmd_path.exists():
-            raise RuntimeError("VTFCmd.exe not found. Make sure it exists at vtfedit/bin/VTFCmd.exe")
+            raise RuntimeError("VTFCmd.exe not found. Make sure it exists at vtfedit/VTFCmd.exe")
 
     def _run_vtf_command(self, args):
         cmd_path = str(self.vtf_cmd_path)
@@ -31,30 +32,44 @@ class VTFHandler:
         except subprocess.CalledProcessError as e:
             return False, f"Error executing VTFCmd: {e.stderr}"
 
-    def convert_vtf_to_png(self, vtf_file, output_dir=None):
+    def convert_vtf_to_png(self, vtf_file, relative_to="materials"):
+        # temp directory with a flat structure because VTFCmd is dumb
         vtf_path = Path(vtf_file)
-        out_dir = output_dir or self.working_dir
-        Path(out_dir).mkdir(parents=True, exist_ok=True)
 
+        # get relative path for final output
+        rel_path = vtf_path.relative_to(Path(vtf_path.parts[0]) / relative_to)
+        temp_vtf = self.working_dir / vtf_path.name
+        shutil.copy2(vtf_path, temp_vtf)
+
+        # convert to PNG
         args = [
-            "-file", str(vtf_path),
-            "-output", str(out_dir),
+            "-file", str(temp_vtf),
+            "-output", ".",
             "-exportformat", "png"
         ]
 
-        success, message = self._run_vtf_command(args)
-        if success:
-            return Path(out_dir) / f"{vtf_path.stem}.png"
-        return None
+        success, _ = self._run_vtf_command(args)
+        if not success:
+            return None
 
-    def convert_png_to_vtf(self, png_file, output_dir=None, img_format="rgba8888"):
+        # get the generated PNG
+        temp_png = self.working_dir / f"{temp_vtf.stem}.png"
+        final_dir = self.working_dir / relative_to / rel_path.parent
+        final_dir.mkdir(parents=True, exist_ok=True)
+
+        # move PNG to final location
+        final_png = final_dir / f"{vtf_path.stem}.png"
+        shutil.move(temp_png, final_png)
+
+        return final_png
+
+    def convert_png_to_vtf(self, png_file, img_format="rgba8888"):
         png_path = Path(png_file)
-        out_dir = output_dir or self.working_dir
-        Path(out_dir).mkdir(parents=True, exist_ok=True)
+        out_dir = self.working_dir
 
         args = [
             "-file", str(png_path),
-            "-output", str(out_dir),
+            "-output", ".",
             "-format", img_format
         ]
 

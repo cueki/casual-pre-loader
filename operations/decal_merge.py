@@ -1,7 +1,9 @@
 from pathlib import Path
+from typing import Dict
+
 from PIL import Image, ImageFilter
-from typing import List
 from core.handlers.vtf_handler import VTFHandler
+from core.constants import DECAL_MAPPING
 
 
 def create_shadow_effect(image, shadow_size=3, shadow_color=(127, 127, 127, 255)):
@@ -13,8 +15,7 @@ def create_shadow_effect(image, shadow_size=3, shadow_color=(127, 127, 127, 255)
 
     # create a shadow by applying MaxFilter multiple times
     shadow_mask = alpha.copy()
-    for _ in range(shadow_size):
-        shadow_mask = shadow_mask.filter(ImageFilter.MaxFilter(3))
+    shadow_mask = shadow_mask.filter(ImageFilter.MaxFilter(3))
     shadow = Image.new('RGBA', image.size, shadow_color)
     shadow.putalpha(shadow_mask)
 
@@ -51,6 +52,29 @@ def paste_with_full_transparency(base_img, overlay_img, position):
     return base_img
 
 
+def get_decal_info(file_path: str):
+    if file_path.startswith("decal/"):
+        if file_path in DECAL_MAPPING:
+            return file_path, DECAL_MAPPING[file_path]
+        return None, None
+
+    path_obj = Path(file_path)
+    file_name = path_obj.stem
+    potential_paths = [
+        f"decal/{file_name}",
+        f"decal/flesh/{file_name}"
+    ]
+
+    if "flesh" in str(path_obj):
+        potential_paths.reverse()
+
+    for decal_path in potential_paths:
+        if decal_path in DECAL_MAPPING:
+            return decal_path, DECAL_MAPPING[decal_path]
+
+    return None, None
+
+
 class DecalMerge:
     def __init__(self, working_dir="temp/vtf_files", debug=False):
         self.working_dir = Path(working_dir)
@@ -59,41 +83,34 @@ class DecalMerge:
         self.debug = debug
         self.temp_files = []
 
-    def modify_blood_sprite_sheet(self, decal_vtfs: List[str], sprite_sheet_vtf, output_vtf):
-        modified_png = self.working_dir / "modified_sprite_sheet.png"
+    def modify_mod2x_sprite_sheet(self, decal_vtfs: Dict[str, str], sprite_sheet_png, output_vtf):
         try:
-            # convert sprite sheet to PNG
-            converted_path = self.vtf_handler.convert_vtf_to_png(sprite_sheet_vtf)
-            if not converted_path:
-                return False
+            sprite_sheet = Image.open(sprite_sheet_png)
+            # process each decal
+            for decal_path, vtf_file in decal_vtfs.items():
+                decal_type, decal_info = get_decal_info(decal_path)
+                print(decal_path, decal_type)
+                if not decal_type or not decal_info:
+                    print(f"Warning: Could not find mapping for decal {decal_path}")
+                    continue
 
-            sprite_sheet = Image.open(converted_path)
-
-            # hardcoded coordinates for placing each splatter
-            coordinates = [
-                (384, 128),
-                (512, 128),
-                (640, 128),
-                (768, 128),
-                (256, 256),
-                (384, 256)
-            ]
-
-            for i, (vtf_file, position) in enumerate(zip(decal_vtfs, coordinates)):
                 # convert decal to PNG
                 splatter_png_path = self.vtf_handler.convert_vtf_to_png(vtf_file)
-                if not splatter_png_path:
-                    continue
 
                 # process the decal image
                 splatter = Image.open(splatter_png_path)
-                splatter = splatter.resize((128, 128))
-                splatter = create_shadow_effect(splatter, shadow_size=4, shadow_color=(127, 127, 127, 255))
+                splatter = splatter.resize(decal_info["size"])
+                splatter = create_shadow_effect(splatter, shadow_size=4)
+                splatter_out = self.working_dir / str(Path(decal_path).name + ".png")
+                splatter.save(splatter_out)
 
                 # paste the decal onto the sprite sheet
-                sprite_sheet = paste_with_full_transparency(sprite_sheet, splatter, position)
+                sprite_sheet = paste_with_full_transparency(
+                    sprite_sheet, splatter, decal_info["position"]
+                )
 
             # save the modified sprite sheet
+            modified_png = self.working_dir / "modified_sprite_sheet.png"
             sprite_sheet.save(modified_png)
 
             # convert back to VTF
@@ -101,13 +118,11 @@ class DecalMerge:
             if not result_vtf:
                 return False
 
-            # copy to output location if different
-            if str(result_vtf) != output_vtf:
-                import shutil
-                shutil.copy2(result_vtf, output_vtf)
-
             return True
 
         except Exception as e:
             print(f"Error modifying sprite sheet: {e}")
             return False
+
+    def process_mod_decals(self, mod_dir: Path, output_dir: Path):
+        pass

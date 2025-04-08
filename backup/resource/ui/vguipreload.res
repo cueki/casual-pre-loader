@@ -999,174 +999,243 @@
 			"visible"	"1"
 		    "image"                                                     "../vgui/class_portraits/spy_blue_grey_alpha.vmt"
 		}
-	
+
 		"blood5_subrect"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/blood5_subrect.vmt"
 		}
+
 		"mod2x"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
-			"image"	"../decals/mod2x.vmt"
+			"image"	"../decals/decals_mod2x.vmt"
 		}
+
 		"blood5"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/blood5.vmt"
 		}
+
 		"blood3"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/blood3.vmt"
 		}
+
 		"blood6"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/blood6.vmt"
 		}
+
 		"blood4"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/blood4.vmt"
 		}
+
 		"blood1_subrect"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/blood1_subrect.vmt"
 		}
+
 		"blood1"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/blood1.vmt"
 		}
+
 		"blood2_subrect"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/blood2_subrect.vmt"
 		}
+
 		"blood6_subrect"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/blood6_subrect.vmt"
 		}
+
 		"blood4_subrect"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/blood4_subrect.vmt"
 		}
+
 		"blood2"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/blood2.vmt"
 		}
-				"blood3_subrect"
+
+		"blood3_subrect"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/blood3_subrect.vmt"
 		}
+
 		"flesh_blood5_subrect"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood5_subrect.vmt"
 		}
+
 		"flesh_blood2_world"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood2world.vmt"
 		}
+
 		"flesh_blood3_world"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood3world.vmt"
 		}
+
 		"flesh_blood3"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood3.vmt"
 		}
+
 		"flesh_blood1_subrect"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood1_subrect.vmt"
 		}
+
 		"flesh_blood4"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood4.vmt"
 		}
+
 		"flesh_blood1"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood1.vmt"
 		}
+
 		"flesh_blood2_subrect"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood2_subrect.vmt"
 		}
+
 		"flesh_blood2"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood2.vmt"
 		}
+
 		"flesh_blood4_world"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood4world.vmt"
 		}
+
 		"flesh_blood5_world"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood5world.vmt"
 		}
+
 		"flesh_blood4_subrect"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood4_subrect.vmt"
 		}
+
 		"flesh_blood5"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood5.vmt"
 		}
+
 		"flesh_blood3_subrect"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood3_subrect.vmt"
 		}
+
 		"flesh_blood1_world"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood1world.vmt"
+		}
+
+		"blood1_world"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood1world.vmt"
+		}
+
+		"blood2_world"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood2world.vmt"
+		}
+
+		"blood3_world"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood3world.vmt"
+		}
+
+		"blood4_world"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood4world.vmt"
+		}
+
+		"blood5_world"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood5world.vmt"
+		}
+
+		"flesh_blood6_world"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood6world.vmt"
 		}
 	}
 }
