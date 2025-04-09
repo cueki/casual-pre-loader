@@ -277,6 +277,14 @@ class ModDropZone(QFrame):
                 vpk_handler.parse_directory()
                 file_list = vpk_handler.list_files()
 
+                # check for hud vpk
+                is_hud_vpk = any('info.vdf' in f for f in file_list)
+
+                if is_hud_vpk:
+                    self.worker.error.emit(
+                        f"File '{file_name}' appears to be a hud. Huds should not be installed with this app. Please install hud files directly in your tf/custom folder.")
+                    continue
+
                 # check for particles
                 has_particles = any('.pcf' in f for f in file_list)
 
@@ -321,6 +329,7 @@ class ModDropZone(QFrame):
                         with open(mod_json_path, 'w') as f:
                             json.dump(default_mod_info, f, indent=2)
 
+                # this is kinda dumb but it works
                 main_window = self.window()
                 saved_selections = main_window.settings_manager.get_addon_selections()
 
@@ -332,7 +341,6 @@ class ModDropZone(QFrame):
                 main_window.apply_saved_addon_selections()
 
                 successful_files.append(vpk_name)
-
 
             except Exception as e:
                 self.worker.error.emit(f"Error processing {file_name}: {str(e)}")
@@ -369,7 +377,7 @@ class ModDropZone(QFrame):
         self.style().polish(self)
         folder_setup.create_required_folders()
 
-        # Use a dictionary to store normalized paths and their original files
+        # use a dictionary to store normalized paths and their original files
         normalized_files = {}
 
         for url in event.mimeData().urls():

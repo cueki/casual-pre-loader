@@ -62,6 +62,7 @@ class FolderConfig:
                 self.base_default_parents = get_parent_elements(self.base_default_pcf)
 
     def cleanup_temp_folders(self) -> None:
+        # anything put in temp/ will be gone !!!!!
         if self.temp_dir.exists():
             for file in self.temp_dir.glob('**/*'):
                 if file.is_file():

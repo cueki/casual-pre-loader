@@ -10,6 +10,7 @@ from core.parsers.vpk_file import VPKFile
 from core.parsers.pcf_file import PCFFile
 from operations.pcf_rebuild import load_particle_system_map, extract_elements
 from operations.file_processors import pcf_mod_processor, game_type, get_from_custom_dir
+from operations.vgui_preload import patch_mainmenuoverride
 from backup.backup_manager import BackupManager, get_working_vpk_path, prepare_working_copy
 from quickprecache.precache_list import make_precache_list
 from quickprecache.quick_precache import QuickPrecache
@@ -27,7 +28,7 @@ class Interface(QObject):
     def update_progress(self, progress: int, message: str):
         self.progress_signal.emit(progress, message)
 
-    def install(self, tf_path: str, selected_addons: List[str], mod_drop_zone=None):
+    def install(self, tf_path: str, selected_addons: List[str], mod_drop_zone=None, valve_rc_found=False):
         try:
             backup_manager = BackupManager(tf_path)
             working_vpk_path = get_working_vpk_path()
@@ -154,7 +155,8 @@ class Interface(QObject):
 
             # create new VPK for custom content & config
             custom_content_dir = folder_setup.temp_mods_dir
-            copy_config_files(custom_content_dir)
+            copy_config_files(custom_content_dir, valve_rc_found)
+            patch_mainmenuoverride(tf_path)
 
             for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
                 split_file.unlink()
@@ -256,6 +258,6 @@ class Interface(QObject):
         except Exception as e:
             self.error_signal.emit(f"An error occurred while restoring backup: {str(e)}")
         finally:
-            # folder_setup.cleanup_temp_folders()
+            folder_setup.cleanup_temp_folders()
             prepare_working_copy()
             self.operation_finished.emit()

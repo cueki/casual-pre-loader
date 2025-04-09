@@ -64,7 +64,7 @@ class StudioMDL:
                 text=True
             )
         else:
-            # for windows, use a list of arguments
+            # windows
             cmd_args = [
                 exe_path,
                 "-game", tf_path,

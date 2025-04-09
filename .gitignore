@@ -5,6 +5,8 @@ tf2_misc_dir.vpk
 app.dist/
 app.build/
 mods/
+test.py
+addon_metadata.json
 app_settings.json
 
 # Byte-compiled / optimized / DLL files

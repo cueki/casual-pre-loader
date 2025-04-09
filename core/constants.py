@@ -152,3 +152,19 @@ QUICKPRECACHE_FILE_SUFFIXES = [
     ".sw.vtx",
     ".vvd"
 ]
+
+
+DECAL_MAPPING = {
+    # this is just the blood decal mapping, would need to add bullet holes and such if we want those
+    "decal/flesh/blood1": {"position": (384, 64), "size": (64, 64)},
+    "decal/flesh/blood2": {"position": (448, 0), "size": (64, 64)},
+    "decal/flesh/blood3": {"position": (448, 64), "size": (64, 64)},
+    "decal/flesh/blood4": {"position": (512, 0), "size": (64, 64)},
+    "decal/flesh/blood5": {"position": (512, 64), "size": (64, 64)},
+    "decal/blood1": {"position": (384, 128), "size": (128, 128)},
+    "decal/blood2": {"position": (512, 128), "size": (128, 128)},
+    "decal/blood3": {"position": (640, 128), "size": (128, 128)},
+    "decal/blood4": {"position": (768, 128), "size": (128, 128)},
+    "decal/blood5": {"position": (256, 256), "size": (128, 128)},
+    "decal/blood6": {"position": (384, 256), "size": (128, 128)},
+}
