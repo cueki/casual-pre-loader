@@ -1,4 +1,6 @@
+import shutil
 from pathlib import Path
+from core.folder_setup import folder_setup
 from core.parsers.vpk_file import VPKFile
 
 
@@ -16,10 +18,23 @@ def patch_mainmenuoverride(tf_path: str):
               "casual_preloader" not in item.name.lower()):
             _process_vpk(item)
 
-        elif item.is_dir():
+    # check if any directory has mainmenuoverride.res
+    found_mainmenuoverride = False
+    for item in custom_dir.iterdir():
+        if "_casual_preloader" in item.name.lower():
+            continue
+
+        if item.is_dir():
             mainmenuoverride_file = item / "resource" / "ui" / "mainmenuoverride.res"
             if mainmenuoverride_file.exists():
                 _add_vguipreload_string(mainmenuoverride_file)
+                found_mainmenuoverride = True
+
+    if not found_mainmenuoverride:
+        custom_content_dir = folder_setup.temp_mods_dir / "resource" / "ui"
+        custom_content_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2("backup/resource/ui/mainmenuoverride.res", custom_content_dir / "mainmenuoverride.res")
+        _add_vguipreload_string(custom_content_dir / "mainmenuoverride.res")
 
 
 def _add_vguipreload_string(file_path):
