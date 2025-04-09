@@ -2,16 +2,39 @@
 
 # Download the latest release [Here](https://github.com/cueki/casual-particle-pre-loader/releases/).
 # Most up-to-date tutorial [Here](https://gamebanana.com/tuts/18436)
+# If you want to run with python (Linux):
 
-If you want to run with python:
+We need studiomdl.exe from the Windows version of TF2.
 
+First, force the use of proton in game properties, make sure to click "update" after.
+
+![](images/proton.png)
+
+Once updated, navigate to your `Steam/steamapps/common/Team Fortress 2/` and rename bin/ to something other than bin/, for example, bin_/.
+
+![](images/bin.png)
+
+Disable proton in game properties, and update again.
+
+![](images/disable_proton.png)
+
+Back in `Steam/steamapps/common/Team Fortress 2/`, rename bin_/ back to bin/ to merge the directories, or copy its contents into bin/.
+
+![](images/bin_merge.png)
+
+If done right, you should now see `studiomdl.exe` inside the bin/ folder!
+
+![](images/studiomdl.png)
+
+Now you can clone the repo, make sure to put the required vpks into backup/!
 ```
-git clone https://github.com/cueki/casual-particle-pre-loader
-cd casual-particle-pre-loader
-mkdir backup
-(copy the tf2_misc_dir.vpk, _000.vpk and _017.vpk from tf/ into backup/)
+git clone https://github.com/cueki/casual-pre-loader
+cd casual-pre-loader
+python -m venv .venv
+source .venv/bin/activate (you will need activate the venv each time)
 pip install -r requirements.txt
-python app.py
+(copy the tf2_misc_dir.vpk, _000.vpk and _017.vpk from tf/ into backup/)
+python main.py
 ```
 # How does this work?
 
