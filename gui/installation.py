@@ -43,6 +43,7 @@ class InstallationManager(QObject):
         valid, message = self.validate_tf_path()
         if not valid:
             self.operation_error.emit(message)
+            self.operation_finished.emit()
             return
 
         self.processing = True
