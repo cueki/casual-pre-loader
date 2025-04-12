@@ -1,0 +1,10 @@
+"sky"
+{
+	
+	"$hdrcompressedTexture" "skybox/sky_halloween_night_01_hdrup"	
+	"$nofog" "1"
+	"$ignorez" "1"
+	"$basetexture" "skybox/sky_halloween_night_01up"
+	"$basetexturetransform" "center .5 .5 scale 1 1 rotate 90  translate 0 0"
+	"%keywords" "tf"
+}
