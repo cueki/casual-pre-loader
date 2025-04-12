@@ -14,8 +14,9 @@ def modify_basetexture_path(content: bytes) -> bytes:
     content_str = content.decode('utf-8', errors='replace')
     pattern = r'("\$basetexture"\s+")(skybox\/[^"]+)(")'
     modified = re.sub(pattern, lambda m: m.group(1) + m.group(2) + "1" + m.group(3),
-                     content_str, flags=re.IGNORECASE)
-    return modified.encode('utf-8')
+                      content_str, flags=re.IGNORECASE)
+    result = modified.encode('utf-8')
+    return result
 
 
 def handle_skybox_mods(temp_dir: Path, tf_path) -> int:
@@ -26,14 +27,14 @@ def handle_skybox_mods(temp_dir: Path, tf_path) -> int:
     print(f"Found {len(skybox_vmts)} skybox vmts in {temp_dir.name}")
     vpk_path = str(Path(tf_path) / "tf2_misc_dir.vpk")
     patched_count = 0
-
+    file_handler = FileHandler(vpk_path)
     for vmt_path in skybox_vmts:
         try:
             # modify basetexture path
             with open(vmt_path, 'rb') as f:
                 original_content = f.read()
-            modified_content = modify_basetexture_path(original_content)
 
+            modified_content = modify_basetexture_path(original_content)
             # get the original texture path
             orig_texture_path = Path("skybox/" + Path(vmt_path).stem)
             new_texture_path = f"{orig_texture_path}1"
@@ -46,14 +47,9 @@ def handle_skybox_mods(temp_dir: Path, tf_path) -> int:
                 new_vtf_path.parent.mkdir(parents=True, exist_ok=True)
                 shutil.move(orig_vtf_path, new_vtf_path)
 
-            file_handler = FileHandler(vpk_path)
             # find the vmt file in the vpk
             vmt_filename = vmt_path.name
-            target_path = None
-            for file_path in file_handler.vpk.find_files(f"*{vmt_filename}"):
-                if file_path.endswith(vmt_filename):
-                    target_path = file_path
-                    break
+            target_path = "materials/skybox/" + vmt_filename
 
             if not target_path:
                 print(f"Error: Could not find {vmt_filename} in VPK")
@@ -67,9 +63,6 @@ def handle_skybox_mods(temp_dir: Path, tf_path) -> int:
 
             if success:
                 patched_count += 1
-                print(f"Successfully replaced {vmt_filename} in VPK")
-            else:
-                print(f"Failed to replace {vmt_filename} in VPK")
 
         except Exception as e:
             print(f"Error processing skybox VMT {vmt_path}: {e}")
