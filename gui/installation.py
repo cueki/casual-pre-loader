@@ -31,7 +31,7 @@ class InstallationManager(QObject):
         if not self.tf_path:
             return False, "Please select tf/ directory!"
 
-        if not self.tf_path.endswith("/tf"):
+        if not (self.tf_path.endswith("/tf") or self.tf_path.endswith("/tf/")):
             return False, "Please select tf/ directory!"
 
         if not Path(self.tf_path).exists():
@@ -43,6 +43,7 @@ class InstallationManager(QObject):
         valid, message = self.validate_tf_path()
         if not valid:
             self.operation_error.emit(message)
+            self.operation_finished.emit()
             return
 
         self.processing = True

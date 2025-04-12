@@ -32,7 +32,7 @@ def paste_with_full_transparency(base_img, overlay_img, position):
     base_pixels = base_img.load()
     overlay_pixels = overlay_img.load()
 
-    #calculate effective paste area
+    # calculate effective paste area
     x_start, y_start = position
     x_end = min(x_start + overlay_width, base_width)
     y_end = min(y_start + overlay_height, base_height)

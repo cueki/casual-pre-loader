@@ -130,11 +130,10 @@ class ConflictMatrix(QTableWidget):
         for row, mod in enumerate(mods):
             select_all_widget = QWidget()
             select_all_layout = QHBoxLayout(select_all_widget)
-            select_all_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             select_all_layout.setContentsMargins(0, 0, 0, 0)
 
             select_all_button = QPushButton() # text updated later
-            select_all_button.setFixedWidth(110)
+            select_all_button.setFixedWidth(102)
             # use lambda with default argument to capture current row value
             select_all_button.clicked.connect(lambda checked=False, r=row: self.select_all_row(r))
             select_all_layout.addWidget(select_all_button)
@@ -255,7 +254,7 @@ class ConflictMatrix(QTableWidget):
                     if layout and layout.count() > 0:
                          checkbox = layout.itemAt(0).widget()
                          if isinstance(checkbox, QCheckBox) and checkbox.isChecked():
-                            checkbox.blockSignals(True) # Prevent triggering stateChanged
+                            checkbox.blockSignals(True)
                             checkbox.setChecked(False)
                             checkbox.blockSignals(False)
 

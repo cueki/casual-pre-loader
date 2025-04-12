@@ -6,6 +6,7 @@ from core.constants import CUSTOM_VPK_NAMES, DX8_LIST, CUSTOM_VPK_NAME, CUSTOM_V
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler, copy_config_files
 from core.handlers.pcf_handler import check_parents, update_materials
+from core.handlers.skybox_handler import handle_skybox_mods, restore_skybox_files
 from core.parsers.vpk_file import VPKFile
 from core.parsers.pcf_file import PCFFile
 from operations.pcf_rebuild import load_particle_system_map, extract_elements
@@ -65,6 +66,10 @@ class Interface(QObject):
                 completed_files += 1
                 current_progress = 10 + int((completed_files / total_files) * progress_range)
                 self.update_progress(current_progress, f"Installing addons... ({completed_files}/{total_files} files)")
+
+            # remove any skybox mods if present then patch new ones in if selected
+            restore_skybox_files(tf_path)
+            handle_skybox_mods(folder_setup.temp_mods_dir, tf_path)
 
             if mod_drop_zone:
                 mod_drop_zone.apply_particle_selections()
@@ -223,6 +228,9 @@ class Interface(QObject):
             game_type(Path(tf_path) / 'gameinfo.txt', uninstall=True)
             custom_dir = Path(tf_path) / 'custom'
             custom_dir.mkdir(exist_ok=True)
+
+            # skybox unpatch
+            restore_skybox_files(tf_path)
 
             # flush quick precache
             QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)

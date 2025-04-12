@@ -77,7 +77,7 @@ class FileHandler:
     def list_vmt_files(self) -> List[str]:
         return self.vpk.find_files('*.vmt')
 
-    def process_file(self, file_name: str, processor: callable, create_backup: bool = True) -> bool:
+    def process_file(self, file_name: str, processor: callable, create_backup: bool = True) -> bool | None:
         # if it's just a filename, find its full path
         if '/' not in file_name:
             full_path = self.vpk.find_file_path(file_name)
