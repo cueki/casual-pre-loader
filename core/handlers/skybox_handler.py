@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler
+from core.parsers.vpk_file import VPKFile
 
 
 def is_skybox_vmt(file_path: Path) -> bool:
@@ -70,3 +71,28 @@ def handle_skybox_mods(temp_dir: Path, tf_path) -> int:
             traceback.print_exc()
 
     return patched_count
+
+
+def restore_skybox_files(tf_path: str) -> int:
+    backup_skybox_dir = Path("backup/materials/skybox")
+    if not backup_skybox_dir.exists():
+        return 0
+
+    vpk = VPKFile(tf_path + "/tf2_misc_dir.vpk")
+    vpk.parse_directory()
+    restored_count = 0
+    for skybox_vmt in backup_skybox_dir.glob("*.vmt"):
+        try:
+            vmt_name = skybox_vmt.name
+            file_path = f"materials/skybox/{vmt_name}"
+
+            with open(skybox_vmt, 'rb') as f:
+                original_content = f.read()
+
+            if vpk.patch_file(file_path, original_content, create_backup=False):
+                restored_count += 1
+
+        except Exception as e:
+            print(f"Error restoring skybox {vmt_name}: {e}")
+
+    return restored_count

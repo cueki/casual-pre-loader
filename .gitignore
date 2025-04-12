@@ -5,6 +5,7 @@ tf2_misc_dir.vpk
 app.dist/
 app.build/
 mods/
+blood_test/
 test.py
 addon_metadata.json
 app_settings.json
