@@ -1160,5 +1160,78 @@
 			"visible"	"1"
 			"image"	"../decals/flesh/blood3_subrect.vmt"
 		}
+
+		"sky_upwardup"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upwardup.vmt"
+		}
+		"sky_upwardbk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upwardbk.vmt"
+		}
+		"sky_upwarddn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upwarddn.vmt"
+		}
+		"sky_upwardft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upwardft.vmt"
+		}
+		"sky_upwardlf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upwardlf.vmt"
+		}
+		"sky_upwardrt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upwardrt.vmt"
+		}
+		"sky_tf2_04bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04bk.vmt"
+		}
+		"sky_tf2_04dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04dn.vmt"
+		}
+		"sky_tf2_04ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04ft.vmt"
+		}
+		"sky_tf2_04lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04lf.vmt"
+		}
+		"sky_tf2_04rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04rt.vmt"
+		}
+		"sky_tf2_04up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04up.vmt"
+		}
 	}
 }
