@@ -14,7 +14,10 @@ class AddonManager(QObject):
 
     def load_addons(self, addons_list):
         addons_dir = folder_setup.addons_dir
+        # block the signal so the addons list doesn't clear in the app_settings.json
+        addons_list.blockSignals(True)
         addons_list.clear()
+        addons_list.blockSignals(False)
         addon_groups = {"texture": [], "model": [], "misc": [], "animation": [], "unknown": []}
 
         for addon_path in addons_dir.iterdir():

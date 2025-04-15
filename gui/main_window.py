@@ -114,6 +114,7 @@ class ParticleManagerGUI(QMainWindow):
         self.addon_description = addon_panel.addon_description
 
         # linking addon signals to main
+        addon_panel.refresh_button_clicked.connect(self.load_addons)
         addon_panel.delete_button_clicked.connect(self.delete_selected_addons)
         addon_panel.addon_selection_changed.connect(self.on_addon_select)
         install_splitter.addWidget(addon_panel)
@@ -187,9 +188,14 @@ class ParticleManagerGUI(QMainWindow):
             self.scan_for_valve_rc(last_dir)
 
     def load_addons(self):
+        updates_found = self.addon_manager.scan_addon_contents()
         self.addon_manager.load_addons(self.addons_list)
         self.apply_saved_addon_selections()
-
+        if updates_found:
+            self.status_label.setText("Addons refreshed - updates found")
+        else:
+            self.status_label.setText("Addons refreshed")
+            
     def get_selected_addons(self):
         selected_addon_names = [item.text().split(' [#')[0] for item in self.addons_list.selectedItems()]
         file_paths = []

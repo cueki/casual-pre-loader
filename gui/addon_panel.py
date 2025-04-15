@@ -1,4 +1,5 @@
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QGroupBox, QListWidget, QPushButton, QSplitter, QListWidgetItem)
+from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QGroupBox, QListWidget, QPushButton, QSplitter, QListWidgetItem,
+                             QHBoxLayout)
 from PyQt6.QtCore import Qt, pyqtSignal
 from gui.mod_descriptor import AddonDescription
 
@@ -6,6 +7,7 @@ from gui.mod_descriptor import AddonDescription
 class AddonPanel(QWidget):
     addon_selection_changed = pyqtSignal()
     delete_button_clicked = pyqtSignal()
+    refresh_button_clicked = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -25,10 +27,23 @@ class AddonPanel(QWidget):
         self.addons_list.itemSelectionChanged.connect(self.on_selection_changed)
         addons_layout.addWidget(self.addons_list)
 
+        # button container
+        button_container = QWidget()
+        button_layout = QHBoxLayout(button_container)
+        button_layout.setContentsMargins(0, 0, 0, 0)
+
+        # refresh button
+        refresh_button = QPushButton("Refresh Addons")
+        refresh_button.clicked.connect(self.refresh_button_clicked)
+        button_layout.addWidget(refresh_button)
+
         # delete button
         delete_button = QPushButton("Delete Selected Addons")
         delete_button.clicked.connect(self.delete_button_clicked)
-        addons_layout.addWidget(delete_button)
+        button_layout.addWidget(delete_button)
+
+        # add button container to layout
+        addons_layout.addWidget(button_container)
         addons_group.setLayout(addons_layout)
         splitter.addWidget(addons_group)
 
