@@ -8,6 +8,7 @@ class AddonPanel(QWidget):
     addon_selection_changed = pyqtSignal()
     delete_button_clicked = pyqtSignal()
     refresh_button_clicked = pyqtSignal()
+    open_addons_button_clicked = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -31,6 +32,11 @@ class AddonPanel(QWidget):
         button_container = QWidget()
         button_layout = QHBoxLayout(button_container)
         button_layout.setContentsMargins(0, 0, 0, 0)
+
+        # open addons folder
+        open_addons_button = QPushButton("Open Addons Folder")
+        open_addons_button.clicked.connect(self.open_addons_button_clicked)
+        button_layout.addWidget(open_addons_button)
 
         # refresh button
         refresh_button = QPushButton("Refresh Addons")

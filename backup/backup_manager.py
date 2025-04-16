@@ -9,7 +9,6 @@ def prepare_working_copy() -> bool:
     try:
         folder_setup.cleanup_temp_folders()
         folder_setup.create_required_folders()
-        # print("Preparing working copy from backup...")
         required_vpks = [
             "tf2_misc_000.vpk",
             "tf2_misc_017.vpk",
@@ -51,7 +50,6 @@ def get_working_vpk_path() -> Path:
 class BackupManager:
     def __init__(self, tf_dir: str):
         self.tf_dir = Path(tf_dir)
-        self.game_vpk_path = self.tf_dir / "tf2_misc_dir.vpk"
 
         # the files we need
         base_name = "tf2_misc"

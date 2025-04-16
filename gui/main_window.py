@@ -1,8 +1,12 @@
+import os
+import platform
+import subprocess
 import threading
 from pathlib import Path
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit,
                              QLabel, QProgressBar, QFileDialog, QMessageBox, QGroupBox, QSplitter, QTabWidget)
+from core.folder_setup import folder_setup
 from core.handlers.file_handler import scan_for_valve_rc_files
 from gui.settings_manager import SettingsManager
 from gui.drag_and_drop import ModDropZone
@@ -116,6 +120,7 @@ class ParticleManagerGUI(QMainWindow):
         # linking addon signals to main
         addon_panel.refresh_button_clicked.connect(self.load_addons)
         addon_panel.delete_button_clicked.connect(self.delete_selected_addons)
+        addon_panel.open_addons_button_clicked.connect(self.open_addons_folder)
         addon_panel.addon_selection_changed.connect(self.on_addon_select)
         install_splitter.addWidget(addon_panel)
 
@@ -162,6 +167,7 @@ class ParticleManagerGUI(QMainWindow):
 
         # addon signals
         self.addons_list.itemSelectionChanged.connect(self.on_addon_select)
+
 
         # installation signals
         self.install_manager.progress_update.connect(self.update_progress)
@@ -406,3 +412,20 @@ class ParticleManagerGUI(QMainWindow):
             self.load_addons()
         else:
             self.show_error(message)
+
+    def open_addons_folder(self):
+        addons_path = folder_setup.addons_dir
+
+        if not addons_path.exists():
+            self.show_error("Addons folder does not exist!")
+            return
+
+        try:
+            if platform.system() == "Windows":
+                os.startfile(str(addons_path))
+            else:
+                subprocess.run(["xdg-open", str(addons_path)])
+
+            self.status_label.setText("Opened addons folder")
+        except Exception as e:
+            self.show_error(f"Failed to open addons folder: {str(e)}")
