@@ -5,7 +5,8 @@ import threading
 from pathlib import Path
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit,
-                             QLabel, QProgressBar, QFileDialog, QMessageBox, QGroupBox, QSplitter, QTabWidget)
+                             QLabel, QProgressBar, QFileDialog, QMessageBox, QGroupBox, QSplitter, QTabWidget,
+                             QCheckBox)
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import scan_for_valve_rc_files
 from gui.settings_manager import SettingsManager
@@ -167,7 +168,6 @@ class ParticleManagerGUI(QMainWindow):
 
         # addon signals
         self.addons_list.itemSelectionChanged.connect(self.on_addon_select)
-
 
         # installation signals
         self.install_manager.progress_update.connect(self.update_progress)
@@ -352,16 +352,23 @@ class ParticleManagerGUI(QMainWindow):
 
     def scan_for_valve_rc(self, directory):
         found_files, self.valve_rc_found = scan_for_valve_rc_files(directory)
-        if found_files:
+        skip_valve_rc_warning = self.settings_manager.get_skip_valve_rc_warning()
+        if found_files and not skip_valve_rc_warning:
             conflict_list = "\n• ".join(found_files)
-            QMessageBox.warning(
-                self,
-                "valve.rc found (most likely in HUD)",
-                f"The following valve.rc files were found in your custom folder:\n• {conflict_list}\n\n"
-                "You have two options.\n"
-                "   1. Add +exec w/config.cfg to your launch options\n"
-                "   2. Remove the file from the HUD"
-            )
+            msg_box = QMessageBox(self)
+            msg_box.setWindowTitle("valve.rc found (most likely in HUD)")
+            msg_box.setText(f"The following valve.rc files were found in your custom folder:\n• {conflict_list}\n\n"
+                            "You have two options.\n"
+                            "   1. Add +exec w/config.cfg to your launch options\n"
+                            "   2. Remove the file from the HUD")
+            msg_box.setIcon(QMessageBox.Icon.Warning)
+
+            dont_show_checkbox = QCheckBox("I put '+exec w/config' in my launch options, don't show this warning again")
+            msg_box.setCheckBox(dont_show_checkbox)
+            msg_box.exec()
+
+            if dont_show_checkbox.isChecked():
+                self.settings_manager.set_skip_valve_rc_warning(True)
 
     def rescan_addon_contents(self):
         thread = threading.Thread(target=self.addon_manager.scan_addon_contents)
@@ -405,7 +412,7 @@ class ParticleManagerGUI(QMainWindow):
 
     def delete_selected_addons(self):
         success, message = self.addon_manager.delete_selected_addons(self.addons_list)
-        if success is None:  # User canceled
+        if success is None:
             return
         elif success:
             self.show_success(message)
