@@ -216,18 +216,15 @@ class Interface(QObject):
     def restore_backup(self, tf_path: str):
         try:
             prepare_working_copy()
-            backup_manager = BackupManager(tf_path)
-
-            if not backup_manager.deploy_to_game():
-                self.error_signal.emit("Failed to restore backup")
-                return
-
             game_type(Path(tf_path) / 'gameinfo.txt', uninstall=True)
             custom_dir = Path(tf_path) / 'custom'
             custom_dir.mkdir(exist_ok=True)
 
             # skybox unpatch
             restore_skybox_files(tf_path)
+
+            # restore particles
+            restore_particle_files(tf_path)
 
             # flush quick precache
             QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
