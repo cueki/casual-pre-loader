@@ -1,4 +1,33 @@
+from pathlib import Path
 from core.parsers.pcf_file import PCFFile, PCFElement
+from core.parsers.vpk_file import VPKFile
+
+
+def restore_particle_files(tf_path: str) -> int:
+    backup_particles_dir = Path("backup/particles")
+    if not backup_particles_dir.exists():
+        return 0
+
+    vpk = VPKFile(tf_path + "/tf2_misc_dir.vpk")
+    vpk.parse_directory()
+    patched_count = 0
+
+    for pcf_file in backup_particles_dir.glob("*.pcf"):
+        file_name = pcf_file.name
+
+        try:
+            file_path = f"particles/{file_name}"
+
+            with open(pcf_file, 'rb') as f:
+                original_content = f.read()
+
+            if vpk.patch_file(file_path, original_content, create_backup=False):
+                patched_count += 1
+
+        except Exception as e:
+            print(f"Error patching particle file {file_name}: {e}")
+
+    return patched_count
 
 
 def get_parent_elements(pcf: PCFFile) -> set[str]:

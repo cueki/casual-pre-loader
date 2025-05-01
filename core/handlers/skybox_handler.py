@@ -81,9 +81,11 @@ def restore_skybox_files(tf_path: str) -> int:
     vpk = VPKFile(tf_path + "/tf2_misc_dir.vpk")
     vpk.parse_directory()
     restored_count = 0
+
     for skybox_vmt in backup_skybox_dir.glob("*.vmt"):
+        vmt_name = skybox_vmt.name
+
         try:
-            vmt_name = skybox_vmt.name
             file_path = f"materials/skybox/{vmt_name}"
 
             with open(skybox_vmt, 'rb') as f:

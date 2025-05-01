@@ -1,11 +1,11 @@
 tf2_misc_000.vpk
 tf2_misc_017.vpk
 tf2_misc_dir.vpk
-*.pcf
 app.dist/
 app.build/
 mods/
 blood_test/
+pl_borneo
 test.py
 addon_metadata.json
 app_settings.json
