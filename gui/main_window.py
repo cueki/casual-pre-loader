@@ -1,8 +1,13 @@
+import os
+import platform
+import subprocess
 import threading
 from pathlib import Path
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit,
-                             QLabel, QProgressBar, QFileDialog, QMessageBox, QGroupBox, QSplitter, QTabWidget)
+                             QLabel, QProgressBar, QFileDialog, QMessageBox, QGroupBox, QSplitter, QTabWidget,
+                             QCheckBox)
+from core.folder_setup import folder_setup
 from core.handlers.file_handler import scan_for_valve_rc_files
 from gui.settings_manager import SettingsManager
 from gui.drag_and_drop import ModDropZone
@@ -114,7 +119,9 @@ class ParticleManagerGUI(QMainWindow):
         self.addon_description = addon_panel.addon_description
 
         # linking addon signals to main
+        addon_panel.refresh_button_clicked.connect(self.load_addons)
         addon_panel.delete_button_clicked.connect(self.delete_selected_addons)
+        addon_panel.open_addons_button_clicked.connect(self.open_addons_folder)
         addon_panel.addon_selection_changed.connect(self.on_addon_select)
         install_splitter.addWidget(addon_panel)
 
@@ -187,9 +194,14 @@ class ParticleManagerGUI(QMainWindow):
             self.scan_for_valve_rc(last_dir)
 
     def load_addons(self):
+        updates_found = self.addon_manager.scan_addon_contents()
         self.addon_manager.load_addons(self.addons_list)
         self.apply_saved_addon_selections()
-
+        if updates_found:
+            self.status_label.setText("Addons refreshed - updates found")
+        else:
+            self.status_label.setText("Addons refreshed")
+            
     def get_selected_addons(self):
         selected_addon_names = [item.text().split(' [#')[0] for item in self.addons_list.selectedItems()]
         file_paths = []
@@ -340,16 +352,23 @@ class ParticleManagerGUI(QMainWindow):
 
     def scan_for_valve_rc(self, directory):
         found_files, self.valve_rc_found = scan_for_valve_rc_files(directory)
-        if found_files:
+        skip_valve_rc_warning = self.settings_manager.get_skip_valve_rc_warning()
+        if found_files and not skip_valve_rc_warning:
             conflict_list = "\n• ".join(found_files)
-            QMessageBox.warning(
-                self,
-                "valve.rc found (most likely in HUD)",
-                f"The following valve.rc files were found in your custom folder:\n• {conflict_list}\n\n"
-                "You have two options.\n"
-                "   1. Add +exec w/config.cfg to your launch options\n"
-                "   2. Remove the file from the HUD"
-            )
+            msg_box = QMessageBox(self)
+            msg_box.setWindowTitle("valve.rc found (most likely in HUD)")
+            msg_box.setText(f"The following valve.rc files were found in your custom folder:\n• {conflict_list}\n\n"
+                            "You have two options.\n"
+                            "   1. Add +exec w/config.cfg to your launch options\n"
+                            "   2. Remove the file from the HUD")
+            msg_box.setIcon(QMessageBox.Icon.Warning)
+
+            dont_show_checkbox = QCheckBox("I put '+exec w/config' in my launch options, don't show this warning again")
+            msg_box.setCheckBox(dont_show_checkbox)
+            msg_box.exec()
+
+            if dont_show_checkbox.isChecked():
+                self.settings_manager.set_skip_valve_rc_warning(True)
 
     def rescan_addon_contents(self):
         thread = threading.Thread(target=self.addon_manager.scan_addon_contents)
@@ -393,10 +412,27 @@ class ParticleManagerGUI(QMainWindow):
 
     def delete_selected_addons(self):
         success, message = self.addon_manager.delete_selected_addons(self.addons_list)
-        if success is None:  # User canceled
+        if success is None:
             return
         elif success:
             self.show_success(message)
             self.load_addons()
         else:
             self.show_error(message)
+
+    def open_addons_folder(self):
+        addons_path = folder_setup.addons_dir
+
+        if not addons_path.exists():
+            self.show_error("Addons folder does not exist!")
+            return
+
+        try:
+            if platform.system() == "Windows":
+                os.startfile(str(addons_path))
+            else:
+                subprocess.run(["xdg-open", str(addons_path)])
+
+            self.status_label.setText("Opened addons folder")
+        except Exception as e:
+            self.show_error(f"Failed to open addons folder: {str(e)}")

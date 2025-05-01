@@ -14,7 +14,8 @@ class SettingsManager:
         default_settings = {
             "last_directory": "",
             "addon_selections": [],
-            "matrix_selections": {}
+            "matrix_selections": {},
+            "skip_valve_rc_warning": False
         }
 
         if self.settings_file.exists():
@@ -86,3 +87,10 @@ class SettingsManager:
     def get_addon_contents(self):
         metadata = self.get_addon_metadata()
         return {name: data.get('files', []) for name, data in metadata.items()}
+
+    def get_skip_valve_rc_warning(self):
+        return self.settings.get("skip_valve_rc_warning", False)
+
+    def set_skip_valve_rc_warning(self, skip_warning):
+        self.settings["skip_valve_rc_warning"] = skip_warning
+        self.save_settings()
