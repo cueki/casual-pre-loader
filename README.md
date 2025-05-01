@@ -33,7 +33,6 @@ cd casual-pre-loader
 python -m venv .venv
 source .venv/bin/activate (you will need activate the venv each time)
 pip install -r requirements.txt
-(copy the tf2_misc_dir.vpk, _000.vpk and _017.vpk from tf/ into backup/)
 python main.py
 ```
 # How does this work?
