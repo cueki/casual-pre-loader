@@ -5,14 +5,14 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from core.constants import CUSTOM_VPK_NAMES, DX8_LIST, CUSTOM_VPK_NAME, CUSTOM_VPK_SPLIT_PATTERN
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler, copy_config_files
-from core.handlers.pcf_handler import check_parents, update_materials
+from core.handlers.pcf_handler import check_parents, update_materials, restore_particle_files
 from core.handlers.skybox_handler import handle_skybox_mods, restore_skybox_files
 from core.parsers.vpk_file import VPKFile
 from core.parsers.pcf_file import PCFFile
 from operations.pcf_rebuild import load_particle_system_map, extract_elements
 from operations.file_processors import pcf_mod_processor, game_type, get_from_custom_dir
 from operations.vgui_preload import patch_mainmenuoverride
-from backup.backup_manager import BackupManager, get_working_vpk_path, prepare_working_copy
+from backup.backup_manager import prepare_working_copy
 from quickprecache.precache_list import make_precache_list
 from quickprecache.quick_precache import QuickPrecache
 
@@ -31,8 +31,7 @@ class Interface(QObject):
 
     def install(self, tf_path: str, selected_addons: List[str], mod_drop_zone=None, valve_rc_found=False):
         try:
-            backup_manager = BackupManager(tf_path)
-            working_vpk_path = get_working_vpk_path()
+            working_vpk_path = Path(tf_path) / "tf2_misc_dir.vpk"
             vpk_file = VPKFile(str(working_vpk_path))
             vpk_file.parse_directory()
             file_handler = FileHandler(str(working_vpk_path))
@@ -70,6 +69,9 @@ class Interface(QObject):
             # remove any skybox mods if present then patch new ones in if selected
             restore_skybox_files(tf_path)
             handle_skybox_mods(folder_setup.temp_mods_dir, tf_path)
+
+            # clear the in-game particle files
+            restore_particle_files(tf_path)
 
             if mod_drop_zone:
                 mod_drop_zone.apply_particle_selections()
@@ -179,11 +181,6 @@ class Interface(QObject):
                     self.error_signal.emit("Failed to create custom VPK")
                     return
 
-            # deploy particles
-            if not backup_manager.deploy_to_game():
-                self.error_signal.emit("Failed to deploy to game directory")
-                return
-
             # flush quick precache every install
             QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
             quick_precache_path = custom_dir / "_QuickPrecache.vpk"
@@ -219,18 +216,15 @@ class Interface(QObject):
     def restore_backup(self, tf_path: str):
         try:
             prepare_working_copy()
-            backup_manager = BackupManager(tf_path)
-
-            if not backup_manager.deploy_to_game():
-                self.error_signal.emit("Failed to restore backup")
-                return
-
             game_type(Path(tf_path) / 'gameinfo.txt', uninstall=True)
             custom_dir = Path(tf_path) / 'custom'
             custom_dir.mkdir(exist_ok=True)
 
             # skybox unpatch
             restore_skybox_files(tf_path)
+
+            # restore particles
+            restore_particle_files(tf_path)
 
             # flush quick precache
             QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
