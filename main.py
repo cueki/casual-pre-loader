@@ -31,7 +31,7 @@ def main():
         splash.showMessage("Initial setup...",
                            Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
                            Qt.GlobalColor.white)
-        initial_setup()
+        initial_setup((Path('mods.zip'), Path('mods/')))
 
     # temp
     folder_setup.cleanup_temp_folders()

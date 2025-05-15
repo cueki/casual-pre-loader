@@ -1,12 +1,8 @@
 import zipfile
 from pathlib import Path
+from typing import Tuple
 
-def initial_setup():
-    packages_to_extract = [
-        # keeping this as list in case I might add more stuff
-        (Path("mods.zip"), Path("mods/")),
-    ]
-
+def initial_setup(*packages_to_extract: Tuple[Path, Path]):
     for zip_path, extract_dir in packages_to_extract:
         if zip_path.exists():
             try:
