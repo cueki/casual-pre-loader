@@ -1,2 +1,4 @@
 PyQt6>=6.8.0
 pillow>=11.1.0
+
+pyxdg; sys_platform == 'linux' or sys_platform == 'darwin'

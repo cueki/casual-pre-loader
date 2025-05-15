@@ -1,6 +1,15 @@
+from sys import platform
+import os
 from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional
+
+# INFO: This file just allows package maintainers to set whether or not this application should act as if it is a portable install.
+# They can easily modify this file and set these values, e.g.
+# `printf '%s\n' 'portable = False' >core/are_we_portable.py`
+# This will make the application use paths outside of the installation location.
+from core.are_we_portable import portable
+
 from core.handlers.pcf_handler import get_parent_elements
 from core.parsers.pcf_file import PCFFile
 
@@ -8,7 +17,23 @@ from core.parsers.pcf_file import PCFFile
 @dataclass
 class FolderConfig:
     # configuration class for managing folder paths
-    project_dir = Path.cwd()
+
+    install_dir = Path(os.path.dirname(os.path.abspath(__file__))).parent  # INFO: I'm not too sure if this can break or not, oh well
+    portable = portable  # make sure it is accessible via self.portable
+
+    # TODO: allow windows users to use non-portable installs (would allow us to remove this entire platform check)
+    if portable or platform == 'win32':  # Windows
+        # default portable values
+        project_dir = install_dir
+    elif platform in ('linux', 'darwin'):  # Linux and MacOS
+        from xdg import BaseDirectory
+
+        # default non-portable values
+        project_dir = Path(BaseDirectory.xdg_data_home) / 'casual-pre-loader'
+
+    else:  # Other (unsupported)
+        raise NotImplementedError(f'Unknown platform: {platform}')
+
     base_default_pcf: Optional[PCFFile] = field(default=None)
     base_default_parents: Optional[set[str]] = field(default=None)
 
@@ -95,3 +120,11 @@ class FolderConfig:
 
 # create a default instance for import
 folder_setup = FolderConfig()
+
+# logging
+print(
+    f'We{" ARE " if folder_setup.portable else " are NOT "}running a portable install',
+    f'Application files are located in {folder_setup.install_dir}',
+    f'Project files are written to {folder_setup.project_dir}',
+    sep='\n'
+)
