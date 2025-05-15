@@ -1,5 +1,5 @@
 import subprocess
-import platform
+from sys import platform
 from pathlib import Path
 from enum import Enum
 
@@ -52,7 +52,7 @@ class StudioMDL:
         tf_path = str(Path(self.game_path) / 'tf')
 
         # use wine on not windows
-        if platform.system() != "Windows":
+        if platform != "win32":
             # for wine, use shell=True and use Z:path maybe ???
             cmd_str = f'wine "{exe_path}" -game "Z:{tf_path}" -nop4 -verbose "Z:{qc_file}"'
             print(f"Executing with wine: {cmd_str}")

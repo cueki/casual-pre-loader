@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
+from sys import platform
 from pathlib import Path
+
 from PyQt6.QtWidgets import QApplication, QSplashScreen
 from PyQt6.QtGui import QPixmap, QIcon
 from PyQt6.QtCore import Qt
+
 from gui.main_window import ParticleManagerGUI
 from gui.setup import initial_setup
 from core.folder_setup import folder_setup
@@ -41,8 +44,7 @@ def main():
     window = ParticleManagerGUI()
 
     # set icon for Windows
-    import platform
-    if platform.system() == 'Windows':
+    if platform == 'win32':
         import ctypes
         my_app_id = 'cool.app.id.yes'
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(my_app_id)
