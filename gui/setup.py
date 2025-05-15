@@ -16,7 +16,6 @@ def initial_setup():
                 with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                     zip_ref.extractall(extract_dir)
 
-                zip_path.unlink()
-                print(f"Extracted {zip_path.name} successfully, deleted ZIP file")
+                print(f"Extracted {zip_path.name} successfully")
             except Exception as e:
                 print(f"Error extracting {zip_path}: {e}")
