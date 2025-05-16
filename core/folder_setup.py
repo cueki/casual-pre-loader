@@ -25,11 +25,13 @@ class FolderConfig:
     if portable or platform == 'win32':  # Windows
         # default portable values
         project_dir = install_dir
+        settings_dir = project_dir
     elif platform in ('linux', 'darwin'):  # Linux and MacOS
         from xdg import BaseDirectory
 
         # default non-portable values
         project_dir = Path(BaseDirectory.xdg_data_home) / 'casual-pre-loader'
+        settings_dir = Path(BaseDirectory.xdg_config_home) / 'casual-pre-loader'
 
     else:  # Other (unsupported)
         raise NotImplementedError(f'Unknown platform: {platform}')
@@ -66,9 +68,11 @@ class FolderConfig:
     def create_required_folders(self) -> None:
         folders = [
             self.backup_dir,
+
             self.mods_dir,
             self.addons_dir,
             self.particles_dir,
+
             self.temp_dir,
             self.temp_working_dir,
             self.temp_output_dir,
@@ -126,5 +130,6 @@ print(
     f'We{" ARE " if folder_setup.portable else " are NOT "}running a portable install',
     f'Application files are located in {folder_setup.install_dir}',
     f'Project files are written to {folder_setup.project_dir}',
+    f'Settings files are in {folder_setup.settings_dir}',
     sep='\n'
 )
