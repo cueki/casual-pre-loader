@@ -48,7 +48,11 @@ def main():
         import ctypes
         my_app_id = 'cool.app.id.yes'
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(my_app_id)
-    window.setWindowIcon(QIcon('gui/cueki_icon.ico'))
+        window.setWindowIcon(QIcon(str(folder_setup.install_dir / 'gui/cueki_icon.ico')))
+    elif platform == 'linux':
+        window.setWindowIcon(QIcon(str(folder_setup.install_dir / 'gui/cueki_icon.png')))
+    else:
+        print(f"[Warning] We don't know how to set an icon for platform type: {platform}")
 
     splash.finish(window)
     window.show()
