@@ -33,7 +33,7 @@ def patch_mainmenuoverride(tf_path: str):
     if not found_mainmenuoverride:
         custom_content_dir = folder_setup.temp_mods_dir / "resource" / "ui"
         custom_content_dir.mkdir(parents=True, exist_ok=True)
-        shutil.copy2("backup/resource/ui/mainmenuoverride.res", custom_content_dir / "mainmenuoverride.res")
+        shutil.copy2(folder_setup.install_dir / 'backup/resource/ui/mainmenuoverride.res', custom_content_dir / 'mainmenuoverride.res')
         _add_vguipreload_string(custom_content_dir / "mainmenuoverride.res")
 
 

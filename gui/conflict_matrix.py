@@ -6,10 +6,11 @@ from PyQt6.QtWidgets import (
     QTableWidget, QHeaderView, QCheckBox, QHBoxLayout, QWidget, QPushButton, QAbstractItemView
 )
 
+from core.folder_setup import folder_setup
 
 def load_mod_urls():
     # load saved URLs from a file
-    urls_file = Path("mod_urls.json")
+    urls_file = folder_setup.install_dir / 'mod_urls.json'
     if urls_file.exists():
         try:
             with open(urls_file, "r") as f:

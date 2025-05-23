@@ -1,12 +1,16 @@
 import json
 from pathlib import Path
 
+from core.folder_setup import folder_setup
 
 class SettingsManager:
     # listen up students, in this class we will learn how to write java getters and setters
     def __init__(self, settings_file="app_settings.json", metadata_file="addon_metadata.json"):
-        self.settings_file = Path(settings_file)
-        self.metadata_file = Path(metadata_file)
+        folder_setup.settings_dir.mkdir(parents=True, exist_ok=True)  # Ensure that settings directory exists
+
+        self.settings_file = folder_setup.settings_dir / settings_file
+        self.metadata_file = folder_setup.settings_dir / metadata_file
+
         self.settings = self._load_settings()
         self.addon_metadata = self._load_metadata()
 

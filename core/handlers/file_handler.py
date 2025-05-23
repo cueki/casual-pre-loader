@@ -12,23 +12,23 @@ def copy_config_files(custom_content_dir, skip_valve_rc=False):
     # config copy
     config_dest_dir = custom_content_dir / "cfg" / "w"
     config_dest_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2("backup/cfg/w/config.cfg", config_dest_dir)
+    shutil.copy2(folder_setup.install_dir / 'backup/cfg/w/config.cfg', config_dest_dir)
 
     # valve.rc copy
     if not skip_valve_rc:
         valverc_dest_dir = custom_content_dir / "cfg"
         valverc_dest_dir.mkdir(parents=True, exist_ok=True)
-        shutil.copy2("backup/cfg/valve.rc", valverc_dest_dir)
+        shutil.copy2(folder_setup.install_dir / 'backup/cfg/valve.rc', valverc_dest_dir)
 
     # vscript copy
     vscript_dest_dir = custom_content_dir / "scripts" / "vscripts"
     vscript_dest_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2("backup/scripts/vscripts/randommenumusic.nut", vscript_dest_dir)
+    shutil.copy2(folder_setup.install_dir / 'backup/scripts/vscripts/randommenumusic.nut', vscript_dest_dir)
 
     # vgui copy
     vgui_dest_dir = custom_content_dir / "resource" / "ui"
     vgui_dest_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2("backup/resource/ui/vguipreload.res", vgui_dest_dir)
+    shutil.copy2(folder_setup.install_dir / 'backup/resource/ui/vguipreload.res', vgui_dest_dir)
 
 
 def scan_for_valve_rc_files(tf_path):

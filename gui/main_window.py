@@ -1,5 +1,5 @@
 import os
-import platform
+from sys import platform
 import subprocess
 import threading
 from pathlib import Path
@@ -428,7 +428,7 @@ class ParticleManagerGUI(QMainWindow):
             return
 
         try:
-            if platform.system() == "Windows":
+            if platform == "win32":
                 os.startfile(str(addons_path))
             else:
                 subprocess.run(["xdg-open", str(addons_path)])

@@ -1,4 +1,4 @@
-import platform
+from sys import platform
 import subprocess
 import shutil
 from pathlib import Path
@@ -15,7 +15,7 @@ class VTFHandler:
 
     def _run_vtf_command(self, args):
         cmd_path = str(self.vtf_cmd_path)
-        if platform.system() != "Windows":
+        if platform != "win32":
             full_cmd = ["wine", cmd_path] + args
         else:
             full_cmd = [cmd_path] + args

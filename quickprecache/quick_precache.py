@@ -7,6 +7,8 @@ from quickprecache.precache_list import make_precache_list
 from quickprecache.r_rootlod import check_root_lod
 from quickprecache.studio_mdl import StudioMDL
 
+from core.folder_setup import folder_setup
+
 
 def handle_string(input_str: str) -> str:
     # strip and remove quotes
@@ -142,7 +144,7 @@ class QuickPrecache:
                 mode='w',
                 suffix='.qc',
                 delete=False,
-                dir=os.getcwd()
+                dir=folder_setup.temp_dir
             )
 
             # save the original filename for reference
@@ -170,7 +172,7 @@ class QuickPrecache:
                 mode='w',
                 suffix='.qc',
                 delete=False,
-                dir=os.getcwd()
+                dir=folder_setup.temp_dir
             )
 
             temp_path = Path(temp_file.name)

@@ -1,7 +1,12 @@
+#!/usr/bin/env python3
+
+from sys import platform
 from pathlib import Path
+
 from PyQt6.QtWidgets import QApplication, QSplashScreen
 from PyQt6.QtGui import QPixmap, QIcon
 from PyQt6.QtCore import Qt
+
 from gui.main_window import ParticleManagerGUI
 from gui.setup import initial_setup
 from core.folder_setup import folder_setup
@@ -22,11 +27,11 @@ def main():
     splash.show()
 
     # initial setup
-    if not Path("mods/").exists():
+    if not folder_setup.mods_dir.exists():
         splash.showMessage("Initial setup...",
                            Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
                            Qt.GlobalColor.white)
-        initial_setup()
+        initial_setup((folder_setup.install_dir / 'mods.zip', folder_setup.mods_dir))
 
     # temp
     folder_setup.cleanup_temp_folders()
@@ -39,12 +44,15 @@ def main():
     window = ParticleManagerGUI()
 
     # set icon for Windows
-    import platform
-    if platform.system() == 'Windows':
+    if platform == 'win32':
         import ctypes
         my_app_id = 'cool.app.id.yes'
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(my_app_id)
-    window.setWindowIcon(QIcon('gui/cueki_icon.ico'))
+        window.setWindowIcon(QIcon(str(folder_setup.install_dir / 'gui/cueki_icon.ico')))
+    elif platform == 'linux':
+        window.setWindowIcon(QIcon(str(folder_setup.install_dir / 'gui/cueki_icon.png')))
+    else:
+        print(f"[Warning] We don't know how to set an icon for platform type: {platform}")
 
     splash.finish(window)
     window.show()
