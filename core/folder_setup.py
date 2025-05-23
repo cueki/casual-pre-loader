@@ -4,10 +4,10 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional
 
-# INFO: This file just allows package maintainers to set whether or not this application should act as if it is a portable install.
+# INFO: This file just allows package maintainers to set whether this application should act as if it is a portable installation.
 # They can easily modify this file and set these values, e.g.
 # `printf '%s\n' 'portable = False' >core/are_we_portable.py`
-# This will make the application use paths outside of the installation location.
+# This will make the application use paths outside the installation location.
 from core.are_we_portable import portable
 
 from core.handlers.pcf_handler import get_parent_elements

@@ -255,7 +255,7 @@ class VPKFile:
             # verify size
             if len(new_data) != entry.entry_length:
                 raise ValueError(
-                    f"Modified file does not match original "
+                    f"Modified file {filepath} does not match original "
                     f"({len(new_data)} != {entry.entry_length} bytes)"
                 )
             # get the correct VPK archive path
