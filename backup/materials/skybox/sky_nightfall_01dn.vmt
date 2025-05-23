@@ -1,9 +1,0 @@
-"sky"
-{
-	"$hdrbasetexture" "Skybox/sky_nightfall_01dn"
-	"$nofog" "1"
-	"$ignorez" "1"
-	"$baseTexture" "Skybox/sky_nightfall_01dn"
-	"%keywords" "tf"
-}
-
