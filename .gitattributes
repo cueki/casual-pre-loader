@@ -1,0 +1,2 @@
+# force CRLF line endings for VMT files
+*.vmt text eol=crlf
