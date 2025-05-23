@@ -1,0 +1,6 @@
+"UnlitGeneric"
+{
+	"$baseTexture" "Skybox/sky_fakeblue"
+	$selfillum 1
+	$selfillumtint" 22 22 22"	
+}

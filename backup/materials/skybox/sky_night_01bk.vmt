@@ -1,0 +1,10 @@
+"sky"
+{
+	
+	"$hdrbasetexture" "skybox/sky_night_01bk"	
+	"$nofog" "1"
+	"$ignorez" "1"
+	"$basetexture" "skybox/sky_night_01bk"
+	"$basetexturetransform" "center 0 0 scale 1 2 rotate 0 translate 0 0"
+	"%keywords" "tf"
+}
