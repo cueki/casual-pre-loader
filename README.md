@@ -28,7 +28,7 @@ If done right, you should now see `studiomdl.exe` inside the bin/ folder!
 
 Now you can clone the repo, or install it as an AUR package!
 
-Using yay: https://github.com/Jguer/yay 
+After installing yay: https://github.com/Jguer/yay 
 
 ```
 yay -S casual-pre-loader-git
