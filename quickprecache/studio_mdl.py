@@ -23,13 +23,13 @@ class StudioMDL:
 
     def _get_studio_mdl_version(self) -> StudioMDLVersion:
         # detect which version of StudioMDL is available
-        # first we do NekoMDL
-        if self._check_studio_mdl_version(StudioMDLVersion.NEKOMDL):
-            return StudioMDLVersion.NEKOMDL
-
-        # then we check for StudioMDL
+        # check for StudioMDL
         if self._check_studio_mdl_version(StudioMDLVersion.STUDIOMDL32):
             return StudioMDLVersion.STUDIOMDL32
+
+        # check for NekoMDL
+        if self._check_studio_mdl_version(StudioMDLVersion.NEKOMDL):
+            return StudioMDLVersion.NEKOMDL
 
         return StudioMDLVersion.MISSING
 
