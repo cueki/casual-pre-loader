@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from sys import platform
-from pathlib import Path
 
 from PyQt6.QtWidgets import QApplication, QSplashScreen
 from PyQt6.QtGui import QPixmap, QIcon
@@ -10,7 +9,7 @@ from PyQt6.QtCore import Qt
 from gui.main_window import ParticleManagerGUI
 from gui.setup import initial_setup
 from core.folder_setup import folder_setup
-from backup.backup_manager import prepare_working_copy
+from core.backup_manager import prepare_working_copy
 
 
 def main():

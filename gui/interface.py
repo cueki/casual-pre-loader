@@ -9,10 +9,10 @@ from core.handlers.pcf_handler import check_parents, update_materials, restore_p
 from core.handlers.skybox_handler import handle_skybox_mods, restore_skybox_files
 from core.parsers.vpk_file import VPKFile
 from core.parsers.pcf_file import PCFFile
+from core.backup_manager import prepare_working_copy
 from operations.pcf_rebuild import load_particle_system_map, extract_elements
 from operations.file_processors import pcf_mod_processor, game_type, get_from_custom_dir
 from operations.vgui_preload import patch_mainmenuoverride
-from backup.backup_manager import prepare_working_copy
 from quickprecache.precache_list import make_precache_list
 from quickprecache.quick_precache import QuickPrecache
 
@@ -93,7 +93,7 @@ class Interface(QObject):
                     source_path = folder_setup.temp_game_files_dir / duplicate_effect
                     if source_path.exists():
                         extract_elements(PCFFile(source_path).decode(),
-                                         load_particle_system_map('particle_system_map.json')
+                                         load_particle_system_map(folder_setup.install_dir / 'particle_system_map.json')
                                          [f'particles/{target_path.name}']).encode(target_path)
 
             if (folder_setup.temp_mods_dir / "blood_trail.pcf").exists():
@@ -260,6 +260,5 @@ class Interface(QObject):
         except Exception as e:
             self.error_signal.emit(f"An error occurred while restoring backup: {str(e)}")
         finally:
-            folder_setup.cleanup_temp_folders()
             prepare_working_copy()
             self.operation_finished.emit()
