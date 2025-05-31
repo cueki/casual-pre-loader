@@ -1,3 +1,4 @@
+import shutil
 from sys import platform
 import os
 from pathlib import Path
@@ -31,6 +32,7 @@ class FolderConfig:
 
         # default non-portable values
         project_dir = Path(BaseDirectory.xdg_data_home) / 'casual-pre-loader'
+        shutil.copytree(install_dir / "backup", project_dir / "backup", dirs_exist_ok=True)
         settings_dir = Path(BaseDirectory.xdg_config_home) / 'casual-pre-loader'
 
     else:  # Other (unsupported)
@@ -42,6 +44,7 @@ class FolderConfig:
     # main folder names
     _backup_folder = "backup"
     _mods_folder = "mods"
+    # mods subdir
     _mods_particles_folder = "particles"
     _mods_addons_folder = "addons"
 
@@ -67,8 +70,6 @@ class FolderConfig:
 
     def create_required_folders(self) -> None:
         folders = [
-            self.backup_dir,
-
             self.mods_dir,
             self.addons_dir,
             self.particles_dir,

@@ -2317,5 +2317,2417 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_well_01up.vmt"
 		}
+		"burn_marks"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/burn_marks.vmt"
+		}
+		"paint_blood"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/paint_blood.vmt"
+		}
+		"paint_blood_buckets"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/paint_blood_buckets.vmt"
+		}
+		"paint_blood_buckets_yeti"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/paint_blood_buckets_yeti.vmt"
+		}
+		"paint_blood_drops"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/paint_blood_drops.vmt"
+		}
+		"paint_dirt"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/paint_dirt.vmt"
+		}
+		"paint_scratches"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/paint_scratches.vmt"
+		}
+		"paint_strokes"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/paint_strokes.vmt"
+		}
+		"p_ambassador_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_ambassador/p_ambassador_wearblend.vmt"
+		}
+		"p_ambassador_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_ambassador/p_ambassador_wearblend.vtf"
+		}
+		"p_flameball_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_flameball/p_flameball_wearblend.vmt"
+		}
+		"p_flameball_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_flameball/p_flameball_wearblend.vtf"
+		}
+		"p_flamethrower_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_flamethrower/p_flamethrower_wearblend.vmt"
+		}
+		"p_flamethrower_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_flamethrower/p_flamethrower_wearblend.vtf"
+		}
+		"p_flamethrower_wearblend_no_label"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_flamethrower/p_flamethrower_wearblend_no_label.vmt"
+		}
+		"p_flamethrower_wearblend_no_label"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_flamethrower/p_flamethrower_wearblend_no_label.vtf"
+		}
+		"p_grenadelauncher_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_grenadelauncher/p_grenadelauncher_wearblend.vmt"
+		}
+		"p_grenadelauncher_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_grenadelauncher/p_grenadelauncher_wearblend.vtf"
+		}
+		"p_grenadelauncher_wearblend_02"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_grenadelauncher/p_grenadelauncher_wearblend_02.vmt"
+		}
+		"p_grenadelauncher_wearblend_02"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_grenadelauncher/p_grenadelauncher_wearblend_02.vtf"
+		}
+		"p_knife_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_knife/p_knife_wearblend.vmt"
+		}
+		"p_knife_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_knife/p_knife_wearblend.vtf"
+		}
+		"p_medigun_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_medigun/p_medigun_wearblend.vmt"
+		}
+		"p_medigun_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_medigun/p_medigun_wearblend.vtf"
+		}
+		"p_medigun_wearblend_wires"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_medigun/p_medigun_wearblend_wires.vmt"
+		}
+		"p_medigun_wearblend_wires"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_medigun/p_medigun_wearblend_wires.vtf"
+		}
+		"p_minigun_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_minigun/p_minigun_wearblend.vmt"
+		}
+		"p_minigun_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_minigun/p_minigun_wearblend.vtf"
+		}
+		"p_minigun_wearblend_02"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_minigun/p_minigun_wearblend_02.vmt"
+		}
+		"p_minigun_wearblend_02"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_minigun/p_minigun_wearblend_02.vtf"
+		}
+		"p_pistol_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_pistol/p_pistol_wearblend.vmt"
+		}
+		"p_pistol_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_pistol/p_pistol_wearblend.vtf"
+		}
+		"p_revolver_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_revolver/p_revolver_wearblend.vmt"
+		}
+		"p_revolver_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_revolver/p_revolver_wearblend.vtf"
+		}
+		"p_rocketlauncher_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_rocketlauncher/p_rocketlauncher_wearblend.vmt"
+		}
+		"p_rocketlauncher_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_rocketlauncher/p_rocketlauncher_wearblend.vtf"
+		}
+		"p_scattergun_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_scattergun/p_scattergun_wearblend.vmt"
+		}
+		"p_scattergun_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_scattergun/p_scattergun_wearblend.vtf"
+		}
+		"p_shotgun_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_shotgun/p_shotgun_wearblend.vmt"
+		}
+		"p_shotgun_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_shotgun/p_shotgun_wearblend.vtf"
+		}
+		"p_smg_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_smg/p_smg_wearblend.vmt"
+		}
+		"p_smg_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_smg/p_smg_wearblend.vtf"
+		}
+		"p_sniperrifle_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_sniperrifle/p_sniperrifle_wearblend.vmt"
+		}
+		"p_sniperrifle_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_sniperrifle/p_sniperrifle_wearblend.vtf"
+		}
+		"p_stickybomb_launcher_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_stickybomb_launcher/p_stickybomb_launcher_wearblend.vmt"
+		}
+		"p_stickybomb_launcher_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_stickybomb_launcher/p_stickybomb_launcher_wearblend.vtf"
+		}
+		"p_ubersaw_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_ubersaw/p_ubersaw_wearblend.vmt"
+		}
+		"p_ubersaw_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_ubersaw/p_ubersaw_wearblend.vtf"
+		}
+		"p_wrench_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_wrench/p_wrench_wearblend.vmt"
+		}
+		"p_wrench_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/weapons/c_models/c_wrench/p_wrench_wearblend.vtf"
+		}
+		"p_amputator_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_amputator/p_amputator_wearblend.vmt"
+		}
+		"p_amputator_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_amputator/p_amputator_wearblend.vtf"
+		}
+		"p_atom_launcher_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_atom_launcher/p_atom_launcher_wearblend.vmt"
+		}
+		"p_atom_launcher_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_atom_launcher/p_atom_launcher_wearblend.vtf"
+		}
+		"p_back_scratcher_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_back_scratcher/p_back_scratcher_wearblend.vmt"
+		}
+		"p_back_scratcher_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_back_scratcher/p_back_scratcher_wearblend.vtf"
+		}
+		"p_battleaxe_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_battleaxe/p_battleaxe_wearblend.vmt"
+		}
+		"p_battleaxe_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_battleaxe/p_battleaxe_wearblend.vtf"
+		}
+		"p_bazaar_sniper_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_bazaar_sniper/p_bazaar_sniper_wearblend.vmt"
+		}
+		"p_bazaar_sniper_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_bazaar_sniper/p_bazaar_sniper_wearblend.vtf"
+		}
+		"p_blackbox_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_blackbox/p_blackbox_wearblend.vmt"
+		}
+		"p_blackbox_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_blackbox/p_blackbox_wearblend.vtf"
+		}
+		"p_claidheamohmor_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_claidheamohmor/p_claidheamohmor_wearblend.vmt"
+		}
+		"p_claidheamohmor_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_claidheamohmor/p_claidheamohmor_wearblend.vtf"
+		}
+		"p_crusaders_crossbow_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_crusaders_crossbow/p_crusaders_crossbow_wearblend.vmt"
+		}
+		"p_crusaders_crossbow_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_crusaders_crossbow/p_crusaders_crossbow_wearblend.vtf"
+		}
+		"p_degreaser_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_degreaser/p_degreaser_wearblend.vmt"
+		}
+		"p_degreaser_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_degreaser/p_degreaser_wearblend.vtf"
+		}
+		"p_demo_cannon_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_demo_cannon/p_demo_cannon_wearblend.vmt"
+		}
+		"p_demo_cannon_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_demo_cannon/p_demo_cannon_wearblend.vtf"
+		}
+		"p_demo_sultan_sword_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_demo_sultan_sword/p_demo_sultan_sword_wearblend.vmt"
+		}
+		"p_demo_sultan_sword_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_demo_sultan_sword/p_demo_sultan_sword_wearblend.vtf"
+		}
+		"p_detonator_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_detonator/p_detonator_wearblend.vmt"
+		}
+		"p_detonator_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_detonator/p_detonator_wearblend.vtf"
+		}
+		"p_gatling_gun_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_gatling_gun/p_gatling_gun_wearblend.vmt"
+		}
+		"p_gatling_gun_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_gatling_gun/p_gatling_gun_wearblend.vtf"
+		}
+		"p_holymackerel_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_holymackerel/p_holymackerel_wearblend.vmt"
+		}
+		"p_holymackerel_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_holymackerel/p_holymackerel_wearblend.vtf"
+		}
+		"p_holymackerel_wearblend_eyes"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_holymackerel/p_holymackerel_wearblend_eyes.vmt"
+		}
+		"p_holymackerel_wearblend_eyes"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_holymackerel/p_holymackerel_wearblend_eyes.vtf"
+		}
+		"p_jag_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_jag/p_jag_wearblend.vmt"
+		}
+		"p_jag_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_jag/p_jag_wearblend.vtf"
+		}
+		"p_lochnload_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_lochnload/p_lochnload_wearblend.vmt"
+		}
+		"p_lochnload_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_lochnload/p_lochnload_wearblend.vtf"
+		}
+		"p_powerjack_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_powerjack/p_powerjack_wearblend.vmt"
+		}
+		"p_powerjack_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_powerjack/p_powerjack_wearblend.vtf"
+		}
+		"p_quadball_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_quadball/p_quadball_wearblend.vmt"
+		}
+		"p_quadball_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_quadball/p_quadball_wearblend.vtf"
+		}
+		"p_reserve_shooter_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_reserve_shooter/p_reserve_shooter_wearblend.vmt"
+		}
+		"p_reserve_shooter_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_reserve_shooter/p_reserve_shooter_wearblend.vtf"
+		}
+		"p_riding_crop_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_riding_crop/p_riding_crop_wearblend.vmt"
+		}
+		"p_riding_crop_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_riding_crop/p_riding_crop_wearblend.vtf"
+		}
+		"p_russian_riot_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_russian_riot/p_russian_riot_wearblend.vmt"
+		}
+		"p_russian_riot_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_russian_riot/p_russian_riot_wearblend.vtf"
+		}
+		"p_scimitar_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_scimitar/p_scimitar_wearblend.vmt"
+		}
+		"p_scimitar_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_scimitar/p_scimitar_wearblend.vtf"
+		}
+		"p_scorch_shot_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_scorch_shot/p_scorch_shot_wearblend.vmt"
+		}
+		"p_scorch_shot_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_scorch_shot/p_scorch_shot_wearblend.vtf"
+		}
+		"p_shortstop_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_shortstop/p_shortstop_wearblend.vmt"
+		}
+		"p_shortstop_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_shortstop/p_shortstop_wearblend.vtf"
+		}
+		"p_soda_popper_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_soda_popper/p_soda_popper_wearblend.vmt"
+		}
+		"p_soda_popper_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_soda_popper/p_soda_popper_wearblend.vtf"
+		}
+		"p_tele_shotgun_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_tele_shotgun/p_tele_shotgun_wearblend.vmt"
+		}
+		"p_tele_shotgun_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_tele_shotgun/p_tele_shotgun_wearblend.vtf"
+		}
+		"p_tomislav_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_tomislav/p_tomislav_wearblend.vmt"
+		}
+		"p_tomislav_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_tomislav/p_tomislav_wearblend.vtf"
+		}
+		"p_trenchgun_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_trenchgun/p_trenchgun_wearblend.vmt"
+		}
+		"p_trenchgun_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_trenchgun/p_trenchgun_wearblend.vtf"
+		}
+		"p_winger_pistol_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_winger_pistol/p_winger_pistol_wearblend.vmt"
+		}
+		"p_winger_pistol_wearblend"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/workshop/weapons/c_models/c_winger_pistol/p_winger_pistol_wearblend.vtf"
+		}
+		"c_pistol"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_pistol.vtf"
+		}
+		"c_double_barrel"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_double_barrel.vtf"
+		}
+		"c_wrangler_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_wrangler_large.vtf"
+		}
+		"c_pistol_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_pistol_large.vtf"
+		}
+		"c_double_barrel_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_double_barrel_large.vtf"
+		}
+		"c_wrangler"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_wrangler.vtf"
+		}
+		"c_bat"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_bat.vtf"
+		}
+		"c_doublebarrel_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_doublebarrel_large.vtf"
+		}
+		"c_scattergun_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_scattergun_large.vtf"
+		}
+		"c_scattergun"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_scattergun.vtf"
+		}
+		"c_doublebarrel"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_doublebarrel.vtf"
+		}
+		"c_bat_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_bat_large.vtf"
+		}
+		"c_lollichop"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_lollichop/c_lollichop.vtf"
+		}
+		"c_lollichop_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_lollichop/c_lollichop_large.vtf"
+		}
+		"c_leather_watch"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_leather_watch/parts/c_leather_watch.vtf"
+		}
+		"c_leather_watch_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_leather_watch/parts/c_leather_watch_large.vtf"
+		}
+		"c_flamethrower_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_flamethrower/c_flamethrower_large.vtf"
+		}
+		"c_flamethrower"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_flamethrower/c_flamethrower.vtf"
+		}
+		"c_boxing_gloves_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_boxing_gloves/c_boxing_gloves_large.vtf"
+		}
+		"c_boxing_gloves"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_boxing_gloves/c_boxing_gloves.vtf"
+		}
+		"c_syringegun"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_syringegun/c_syringegun.vtf"
+		}
+		"c_ambassador"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_ambassador/parts/c_ambassador.vtf"
+		}
+		"c_ambassador_opt"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_ambassador/parts/c_ambassador_opt.vtf"
+		}
+		"c_ambassador_opt_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_ambassador/parts/c_ambassador_opt_large.vtf"
+		}
+		"c_ambassador_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_ambassador/parts/c_ambassador_large.vtf"
+		}
+		"c_gascan"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_gascan/c_gascan.vtf"
+		}
+		"c_gascan_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_gascan/c_gascan_large.vtf"
+		}
+		"c_wooden_bat_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_wooden_bat/c_wooden_bat_large.vtf"
+		}
+		"c_wooden_bat"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_wooden_bat/c_wooden_bat.vtf"
+		}
+		"c_proto_medigun"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_proto_medigun/c_proto_medigun.vtf"
+		}
+		"c_proto_medigun_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_proto_medigun/c_proto_medigun_large.vtf"
+		}
+		"c_frontierjustice_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_frontierjustice/c_frontierjustice_large.vtf"
+		}
+		"c_frontierjustice"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_frontierjustice/c_frontierjustice.vtf"
+		}
+		"c_rocketjumper"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_rocketjumper/c_rocketjumper.vtf"
+		}
+		"c_rocketjumper_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_rocketjumper/c_rocketjumper_large.vtf"
+		}
+		"c_leechgun_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_leechgun/c_leechgun_large.vtf"
+		}
+		"c_leechgun"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_leechgun/c_leechgun.vtf"
+		}
+		"c_fireaxe_pyro_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_fireaxe_pyro/c_fireaxe_pyro_large.vtf"
+		}
+		"c_fireaxe_pyro"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_fireaxe_pyro/c_fireaxe_pyro.vtf"
+		}
+		"c_ubersaw"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_ubersaw/c_ubersaw.vtf"
+		}
+		"c_ubersaw_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_ubersaw/c_ubersaw_large.vtf"
+		}
+		"c_energy_drink"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_energy_drink/c_energy_drink.vtf"
+		}
+		"c_critcola"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_energy_drink/c_critcola.vtf"
+		}
+		"c_critcola_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_energy_drink/c_critcola_large.vtf"
+		}
+		"c_energy_drink_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_energy_drink/c_energy_drink_large.vtf"
+		}
+		"c_pickaxe"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_pickaxe/c_pickaxe.vtf"
+		}
+		"c_pickaxe_s2"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_pickaxe/c_pickaxe_s2.vtf"
+		}
+		"c_pickaxe_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_pickaxe/c_pickaxe_large.vtf"
+		}
+		"c_pickaxe_s2_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_pickaxe/c_pickaxe_s2_large.vtf"
+		}
+		"c_claymore"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_claymore/c_claymore.vtf"
+		}
+		"c_claymore_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_claymore/c_claymore_large.vtf"
+		}
+		"c_rainblower"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_rainblower/c_rainblower.vtf"
+		}
+		"c_rainblower_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_rainblower/c_rainblower_large.vtf"
+		}
+		"c_sandwich"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_sandwich/c_sandwich.vtf"
+		}
+		"c_sandwich_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_sandwich/c_sandwich_large.vtf"
+		}
+		"c_flaregun_pyro_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_flaregun_pyro/c_flaregun_pyro_large.vtf"
+		}
+		"c_flaregun_pyro"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_flaregun_pyro/c_flaregun_pyro.vtf"
+		}
+		"c_scotland_shard_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_scotland_shard/c_scotland_shard_large.vtf"
+		}
+		"c_scotland_shard"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_scotland_shard/c_scotland_shard.vtf"
+		}
+		"rum_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_scotland_shard/rum_large.vtf"
+		}
+		"c_headtaker_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_headtaker/c_headtaker_large.vtf"
+		}
+		"c_headtaker"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_headtaker/c_headtaker.vtf"
+		}
+		"c_bow_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_bow/c_bow_large.vtf"
+		}
+		"c_bow"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_bow/c_bow.vtf"
+		}
+		"c_medigun"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_medigun/c_medigun.vtf"
+		}
+		"c_medigun_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_medigun/c_medigun_large.vtf"
+		}
+		"c_directhit_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_directhit/c_directhit_large.vtf"
+		}
+		"c_directhit"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_directhit/c_directhit.vtf"
+		}
+		"c_backburner_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_backburner/c_backburner_large.vtf"
+		}
+		"c_backburner"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_backburner/c_backburner.vtf"
+		}
+		"c_spy_watch_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_spy_watch/parts/c_spy_watch_large.vtf"
+		}
+		"c_spy_watch"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_spy_watch/parts/c_spy_watch.vtf"
+		}
+		"c_overhealer_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_overhealer/c_overhealer_large.vtf"
+		}
+		"c_overhealer"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_overhealer/c_overhealer.vtf"
+		}
+		"c_proto_syringegun_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_proto_syringegun/c_proto_syringegun_large.vtf"
+		}
+		"c_proto_syringegun"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_proto_syringegun/c_proto_syringegun.vtf"
+		}
+		"c_axtinguisher_pyro"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_axtinguisher/c_axtinguisher_pyro.vtf"
+		}
+		"c_axtinguisher_pyro_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_axtinguisher/c_axtinguisher_pyro_large.vtf"
+		}
+		"c_bonesaw"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_bonesaw/c_bonesaw.vtf"
+		}
+		"c_bonesaw_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/c_models/c_bonesaw/c_bonesaw_large.vtf"
+		}
+		"v_fist_heavy_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/v_models/v_fist_heavy_large.vtf"
+		}
+		"v_fist_heavy"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/v_models/v_fist_heavy.vtf"
+		}
+		"w_pda_engineer"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_pda_engineer.vtf"
+		}
+		"w_sniperrifle"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_sniperrifle.vtf"
+		}
+		"w_sapper_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_sapper_large.vtf"
+		}
+		"w_syringegun_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_syringegun_large.vtf"
+		}
+		"w_shovel"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_shovel.vtf"
+		}
+		"w_revolver_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_revolver_large.vtf"
+		}
+		"w_medigun_overhealer_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_medigun_overhealer_large.vtf"
+		}
+		"w_rocketlauncher_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_rocketlauncher_large.vtf"
+		}
+		"w_sapper"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_sapper.vtf"
+		}
+		"w_bottle_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_bottle_large.vtf"
+		}
+		"w_medigun_overhealer"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_medigun_overhealer.vtf"
+		}
+		"w_machete_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_machete_large.vtf"
+		}
+		"w_machete"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_machete.vtf"
+		}
+		"w_builder_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_builder_large.vtf"
+		}
+		"w_knife_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_knife_large.vtf"
+		}
+		"w_cigarette_case"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_cigarette_case.vtf"
+		}
+		"w_shotgun"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_shotgun.vtf"
+		}
+		"w_shovel_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_shovel_large.vtf"
+		}
+		"w_bottle"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_bottle.vtf"
+		}
+		"w_wrench_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_wrench_large.vtf"
+		}
+		"w_syringegun"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_syringegun.vtf"
+		}
+		"w_smg_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_smg_large.vtf"
+		}
+		"w_cigarette_case_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_cigarette_case_large.vtf"
+		}
+		"w_stickybomb_launcher_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_stickybomb_launcher_large.vtf"
+		}
+		"w_smg"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_smg.vtf"
+		}
+		"w_fireaxe"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_fireaxe.vtf"
+		}
+		"w_grenadelauncher"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_grenadelauncher.vtf"
+		}
+		"w_pda_engineer_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_pda_engineer_large.vtf"
+		}
+		"w_minigun"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_minigun.vtf"
+		}
+		"w_builder"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_builder.vtf"
+		}
+		"w_minigun_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_minigun_large.vtf"
+		}
+		"w_sniperrifle_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_sniperrifle_large.vtf"
+		}
+		"w_grenadelauncher_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_grenadelauncher_large.vtf"
+		}
+		"w_wrench"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_wrench.vtf"
+		}
+		"w_shotgun_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_shotgun_large.vtf"
+		}
+		"w_fireaxe_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_fireaxe_large.vtf"
+		}
+		"w_stickybomb_launcher"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_stickybomb_launcher.vtf"
+		}
+		"w_revolver"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_revolver.vtf"
+		}
+		"w_knife"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_knife.vtf"
+		}
+		"w_rocketlauncher"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/weapons/w_models/w_rocketlauncher.vtf"
+		}
+		"c_gatling_gun_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_gatling_gun/c_gatling_gun_large.vtf"
+		}
+		"c_gatling_gun"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_gatling_gun/c_gatling_gun.vtf"
+		}
+		"c_letranger"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_letranger/c_letranger.vtf"
+		}
+		"c_letranger_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_letranger/c_letranger_large.vtf"
+		}
+		"c_amputator"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_amputator/c_amputator.vtf"
+		}
+		"c_amputator_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_amputator/c_amputator_large.vtf"
+		}
+		"c_buffalo_steak_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_buffalo_steak/c_buffalo_steak_large.vtf"
+		}
+		"c_buffalo_steak"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_buffalo_steak/c_buffalo_steak.vtf"
+		}
+		"c_tele_shotgun"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_tele_shotgun/c_tele_shotgun.vtf"
+		}
+		"c_tele_shotgun_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_tele_shotgun/c_tele_shotgun_large.vtf"
+		}
+		"c_golfclub_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_golfclub/c_golfclub_large.vtf"
+		}
+		"c_golfclub"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_golfclub/c_golfclub.vtf"
+		}
+		"c_sydney_sleeper"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_sydney_sleeper/c_sydney_sleeper.vtf"
+		}
+		"c_sydney_sleeper_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_sydney_sleeper/c_sydney_sleeper_large.vtf"
+		}
+		"c_voodoo_pin_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_voodoo_pin/c_voodoo_pin_large.vtf"
+		}
+		"c_voodoo_pin"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_voodoo_pin/c_voodoo_pin.vtf"
+		}
+		"c_invasion_bat_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_invasion_bat/c_invasion_bat_large.vtf"
+		}
+		"c_invasion_bat"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_invasion_bat/c_invasion_bat.vtf"
+		}
+		"c_ttg_sam_gun"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_ttg_sam_gun/c_ttg_sam_gun.vtf"
+		}
+		"c_ttg_sam_gun_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_ttg_sam_gun/c_ttg_sam_gun_large.vtf"
+		}
+		"c_back_scratcher_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_back_scratcher/c_back_scratcher_large.vtf"
+		}
+		"c_back_scratcher"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_back_scratcher/c_back_scratcher.vtf"
+		}
+		"c_riding_crop"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_riding_crop/c_riding_crop.vtf"
+		}
+		"c_riding_crop_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_riding_crop/c_riding_crop_large.vtf"
+		}
+		"c_scorch_shot"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_scorch_shot/c_scorch_shot.vtf"
+		}
+		"c_scorch_shot_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_scorch_shot/c_scorch_shot_large.vtf"
+		}
+		"c_jag"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_jag/c_jag.vtf"
+		}
+		"c_jag_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_jag/c_jag_large.vtf"
+		}
+		"c_drg_righteousbison"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_drg_righteousbison/c_drg_righteousbison.vtf"
+		}
+		"c_drg_righteousbison_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_drg_righteousbison/c_drg_righteousbison_large.vtf"
+		}
+		"c_powerjack_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_powerjack/c_powerjack_large.vtf"
+		}
+		"c_powerjack"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_powerjack/c_powerjack.vtf"
+		}
+		"c_atom_launcher_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_atom_launcher/c_atom_launcher_large.vtf"
+		}
+		"c_atom_launcher"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_atom_launcher/c_atom_launcher.vtf"
+		}
+		"c_winger"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_winger/c_winger.vtf"
+		}
+		"c_winger_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_winger/c_winger_large.vtf"
+		}
+		"c_reserve_shooter"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_reserve_shooter/c_reserve_shooter.vtf"
+		}
+		"c_reserve_shooter_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_reserve_shooter/c_reserve_shooter_large.vtf"
+		}
+		"c_ava_roseknife"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_ava_roseknife/c_ava_roseknife.vtf"
+		}
+		"c_ava_roseknife_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_ava_roseknife/c_ava_roseknife_large.vtf"
+		}
+		"c_caber_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_caber/c_caber_large.vtf"
+		}
+		"c_caber"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_caber/c_caber.vtf"
+		}
+		"c_drg_manmelter_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_drg_manmelter/c_drg_manmelter_large.vtf"
+		}
+		"c_drg_manmelter"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_drg_manmelter/c_drg_manmelter.vtf"
+		}
+		"c_rift_fire_mace"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_rift_fire_mace/c_rift_fire_mace.vtf"
+		}
+		"c_rift_fire_mace_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_rift_fire_mace/c_rift_fire_mace_large.vtf"
+		}
+		"c_scout_sword_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_scout_sword/c_scout_sword_large.vtf"
+		}
+		"c_scout_sword"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_scout_sword/c_scout_sword.vtf"
+		}
+		"c_pro_smg_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_pro_smg/c_pro_smg_large.vtf"
+		}
+		"c_pro_smg"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_pro_smg/c_pro_smg.vtf"
+		}
+		"c_degreaser_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_degreaser/c_degreaser_large.vtf"
+		}
+		"c_degreaser"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_degreaser/c_degreaser.vtf"
+		}
+		"c_boston_basher"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_boston_basher/c_boston_basher.vtf"
+		}
+		"c_boston_basher_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_boston_basher/c_boston_basher_large.vtf"
+		}
+		"c_ham"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_ham/c_ham.vtf"
+		}
+		"c_ham_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_ham/c_ham_large.vtf"
+		}
+		"c_wood_machete"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_wood_machete/c_wood_machete.vtf"
+		}
+		"c_wood_machete_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_wood_machete/c_wood_machete_large.vtf"
+		}
+		"c_russian_riot"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_russian_riot/c_russian_riot.vtf"
+		}
+		"c_russian_riot_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_russian_riot/c_russian_riot_large.vtf"
+		}
+		"c_switchblade"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_switchblade/c_switchblade.vtf"
+		}
+		"c_switchblade_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_switchblade/c_switchblade_large.vtf"
+		}
+		"c_demo_sultan_sword_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_demo_sultan_sword/c_demo_sultan_sword_large.vtf"
+		}
+		"c_demo_sultan_sword"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_demo_sultan_sword/c_demo_sultan_sword.vtf"
+		}
+		"c_liberty_launcher_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_liberty_launcher/c_liberty_launcher_large.vtf"
+		}
+		"c_liberty_launcher"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_liberty_launcher/c_liberty_launcher.vtf"
+		}
+		"c_bazaar_sniper_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_bazaar_sniper/c_bazaar_sniper_large.vtf"
+		}
+		"c_bazaar_sniper"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_bazaar_sniper/c_bazaar_sniper.vtf"
+		}
+		"c_paintrain_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_paintrain/c_paintrain_large.vtf"
+		}
+		"c_paintrain"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_paintrain/c_paintrain.vtf"
+		}
+		"c_sodapopper_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_sodapopper/c_sodapopper_large.vtf"
+		}
+		"c_sodapopper"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_sodapopper/c_sodapopper.vtf"
+		}
+		"c_skullbat_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_skullbat/c_skullbat_large.vtf"
+		}
+		"c_skullbat"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_skullbat/c_skullbat.vtf"
+		}
+		"c_invasion_sniperrifle"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_invasion_sniperrifle/c_invasion_sniperrifle.vtf"
+		}
+		"c_invasion_sniperrifle_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_invasion_sniperrifle/c_invasion_sniperrifle_large.vtf"
+		}
+		"c_battleaxe"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_battleaxe/c_battleaxe.vtf"
+		}
+		"c_battleaxe_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_battleaxe/c_battleaxe_large.vtf"
+		}
+		"c_xms_giftwrap"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_xms_giftwrap/c_xms_giftwrap.vtf"
+		}
+		"c_xms_giftwrap_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_xms_giftwrap/c_xms_giftwrap_large.vtf"
+		}
+		"c_tomislav_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_tomislav/c_tomislav_large.vtf"
+		}
+		"c_tomislav"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_tomislav/c_tomislav.vtf"
+		}
+		"c_spikewrench_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_spikewrench/c_spikewrench_large.vtf"
+		}
+		"c_spikewrench"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_spikewrench/c_spikewrench.vtf"
+		}
+		"c_pep_pistol"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_pep_pistol/c_pep_pistol.vtf"
+		}
+		"c_pep_pistol_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_pep_pistol/c_pep_pistol_large.vtf"
+		}
+		"c_rift_fire_axe"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_rift_fire_axe/c_rift_fire_axe.vtf"
+		}
+		"c_rift_fire_axe_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_rift_fire_axe/c_rift_fire_axe_large.vtf"
+		}
+		"c_uberneedle"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_uberneedle/c_uberneedle.vtf"
+		}
+		"c_uberneedle_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_uberneedle/c_uberneedle_large.vtf"
+		}
+		"c_pep_scattergun_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_pep_scattergun/c_pep_scattergun_large.vtf"
+		}
+		"c_pep_scattergun"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_pep_scattergun/c_pep_scattergun.vtf"
+		}
+		"c_kingmaker_sticky"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_kingmaker_sticky/c_kingmaker_sticky.vtf"
+		}
+		"c_kingmaker_sticky_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_kingmaker_sticky/c_kingmaker_sticky_large.vtf"
+		}
+		"c_market_gardener_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_market_gardener/c_market_gardener_large.vtf"
+		}
+		"c_market_gardener"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_market_gardener/c_market_gardener.vtf"
+		}
+		"c_quadball_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_quadball/c_quadball_large.vtf"
+		}
+		"c_quadball"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_quadball/c_quadball.vtf"
+		}
+		"c_drg_thirddegree_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_drg_thirddegree/c_drg_thirddegree_large.vtf"
+		}
+		"c_drg_thirddegree"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_drg_thirddegree/c_drg_thirddegree.vtf"
+		}
+		"c_detonator_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_detonator/c_detonator_large.vtf"
+		}
+		"c_detonator"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_detonator/c_detonator.vtf"
+		}
+		"c_croc_knife_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_croc_knife/c_croc_knife_large.vtf"
+		}
+		"c_croc_knife"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_croc_knife/c_croc_knife.vtf"
+		}
+		"c_dumpster_device_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_dumpster_device/c_dumpster_device_large.vtf"
+		}
+		"c_dumpster_device"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_dumpster_device/c_dumpster_device.vtf"
+		}
+		"c_bonk_bat_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_bonk_bat/c_bonk_bat_large.vtf"
+		}
+		"c_bonk_bat"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_bonk_bat/c_bonk_bat.vtf"
+		}
+		"c_crusaders_crossbow_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_crusaders_crossbow/c_crusaders_crossbow_large.vtf"
+		}
+		"c_crusaders_crossbow"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_crusaders_crossbow/c_crusaders_crossbow.vtf"
+		}
+		"c_pro_rifle_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_pro_rifle/c_pro_rifle_large.vtf"
+		}
+		"c_pro_rifle"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_pro_rifle/c_pro_rifle.vtf"
+		}
+		"c_drg_pomson"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_drg_pomson/c_drg_pomson.vtf"
+		}
+		"c_drg_pomson_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_drg_pomson/c_drg_pomson_large.vtf"
+		}
+		"c_scotland_shard_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_scotland_shard/c_scotland_shard_large.vtf"
+		}
+		"c_scotland_shard"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_scotland_shard/c_scotland_shard.vtf"
+		}
+		"c_invasion_pistol_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_invasion_pistol/c_invasion_pistol_large.vtf"
+		}
+		"c_invasion_pistol"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_invasion_pistol/c_invasion_pistol.vtf"
+		}
+		"c_rfa_hammer_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_rfa_hammer/c_rfa_hammer_large.vtf"
+		}
+		"c_rfa_hammer"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_rfa_hammer/c_rfa_hammer.vtf"
+		}
+		"c_invasion_wrangler"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_invasion_wrangler/c_invasion_wrangler.vtf"
+		}
+		"c_invasion_wrangler_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_invasion_wrangler/c_invasion_wrangler_large.vtf"
+		}
+		"c_candy_cane"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_candy_cane/c_candy_cane.vtf"
+		}
+		"c_candy_cane_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_candy_cane/c_candy_cane_large.vtf"
+		}
+		"c_drg_wrenchmotron"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_drg_wrenchmotron/c_drg_wrenchmotron.vtf"
+		}
+		"c_drg_wrenchmotron_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_drg_wrenchmotron/c_drg_wrenchmotron_large.vtf"
+		}
+		"c_blackbox_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_blackbox/c_blackbox_large.vtf"
+		}
+		"c_blackbox"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_blackbox/c_blackbox.vtf"
+		}
+		"c_iron_curtain_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_iron_curtain/c_iron_curtain_large.vtf"
+		}
+		"c_iron_curtain"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_iron_curtain/c_iron_curtain.vtf"
+		}
+		"c_eternal_reward"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_eternal_reward/c_eternal_reward.vtf"
+		}
+		"c_eternal_reward_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_eternal_reward/c_eternal_reward_large.vtf"
+		}
+		"c_trenchgun_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_trenchgun/c_trenchgun_large.vtf"
+		}
+		"c_trenchgun"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_trenchgun/c_trenchgun.vtf"
+		}
+		"c_demo_cannon"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_demo_cannon/c_demo_cannon.vtf"
+		}
+		"c_demo_cannon_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_demo_cannon/c_demo_cannon_large.vtf"
+		}
+		"c_shortstop"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_shortstop/c_shortstop.vtf"
+		}
+		"c_shortstop_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_shortstop/c_shortstop_large.vtf"
+		}
+		"c_scimitar"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_scimitar/c_scimitar.vtf"
+		}
+		"c_scimitar_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_scimitar/c_scimitar_large.vtf"
+		}
+		"c_claidheamohmor"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_claidheamohmor/c_claidheamohmor.vtf"
+		}
+		"c_claidheamohmor_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_claidheamohmor/c_claidheamohmor_large.vtf"
+		}
+		"c_holymackerel"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_holymackerel/c_holymackerel.vtf"
+		}
+		"c_holymackerel_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_holymackerel/c_holymackerel_large.vtf"
+		}
+		"c_sledgehammer"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_sledgehammer/c_sledgehammer.vtf"
+		}
+		"c_sledgehammer_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_sledgehammer/c_sledgehammer_large.vtf"
+		}
+		"c_drg_phlogistinator"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_drg_phlogistinator/c_drg_phlogistinator.vtf"
+		}
+		"c_drg_phlogistinator_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop/weapons/c_models/c_drg_phlogistinator/c_drg_phlogistinator_large.vtf"
+		}
+		"c_prinny_knife_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_prinny_knife/c_prinny_knife_large.vtf"
+		}
+		"c_prinny_knife"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_prinny_knife/c_prinny_knife.vtf"
+		}
+		"c_bet_rocketlauncher"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_bet_rocketlauncher/c_bet_rocketlauncher.vtf"
+		}
+		"c_bet_rocketlauncher_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_bet_rocketlauncher/c_bet_rocketlauncher_large.vtf"
+		}
+		"c_shogun_kunai"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_shogun_kunai/c_shogun_kunai.vtf"
+		}
+		"c_shogun_kunai_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_shogun_kunai/c_shogun_kunai_large.vtf"
+		}
+		"c_shogun_warfan_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_shogun_warfan/c_shogun_warfan_large.vtf"
+		}
+		"c_shogun_warfan"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_shogun_warfan/c_shogun_warfan.vtf"
+		}
+		"c_sd_neonsign"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_sd_neonsign/c_sd_neonsign.vtf"
+		}
+		"c_sd_neonsign_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_sd_neonsign/c_sd_neonsign_large.vtf"
+		}
+		"c_shogun_katana_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_shogun_katana/c_shogun_katana_large.vtf"
+		}
+		"c_shogun_katana"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_shogun_katana/c_shogun_katana.vtf"
+		}
+		"c_canton_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_canton/c_canton_large.vtf"
+		}
+		"c_canton"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_canton/c_canton.vtf"
+		}
+		"c_dex_sniperrifle"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_dex_sniperrifle/c_dex_sniperrifle.vtf"
+		}
+		"c_dex_sniperrifle_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_dex_sniperrifle/c_dex_sniperrifle_large.vtf"
+		}
+		"c_dex_revolver"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_dex_revolver/c_dex_revolver.vtf"
+		}
+		"c_dex_revolver_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_dex_revolver/c_dex_revolver_large.vtf"
+		}
+		"c_sd_cleaver_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_sd_cleaver/c_sd_cleaver_large.vtf"
+		}
+		"c_sd_cleaver"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_sd_cleaver/c_sd_cleaver.vtf"
+		}
+		"c_sd_sapper_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_sd_sapper/c_sd_sapper_large.vtf"
+		}
+		"c_sd_sapper"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../backpack/workshop_partner/weapons/c_models/c_sd_sapper/c_sd_sapper.vtf"
+		}
 	}
 }
