@@ -1,5 +1,5 @@
 Hi.
-Thank you for installing my preloader. (Ver 1.3.0)
+Thank you for installing my preloader. (Ver 1.4.3)
 Simply double click RUNME
 I recommend checking this file every update as there might be some extra info regarding upgrading from version to version.
 
@@ -21,11 +21,10 @@ mod.json structure:
     "description": "Some extra info about my awesome mod!" // Description, can be pretty long but your milage may vary on the formatting
 }
 
-25/03/2025 (update 1.3.0):
-!!!IMPORTANT!!!
-The addons/ and particles/ folders now reside inside casual-preloader/mods, previously they were casual-preloader/addons and casual-preloader/mods.
-The casual-preloader/mods/addons/ folder is no longer using zipped archives and now just uses folders.
-That means if you are updating and want to keep the mods you have installed, you need to manually move the contents of casual-preloader/particles into casual-preloader/mods/particles and casual-preloader/addons into casual-preloader/mods/addons.
-!!!SUPER IMPORTANT!!!
-You also need to UNZIP the addons so that they are no longer zip files.
-So previously what might have been "casual-preloader/addons/Flat Textures v1.zip" should now be "casual-preloader/mods/addons/Flat Textures v1/"
+05/31/2025 (update 1.4.3):
+Uh.
+Yeah.
+We got backpack icons and weapon wear figured out.
+If I ever get around to automating decals, then every single visual thing can be modified. Sounds I haven't really looked at yet...
+Thanks for 20k downloads :)
+

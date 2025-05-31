@@ -26,11 +26,10 @@ def main():
     splash.show()
 
     # initial setup
-    if not folder_setup.mods_dir.exists():
-        splash.showMessage("Initial setup...",
-                           Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
-                           Qt.GlobalColor.white)
-        initial_setup((folder_setup.install_dir / 'mods.zip', folder_setup.mods_dir))
+    splash.showMessage("Initial setup...",
+                       Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
+                       Qt.GlobalColor.white)
+    initial_setup((folder_setup.install_dir / 'mods.zip', folder_setup.mods_dir))
 
     # temp
     folder_setup.cleanup_temp_folders()
