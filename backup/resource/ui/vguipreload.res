@@ -1153,17 +1153,25 @@
 			"visible"	"1"
 			"image"	"../decals/flesh/blood5.vmt"
 		}
+
 		"flesh_blood3_subrect"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/flesh/blood3_subrect.vmt"
 		}
-		"sky_alpinestorm_01bk"
+
+"sky_alpinestorm_01bk"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_alpinestorm_01bk.vmt"
+		}
+		"sky_alpinestorm_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_alpinestorm_01bk.vtf"
 		}
 		"sky_alpinestorm_01dn"
 		{
@@ -1171,11 +1179,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_alpinestorm_01dn.vmt"
 		}
+		"sky_alpinestorm_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_alpinestorm_01dn.vtf"
+		}
 		"sky_alpinestorm_01ft"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_alpinestorm_01ft.vmt"
+		}
+		"sky_alpinestorm_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_alpinestorm_01ft.vtf"
 		}
 		"sky_alpinestorm_01lf"
 		{
@@ -1183,11 +1203,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_alpinestorm_01lf.vmt"
 		}
+		"sky_alpinestorm_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_alpinestorm_01lf.vtf"
+		}
 		"sky_alpinestorm_01rt"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_alpinestorm_01rt.vmt"
+		}
+		"sky_alpinestorm_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_alpinestorm_01rt.vtf"
 		}
 		"sky_alpinestorm_01up"
 		{
@@ -1195,11 +1227,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_alpinestorm_01up.vmt"
 		}
+		"sky_alpinestorm_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_alpinestorm_01up.vtf"
+		}
 		"sky_badlands_01bk"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_badlands_01bk.vmt"
+		}
+		"sky_badlands_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_badlands_01bk.vtf"
 		}
 		"sky_badlands_01dn"
 		{
@@ -1207,11 +1251,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_badlands_01dn.vmt"
 		}
+		"sky_badlands_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_badlands_01dn.vtf"
+		}
 		"sky_badlands_01ft"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_badlands_01ft.vmt"
+		}
+		"sky_badlands_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_badlands_01ft.vtf"
 		}
 		"sky_badlands_01lf"
 		{
@@ -1219,11 +1275,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_badlands_01lf.vmt"
 		}
+		"sky_badlands_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_badlands_01lf.vtf"
+		}
 		"sky_badlands_01rt"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_badlands_01rt.vmt"
+		}
+		"sky_badlands_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_badlands_01rt.vtf"
 		}
 		"sky_badlands_01up"
 		{
@@ -1231,11 +1299,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_badlands_01up.vmt"
 		}
+		"sky_badlands_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_badlands_01up.vtf"
+		}
 		"sky_dustbowl_01bk"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_dustbowl_01bk.vmt"
+		}
+		"sky_dustbowl_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_dustbowl_01bk.vtf"
 		}
 		"sky_dustbowl_01dn"
 		{
@@ -1243,11 +1323,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_dustbowl_01dn.vmt"
 		}
+		"sky_dustbowl_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_dustbowl_01dn.vtf"
+		}
 		"sky_dustbowl_01ft"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_dustbowl_01ft.vmt"
+		}
+		"sky_dustbowl_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_dustbowl_01ft.vtf"
 		}
 		"sky_dustbowl_01_hdrbk"
 		{
@@ -1255,11 +1347,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_dustbowl_01_hdrbk.vmt"
 		}
+		"sky_dustbowl_01_hdrbk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_dustbowl_01_hdrbk.vtf"
+		}
 		"sky_dustbowl_01_hdrdn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_dustbowl_01_hdrdn.vmt"
+		}
+		"sky_dustbowl_01_hdrdn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_dustbowl_01_hdrdn.vtf"
 		}
 		"sky_dustbowl_01_hdrft"
 		{
@@ -1267,11 +1371,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_dustbowl_01_hdrft.vmt"
 		}
+		"sky_dustbowl_01_hdrft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_dustbowl_01_hdrft.vtf"
+		}
 		"sky_dustbowl_01_hdrlf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_dustbowl_01_hdrlf.vmt"
+		}
+		"sky_dustbowl_01_hdrlf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_dustbowl_01_hdrlf.vtf"
 		}
 		"sky_dustbowl_01_hdrrt"
 		{
@@ -1279,11 +1395,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_dustbowl_01_hdrrt.vmt"
 		}
+		"sky_dustbowl_01_hdrrt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_dustbowl_01_hdrrt.vtf"
+		}
 		"sky_dustbowl_01_hdrup"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_dustbowl_01_hdrup.vmt"
+		}
+		"sky_dustbowl_01_hdrup"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_dustbowl_01_hdrup.vtf"
 		}
 		"sky_dustbowl_01lf"
 		{
@@ -1291,11 +1419,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_dustbowl_01lf.vmt"
 		}
+		"sky_dustbowl_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_dustbowl_01lf.vtf"
+		}
 		"sky_dustbowl_01rt"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_dustbowl_01rt.vmt"
+		}
+		"sky_dustbowl_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_dustbowl_01rt.vtf"
 		}
 		"sky_dustbowl_01up"
 		{
@@ -1303,11 +1443,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_dustbowl_01up.vmt"
 		}
+		"sky_dustbowl_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_dustbowl_01up.vtf"
+		}
 		"sky_fakeblue"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_fakeblue.vmt"
+		}
+		"sky_fakeblue"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_fakeblue.vtf"
 		}
 		"sky_goldrush_01bk"
 		{
@@ -1315,11 +1467,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_goldrush_01bk.vmt"
 		}
+		"sky_goldrush_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_goldrush_01bk.vtf"
+		}
 		"sky_goldrush_01dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_goldrush_01dn.vmt"
+		}
+		"sky_goldrush_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_goldrush_01dn.vtf"
 		}
 		"sky_goldrush_01ft"
 		{
@@ -1327,11 +1491,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_goldrush_01ft.vmt"
 		}
+		"sky_goldrush_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_goldrush_01ft.vtf"
+		}
 		"sky_goldrush_01lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_goldrush_01lf.vmt"
+		}
+		"sky_goldrush_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_goldrush_01lf.vtf"
 		}
 		"sky_goldrush_01rt"
 		{
@@ -1339,11 +1515,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_goldrush_01rt.vmt"
 		}
+		"sky_goldrush_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_goldrush_01rt.vtf"
+		}
 		"sky_goldrush_01up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_goldrush_01up.vmt"
+		}
+		"sky_goldrush_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_goldrush_01up.vtf"
 		}
 		"sky_granary_01bk"
 		{
@@ -1351,11 +1539,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_granary_01bk.vmt"
 		}
+		"sky_granary_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_granary_01bk.vtf"
+		}
 		"sky_granary_01dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_granary_01dn.vmt"
+		}
+		"sky_granary_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_granary_01dn.vtf"
 		}
 		"sky_granary_01ft"
 		{
@@ -1363,11 +1563,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_granary_01ft.vmt"
 		}
+		"sky_granary_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_granary_01ft.vtf"
+		}
 		"sky_granary_01_hdrbk"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_granary_01_hdrbk.vmt"
+		}
+		"sky_granary_01_hdrbk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_granary_01_hdrbk.vtf"
 		}
 		"sky_granary_01_hdrdn"
 		{
@@ -1375,11 +1587,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_granary_01_hdrdn.vmt"
 		}
+		"sky_granary_01_hdrdn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_granary_01_hdrdn.vtf"
+		}
 		"sky_granary_01_hdrft"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_granary_01_hdrft.vmt"
+		}
+		"sky_granary_01_hdrft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_granary_01_hdrft.vtf"
 		}
 		"sky_granary_01_hdrlf"
 		{
@@ -1387,11 +1611,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_granary_01_hdrlf.vmt"
 		}
+		"sky_granary_01_hdrlf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_granary_01_hdrlf.vtf"
+		}
 		"sky_granary_01_hdrrt"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_granary_01_hdrrt.vmt"
+		}
+		"sky_granary_01_hdrrt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_granary_01_hdrrt.vtf"
 		}
 		"sky_granary_01_hdrup"
 		{
@@ -1399,11 +1635,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_granary_01_hdrup.vmt"
 		}
+		"sky_granary_01_hdrup"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_granary_01_hdrup.vtf"
+		}
 		"sky_granary_01lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_granary_01lf.vmt"
+		}
+		"sky_granary_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_granary_01lf.vtf"
 		}
 		"sky_granary_01rt"
 		{
@@ -1411,11 +1659,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_granary_01rt.vmt"
 		}
+		"sky_granary_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_granary_01rt.vtf"
+		}
 		"sky_granary_01up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_granary_01up.vmt"
+		}
+		"sky_granary_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_granary_01up.vtf"
 		}
 		"sky_gravel_01bk"
 		{
@@ -1423,11 +1683,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_gravel_01bk.vmt"
 		}
+		"sky_gravel_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_gravel_01bk.vtf"
+		}
 		"sky_gravel_01dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_gravel_01dn.vmt"
+		}
+		"sky_gravel_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_gravel_01dn.vtf"
 		}
 		"sky_gravel_01ft"
 		{
@@ -1435,11 +1707,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_gravel_01ft.vmt"
 		}
+		"sky_gravel_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_gravel_01ft.vtf"
+		}
 		"sky_gravel_01_hdrbk"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_gravel_01_hdrbk.vmt"
+		}
+		"sky_gravel_01_hdrbk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_gravel_01_hdrbk.vtf"
 		}
 		"sky_gravel_01_hdrdn"
 		{
@@ -1447,11 +1731,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_gravel_01_hdrdn.vmt"
 		}
+		"sky_gravel_01_hdrdn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_gravel_01_hdrdn.vtf"
+		}
 		"sky_gravel_01_hdrft"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_gravel_01_hdrft.vmt"
+		}
+		"sky_gravel_01_hdrft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_gravel_01_hdrft.vtf"
 		}
 		"sky_gravel_01_hdrlf"
 		{
@@ -1459,11 +1755,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_gravel_01_hdrlf.vmt"
 		}
+		"sky_gravel_01_hdrlf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_gravel_01_hdrlf.vtf"
+		}
 		"sky_gravel_01_hdrrt"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_gravel_01_hdrrt.vmt"
+		}
+		"sky_gravel_01_hdrrt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_gravel_01_hdrrt.vtf"
 		}
 		"sky_gravel_01_hdrup"
 		{
@@ -1471,11 +1779,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_gravel_01_hdrup.vmt"
 		}
+		"sky_gravel_01_hdrup"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_gravel_01_hdrup.vtf"
+		}
 		"sky_gravel_01lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_gravel_01lf.vmt"
+		}
+		"sky_gravel_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_gravel_01lf.vtf"
 		}
 		"sky_gravel_01rt"
 		{
@@ -1483,11 +1803,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_gravel_01rt.vmt"
 		}
+		"sky_gravel_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_gravel_01rt.vtf"
+		}
 		"sky_gravel_01up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_gravel_01up.vmt"
+		}
+		"sky_gravel_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_gravel_01up.vtf"
 		}
 		"sky_halloweenbk"
 		{
@@ -1495,11 +1827,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_halloweenbk.vmt"
 		}
+		"sky_halloweenbk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloweenbk.vtf"
+		}
 		"sky_halloweendn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_halloweendn.vmt"
+		}
+		"sky_halloweendn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloweendn.vtf"
 		}
 		"sky_halloweenft"
 		{
@@ -1507,11 +1851,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_halloweenft.vmt"
 		}
+		"sky_halloweenft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloweenft.vtf"
+		}
 		"sky_halloweenlf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_halloweenlf.vmt"
+		}
+		"sky_halloweenlf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloweenlf.vtf"
 		}
 		"sky_halloween_night_01bk"
 		{
@@ -1519,11 +1875,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night_01bk.vmt"
 		}
+		"sky_halloween_night_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night_01bk.vtf"
+		}
 		"sky_halloween_night_01dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night_01dn.vmt"
+		}
+		"sky_halloween_night_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night_01dn.vtf"
 		}
 		"sky_halloween_night_01ft"
 		{
@@ -1531,11 +1899,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night_01ft.vmt"
 		}
+		"sky_halloween_night_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night_01ft.vtf"
+		}
 		"sky_halloween_night_01_hdrbk"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night_01_hdrbk.vmt"
+		}
+		"sky_halloween_night_01_hdrbk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night_01_hdrbk.vtf"
 		}
 		"sky_halloween_night_01_hdrdn"
 		{
@@ -1543,11 +1923,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night_01_hdrdn.vmt"
 		}
+		"sky_halloween_night_01_hdrdn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night_01_hdrdn.vtf"
+		}
 		"sky_halloween_night_01_hdrft"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night_01_hdrft.vmt"
+		}
+		"sky_halloween_night_01_hdrft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night_01_hdrft.vtf"
 		}
 		"sky_halloween_night_01_hdrlf"
 		{
@@ -1555,11 +1947,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night_01_hdrlf.vmt"
 		}
+		"sky_halloween_night_01_hdrlf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night_01_hdrlf.vtf"
+		}
 		"sky_halloween_night_01_hdrrt"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night_01_hdrrt.vmt"
+		}
+		"sky_halloween_night_01_hdrrt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night_01_hdrrt.vtf"
 		}
 		"sky_halloween_night_01_hdrup"
 		{
@@ -1567,11 +1971,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night_01_hdrup.vmt"
 		}
+		"sky_halloween_night_01_hdrup"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night_01_hdrup.vtf"
+		}
 		"sky_halloween_night_01lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night_01lf.vmt"
+		}
+		"sky_halloween_night_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night_01lf.vtf"
 		}
 		"sky_halloween_night_01rt"
 		{
@@ -1579,11 +1995,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night_01rt.vmt"
 		}
+		"sky_halloween_night_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night_01rt.vtf"
+		}
 		"sky_halloween_night_01up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night_01up.vmt"
+		}
+		"sky_halloween_night_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night_01up.vtf"
 		}
 		"sky_halloween_night2014_01bk"
 		{
@@ -1591,11 +2019,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night2014_01bk.vmt"
 		}
+		"sky_halloween_night2014_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night2014_01bk.vtf"
+		}
 		"sky_halloween_night2014_01dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night2014_01dn.vmt"
+		}
+		"sky_halloween_night2014_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night2014_01dn.vtf"
 		}
 		"sky_halloween_night2014_01ft"
 		{
@@ -1603,11 +2043,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night2014_01ft.vmt"
 		}
+		"sky_halloween_night2014_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night2014_01ft.vtf"
+		}
 		"sky_halloween_night2014_01_hdrbk"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night2014_01_hdrbk.vmt"
+		}
+		"sky_halloween_night2014_01_hdrbk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night2014_01_hdrbk.vtf"
 		}
 		"sky_halloween_night2014_01_hdrdn"
 		{
@@ -1615,11 +2067,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night2014_01_hdrdn.vmt"
 		}
+		"sky_halloween_night2014_01_hdrdn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night2014_01_hdrdn.vtf"
+		}
 		"sky_halloween_night2014_01_hdrft"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night2014_01_hdrft.vmt"
+		}
+		"sky_halloween_night2014_01_hdrft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night2014_01_hdrft.vtf"
 		}
 		"sky_halloween_night2014_01_hdrlf"
 		{
@@ -1627,11 +2091,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night2014_01_hdrlf.vmt"
 		}
+		"sky_halloween_night2014_01_hdrlf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night2014_01_hdrlf.vtf"
+		}
 		"sky_halloween_night2014_01_hdrrt"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night2014_01_hdrrt.vmt"
+		}
+		"sky_halloween_night2014_01_hdrrt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night2014_01_hdrrt.vtf"
 		}
 		"sky_halloween_night2014_01_hdrup"
 		{
@@ -1639,11 +2115,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night2014_01_hdrup.vmt"
 		}
+		"sky_halloween_night2014_01_hdrup"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night2014_01_hdrup.vtf"
+		}
 		"sky_halloween_night2014_01lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night2014_01lf.vmt"
+		}
+		"sky_halloween_night2014_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night2014_01lf.vtf"
 		}
 		"sky_halloween_night2014_01rt"
 		{
@@ -1651,11 +2139,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night2014_01rt.vmt"
 		}
+		"sky_halloween_night2014_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night2014_01rt.vtf"
+		}
 		"sky_halloween_night2014_01up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_halloween_night2014_01up.vmt"
+		}
+		"sky_halloween_night2014_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloween_night2014_01up.vtf"
 		}
 		"sky_halloweenrt"
 		{
@@ -1663,11 +2163,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_halloweenrt.vmt"
 		}
+		"sky_halloweenrt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloweenrt.vtf"
+		}
 		"sky_halloweenup"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_halloweenup.vmt"
+		}
+		"sky_halloweenup"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_halloweenup.vtf"
 		}
 		"sky_harvest_01bk"
 		{
@@ -1675,11 +2187,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_01bk.vmt"
 		}
+		"sky_harvest_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_01bk.vtf"
+		}
 		"sky_harvest_01dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_01dn.vmt"
+		}
+		"sky_harvest_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_01dn.vtf"
 		}
 		"sky_harvest_01ft"
 		{
@@ -1687,11 +2211,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_01ft.vmt"
 		}
+		"sky_harvest_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_01ft.vtf"
+		}
 		"sky_harvest_01_hdrbk"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_01_hdrbk.vmt"
+		}
+		"sky_harvest_01_hdrbk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_01_hdrbk.vtf"
 		}
 		"sky_harvest_01_hdrdn"
 		{
@@ -1699,11 +2235,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_01_hdrdn.vmt"
 		}
+		"sky_harvest_01_hdrdn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_01_hdrdn.vtf"
+		}
 		"sky_harvest_01_hdrft"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_01_hdrft.vmt"
+		}
+		"sky_harvest_01_hdrft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_01_hdrft.vtf"
 		}
 		"sky_harvest_01_hdrlf"
 		{
@@ -1711,11 +2259,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_01_hdrlf.vmt"
 		}
+		"sky_harvest_01_hdrlf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_01_hdrlf.vtf"
+		}
 		"sky_harvest_01_hdrrt"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_01_hdrrt.vmt"
+		}
+		"sky_harvest_01_hdrrt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_01_hdrrt.vtf"
 		}
 		"sky_harvest_01_hdrup"
 		{
@@ -1723,11 +2283,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_01_hdrup.vmt"
 		}
+		"sky_harvest_01_hdrup"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_01_hdrup.vtf"
+		}
 		"sky_harvest_01lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_01lf.vmt"
+		}
+		"sky_harvest_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_01lf.vtf"
 		}
 		"sky_harvest_01rt"
 		{
@@ -1735,11 +2307,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_01rt.vmt"
 		}
+		"sky_harvest_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_01rt.vtf"
+		}
 		"sky_harvest_01up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_01up.vmt"
+		}
+		"sky_harvest_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_01up.vtf"
 		}
 		"sky_harvest_night_01bk"
 		{
@@ -1747,11 +2331,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_night_01bk.vmt"
 		}
+		"sky_harvest_night_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_night_01bk.vtf"
+		}
 		"sky_harvest_night_01dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_night_01dn.vmt"
+		}
+		"sky_harvest_night_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_night_01dn.vtf"
 		}
 		"sky_harvest_night_01ft"
 		{
@@ -1759,11 +2355,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_night_01ft.vmt"
 		}
+		"sky_harvest_night_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_night_01ft.vtf"
+		}
 		"sky_harvest_night_01lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_night_01lf.vmt"
+		}
+		"sky_harvest_night_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_night_01lf.vtf"
 		}
 		"sky_harvest_night_01rt"
 		{
@@ -1771,11 +2379,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_night_01rt.vmt"
 		}
+		"sky_harvest_night_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_night_01rt.vtf"
+		}
 		"sky_harvest_night_01up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_harvest_night_01up.vmt"
+		}
+		"sky_harvest_night_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_harvest_night_01up.vtf"
 		}
 		"sky_hydro_01bk"
 		{
@@ -1783,11 +2403,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_hydro_01bk.vmt"
 		}
+		"sky_hydro_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_hydro_01bk.vtf"
+		}
 		"sky_hydro_01dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_hydro_01dn.vmt"
+		}
+		"sky_hydro_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_hydro_01dn.vtf"
 		}
 		"sky_hydro_01ft"
 		{
@@ -1795,11 +2427,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_hydro_01ft.vmt"
 		}
+		"sky_hydro_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_hydro_01ft.vtf"
+		}
 		"sky_hydro_01_hdrbk"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_hydro_01_hdrbk.vmt"
+		}
+		"sky_hydro_01_hdrbk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_hydro_01_hdrbk.vtf"
 		}
 		"sky_hydro_01_hdrdn"
 		{
@@ -1807,11 +2451,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_hydro_01_hdrdn.vmt"
 		}
+		"sky_hydro_01_hdrdn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_hydro_01_hdrdn.vtf"
+		}
 		"sky_hydro_01_hdrft"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_hydro_01_hdrft.vmt"
+		}
+		"sky_hydro_01_hdrft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_hydro_01_hdrft.vtf"
 		}
 		"sky_hydro_01_hdrlf"
 		{
@@ -1819,11 +2475,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_hydro_01_hdrlf.vmt"
 		}
+		"sky_hydro_01_hdrlf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_hydro_01_hdrlf.vtf"
+		}
 		"sky_hydro_01_hdrrt"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_hydro_01_hdrrt.vmt"
+		}
+		"sky_hydro_01_hdrrt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_hydro_01_hdrrt.vtf"
 		}
 		"sky_hydro_01_hdrup"
 		{
@@ -1831,11 +2499,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_hydro_01_hdrup.vmt"
 		}
+		"sky_hydro_01_hdrup"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_hydro_01_hdrup.vtf"
+		}
 		"sky_hydro_01lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_hydro_01lf.vmt"
+		}
+		"sky_hydro_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_hydro_01lf.vtf"
 		}
 		"sky_hydro_01rt"
 		{
@@ -1843,11 +2523,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_hydro_01rt.vmt"
 		}
+		"sky_hydro_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_hydro_01rt.vtf"
+		}
 		"sky_hydro_01up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_hydro_01up.vmt"
+		}
+		"sky_hydro_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_hydro_01up.vtf"
 		}
 		"sky_island_01bk"
 		{
@@ -1855,11 +2547,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_island_01bk.vmt"
 		}
+		"sky_island_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_island_01bk.vtf"
+		}
 		"sky_island_01dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_island_01dn.vmt"
+		}
+		"sky_island_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_island_01dn.vtf"
 		}
 		"sky_island_01ft"
 		{
@@ -1867,11 +2571,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_island_01ft.vmt"
 		}
+		"sky_island_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_island_01ft.vtf"
+		}
 		"sky_island_01lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_island_01lf.vmt"
+		}
+		"sky_island_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_island_01lf.vtf"
 		}
 		"sky_island_01rt"
 		{
@@ -1879,11 +2595,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_island_01rt.vmt"
 		}
+		"sky_island_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_island_01rt.vtf"
+		}
 		"sky_island_01up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_island_01up.vmt"
+		}
+		"sky_island_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_island_01up.vtf"
 		}
 		"sky_morningsnow_01bk"
 		{
@@ -1891,11 +2619,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_morningsnow_01bk.vmt"
 		}
+		"sky_morningsnow_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_morningsnow_01bk.vtf"
+		}
 		"sky_morningsnow_01dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_morningsnow_01dn.vmt"
+		}
+		"sky_morningsnow_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_morningsnow_01dn.vtf"
 		}
 		"sky_morningsnow_01ft"
 		{
@@ -1903,11 +2643,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_morningsnow_01ft.vmt"
 		}
+		"sky_morningsnow_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_morningsnow_01ft.vtf"
+		}
 		"sky_morningsnow_01lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_morningsnow_01lf.vmt"
+		}
+		"sky_morningsnow_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_morningsnow_01lf.vtf"
 		}
 		"sky_morningsnow_01rt"
 		{
@@ -1915,11 +2667,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_morningsnow_01rt.vmt"
 		}
+		"sky_morningsnow_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_morningsnow_01rt.vtf"
+		}
 		"sky_morningsnow_01up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_morningsnow_01up.vmt"
+		}
+		"sky_morningsnow_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_morningsnow_01up.vtf"
 		}
 		"sky_night_01bk"
 		{
@@ -1927,11 +2691,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_night_01bk.vmt"
 		}
+		"sky_night_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_night_01bk.vtf"
+		}
 		"sky_night_01dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_night_01dn.vmt"
+		}
+		"sky_night_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_night_01dn.vtf"
 		}
 		"sky_night_01ft"
 		{
@@ -1939,11 +2715,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_night_01ft.vmt"
 		}
+		"sky_night_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_night_01ft.vtf"
+		}
 		"sky_night_01lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_night_01lf.vmt"
+		}
+		"sky_night_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_night_01lf.vtf"
 		}
 		"sky_night_01rt"
 		{
@@ -1951,11 +2739,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_night_01rt.vmt"
 		}
+		"sky_night_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_night_01rt.vtf"
+		}
 		"sky_night_01up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_night_01up.vmt"
+		}
+		"sky_night_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_night_01up.vtf"
 		}
 		"sky_nightfall_01bk"
 		{
@@ -1963,11 +2763,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_nightfall_01bk.vmt"
 		}
+		"sky_nightfall_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_nightfall_01bk.vtf"
+		}
 		"sky_nightfall_01dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_nightfall_01dn.vmt"
+		}
+		"sky_nightfall_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_nightfall_01dn.vtf"
 		}
 		"sky_nightfall_01ft"
 		{
@@ -1975,11 +2787,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_nightfall_01ft.vmt"
 		}
+		"sky_nightfall_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_nightfall_01ft.vtf"
+		}
 		"sky_nightfall_01lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_nightfall_01lf.vmt"
+		}
+		"sky_nightfall_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_nightfall_01lf.vtf"
 		}
 		"sky_nightfall_01rt"
 		{
@@ -1987,11 +2811,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_nightfall_01rt.vmt"
 		}
+		"sky_nightfall_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_nightfall_01rt.vtf"
+		}
 		"sky_nightfall_01up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_nightfall_01up.vmt"
+		}
+		"sky_nightfall_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_nightfall_01up.vtf"
 		}
 		"sky_rainbow_01bk"
 		{
@@ -1999,11 +2835,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_rainbow_01bk.vmt"
 		}
+		"sky_rainbow_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_rainbow_01bk.vtf"
+		}
 		"sky_rainbow_01dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_rainbow_01dn.vmt"
+		}
+		"sky_rainbow_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_rainbow_01dn.vtf"
 		}
 		"sky_rainbow_01ft"
 		{
@@ -2011,11 +2859,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_rainbow_01ft.vmt"
 		}
+		"sky_rainbow_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_rainbow_01ft.vtf"
+		}
 		"sky_rainbow_01lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_rainbow_01lf.vmt"
+		}
+		"sky_rainbow_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_rainbow_01lf.vtf"
 		}
 		"sky_rainbow_01rt"
 		{
@@ -2023,11 +2883,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_rainbow_01rt.vmt"
 		}
+		"sky_rainbow_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_rainbow_01rt.vtf"
+		}
 		"sky_rainbow_01up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_rainbow_01up.vmt"
+		}
+		"sky_rainbow_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_rainbow_01up.vtf"
 		}
 		"sky_stormfront_01bk"
 		{
@@ -2035,11 +2907,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_stormfront_01bk.vmt"
 		}
+		"sky_stormfront_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_stormfront_01bk.vtf"
+		}
 		"sky_stormfront_01dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_stormfront_01dn.vmt"
+		}
+		"sky_stormfront_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_stormfront_01dn.vtf"
 		}
 		"sky_stormfront_01ft"
 		{
@@ -2047,11 +2931,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_stormfront_01ft.vmt"
 		}
+		"sky_stormfront_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_stormfront_01ft.vtf"
+		}
 		"sky_stormfront_01lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_stormfront_01lf.vmt"
+		}
+		"sky_stormfront_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_stormfront_01lf.vtf"
 		}
 		"sky_stormfront_01rt"
 		{
@@ -2059,11 +2955,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_stormfront_01rt.vmt"
 		}
+		"sky_stormfront_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_stormfront_01rt.vtf"
+		}
 		"sky_stormfront_01up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_stormfront_01up.vmt"
+		}
+		"sky_stormfront_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_stormfront_01up.vtf"
 		}
 		"sky_tf2_04bk"
 		{
@@ -2071,11 +2979,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_tf2_04bk.vmt"
 		}
+		"sky_tf2_04bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04bk.vtf"
+		}
 		"sky_tf2_04dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_tf2_04dn.vmt"
+		}
+		"sky_tf2_04dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04dn.vtf"
 		}
 		"sky_tf2_04ft"
 		{
@@ -2083,11 +3003,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_tf2_04ft.vmt"
 		}
+		"sky_tf2_04ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04ft.vtf"
+		}
 		"sky_tf2_04_hdrbk"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_tf2_04_hdrbk.vmt"
+		}
+		"sky_tf2_04_hdrbk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04_hdrbk.vtf"
 		}
 		"sky_tf2_04_hdrdn"
 		{
@@ -2095,11 +3027,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_tf2_04_hdrdn.vmt"
 		}
+		"sky_tf2_04_hdrdn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04_hdrdn.vtf"
+		}
 		"sky_tf2_04_hdrft"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_tf2_04_hdrft.vmt"
+		}
+		"sky_tf2_04_hdrft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04_hdrft.vtf"
 		}
 		"sky_tf2_04_hdrlf"
 		{
@@ -2107,11 +3051,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_tf2_04_hdrlf.vmt"
 		}
+		"sky_tf2_04_hdrlf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04_hdrlf.vtf"
+		}
 		"sky_tf2_04_hdrrt"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_tf2_04_hdrrt.vmt"
+		}
+		"sky_tf2_04_hdrrt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04_hdrrt.vtf"
 		}
 		"sky_tf2_04_hdrup"
 		{
@@ -2119,11 +3075,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_tf2_04_hdrup.vmt"
 		}
+		"sky_tf2_04_hdrup"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04_hdrup.vtf"
+		}
 		"sky_tf2_04lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_tf2_04lf.vmt"
+		}
+		"sky_tf2_04lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04lf.vtf"
 		}
 		"sky_tf2_04rt"
 		{
@@ -2131,11 +3099,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_tf2_04rt.vmt"
 		}
+		"sky_tf2_04rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04rt.vtf"
+		}
 		"sky_tf2_04up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_tf2_04up.vmt"
+		}
+		"sky_tf2_04up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_tf2_04up.vtf"
 		}
 		"sky_trainyard_01bk"
 		{
@@ -2143,11 +3123,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_trainyard_01bk.vmt"
 		}
+		"sky_trainyard_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_trainyard_01bk.vtf"
+		}
 		"sky_trainyard_01dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_trainyard_01dn.vmt"
+		}
+		"sky_trainyard_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_trainyard_01dn.vtf"
 		}
 		"sky_trainyard_01ft"
 		{
@@ -2155,11 +3147,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_trainyard_01ft.vmt"
 		}
+		"sky_trainyard_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_trainyard_01ft.vtf"
+		}
 		"sky_trainyard_01lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_trainyard_01lf.vmt"
+		}
+		"sky_trainyard_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_trainyard_01lf.vtf"
 		}
 		"sky_trainyard_01rt"
 		{
@@ -2167,11 +3171,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_trainyard_01rt.vmt"
 		}
+		"sky_trainyard_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_trainyard_01rt.vtf"
+		}
 		"sky_trainyard_01up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_trainyard_01up.vmt"
+		}
+		"sky_trainyard_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_trainyard_01up.vtf"
 		}
 		"sky_upwardbk"
 		{
@@ -2179,11 +3195,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_upwardbk.vmt"
 		}
+		"sky_upwardbk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upwardbk.vtf"
+		}
 		"sky_upwarddn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_upwarddn.vmt"
+		}
+		"sky_upwarddn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upwarddn.vtf"
 		}
 		"sky_upwardft"
 		{
@@ -2191,11 +3219,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_upwardft.vmt"
 		}
+		"sky_upwardft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upwardft.vtf"
+		}
 		"sky_upward_hdrbk"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_upward_hdrbk.vmt"
+		}
+		"sky_upward_hdrbk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upward_hdrbk.vtf"
 		}
 		"sky_upward_hdrdn"
 		{
@@ -2203,11 +3243,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_upward_hdrdn.vmt"
 		}
+		"sky_upward_hdrdn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upward_hdrdn.vtf"
+		}
 		"sky_upward_hdrft"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_upward_hdrft.vmt"
+		}
+		"sky_upward_hdrft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upward_hdrft.vtf"
 		}
 		"sky_upward_hdrlf"
 		{
@@ -2215,11 +3267,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_upward_hdrlf.vmt"
 		}
+		"sky_upward_hdrlf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upward_hdrlf.vtf"
+		}
 		"sky_upward_hdrrt"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_upward_hdrrt.vmt"
+		}
+		"sky_upward_hdrrt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upward_hdrrt.vtf"
 		}
 		"sky_upward_hdrup"
 		{
@@ -2227,11 +3291,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_upward_hdrup.vmt"
 		}
+		"sky_upward_hdrup"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upward_hdrup.vtf"
+		}
 		"sky_upwardlf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_upwardlf.vmt"
+		}
+		"sky_upwardlf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upwardlf.vtf"
 		}
 		"sky_upwardrt"
 		{
@@ -2239,11 +3315,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_upwardrt.vmt"
 		}
+		"sky_upwardrt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upwardrt.vtf"
+		}
 		"sky_upwardup"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_upwardup.vmt"
+		}
+		"sky_upwardup"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_upwardup.vtf"
 		}
 		"sky_well_01bk"
 		{
@@ -2251,11 +3339,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_well_01bk.vmt"
 		}
+		"sky_well_01bk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_well_01bk.vtf"
+		}
 		"sky_well_01dn"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_well_01dn.vmt"
+		}
+		"sky_well_01dn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_well_01dn.vtf"
 		}
 		"sky_well_01ft"
 		{
@@ -2263,11 +3363,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_well_01ft.vmt"
 		}
+		"sky_well_01ft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_well_01ft.vtf"
+		}
 		"sky_well_01_hdrbk"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_well_01_hdrbk.vmt"
+		}
+		"sky_well_01_hdrbk"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_well_01_hdrbk.vtf"
 		}
 		"sky_well_01_hdrdn"
 		{
@@ -2275,11 +3387,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_well_01_hdrdn.vmt"
 		}
+		"sky_well_01_hdrdn"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_well_01_hdrdn.vtf"
+		}
 		"sky_well_01_hdrft"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_well_01_hdrft.vmt"
+		}
+		"sky_well_01_hdrft"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_well_01_hdrft.vtf"
 		}
 		"sky_well_01_hdrlf"
 		{
@@ -2287,11 +3411,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_well_01_hdrlf.vmt"
 		}
+		"sky_well_01_hdrlf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_well_01_hdrlf.vtf
+		}
 		"sky_well_01_hdrrt"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_well_01_hdrrt.vmt"
+		}
+		"sky_well_01_hdrrt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_well_01_hdrrt.vtf"
 		}
 		"sky_well_01_hdrup"
 		{
@@ -2299,11 +3435,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_well_01_hdrup.vmt"
 		}
+		"sky_well_01_hdrup"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_well_01_hdrup.vtf"
+		}
 		"sky_well_01lf"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_well_01lf.vmt"
+		}
+		"sky_well_01lf"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_well_01lf.vtf"
 		}
 		"sky_well_01rt"
 		{
@@ -2311,11 +3459,23 @@
 			"visible"	"1"
 			"image"	"../skybox/sky_well_01rt.vmt"
 		}
+		"sky_well_01rt"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_well_01rt.vtf"
+		}
 		"sky_well_01up"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../skybox/sky_well_01up.vmt"
+		}
+		"sky_well_01up"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../skybox/sky_well_01up.vtf"
 		}
 		"burn_marks"
 		{
