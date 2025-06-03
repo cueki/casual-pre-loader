@@ -1000,53 +1000,11 @@
 		    "image"                                                     "../vgui/class_portraits/spy_blue_grey_alpha.vmt"
 		}
 
-		"blood5_subrect"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/blood5_subrect.vmt"
-		}
-
 		"mod2x"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
 			"image"	"../decals/decals_mod2x.vmt"
-		}
-
-		"blood5"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/blood5.vmt"
-		}
-
-		"blood3"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/blood3.vmt"
-		}
-
-		"blood6"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/blood6.vmt"
-		}
-
-		"blood4"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/blood4.vmt"
-		}
-
-		"blood1_subrect"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/blood1_subrect.vmt"
 		}
 
 		"blood1"
@@ -1055,26 +1013,11 @@
 			"visible"	"1"
 			"image"	"../decals/blood1.vmt"
 		}
-
-		"blood2_subrect"
+		"blood1"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
-			"image"	"../decals/blood2_subrect.vmt"
-		}
-
-		"blood6_subrect"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/blood6_subrect.vmt"
-		}
-
-		"blood4_subrect"
-		{
-			"ControlName"	"ImagePanel"
-			"visible"	"1"
-			"image"	"../decals/blood4_subrect.vmt"
+			"image"	"../decals/blood1.vtf"
 		}
 
 		"blood2"
@@ -1083,6 +1026,90 @@
 			"visible"	"1"
 			"image"	"../decals/blood2.vmt"
 		}
+		"blood2"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood2.vtf"
+		}
+
+		"blood3"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood3.vmt"
+		}
+		"blood3"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood3.vtf"
+		}
+
+		"blood4"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood4.vmt"
+		}
+		"blood4"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood4.vtf"
+		}
+
+		"blood5"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood5.vmt"
+		}
+		"blood5"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood5.vtf"
+		}
+
+		"blood6"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood6.vmt"
+		}
+		"blood6"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood6.vtf"
+		}
+
+		"blood1_subrect"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood1_subrect.vmt"
+		}
+		"blood1_subrect"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood1_subrect.vtf"
+		}
+
+		"blood2_subrect"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood2_subrect.vmt"
+		}
+		"blood2_subrect"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood2_subrect.vtf"
+		}
 
 		"blood3_subrect"
 		{
@@ -1090,33 +1117,50 @@
 			"visible"	"1"
 			"image"	"../decals/blood3_subrect.vmt"
 		}
-
-		"flesh_blood5_subrect"
+		"blood3_subrect"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
-			"image"	"../decals/flesh/blood5_subrect.vmt"
+			"image"	"../decals/blood3_subrect.vtf"
 		}
 
-		"flesh_blood3"
+		"blood4_subrect"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
-			"image"	"../decals/flesh/blood3.vmt"
+			"image"	"../decals/blood4_subrect.vmt"
+		}
+		"blood4_subrect"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood4_subrect.vtf"
 		}
 
-		"flesh_blood1_subrect"
+		"blood5_subrect"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
-			"image"	"../decals/flesh/blood1_subrect.vmt"
+			"image"	"../decals/blood5_subrect.vmt"
+		}
+		"blood5_subrect"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood5_subrect.vtf"
 		}
 
-		"flesh_blood4"
+		"blood6_subrect"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
-			"image"	"../decals/flesh/blood4.vmt"
+			"image"	"../decals/blood6_subrect.vmt"
+		}
+		"blood6_subrect"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/blood6_subrect.vtf"
 		}
 
 		"flesh_blood1"
@@ -1125,12 +1169,11 @@
 			"visible"	"1"
 			"image"	"../decals/flesh/blood1.vmt"
 		}
-
-		"flesh_blood2_subrect"
+		"flesh_blood1"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
-			"image"	"../decals/flesh/blood2_subrect.vmt"
+			"image"	"../decals/flesh/blood1.vtf"
 		}
 
 		"flesh_blood2"
@@ -1139,12 +1182,37 @@
 			"visible"	"1"
 			"image"	"../decals/flesh/blood2.vmt"
 		}
-
-		"flesh_blood4_subrect"
+		"flesh_blood2"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
-			"image"	"../decals/flesh/blood4_subrect.vmt"
+			"image"	"../decals/flesh/blood2.vtf"
+		}
+
+		"flesh_blood3"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/flesh/blood3.vmt"
+		}
+		"flesh_blood3"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/flesh/blood3.vtf"
+		}
+
+		"flesh_blood4"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/flesh/blood4.vmt"
+		}
+		"flesh_blood4"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/flesh/blood4.vtf"
 		}
 
 		"flesh_blood5"
@@ -1153,6 +1221,38 @@
 			"visible"	"1"
 			"image"	"../decals/flesh/blood5.vmt"
 		}
+		"flesh_blood5"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/flesh/blood5.vtf"
+		}
+
+		"flesh_blood1_subrect"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/flesh/blood1_subrect.vmt"
+		}
+		"flesh_blood1_subrect"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/flesh/blood1_subrect.vtf"
+		}
+
+		"flesh_blood2_subrect"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/flesh/blood2_subrect.vmt"
+		}
+		"flesh_blood2_subrect"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/flesh/blood2_subrect.vtf"
+		}
 
 		"flesh_blood3_subrect"
 		{
@@ -1160,8 +1260,40 @@
 			"visible"	"1"
 			"image"	"../decals/flesh/blood3_subrect.vmt"
 		}
+		"flesh_blood3_subrect"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/flesh/blood3_subrect.vtf"
+		}
 
-"sky_alpinestorm_01bk"
+		"flesh_blood4_subrect"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/flesh/blood4_subrect.vmt"
+		}
+		"flesh_blood4_subrect"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/flesh/blood4_subrect.vtf"
+		}
+
+		"flesh_blood5_subrect"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/flesh/blood5_subrect.vmt"
+		}
+		"flesh_blood5_subrect"
+		{
+			"ControlName"	"ImagePanel"
+			"visible"	"1"
+			"image"	"../decals/flesh/blood5_subrect.vtf"
+		}
+
+		"sky_alpinestorm_01bk"
 		{
 			"ControlName"	"ImagePanel"
 			"visible"	"1"
