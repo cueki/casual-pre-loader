@@ -10,6 +10,7 @@ from core.handlers.skybox_handler import handle_skybox_mods, restore_skybox_file
 from core.parsers.vpk_file import VPKFile
 from core.parsers.pcf_file import PCFFile
 from core.backup_manager import prepare_working_copy
+from operations.for_the_love_of_god_add_vmts_to_your_mods import generate_missing_vmt_files
 from operations.pcf_rebuild import load_particle_system_map, extract_elements
 from operations.file_processors import pcf_mod_processor, game_type, get_from_custom_dir
 from operations.vgui_preload import patch_mainmenuoverride
@@ -164,6 +165,8 @@ class Interface(QObject):
             custom_content_dir = folder_setup.temp_mods_dir
             copy_config_files(custom_content_dir, valve_rc_found)
             patch_mainmenuoverride(tf_path)
+            # make vmts
+            generate_missing_vmt_files(custom_content_dir)
 
             for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
                 split_file.unlink()
