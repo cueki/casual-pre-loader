@@ -11,15 +11,6 @@ def is_skybox_vmt(file_path: Path) -> bool:
             file_path.suffix.lower() == '.vmt')
 
 
-def modify_basetexture_path(content: bytes) -> bytes:
-    content_str = content.decode('utf-8', errors='replace')
-    pattern = r'("\$basetexture"\s+")(skybox\/[^"]+)(")'
-    modified = re.sub(pattern, lambda m: m.group(1) + m.group(2) + "1" + m.group(3),
-                      content_str, flags=re.IGNORECASE)
-    result = modified.encode('utf-8')
-    return result
-
-
 def handle_skybox_mods(temp_dir: Path, tf_path) -> int:
     skybox_vmts = [vmt for vmt in temp_dir.glob('**/*.vmt') if is_skybox_vmt(vmt)]
     if not skybox_vmts:
@@ -31,20 +22,16 @@ def handle_skybox_mods(temp_dir: Path, tf_path) -> int:
     file_handler = FileHandler(vpk_path)
     for vmt_path in skybox_vmts:
         try:
-            # modify basetexture path
             with open(vmt_path, 'rb') as f:
                 original_content = f.read()
 
-            modified_content = modify_basetexture_path(original_content)
             # get the original texture path
-            orig_texture_path = Path("skybox/" + Path(vmt_path).stem)
-            new_texture_path = f"{orig_texture_path}1"
-            modify_basetexture_path(original_content)
+            texture_path = Path("skybox/" + Path(vmt_path).stem)
 
             # copy vtf with modified name
             orig_vtf_path = vmt_path.with_suffix('.vtf')
             if orig_vtf_path.exists():
-                new_vtf_path = folder_setup.temp_mods_dir / 'materials' / f"{new_texture_path}.vtf"
+                new_vtf_path = folder_setup.temp_mods_dir / 'materials' / f"{texture_path}.vtf"
                 new_vtf_path.parent.mkdir(parents=True, exist_ok=True)
                 shutil.move(orig_vtf_path, new_vtf_path)
 
@@ -57,8 +44,9 @@ def handle_skybox_mods(temp_dir: Path, tf_path) -> int:
                 continue
 
             def processor(content):
-                return modified_content
+                return original_content
 
+            # patch vmt into vpk
             success = file_handler.process_file(target_path, processor, create_backup=False)
             vmt_path.unlink()
 
