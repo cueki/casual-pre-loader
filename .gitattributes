@@ -1,2 +1,5 @@
 # force CRLF line endings for VMT files
 *.vmt text eol=crlf
+
+# remove .res files from stats
+*.res linguist-vendored
