@@ -2,4 +2,4 @@
 *.vmt text eol=crlf
 
 # remove .res files from stats
-*.res linguist-vendored
+backup/** linguist-vendored
