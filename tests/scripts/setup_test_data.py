@@ -1,6 +1,5 @@
 import shutil
 from pathlib import Path
-from gui import settings_manager
 from gui.settings_manager import SettingsManager
 
 

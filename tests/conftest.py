@@ -1,5 +1,6 @@
 import pytest
 import tempfile
+import core.folder_setup
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -41,18 +42,20 @@ def mock_folder_setup(monkeypatch):
         temp_path = Path(temp_dir)
 
         # mock folder structure
-        mock_config = Mock(spec=FolderConfig)
+        mock_config = Mock()
         mock_config.temp_dir = temp_path / "temp"
         mock_config.temp_mods_dir = temp_path / "temp" / "mods"
         mock_config.backup_dir = temp_path / "backup"
         mock_config.addons_dir = temp_path / "addons"
+        mock_config.install_dir = temp_path / "install"
 
-        mock_config.temp_dir.mkdir(parents=True)
-        mock_config.temp_mods_dir.mkdir(parents=True)
-        mock_config.backup_dir.mkdir(parents=True)
-        mock_config.addons_dir.mkdir(parents=True)
+        for attr in ['temp_dir', 'temp_mods_dir', 'backup_dir', 'addons_dir', 'install_dir']:
+            getattr(mock_config, attr).mkdir(parents=True, exist_ok=True)
 
-        monkeypatch.setattr("core.folder_setup.folder_setup", mock_config)
+        # create backup structure
+        (mock_config.backup_dir / "particles").mkdir()
+        (mock_config.backup_dir / "materials" / "skybox").mkdir(parents=True)
+        monkeypatch.setattr(core.folder_setup, "folder_setup", mock_config)
         yield mock_config
 
 

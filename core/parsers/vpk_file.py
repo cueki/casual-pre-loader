@@ -1,8 +1,8 @@
 import zlib
 import struct
 from hashlib import md5
-from dataclasses import dataclass
 from pathlib import Path
+from dataclasses import dataclass
 from typing import Dict, Optional, BinaryIO, List, Tuple
 
 
@@ -35,20 +35,36 @@ class VPKDirectoryEntry:
 
         if entry.preload_bytes > 0:
             entry.preload_data = file.read(entry.preload_bytes)
+
+        # 0xFFFF terminator
+        terminator = struct.unpack('<H', file.read(2))[0]
+        if terminator != 0xFFFF:
+            print(f"VPK WARNING: Expected 0xFFFF terminator, got 0x{terminator:04X}")
+
         return entry
 
 
 def read_null_string(file: BinaryIO) -> str:
     result = bytearray()
+    bad_result = bytearray()
+    had_data = False
+
     while True:
         char = file.read(1)
         if not char or char == b'\x00':
             break
+        had_data = True
+
         # only accept ASCII characters
         if 32 <= char[0] <= 126:
             result.extend(char)
-    return result.decode('ascii') if result else ''
+        else:
+            bad_result.extend(char)
 
+    if had_data and not result:
+        print(f"[VPK] All chars filtered, bad_result: {bad_result.hex()}")
+
+    return result.decode("ascii")
 
 class VPKFile:
     def __init__(self, vpk_path: str):
@@ -80,9 +96,9 @@ class VPKFile:
                 self.base_path = str(Path(vpk_path).with_suffix(''))
 
         # for single-file VPKs, calculate header offset
-        self.header_offset = 0
+        self.header_and_tree_offset = 0
         if not self.is_dir_vpk:
-            self._calculate_header_offset()
+            self._calculate_header_and_tree_offset()
 
     def parse_directory(self) -> 'VPKFile':
         with open(self.dir_path, 'rb') as f:
@@ -115,18 +131,18 @@ class VPKFile:
                         self.directory[extension][path][filename] = entry
         return self
 
-    def _calculate_header_offset(self) -> int:
+    def _calculate_header_and_tree_offset(self) -> int:
         try:
             with open(self.dir_path, 'rb') as f:
                 # VPK header is 28 bytes (7 uint32 values)
                 header = f.read(28)
                 if len(header) != 28:
-                    return 0
+                    raise ValueError(f"Invalid VPK header: expected 28 bytes, got {len(header)}")
 
                 tree_size = int.from_bytes(header[8:12], 'little')
-                self.header_offset = (28 + tree_size)  # tree + header offset
+                self.header_and_tree_offset = (28 + tree_size)  # tree + header offset
 
-                return self.header_offset
+                return self.header_and_tree_offset
 
         except Exception as e:
             print(f"Error calculating header offset: {e}")
@@ -147,7 +163,7 @@ class VPKFile:
             with open(archive_path, 'rb') as f:
                 adjusted_offset = offset
                 if not self.is_dir_vpk:
-                    adjusted_offset = offset + self.header_offset
+                    adjusted_offset = offset + self.header_and_tree_offset
 
                 f.seek(adjusted_offset)
                 return f.read(size)

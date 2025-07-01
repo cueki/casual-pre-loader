@@ -9,9 +9,10 @@ def run_critical_tests():
 
     cmd = [
         sys.executable, "-m", "pytest",
-        "tests/critical/",
+        "critical/",
         "-v",
-        "--tb=short",
+        "-s",
+        "--tb=long",
         "--maxfail=1",
         "-x",
         "--durations=10"
