@@ -134,9 +134,15 @@ class AddonManager(QObject):
             return False, "No addons selected for deletion."
 
         selected_addon_names = []
+        selected_folder_names = []
         for item in selected_items:
-            addon_name = item.data(Qt.ItemDataRole.UserRole) or item.text().split(' [#')[0]
-            selected_addon_names.append(addon_name)
+            display_name = item.data(Qt.ItemDataRole.UserRole) or item.text().split(' [#')[0]
+            selected_addon_names.append(display_name)
+            if display_name in self.addons_file_paths:
+                folder_name = self.addons_file_paths[display_name]['file_path']
+                selected_folder_names.append(folder_name)
+            else:
+                selected_folder_names.append(display_name)
 
         addon_list = "\n• ".join(selected_addon_names)
         result = QMessageBox.warning(
@@ -151,23 +157,23 @@ class AddonManager(QObject):
             return None, None
 
         errors = []
-        for addon_name in selected_addon_names:
-            addon_path = folder_setup.addons_dir / addon_name
+        for display_name, folder_name in zip(selected_addon_names, selected_folder_names):
+            addon_path = folder_setup.addons_dir / folder_name  # ← Use folder name
             if addon_path.exists() and addon_path.is_dir():
                 try:
                     import shutil
                     shutil.rmtree(addon_path)
                 except Exception as e:
-                    errors.append(f"Failed to delete {addon_name}: {str(e)}")
+                    errors.append(f"Failed to delete {display_name}: {str(e)}")
 
         if errors:
             return False, "\n".join(errors)
 
         # update addon_metadata.json
         addon_metadata = self.settings_manager.get_addon_metadata()
-        for addon_name in selected_addon_names:
-            if addon_name in addon_metadata:
-                del addon_metadata[addon_name]
+        for folder_name in selected_folder_names:
+            if folder_name in addon_metadata:
+                del addon_metadata[folder_name]
 
         self.settings_manager.set_addon_metadata(addon_metadata)
         return True, "Selected addons have been deleted."
