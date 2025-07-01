@@ -31,6 +31,10 @@ class AddonManager(QObject):
         # sort the addon groups alphabetically
         addon_groups = {group: addon_groups[group] for group in sorted(addon_groups)}
 
+        # sort the addons in each group alphabetically
+        for group in addon_groups:
+            addon_groups[group].sort(key=lambda x: x['addon_name'].lower())
+
         # add addons to list widget with group splitters
         for addon_type in addon_groups:
             if addon_type != "unknown":

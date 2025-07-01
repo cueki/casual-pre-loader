@@ -117,6 +117,7 @@ class VPKProcessWorker(QObject):
 
 class ModDropZone(QFrame):
     mod_dropped = pyqtSignal(str)
+    addon_updated = pyqtSignal()
 
     def __init__(self, parent=None, settings_manager=None, rescan_callback=None):
         super().__init__(parent)
@@ -329,17 +330,6 @@ class ModDropZone(QFrame):
                         with open(mod_json_path, 'w') as f:
                             json.dump(default_mod_info, f, indent=2)
 
-                # this is kinda dumb but it works
-                main_window = self.window()
-                saved_selections = main_window.settings_manager.get_addon_selections()
-
-                # refresh the addon list
-                main_window.load_addons()
-
-                # re-apply the saved selections
-                main_window.settings_manager.set_addon_selections(saved_selections)
-                main_window.apply_saved_addon_selections()
-
                 successful_files.append(vpk_name)
 
             except Exception as e:
@@ -347,6 +337,7 @@ class ModDropZone(QFrame):
 
         if successful_files:
             if len(successful_files) == 1:
+                self.addon_updated.emit()
                 self.worker.success.emit(f"Successfully processed {successful_files[0]}")
             else:
                 file_list_text = ",\n".join(successful_files)
