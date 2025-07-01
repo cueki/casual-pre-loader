@@ -31,7 +31,7 @@ class AddonManager(QObject):
         # sort the addon groups alphabetically
         addon_groups = {group: addon_groups[group] for group in sorted(addon_groups)}
 
-        # sort the addons in each group alphabetically
+        # sort the addons in each group alphabetically based on mod.json name
         for group in addon_groups:
             addon_groups[group].sort(key=lambda x: x['addon_name'].lower())
 
