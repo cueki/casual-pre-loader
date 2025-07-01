@@ -318,7 +318,13 @@ class VPKFile:
 
             vpk_structure = {}
             for file_path, rel_path in files:
-                extension = rel_path.suffix[1:] if rel_path.suffix else ''
+                if not rel_path.suffix:
+                    extension = ' '  # Single space per VPK format specification
+                else:
+                    extension = rel_path.suffix[1:]
+                    if not extension:  # Edge case: file ends with dot
+                        extension = ' '  # Single space per VPK format specification
+
                 path = str(rel_path.parent).replace('\\', '/')
                 if path == '.':
                     path = ' '
