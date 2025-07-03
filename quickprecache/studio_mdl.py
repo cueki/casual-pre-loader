@@ -18,7 +18,7 @@ class StudioMDL:
         if self.studio_mdl_version == StudioMDLVersion.MISSING:
             raise RuntimeError(
                 "StudioMDL.exe not found, you probably installed the mod wrong.\n"
-                "!!! IF YOU ARE ON LINUX, YOU NEED THE NEKOMDL OR STUDOMDL FROM A WINDOWS VERSION OF THE GAME !!!"
+                "!!! IF YOU ARE ON LINUX, YOU NEED THE STUDOMDL EXECUTABLE FROM A WINDOWS VERSION OF THE GAME !!!"
             )
 
     def _get_studio_mdl_version(self) -> StudioMDLVersion:
@@ -27,9 +27,12 @@ class StudioMDL:
         if self._check_studio_mdl_version(StudioMDLVersion.STUDIOMDL32):
             return StudioMDLVersion.STUDIOMDL32
 
+        # im going to comment this out and see what happens, afaik studiomdl comes with the game so im not sure
+        # why you'd have nekomdl, + nekomdl produces errors sometimes. I don't think it's a good fallback option...
+        # cukei - 7/02/2025
         # check for NekoMDL
-        if self._check_studio_mdl_version(StudioMDLVersion.NEKOMDL):
-            return StudioMDLVersion.NEKOMDL
+        # if self._check_studio_mdl_version(StudioMDLVersion.NEKOMDL):
+        #     return StudioMDLVersion.NEKOMDL
 
         return StudioMDLVersion.MISSING
 
