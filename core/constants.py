@@ -168,3 +168,25 @@ DECAL_MAPPING = {
     "decal/blood5": {"position": (256, 256), "size": (128, 128)},
     "decal/blood6": {"position": (384, 256), "size": (128, 128)},
 }
+
+PARTICLE_GROUP_MAPPING = {
+    "explosions": ["drg_cowmangler.pcf", "stickybomb.pcf", "rocketbackblast.pcf",
+                "explosion.pcf", "rockettrail.pcf", "classic_rocket_trail.pcf"],
+    "fire": ["drg_pyro.pcf", "burningplayer.pcf", "flamethrower_mvm.pcf", "flamethrower.pcf"],
+    "bullets": ["impact_fx.pcf", "shellejection.pcf", "bullet_tracers.pcf",
+               "nailtrails.pcf", "muzzle_flash.pcf", "blood_impact.pcf"],
+    "weapons": ["rocketpack.pcf", "invasion_ray_gun_fx.pcf", "firstperson_weapon_fx.pcf",
+               "items_engineer.pcf", "items_demo.pcf", "xms.pcf", "drg_engineer.pcf",
+               "dxhr_fx.pcf", "drg_bison.pcf", "soldierbuff.pcf", "medicgun_attrib.pcf", "medicgun_beam.pcf"],
+    "maps": ["urban_fx.pcf", "smoke_island_volcano.pcf", "doomsday_fx.pcf", "harbor_fx.pcf",
+            "rain_custom.pcf", "stormfront.pcf", "dirty_explode.pcf", "water.pcf",
+            "bigboom.pcf", "smoke_blackbillow.pcf"],
+    "game_modes": ["powerups.pcf", "passtime_tv_projection.pcf", "passtime_beam.pcf", "passtime.pcf",
+                 "halloween.pcf", "mvm.pcf", "eyeboss.pcf", "scary_ghost.pcf", "flag_particles.pcf"],
+    "player": ["taunt_fx.pcf", "rps.pcf", "killstreak.pcf", "bl_killtaunt.pcf", "class_fx.pcf",
+              "conc_stars.pcf", "item_fx.pcf", "disguise.pcf", "nemesis.pcf", "speechbubbles.pcf",
+              "crit.pcf", "cig_smoke.pcf", "blood_trail.pcf", "rocketjumptrail.pcf"],
+    "buildings": ["teleport_status.pcf", "player_recent_teleport.pcf", "teleported_fx.pcf", "buildingdamage.pcf"],
+    "misc": ["bombinomicon.pcf", "training.pcf", "cinefx.pcf", "sparks.pcf", "vgui_menu_particles.pcf",
+            "rankup.pcf", "stamp_spin.pcf", "coin_spin.pcf", "npc_fx.pcf"]
+}
