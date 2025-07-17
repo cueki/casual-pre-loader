@@ -168,6 +168,7 @@ class ParticleManagerGUI(QMainWindow):
 
         # addon signals
         self.addons_list.itemSelectionChanged.connect(self.on_addon_select)
+        self.mod_drop_zone.addon_updated.connect(self.load_addons)
 
         # installation signals
         self.install_manager.progress_update.connect(self.update_progress)
