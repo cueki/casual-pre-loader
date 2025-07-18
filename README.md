@@ -45,7 +45,7 @@ python main.py
 ```
 # How does this work?
 
-There are two exploits im using, one that many are familiar with, being the game_info change (nothing really noteworthy here, known widely since at least 2018-2019), and the second being that the game doesn't actually check the md5 hashes outlined in the directory vpk.
+There are two exploits im using, one that many are familiar with, being the game_info change (nothing really noteworthy here, known widely since at least ~~2018-2019~~ **2020!** my bad, incorrectly recalled dates, should have double-checked), and the second being that the game doesn't actually check the md5 hashes outlined in the directory vpk.
 I combine both of these in order to "replace" the particles already present in the game with modded ones, which then point to the custom directory for their material files.
 
 When first approaching this, I had no idea about the md5 hash being unchecked, I stumbled across that fact by accident some time in August 2023. Surely this has no correlation to any events whatsoever.
