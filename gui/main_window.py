@@ -6,31 +6,117 @@ from pathlib import Path
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit,
                              QLabel, QProgressBar, QFileDialog, QMessageBox, QGroupBox, QSplitter, QTabWidget,
-                             QCheckBox)
+                             QCheckBox,  QDialog)
+from PyQt6.QtGui import QAction
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import scan_for_valve_rc_files
-from gui.settings_manager import SettingsManager
+from gui.settings_manager import SettingsManager, validate_tf_directory
 from gui.drag_and_drop import ModDropZone
 from gui.addon_manager import AddonManager
 from gui.installation import InstallationManager
 from gui.addon_panel import AddonPanel
 
 
+class SettingsDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.ok_button = None
+        self.validation_label = None
+        self.browse_button = None
+        self.tf_path_edit = None
+        self.tf_directory = ""
+        
+        self.setWindowTitle("Settings")
+        self.setMinimumSize(500, 300)
+        self.setModal(True)
+        
+        # get current tf/ directory from parent's install manager
+        if hasattr(parent, 'install_manager') and parent.install_manager.tf_path:
+            self.tf_directory = parent.install_manager.tf_path
+        
+        self.setup_ui()
+    
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        
+        # tf/ Directory Group
+        tf_group = QGroupBox("TF2 Directory")
+        tf_layout = QVBoxLayout()
+        
+        # directory display
+        current_label = QLabel("Current TF2 directory:")
+        tf_layout.addWidget(current_label)
+        
+        # directory selection
+        dir_layout = QHBoxLayout()
+        self.tf_path_edit = QLineEdit()
+        self.tf_path_edit.setReadOnly(True)
+        self.tf_path_edit.setText(self.tf_directory)
+        self.tf_path_edit.setPlaceholderText("No TF2 directory selected...")
+        
+        self.browse_button = QPushButton("Browse...")
+        self.browse_button.clicked.connect(self.browse_tf_dir)
+        
+        dir_layout.addWidget(self.tf_path_edit)
+        dir_layout.addWidget(self.browse_button)
+        tf_layout.addLayout(dir_layout)
+        
+        # validation
+        self.validation_label = QLabel("")
+        self.validation_label.setWordWrap(True)
+        tf_layout.addWidget(self.validation_label)
+        
+        tf_group.setLayout(tf_layout)
+        layout.addWidget(tf_group)
+        
+        # validate initial directory
+        if self.tf_directory:
+            validate_tf_directory(self.tf_directory, self.validation_label)
+        
+        layout.addStretch()
+        
+        # buttons
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        
+        cancel_button = QPushButton("Cancel")
+        cancel_button.clicked.connect(self.reject)
+        button_layout.addWidget(cancel_button)
+        
+        self.ok_button = QPushButton("OK")
+        self.ok_button.clicked.connect(self.accept)
+        button_layout.addWidget(self.ok_button)
+        
+        layout.addLayout(button_layout)
+    
+    def browse_tf_dir(self):
+        directory = QFileDialog.getExistingDirectory(self, "Select tf/ Directory")
+        if directory:
+            self.tf_directory = directory
+            self.tf_path_edit.setText(directory)
+            validate_tf_directory(directory, self.validation_label)
+    
+    
+    def get_tf_directory(self):
+        return self.tf_directory
+
+
 class ParticleManagerGUI(QMainWindow):
-    def __init__(self):
+    def __init__(self, tf_directory=None):
         super().__init__()
+        # store initial tf directory from first-time setup
+        self.initial_tf_directory = tf_directory
+        
         # managers
         self.settings_manager = SettingsManager()
         self.addon_manager = AddonManager(self.settings_manager)
-        self.install_manager = InstallationManager()
+        self.install_manager = InstallationManager(self.settings_manager)
 
         # UI components
         self.status_label = None
         self.progress_bar = None
         self.restore_button = None
         self.install_button = None
-        self.browse_button = None
-        self.tf_path_edit = None
         self.addons_list = None
         self.addon_description = None
         self.mod_drop_zone = None
@@ -39,11 +125,18 @@ class ParticleManagerGUI(QMainWindow):
         self.setWindowTitle("cukei's casual pre-loader :)")
         self.setMinimumSize(800, 400)
         self.resize(1200, 700)
+        self.setup_menu_bar()
         self.setup_ui()
         self.setup_signals()
 
         # load initial data
-        self.load_last_directory()
+        if self.initial_tf_directory:
+            # set tf/ directory from first-time setup and save it
+            self.install_manager.set_tf_path(self.initial_tf_directory)
+            self.settings_manager.set_last_directory(self.initial_tf_directory)
+        else:
+            self.load_last_directory()
+        
         self.load_addons()
         self.scan_for_mcp_files()
         self.rescan_addon_contents()
@@ -51,22 +144,22 @@ class ParticleManagerGUI(QMainWindow):
         # valve.rc flag
         self.valve_rc_found = None
 
+    def setup_menu_bar(self):
+        menubar = self.menuBar()
+        
+        # options menu
+        options_menu = menubar.addMenu("Options")
+        
+        # settings action
+        settings_action = QAction("Settings...", self)
+        settings_action.triggered.connect(self.open_settings_dialog)
+        options_menu.addAction(settings_action)
+
     def setup_ui(self):
         # main layout
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
-
-        # TF Directory Group
-        tf_group = QGroupBox("tf/ Directory")
-        tf_layout = QHBoxLayout()
-        self.tf_path_edit = QLineEdit()
-        self.tf_path_edit.setReadOnly(True)
-        self.browse_button = QPushButton("Browse")
-        tf_layout.addWidget(self.tf_path_edit)
-        tf_layout.addWidget(self.browse_button)
-        tf_group.setLayout(tf_layout)
-        main_layout.addWidget(tf_group)
 
         # tab widget for particles and install
         tab_widget = QTabWidget()
@@ -162,7 +255,6 @@ class ParticleManagerGUI(QMainWindow):
 
     def setup_signals(self):
         # button signals
-        self.browse_button.clicked.connect(self.browse_tf_dir)
         self.install_button.clicked.connect(self.start_install)
         self.restore_button.clicked.connect(self.start_restore)
 
@@ -176,21 +268,11 @@ class ParticleManagerGUI(QMainWindow):
         self.install_manager.operation_success.connect(self.show_success)
         self.install_manager.operation_finished.connect(self.on_operation_finished)
 
-    def browse_tf_dir(self):
-        directory = QFileDialog.getExistingDirectory(self, "Select tf/ Directory")
-        if directory:
-            self.install_manager.set_tf_path(directory)
-            self.tf_path_edit.setText(directory)
-            self.settings_manager.set_last_directory(directory)
-            self.update_restore_button_state()
-            self.scan_for_mcp_files()
-            self.scan_for_valve_rc(directory)
 
     def load_last_directory(self):
         last_dir = self.settings_manager.get_last_directory()
         if last_dir and Path(last_dir).exists():
             self.install_manager.set_tf_path(last_dir)
-            self.tf_path_edit.setText(last_dir)
             self.update_restore_button_state()
             self.scan_for_valve_rc(last_dir)
 
@@ -391,7 +473,6 @@ class ParticleManagerGUI(QMainWindow):
 
     def set_processing_state(self, processing: bool):
         enabled = not processing
-        self.browse_button.setEnabled(enabled)
         self.install_button.setEnabled(enabled)
         if not processing:
             self.update_restore_button_state()
@@ -437,3 +518,16 @@ class ParticleManagerGUI(QMainWindow):
             self.status_label.setText("Opened addons folder")
         except Exception as e:
             self.show_error(f"Failed to open addons folder: {str(e)}")
+
+    def open_settings_dialog(self):
+        dialog = SettingsDialog(self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            # update TF directory if changed
+            new_tf_dir = dialog.get_tf_directory()
+            if new_tf_dir and new_tf_dir != self.install_manager.tf_path:
+                self.install_manager.set_tf_path(new_tf_dir)
+                self.settings_manager.set_last_directory(new_tf_dir)
+                self.update_restore_button_state()
+                self.scan_for_mcp_files()
+                self.scan_for_valve_rc(new_tf_dir)
+                self.status_label.setText("TF2 directory updated successfully")

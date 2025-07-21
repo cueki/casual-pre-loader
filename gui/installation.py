@@ -4,6 +4,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
 from operations.file_processors import check_game_type
 from gui.interface import Interface
+from gui.settings_manager import validate_tf_directory
 
 
 class InstallationManager(QObject):
@@ -12,11 +13,12 @@ class InstallationManager(QObject):
     operation_error = pyqtSignal(str)
     operation_success = pyqtSignal(str)
 
-    def __init__(self):
+    def __init__(self, settings_manager=None):
         super().__init__()
         self.interface = Interface()
         self.tf_path = ""
         self.processing = False
+        self.settings_manager = settings_manager
 
         # interface connection
         self.interface.progress_signal.connect(self.progress_update)
@@ -27,22 +29,10 @@ class InstallationManager(QObject):
     def set_tf_path(self, path):
         self.tf_path = path
 
-    def validate_tf_path(self):
-        if not self.tf_path:
-            return False, "Please select tf/ directory!"
-
-        if not (self.tf_path.endswith("/tf") or self.tf_path.endswith("/tf/")):
-            return False, "Please select tf/ directory!"
-
-        if not Path(self.tf_path).exists():
-            return False, "Selected TF2 directory does not exist!"
-
-        return True, ""
 
     def install(self, selected_addons, mod_drop_zone=None, valve_rc_found=False):
-        valid, message = self.validate_tf_path()
-        if not valid:
-            self.operation_error.emit(message)
+        if not validate_tf_directory(self.tf_path):
+            self.operation_error.emit("Invalid TF2 directory!")
             self.operation_finished.emit()
             return
 
