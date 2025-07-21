@@ -36,7 +36,7 @@ class FirstTimeSetupDialog(QDialog):
         layout = QVBoxLayout(self)
         
         # title
-        welcome_label = QLabel("Welcome to cukei's casual pre-loader!")
+        welcome_label = QLabel("Welcome to casual pre-loader!")
         welcome_label.setStyleSheet("font-size: 16px; font-weight: bold; margin: 10px;")
         welcome_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(welcome_label)
@@ -162,8 +162,7 @@ class FirstTimeSetupDialog(QDialog):
         mods_layout.addWidget(self.mods_import_edit)
         mods_layout.addWidget(mods_browse_button)
         import_layout.addLayout(mods_layout)
-        
-        
+
         # clear imports button
         clear_imports_button = QPushButton("Clear Import Selections")
         clear_imports_button.clicked.connect(self.clear_import_selections)
@@ -250,17 +249,16 @@ class FirstTimeSetupDialog(QDialog):
         if self.import_settings_path:
             settings_path = Path(self.import_settings_path)
             if settings_path.exists():
-                status_parts.append("✅ Settings file selected")
+                status_parts.append("Settings file selected")
             else:
-                status_parts.append("❌ Settings file not found")
+                status_parts.append("Settings file not found")
         
         if self.import_mods_path:
             mods_path = Path(self.import_mods_path)
             if mods_path.exists() and mods_path.is_dir():
-                mod_count = len(list(mods_path.iterdir()))
-                status_parts.append(f"✅ Mods folder selected ({mod_count} items)")
+                status_parts.append(f"Mods folder selected")
             else:
-                status_parts.append("❌ Mods folder not found or empty")
+                status_parts.append("Mods folder not found or empty")
         
         if not status_parts:
             status_parts.append("No import files selected (this is optional)")
