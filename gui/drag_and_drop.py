@@ -197,22 +197,31 @@ class ModDropZone(QFrame):
 
         for mod_name in used_mods:
             mod_dir = folder_setup.particles_dir / mod_name
-            # process each required material
-            for material_path in required_materials:
-                full_material_path = mod_dir / 'materials' / material_path.replace('\\', '/')
-                if full_material_path.exists():
-                    material_destination = folder_setup.temp_mods_dir / Path(full_material_path).relative_to(mod_dir)
-                    material_destination.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(Path(full_material_path), material_destination)
-                    texture_paths = parse_vmt_texture(full_material_path)
-                    if texture_paths:
-                        for texture_path in texture_paths:
-                            full_texture_path = mod_dir / 'materials' / str(texture_path).replace('\\', '/')
-                            if full_texture_path.exists():
-                                texture_destination = folder_setup.temp_mods_dir / Path(full_texture_path).relative_to(
-                                    mod_dir)
-                                texture_destination.parent.mkdir(parents=True, exist_ok=True)
-                                shutil.copy2(Path(full_texture_path), texture_destination)
+            # this is some cheeks bro, bypass parse_vmt_texture and copy entire materials folder
+            if "skeleton_hotel" in mod_name.lower():
+                materials_source = mod_dir / 'materials'
+                if materials_source.exists():
+                    materials_destination = folder_setup.temp_mods_dir / 'materials'
+                    if materials_destination.exists():
+                        shutil.rmtree(materials_destination)
+                    shutil.copytree(materials_source, materials_destination, dirs_exist_ok=True)
+            else:
+                # process each required material if it's not skeleton hotel
+                for material_path in required_materials:
+                    full_material_path = mod_dir / 'materials' / material_path.replace('\\', '/')
+                    if full_material_path.exists():
+                        material_destination = folder_setup.temp_mods_dir / Path(full_material_path).relative_to(mod_dir)
+                        material_destination.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(Path(full_material_path), material_destination)
+                        texture_paths = parse_vmt_texture(full_material_path)
+                        if texture_paths:
+                            for texture_path in texture_paths:
+                                full_texture_path = mod_dir / 'materials' / str(texture_path).replace('\\', '/')
+                                if full_texture_path.exists():
+                                    texture_destination = folder_setup.temp_mods_dir / Path(full_texture_path).relative_to(
+                                        mod_dir)
+                                    texture_destination.parent.mkdir(parents=True, exist_ok=True)
+                                    shutil.copy2(Path(full_texture_path), texture_destination)
 
         return len(selections) > 0
 
