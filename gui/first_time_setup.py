@@ -36,7 +36,7 @@ class FirstTimeSetupDialog(QDialog):
         layout = QVBoxLayout(self)
         
         # title
-        welcome_label = QLabel("Welcome to casual pre-loader!")
+        welcome_label = QLabel("Welcome to the casual pre-loader!")
         welcome_label.setStyleSheet("font-size: 16px; font-weight: bold; margin: 10px;")
         welcome_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(welcome_label)
