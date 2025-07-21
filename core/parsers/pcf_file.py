@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import BinaryIO, Any, List, Dict, Tuple, Union
 from core.constants import PCFVersion, AttributeType, ATTRIBUTE_VALUES
 
+# see: https://developer.valvesoftware.com/wiki/PCF
 
 @dataclass
 class PCFElement:
