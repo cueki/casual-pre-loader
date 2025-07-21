@@ -6,6 +6,7 @@ from PyQt6.QtGui import QPixmap, QIcon
 from PyQt6.QtCore import Qt
 from gui.main_window import ParticleManagerGUI
 from gui.setup import initial_setup
+from gui.first_time_setup import check_first_time_setup, run_first_time_setup
 from core.folder_setup import folder_setup
 from core.backup_manager import prepare_working_copy
 
@@ -15,6 +16,14 @@ def main():
     font = app.font()
     font.setPointSize(10)
     app.setFont(font)
+
+    # first-time setup
+    tf_directory = None
+    if check_first_time_setup():
+        tf_directory = run_first_time_setup()
+        if tf_directory is None:
+            # user cancelled setup
+            return
 
     # splash screen
     splash_pixmap = QPixmap('gui/cueki_icon.png')
@@ -37,7 +46,7 @@ def main():
                        Qt.GlobalColor.white)
     prepare_working_copy()
 
-    window = ParticleManagerGUI()
+    window = ParticleManagerGUI(tf_directory)
 
     # set icon for Windows
     if platform == 'win32':

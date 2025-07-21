@@ -1,7 +1,48 @@
 import json
 from pathlib import Path
-
 from core.folder_setup import folder_setup
+
+
+def validate_tf_directory(directory, validation_label=None):
+    if not directory:
+        if validation_label:
+            validation_label.setText("")
+        return False
+
+    tf_path = Path(directory)
+
+    # check if directory exists
+    if not tf_path.exists():
+        if validation_label:
+            validation_label.setText("Directory does not exist!")
+            validation_label.setStyleSheet("color: red;")
+        return False
+
+    # check if it's actually a tf directory
+    if not (tf_path.name == "tf" or tf_path.name.endswith("/tf")):
+        if validation_label:
+            validation_label.setText("Selected directory should be named 'tf'")
+            validation_label.setStyleSheet("color: orange;")
+
+    # check for gameinfo.txt
+    if not (tf_path / "gameinfo.txt").exists():
+        if validation_label:
+            validation_label.setText("gameinfo.txt not found - this doesn't appear to be a valid tf/ directory")
+            validation_label.setStyleSheet("color: red;")
+        return False
+
+    # check for tf2_misc_dir.vpk
+    if not (tf_path / "tf2_misc_dir.vpk").exists():
+        if validation_label:
+            validation_label.setText("tf2_misc_dir.vpk not found - some features may not work")
+            validation_label.setStyleSheet("color: orange;")
+    else:
+        if validation_label:
+            validation_label.setText("Valid TF2 directory detected!")
+            validation_label.setStyleSheet("color: green;")
+
+    return True
+
 
 class SettingsManager:
     # listen up students, in this class we will learn how to write java getters and setters
