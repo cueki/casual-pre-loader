@@ -166,7 +166,7 @@ class Interface(QObject):
             copy_config_files(custom_content_dir, valve_rc_found)
             patch_mainmenuoverride(tf_path)
             # make vmts
-            generate_missing_vmt_files(custom_content_dir)
+            generate_missing_vmt_files(custom_content_dir, tf_path)
 
             for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
                 split_file.unlink()
