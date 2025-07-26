@@ -153,6 +153,15 @@ QUICKPRECACHE_FILE_SUFFIXES = [
     ".vvd"
 ]
 
+QUICKPRECACHE_MODEL_LIST = [
+    "prop",
+    "flag",
+    "bots",
+    "ammo_box",
+    "ammopack",
+    "medkit",
+    "currencypack"
+]
 
 DECAL_MAPPING = {
     # this is just the blood decal mapping, would need to add bullet holes and such if we want those

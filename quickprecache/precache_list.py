@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Set, List
-from core.constants import QUICKPRECACHE_FILE_SUFFIXES
+from core.constants import QUICKPRECACHE_FILE_SUFFIXES, QUICKPRECACHE_MODEL_LIST
 from core.parsers.vpk_file import VPKFile
 
 
@@ -22,9 +22,7 @@ def make_precache_list(game_path: str) -> Set[str]:
 
 def _should_quickprecache(file_path: str) -> bool:
     file_path_lower = file_path.lower()
-    return any(keyword in file_path_lower for keyword in [
-        "prop", "flag", "bots", "ammo_box", "ammopack", "medkit", "currencypack"
-    ])
+    return any(keyword in file_path_lower for keyword in QUICKPRECACHE_MODEL_LIST)
 
 
 def _process_file_to_model_path(file_path: str) -> str:
