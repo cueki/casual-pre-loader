@@ -1,7 +1,7 @@
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
-from core.parsers.pcf_file import PCFFile
+from valve_parsers import PCFFile
 from operations.pcf_rebuild import (
     load_particle_system_map,
     get_pcf_element_names,

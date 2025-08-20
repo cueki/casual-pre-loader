@@ -4,7 +4,7 @@ import shutil
 import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
-from core.parsers.vpk_file import VPKFile
+from valve_parsers import VPKFile
 from core.handlers.pcf_handler import restore_particle_files
 
 

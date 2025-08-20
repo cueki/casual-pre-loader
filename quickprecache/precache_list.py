@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Set, List
 from core.constants import QUICKPRECACHE_FILE_SUFFIXES, QUICKPRECACHE_MODEL_LIST
-from core.parsers.vpk_file import VPKFile
+from valve_parsers import VPKFile
 
 
 def make_precache_list(game_path: str) -> Set[str]:

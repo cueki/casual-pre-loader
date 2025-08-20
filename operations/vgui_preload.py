@@ -1,7 +1,7 @@
 import shutil
 from pathlib import Path
 from core.folder_setup import folder_setup
-from core.parsers.vpk_file import VPKFile
+from valve_parsers import VPKFile
 
 
 def patch_mainmenuoverride(tf_path: str):

@@ -1,4 +1,4 @@
-from core.parsers.pcf_file import PCFFile, PCFElement
+from valve_parsers import PCFFile, PCFElement
 from core.constants import AttributeType
 
 

@@ -1,6 +1,6 @@
 from pathlib import Path
-from core.parsers.pcf_file import PCFFile
-from core.parsers.vpk_file import VPKFile
+from valve_parsers import PCFFile
+from valve_parsers import VPKFile
 from operations.pcf_compress import remove_duplicate_elements
 
 

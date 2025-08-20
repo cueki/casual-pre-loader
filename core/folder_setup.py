@@ -12,7 +12,7 @@ from typing import Optional
 from core.are_we_portable import portable
 
 from core.handlers.pcf_handler import get_parent_elements
-from core.parsers.pcf_file import PCFFile
+from valve_parsers import PCFFile
 
 
 @dataclass

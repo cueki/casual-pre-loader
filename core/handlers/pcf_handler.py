@@ -1,6 +1,6 @@
 from pathlib import Path
-from core.parsers.pcf_file import PCFFile, PCFElement
-from core.parsers.vpk_file import VPKFile
+from valve_parsers import PCFFile, PCFElement
+from valve_parsers import VPKFile
 
 
 def restore_particle_files(tf_path: str) -> int:

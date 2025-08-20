@@ -5,8 +5,8 @@ from pathlib import Path
 from PyQt6.QtCore import Qt, pyqtSignal, QObject
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QLabel, QMessageBox, QProgressDialog
 from core.folder_setup import folder_setup
-from core.parsers.vpk_file import VPKFile
-from core.parsers.pcf_file import PCFFile
+from valve_parsers import VPKFile
+from valve_parsers import PCFFile
 from gui.conflict_matrix import ConflictMatrix
 from operations.advanced_particle_merger import AdvancedParticleMerger
 
