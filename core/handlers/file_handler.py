@@ -118,7 +118,8 @@ class FileHandler:
                     content = f.read()
                 new_data = processor(content)
             else:
-                raise ValueError(f"Unsupported file type: {file_type}")
+                print(f"Error: Unsupported file type '{file_type}' for file {file_name}")
+                return False
 
             # check if the processed file size matches the original size
             if len(new_data) != original_size:

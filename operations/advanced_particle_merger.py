@@ -17,7 +17,11 @@ def sequential_merge(pcf_files: List[PCFFile]):
         return None
     result = pcf_files[0]
     for pcf in pcf_files[1:]:
-        result = merge_pcf_files(result, pcf)
+        try:
+            result = merge_pcf_files(result, pcf)
+        except ValueError as e:
+            print(f"Warning: Skipping PCF file due to merge error: {e}")
+            continue
     return result
 
 
@@ -91,7 +95,11 @@ class AdvancedParticleMerger:
 
                 if duplicates:
                     game_elements = PCFFile(game_file_out).decode()
-                    result = merge_pcf_files(chosen_pcf, game_elements)
+                    try:
+                        result = merge_pcf_files(chosen_pcf, game_elements)
+                    except ValueError as e:
+                        print(f"Warning: Failed to merge with game elements: {e}")
+                        result = chosen_pcf
                 else:
                     group_files.append(game_file_out)
                     pcf_files = [PCFFile(particle).decode() for particle in group_files]
