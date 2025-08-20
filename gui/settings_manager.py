@@ -57,7 +57,7 @@ class SettingsManager:
 
     def _load_settings(self):
         default_settings = {
-            "last_directory": "",
+            "tf_directory": "",
             "addon_selections": [],
             "matrix_selections": {},
             "skip_valve_rc_warning": False
@@ -101,11 +101,11 @@ class SettingsManager:
         except Exception as e:
             print(f"Error saving addon metadata: {e}")
 
-    def get_last_directory(self):
-        return self.settings.get("last_directory", "")
+    def get_tf_directory(self):
+        return self.settings.get("tf_directory", "")
 
-    def set_last_directory(self, directory):
-        self.settings["last_directory"] = directory
+    def set_tf_directory(self, directory):
+        self.settings["tf_directory"] = directory
         self.save_settings()
 
     def get_addon_selections(self):

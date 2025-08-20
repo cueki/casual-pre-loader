@@ -15,7 +15,7 @@ from gui.drag_and_drop import ModDropZone
 from gui.addon_manager import AddonManager
 from gui.installation import InstallationManager
 from gui.addon_panel import AddonPanel
-
+from gui.first_time_setup import get_mods_zip_enabled, set_mods_zip_enabled
 
 class SettingsDialog(QDialog):
     def __init__(self, parent=None):
@@ -25,6 +25,7 @@ class SettingsDialog(QDialog):
         self.browse_button = None
         self.tf_path_edit = None
         self.tf_directory = ""
+        self.mods_checkbox = None
         
         self.setWindowTitle("Settings")
         self.setMinimumSize(500, 300)
@@ -73,6 +74,25 @@ class SettingsDialog(QDialog):
         if self.tf_directory:
             validate_tf_directory(self.tf_directory, self.validation_label)
         
+        # included mods group
+        mods_group = QGroupBox("Included Mods")
+        mods_layout = QVBoxLayout()
+        
+        mods_description = QLabel(
+            "Control whether included mods (mods.zip) should be available in the app.\n"
+            "Note: Changing this setting will take effect on next app restart."
+        )
+        mods_description.setWordWrap(True)
+        mods_layout.addWidget(mods_description)
+        
+        self.mods_checkbox = QCheckBox("Include built-in mods (mods.zip)")
+        # Set current value from settings
+        self.mods_checkbox.setChecked(get_mods_zip_enabled())
+        mods_layout.addWidget(self.mods_checkbox)
+        
+        mods_group.setLayout(mods_layout)
+        layout.addWidget(mods_group)
+        
         layout.addStretch()
         
         # buttons
@@ -84,7 +104,7 @@ class SettingsDialog(QDialog):
         button_layout.addWidget(cancel_button)
         
         self.ok_button = QPushButton("OK")
-        self.ok_button.clicked.connect(self.accept)
+        self.ok_button.clicked.connect(self.save_and_accept)
         button_layout.addWidget(self.ok_button)
         
         layout.addLayout(button_layout)
@@ -99,6 +119,11 @@ class SettingsDialog(QDialog):
     
     def get_tf_directory(self):
         return self.tf_directory
+
+    def save_and_accept(self):
+        # save mods.zip setting
+        set_mods_zip_enabled(self.mods_checkbox.isChecked())
+        self.accept()
 
 
 class ParticleManagerGUI(QMainWindow):
@@ -133,9 +158,9 @@ class ParticleManagerGUI(QMainWindow):
         if self.initial_tf_directory:
             # set tf/ directory from first-time setup and save it
             self.install_manager.set_tf_path(self.initial_tf_directory)
-            self.settings_manager.set_last_directory(self.initial_tf_directory)
+            self.settings_manager.set_tf_directory(self.initial_tf_directory)
         else:
-            self.load_last_directory()
+            self.load_tf_directory()
         
         self.load_addons()
         self.scan_for_mcp_files()
@@ -269,12 +294,12 @@ class ParticleManagerGUI(QMainWindow):
         self.install_manager.operation_finished.connect(self.on_operation_finished)
 
 
-    def load_last_directory(self):
-        last_dir = self.settings_manager.get_last_directory()
-        if last_dir and Path(last_dir).exists():
-            self.install_manager.set_tf_path(last_dir)
+    def load_tf_directory(self):
+        tf_dir = self.settings_manager.get_tf_directory()
+        if tf_dir and Path(tf_dir).exists():
+            self.install_manager.set_tf_path(tf_dir)
             self.update_restore_button_state()
-            self.scan_for_valve_rc(last_dir)
+            self.scan_for_valve_rc(tf_dir)
 
     def load_addons(self):
         updates_found = self.addon_manager.scan_addon_contents()
@@ -526,7 +551,7 @@ class ParticleManagerGUI(QMainWindow):
             new_tf_dir = dialog.get_tf_directory()
             if new_tf_dir and new_tf_dir != self.install_manager.tf_path:
                 self.install_manager.set_tf_path(new_tf_dir)
-                self.settings_manager.set_last_directory(new_tf_dir)
+                self.settings_manager.set_tf_directory(new_tf_dir)
                 self.update_restore_button_state()
                 self.scan_for_mcp_files()
                 self.scan_for_valve_rc(new_tf_dir)
