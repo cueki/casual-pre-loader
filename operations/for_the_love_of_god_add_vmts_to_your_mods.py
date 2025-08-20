@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Set, List, Optional
 from core.folder_setup import folder_setup
-from core.parsers.vpk_file import VPKFile
+from valve_parsers import VPKFile
 
 
 def find_all_vtf_files(directory: Path) -> List[Path]:
