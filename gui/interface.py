@@ -1,14 +1,13 @@
 import shutil
 from pathlib import Path
 from typing import List
+from valve_parsers import VPKFile, PCFFile
 from PyQt6.QtCore import QObject, pyqtSignal
 from core.constants import CUSTOM_VPK_NAMES, DX8_LIST, CUSTOM_VPK_NAME, CUSTOM_VPK_SPLIT_PATTERN
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler, copy_config_files
 from core.handlers.pcf_handler import check_parents, update_materials, restore_particle_files
 from core.handlers.skybox_handler import handle_skybox_mods, restore_skybox_files
-from valve_parsers import VPKFile
-from valve_parsers import PCFFile
 from core.backup_manager import prepare_working_copy
 from operations.for_the_love_of_god_add_vmts_to_your_mods import generate_missing_vmt_files
 from operations.pcf_rebuild import load_particle_system_map, extract_elements

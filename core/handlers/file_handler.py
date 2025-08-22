@@ -3,8 +3,7 @@ import shutil
 import traceback
 from typing import List
 from pathlib import Path
-from valve_parsers import PCFFile
-from valve_parsers import VPKFile
+from valve_parsers import VPKFile, PCFFile
 from core.folder_setup import folder_setup
 
 
