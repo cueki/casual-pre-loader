@@ -103,6 +103,7 @@ ATTRIBUTE_DEFAULTS = [
     ("Visibility Camera Depth Bias", 0.0)
 ]
 
+
 DX8_LIST = [
     "burningplayer",
     "cig_smoke",
@@ -127,6 +128,7 @@ DX8_LIST = [
     "soldierbuff",
     "stickybomb"
 ]
+
 
 CUSTOM_VPK_NAME = "_casual_preloader.vpk"
 CUSTOM_VPK_SPLIT_PATTERN = "_casual_preloader_"
@@ -153,6 +155,7 @@ QUICKPRECACHE_FILE_SUFFIXES = [
     ".vvd"
 ]
 
+
 QUICKPRECACHE_MODEL_LIST = [
     "prop",
     "flag",
@@ -162,6 +165,7 @@ QUICKPRECACHE_MODEL_LIST = [
     "medkit",
     "currencypack"
 ]
+
 
 DECAL_MAPPING = {
     # this is just the blood decal mapping, would need to add bullet holes and such if we want those
@@ -177,6 +181,7 @@ DECAL_MAPPING = {
     "decal/blood5": {"position": (256, 256), "size": (128, 128)},
     "decal/blood6": {"position": (384, 256), "size": (128, 128)},
 }
+
 
 PARTICLE_GROUP_MAPPING = {
     "explosions": ["drg_cowmangler.pcf", "stickybomb.pcf", "rocketbackblast.pcf",
@@ -199,3 +204,20 @@ PARTICLE_GROUP_MAPPING = {
     "misc": ["bombinomicon.pcf", "training.pcf", "cinefx.pcf", "sparks.pcf", "vgui_menu_particles.pcf",
             "rankup.pcf", "stamp_spin.pcf", "coin_spin.pcf", "npc_fx.pcf"]
 }
+
+
+VALID_MOD_ROOT_FOLDERS = [
+    "cfg",
+    "classes",
+    "expressions",
+    "maps",
+    "materials",
+    "media",
+    "models",
+    "particles",
+    "resource",
+    "scenes",
+    "scripts",
+    "servers",
+    "sound"
+]
