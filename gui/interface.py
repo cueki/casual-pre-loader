@@ -30,7 +30,7 @@ class Interface(QObject):
     def update_progress(self, progress: int, message: str):
         self.progress_signal.emit(progress, message)
 
-    def install(self, tf_path: str, selected_addons: List[str], mod_drop_zone=None, valve_rc_found=False):
+    def install(self, tf_path: str, selected_addons: List[str], mod_drop_zone=None):
         try:
             working_vpk_path = Path(tf_path) / "tf2_misc_dir.vpk"
             vpk_file = VPKFile(str(working_vpk_path))
@@ -163,7 +163,7 @@ class Interface(QObject):
 
             # create new VPK for custom content & config
             custom_content_dir = folder_setup.temp_mods_dir
-            copy_config_files(custom_content_dir, valve_rc_found)
+            copy_config_files(custom_content_dir)
             patch_mainmenuoverride(tf_path)
             # make vmts
             generate_missing_vmt_files(custom_content_dir, tf_path)

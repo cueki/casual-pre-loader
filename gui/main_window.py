@@ -9,7 +9,6 @@ from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPu
                              QCheckBox,  QDialog)
 from PyQt6.QtGui import QAction
 from core.folder_setup import folder_setup
-from core.handlers.file_handler import scan_for_valve_rc_files
 from gui.settings_manager import SettingsManager, validate_tf_directory
 from gui.drag_and_drop import ModDropZone
 from gui.addon_manager import AddonManager
@@ -166,8 +165,6 @@ class ParticleManagerGUI(QMainWindow):
         self.scan_for_mcp_files()
         self.rescan_addon_contents()
 
-        # valve.rc flag
-        self.valve_rc_found = None
 
     def setup_menu_bar(self):
         menubar = self.menuBar()
@@ -299,7 +296,6 @@ class ParticleManagerGUI(QMainWindow):
         if tf_dir and Path(tf_dir).exists():
             self.install_manager.set_tf_path(tf_dir)
             self.update_restore_button_state()
-            self.scan_for_valve_rc(tf_dir)
 
     def load_addons(self):
         updates_found = self.addon_manager.scan_addon_contents()
@@ -458,25 +454,23 @@ class ParticleManagerGUI(QMainWindow):
                 f"The following items in your custom folder may conflict with this method:\n\n• {conflict_list}\n\nIt's recommended to remove these to avoid issues."
             )
 
-    def scan_for_valve_rc(self, directory):
-        found_files, self.valve_rc_found = scan_for_valve_rc_files(directory)
-        skip_valve_rc_warning = self.settings_manager.get_skip_valve_rc_warning()
-        if found_files and not skip_valve_rc_warning:
-            conflict_list = "\n• ".join(found_files)
+    def show_launch_options_popup(self):
+        skip_launch_popup = self.settings_manager.get_skip_launch_options_popup()
+        if not skip_launch_popup:
             msg_box = QMessageBox(self)
-            msg_box.setWindowTitle("valve.rc found (most likely in HUD)")
-            msg_box.setText(f"The following valve.rc files were found in your custom folder:\n• {conflict_list}\n\n"
-                            "You have two options.\n"
-                            "   1. Add +exec w/config.cfg to your launch options\n"
-                            "   2. Remove the file from the HUD")
-            msg_box.setIcon(QMessageBox.Icon.Warning)
+            msg_box.setWindowTitle("Installation Complete - Launch Options Required")
+            msg_box.setText("Installation completed successfully!\n\n"
+                            "IMPORTANT: You must add the following to your TF2 launch options:\n\n"
+                            "+exec w/config.cfg\n\n"
+                            "This ensures the preloader works correctly with your game.")
+            msg_box.setIcon(QMessageBox.Icon.Information)
 
-            dont_show_checkbox = QCheckBox("I put '+exec w/config' in my launch options, don't show this warning again")
+            dont_show_checkbox = QCheckBox("Don't show this popup again")
             msg_box.setCheckBox(dont_show_checkbox)
             msg_box.exec()
 
             if dont_show_checkbox.isChecked():
-                self.settings_manager.set_skip_valve_rc_warning(True)
+                self.settings_manager.set_skip_launch_options_popup(True)
 
     def rescan_addon_contents(self):
         thread = threading.Thread(target=self.addon_manager.scan_addon_contents)
@@ -486,7 +480,7 @@ class ParticleManagerGUI(QMainWindow):
     def start_install(self):
         selected_addons = self.get_selected_addons()
         self.set_processing_state(True)
-        self.install_manager.install(selected_addons, self.mod_drop_zone, self.valve_rc_found)
+        self.install_manager.install(selected_addons, self.mod_drop_zone)
 
     def start_restore(self):
         if self.install_manager.restore():
@@ -516,6 +510,7 @@ class ParticleManagerGUI(QMainWindow):
 
     def show_success(self, message):
         QMessageBox.information(self, "Success", message)
+        self.show_launch_options_popup()
 
     def delete_selected_addons(self):
         success, message = self.addon_manager.delete_selected_addons(self.addons_list)
@@ -554,5 +549,4 @@ class ParticleManagerGUI(QMainWindow):
                 self.settings_manager.set_tf_directory(new_tf_dir)
                 self.update_restore_button_state()
                 self.scan_for_mcp_files()
-                self.scan_for_valve_rc(new_tf_dir)
                 self.status_label.setText("TF2 directory updated successfully")

@@ -60,7 +60,7 @@ class SettingsManager:
             "tf_directory": "",
             "addon_selections": [],
             "matrix_selections": {},
-            "skip_valve_rc_warning": False
+            "skip_launch_options_popup": False
         }
 
         if self.settings_file.exists():
@@ -133,9 +133,9 @@ class SettingsManager:
         metadata = self.get_addon_metadata()
         return {name: data.get('files', []) for name, data in metadata.items()}
 
-    def get_skip_valve_rc_warning(self):
-        return self.settings.get("skip_valve_rc_warning", False)
+    def get_skip_launch_options_popup(self):
+        return self.settings.get("skip_launch_options_popup", False)
 
-    def set_skip_valve_rc_warning(self, skip_warning):
-        self.settings["skip_valve_rc_warning"] = skip_warning
+    def set_skip_launch_options_popup(self, skip_popup):
+        self.settings["skip_launch_options_popup"] = skip_popup
         self.save_settings()

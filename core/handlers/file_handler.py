@@ -8,17 +8,11 @@ from valve_parsers import VPKFile
 from core.folder_setup import folder_setup
 
 
-def copy_config_files(custom_content_dir, skip_valve_rc=False):
+def copy_config_files(custom_content_dir):
     # config copy
     config_dest_dir = custom_content_dir / "cfg" / "w"
     config_dest_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(folder_setup.install_dir / 'backup/cfg/w/config.cfg', config_dest_dir)
-
-    # valve.rc copy
-    if not skip_valve_rc:
-        valverc_dest_dir = custom_content_dir / "cfg"
-        valverc_dest_dir.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(folder_setup.install_dir / 'backup/cfg/valve.rc', valverc_dest_dir)
 
     # vscript copy
     vscript_dest_dir = custom_content_dir / "scripts" / "vscripts"
@@ -29,41 +23,6 @@ def copy_config_files(custom_content_dir, skip_valve_rc=False):
     vgui_dest_dir = custom_content_dir / "resource" / "ui"
     vgui_dest_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(folder_setup.install_dir / 'backup/resource/ui/vguipreload.res', vgui_dest_dir)
-
-
-def scan_for_valve_rc_files(tf_path):
-    if not tf_path:
-        return [], False
-
-    custom_dir = Path(tf_path) / 'custom'
-    if not custom_dir.exists():
-        return [], False
-
-    found_files = []
-
-    for item in custom_dir.iterdir():
-        if "_casual_preloader" in item.name.lower():
-            continue
-
-        if item.is_dir():
-            valve_rc_file = item / "cfg" / "valve.rc"
-            if valve_rc_file.exists():
-                found_files.append(f"Folder: {item.name}/cfg/valve.rc")
-
-        elif (item.is_file() and
-              item.suffix.lower() == ".vpk"):
-            try:
-                vpk_file = VPKFile(str(item))
-                vpk_file.parse_directory()
-                valve_path = vpk_file.find_file_path("cfg/valve.rc")
-                if valve_path or vpk_file.find_file_path("valve.rc"):
-                    found_files.append(f"VPK: {item.name}")
-            except Exception as e:
-                print(f"Error checking VPK {item}: {e}")
-
-    valve_rc_found = len(found_files) > 0
-
-    return found_files, valve_rc_found
 
 
 class FileHandler:
