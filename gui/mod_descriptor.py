@@ -1,5 +1,6 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QScrollArea, QFrame)
+from core.constants import MOD_TYPE_COLORS
 
 class AddonDescription(QWidget):
     def __init__(self, parent=None):
@@ -64,17 +65,7 @@ class AddonDescription(QWidget):
         self.clear()
 
     def set_type_style(self, addon_type: str):
-        colors = {
-            "custom": "#4CAF50", # green
-            "model": "#2196F3", # blue
-            "texture": "#9C27B0", # magenta
-            "misc": "#FF9800", # orange
-            "animation": "#392C52", # purple
-            "experimental": "#EED202", # yellow
-            "unknown": "#FF0000" # red
-        }
-
-        color = colors.get(addon_type.lower(), "#757575")
+        color = MOD_TYPE_COLORS.get(addon_type.lower(), "#757575")
         self.type_label.setStyleSheet(f"""
             background-color: {color};
             color: white;

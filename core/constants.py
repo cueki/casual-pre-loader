@@ -206,7 +206,7 @@ PARTICLE_GROUP_MAPPING = {
 }
 
 
-VALID_MOD_ROOT_FOLDERS = [
+VALID_MOD_ROOT_FOLDERS = {
     "cfg",
     "classes",
     "expressions",
@@ -220,4 +220,16 @@ VALID_MOD_ROOT_FOLDERS = [
     "scripts",
     "servers",
     "sound"
-]
+}
+
+
+MOD_TYPE_COLORS = {
+    "skin": "#4CAF50",         # green
+    "model": "#2196F3",        # blue
+    "texture": "#9C27B0",      # magenta
+    "misc": "#FF9800",         # orange
+    "animation": "#392C52",    # purple
+    "experimental": "#EED202", # yellow
+    "hud": "#00BCD4",          # cyan
+    "unknown": "#FF0000"       # red
+}
