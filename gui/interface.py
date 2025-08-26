@@ -8,6 +8,7 @@ from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler, copy_config_files
 from core.handlers.pcf_handler import check_parents, update_materials, restore_particle_files
 from core.handlers.skybox_handler import handle_skybox_mods, restore_skybox_files
+from core.handlers.sound_handler import SoundHandler
 from core.backup_manager import prepare_working_copy
 from operations.for_the_love_of_god_add_vmts_to_your_mods import generate_missing_vmt_files
 from operations.pcf_rebuild import load_particle_system_map, extract_elements
@@ -25,6 +26,7 @@ class Interface(QObject):
 
     def __init__(self):
         super().__init__()
+        self.sound_handler = SoundHandler()
 
     def update_progress(self, progress: int, message: str):
         self.progress_signal.emit(progress, message)
@@ -46,11 +48,18 @@ class Interface(QObject):
                 if addon_dir.exists() and addon_dir.is_dir():
                     for src_path in addon_dir.glob('**/*'):
                         if src_path.is_file() and src_path.name != 'mod.json':
+                            # skip sound script files from addons (we'll use our versions)
+                            rel_path = src_path.relative_to(addon_dir)
+                            if (rel_path.parts[0] == 'scripts' and 
+                                len(rel_path.parts) >= 2 and 
+                                'sound' in src_path.name.lower() and 
+                                src_path.suffix == '.txt'):
+                                continue
                             total_files += 1
                             files_to_copy.append((src_path, addon_dir))
 
             # progress bar
-            progress_range = 40
+            progress_range = 25
             completed_files = 0
             self.update_progress(10, f"Installing addons... (0/{total_files} files)")
 
@@ -65,6 +74,18 @@ class Interface(QObject):
                 completed_files += 1
                 current_progress = 10 + int((completed_files / total_files) * progress_range)
                 self.update_progress(current_progress, f"Installing addons... ({completed_files}/{total_files} files)")
+
+            # process sound mods and copy needed script files from backup
+            self.update_progress(35, "Processing sound mods...")
+            backup_scripts_dir = folder_setup.backup_dir / 'scripts'
+            
+            sound_result = self.sound_handler.process_temp_sound_mods(
+                folder_setup.temp_mods_dir,
+                backup_scripts_dir,
+                Path(tf_path) / "tf2_sound_misc_dir.vpk"
+            )
+            if sound_result:
+                self.update_progress(50, f"Sound processing: {sound_result['message']}")
 
             # remove any skybox mods if present then patch new ones in if selected
             restore_skybox_files(tf_path)
