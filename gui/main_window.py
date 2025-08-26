@@ -155,6 +155,7 @@ class ParticleManagerGUI(QMainWindow):
         self.setWindowTitle("cukei's casual pre-loader :)")
         self.setMinimumSize(800, 400)
         self.resize(1200, 700)
+        self.setAcceptDrops(True)
         self.setup_menu_bar()
         self.setup_ui()
         self.setup_signals()
@@ -556,3 +557,15 @@ class ParticleManagerGUI(QMainWindow):
                 self.update_restore_button_state()
                 self.scan_for_mcp_files()
                 self.status_label.setText("TF2 directory updated successfully")
+
+    def dragEnterEvent(self, event):
+        if hasattr(self, 'mod_drop_zone') and self.mod_drop_zone:
+            self.mod_drop_zone.dragEnterEvent(event)
+
+    def dragLeaveEvent(self, event):
+        if hasattr(self, 'mod_drop_zone') and self.mod_drop_zone:
+            self.mod_drop_zone.dragLeaveEvent(event)
+
+    def dropEvent(self, event):
+        if hasattr(self, 'mod_drop_zone') and self.mod_drop_zone:
+            self.mod_drop_zone.dropEvent(event)
