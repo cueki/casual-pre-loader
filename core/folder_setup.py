@@ -44,6 +44,7 @@ class FolderConfig:
     # main folder names
     _backup_folder = "backup"
     _mods_folder = "mods"
+
     # mods subdir
     _mods_particles_folder = "particles"
     _mods_addons_folder = "addons"

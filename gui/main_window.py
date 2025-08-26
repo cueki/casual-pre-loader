@@ -15,6 +15,7 @@ from gui.addon_manager import AddonManager
 from gui.installation import InstallationManager
 from gui.addon_panel import AddonPanel
 from gui.first_time_setup import get_mods_zip_enabled, set_mods_zip_enabled
+from core.version import VERSION
 
 class SettingsDialog(QDialog):
     def __init__(self, parent=None):
@@ -27,7 +28,7 @@ class SettingsDialog(QDialog):
         self.mods_checkbox = None
         
         self.setWindowTitle("Settings")
-        self.setMinimumSize(500, 300)
+        self.setMinimumSize(500, 375)
         self.setModal(True)
         
         # get current tf/ directory from parent's install manager
@@ -85,19 +86,25 @@ class SettingsDialog(QDialog):
         mods_layout.addWidget(mods_description)
         
         self.mods_checkbox = QCheckBox("Include built-in mods (mods.zip)")
-        # Set current value from settings
+        # set current value from settings
         self.mods_checkbox.setChecked(get_mods_zip_enabled())
         mods_layout.addWidget(self.mods_checkbox)
-        
         mods_group.setLayout(mods_layout)
         layout.addWidget(mods_group)
         
+        # version group
+        version_group = QGroupBox("About")
+        version_layout = QVBoxLayout()
+        version_label = QLabel(f"Version: {VERSION}")
+        version_label.setStyleSheet("font-weight: bold;")
+        version_layout.addWidget(version_label)
+        version_group.setLayout(version_layout)
+        layout.addWidget(version_group)
         layout.addStretch()
         
         # buttons
         button_layout = QHBoxLayout()
         button_layout.addStretch()
-        
         cancel_button = QPushButton("Cancel")
         cancel_button.clicked.connect(self.reject)
         button_layout.addWidget(cancel_button)
@@ -105,7 +112,6 @@ class SettingsDialog(QDialog):
         self.ok_button = QPushButton("OK")
         self.ok_button.clicked.connect(self.save_and_accept)
         button_layout.addWidget(self.ok_button)
-        
         layout.addLayout(button_layout)
     
     def browse_tf_dir(self):
