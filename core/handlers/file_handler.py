@@ -27,7 +27,6 @@ def copy_config_files(custom_content_dir):
 class FileHandler:
     def __init__(self, vpk_file_path: str):
         self.vpk = VPKFile(str(vpk_file_path))
-        self.vpk.parse_directory()
 
     def list_pcf_files(self) -> List[str]:
         return self.vpk.find_files('*.pcf')
@@ -49,21 +48,26 @@ class FileHandler:
         temp_path = folder_setup.get_temp_path(f"temp_{Path(file_name).name}")
 
         try:
-            # get original file size before any processing
-            entry_info = self.vpk.get_file_entry(full_path)
-            if not entry_info:
-                print(f"Failed to get file entry for {full_path}")
+            # get original file info
+            file_info = self.vpk.get_file_info(full_path)
+            if not file_info:
+                print(f"Failed to get file info for {full_path}")
                 return False
-            original_size = entry_info[2].entry_length
-
-            # extract file as temporary for processing
-            if not self.vpk.extract_file(full_path, str(temp_path)):
-                print(f"Failed to extract {full_path}")
-                return False
+            original_size = file_info['size']
 
             # process based on file type
             file_type = Path(file_name).suffix.lower()
             if file_type == '.pcf':
+                # get file data directly into memory for PCF processing
+                pcf_data = self.vpk.get_file_data(full_path)
+                if not pcf_data:
+                    print(f"Failed to get data for {full_path}")
+                    return False
+                
+                # write to temp file for PCF processing
+                with open(temp_path, 'wb') as f:
+                    f.write(pcf_data)
+                
                 pcf = PCFFile(temp_path).decode()
                 processed = processor(pcf)
                 processed.encode(temp_path)
@@ -71,10 +75,15 @@ class FileHandler:
                 # read processed PCF data and check size
                 with open(temp_path, 'rb') as f:
                     new_data = f.read()
+
             elif file_type in ['.vmt', '.txt', '.res']:
-                with open(temp_path, 'rb') as f:
-                    content = f.read()
+                # get file data directly into memory for text processing
+                content = self.vpk.get_file_data(full_path)
+                if not content:
+                    print(f"Failed to get data for {full_path}")
+                    return False
                 new_data = processor(content)
+
             else:
                 print(f"Error: Unsupported file type '{file_type}' for file {file_name}")
                 return False
@@ -86,6 +95,7 @@ class FileHandler:
                     padding_needed = original_size - len(new_data)
                     print(f"Adding {padding_needed} bytes of padding to {file_name}")
                     new_data = new_data[:-1] + b' ' * padding_needed + new_data[-1:]
+
                 else:
                     print(f"ERROR: {file_name} is {len(new_data) - original_size} bytes larger than original! "
                           f"This should be ignored unless you know what you are doing")

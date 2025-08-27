@@ -10,7 +10,6 @@ from typing import Optional
 # `printf '%s\n' 'portable = False' >core/are_we_portable.py`
 # This will make the application use paths outside the installation location.
 from core.are_we_portable import portable
-
 from core.handlers.pcf_handler import get_parent_elements
 from valve_parsers import PCFFile
 
@@ -18,7 +17,6 @@ from valve_parsers import PCFFile
 @dataclass
 class FolderConfig:
     # configuration class for managing folder paths
-
     install_dir = Path(os.path.dirname(os.path.abspath(__file__))).parent  # INFO: I'm not too sure if this can break or not, oh well
     portable = portable  # make sure it is accessible via self.portable
 

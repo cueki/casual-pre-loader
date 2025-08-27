@@ -33,10 +33,9 @@ def find_child_elements(pcf: PCFFile, element_idx: int, visited: Set[int]) -> Se
 
 
 def find_element_by_name(pcf: PCFFile, element_name: str):
-    element_name_bytes = element_name.encode('ascii')
-    for idx, element in enumerate(pcf.elements):
-        if element.element_name == element_name_bytes:
-            return idx
+    element = pcf.find_element_by_name(element_name)
+    if element:
+        return pcf.elements.index(element)
     return None
 
 
@@ -47,12 +46,8 @@ def get_element_tree(pcf: PCFFile, element_idx: int) -> Dict[int, PCFElement]:
 
 
 def get_pcf_element_names(pcf: PCFFile) -> List[str]:
-    names = []
-    for element in pcf.elements:
-        type_name = pcf.string_dictionary[element.type_name_index]
-        if type_name == b'DmeParticleSystemDefinition':
-            names.append(element.element_name.decode('ascii'))
-    return names
+    system_defs = pcf.get_elements_by_type('DmeParticleSystemDefinition')
+    return [elem.element_name.decode('ascii') for elem in system_defs]
 
 
 def build_reverse_element_map(particle_system_map) -> Dict[str, str]:

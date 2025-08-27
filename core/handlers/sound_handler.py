@@ -199,7 +199,6 @@ def create_vpk_based_mappings(sound_files: List[Path], vpk_path: Path) -> List[D
     # create mappings between mod sound files and their canonical VPK paths
     try:
         vpk = VPKFile(str(vpk_path))
-        vpk.parse_directory()
     except Exception as e:
         print(f"[ERROR] Error loading {vpk_path}: {e}")
         return []

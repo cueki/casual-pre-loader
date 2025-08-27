@@ -54,8 +54,8 @@ def _add_vguipreload_string(file_path):
 def _process_vpk(vpk_path):
     try:
         vpk_file = VPKFile(str(vpk_path))
-        vpk_file.parse_directory()
         target_files = vpk_file.find_files("resource/ui/mainmenuoverride.res")
+
         # skip if no mainmenuoverride.res
         if not target_files:
             return
@@ -65,11 +65,7 @@ def _process_vpk(vpk_path):
         extract_dir = custom_dir / vpk_name
         extract_dir.mkdir(parents=True, exist_ok=True)
 
-        file_list = vpk_file.list_files()
-        for file_path in file_list:
-            out_path = extract_dir / file_path
-            out_path.parent.mkdir(parents=True, exist_ok=True)
-            vpk_file.extract_file(file_path, str(out_path))
+        vpk_file.extract_all(str(extract_dir))
 
         extracted_mainmenuoverride_file = extract_dir / "resource" / "ui" / "mainmenuoverride.res"
         _add_vguipreload_string(extracted_mainmenuoverride_file)
