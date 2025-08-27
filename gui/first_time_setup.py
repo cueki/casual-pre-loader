@@ -1,9 +1,11 @@
 import os
+import json
 import shutil
+import zipfile
 from pathlib import Path
 from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit,
                              QLabel, QFileDialog, QMessageBox, QGroupBox, QTabWidget, 
-                             QWidget, QFrame)
+                             QWidget, QFrame, QCheckBox)
 from PyQt6.QtCore import Qt, pyqtSignal
 from core.folder_setup import folder_setup
 from gui.settings_manager import SettingsManager, validate_tf_directory
@@ -14,6 +16,7 @@ class FirstTimeSetupDialog(QDialog):
     
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.install_mods_checkbox = None
         self.import_status_label = None
         self.mods_import_edit = None
         self.settings_import_edit = None
@@ -25,9 +28,10 @@ class FirstTimeSetupDialog(QDialog):
         self.import_settings_path = ""
         self.settings_manager = SettingsManager()
         self.import_mods_path = ""
+        self.install_included_mods = True
         
         self.setWindowTitle("First Time Setup")
-        self.setMinimumSize(600, 500)
+        self.setMinimumSize(750, 500)
         self.setModal(True)
         
         self.setup_ui()
@@ -116,6 +120,26 @@ class FirstTimeSetupDialog(QDialog):
         tf_group.setLayout(tf_layout)
         layout.addWidget(tf_group)
         
+        # included mods group
+        mods_group = QGroupBox("Included Mods")
+        mods_layout = QVBoxLayout()
+        
+        mods_description = QLabel(
+            "This preloader comes with a collection of popular TF2 mods.\n"
+            "Would you like to include these in the app?\n\n"
+            "IMPORTANT: Enable this if you 'Import Previous Settings' from another version and used the pre-installed mods."
+        )
+        mods_description.setWordWrap(True)
+        mods_layout.addWidget(mods_description)
+        
+        self.install_mods_checkbox = QCheckBox("Install included mods (mods.zip)")
+        self.install_mods_checkbox.setChecked(True)
+        self.install_mods_checkbox.toggled.connect(self.on_mods_checkbox_changed)
+        mods_layout.addWidget(self.install_mods_checkbox)
+        
+        mods_group.setLayout(mods_layout)
+        layout.addWidget(mods_group)
+        
         layout.addStretch()
         return tab
     
@@ -124,7 +148,8 @@ class FirstTimeSetupDialog(QDialog):
         layout = QVBoxLayout(tab)
         
         instructions = QLabel(
-            "If you have previously used this preloader, you can import your settings and mods.\n"
+            "If you have previously used this preloader, you can import your settings.\n"
+            "Select your app_settings.json file and the mods folder will be imported automatically.\n"
             "This is optional - you can skip this step if this is your first time using the preloader."
         )
         instructions.setWordWrap(True)
@@ -148,20 +173,6 @@ class FirstTimeSetupDialog(QDialog):
         settings_layout.addWidget(self.settings_import_edit)
         settings_layout.addWidget(settings_browse_button)
         import_layout.addLayout(settings_layout)
-        
-        # mods folder import
-        mods_layout = QHBoxLayout()
-        mods_layout.addWidget(QLabel("Mods folder:"))
-        self.mods_import_edit = QLineEdit()
-        self.mods_import_edit.setReadOnly(True)
-        self.mods_import_edit.setPlaceholderText("Optional: Select mods/ folder...")
-        
-        mods_browse_button = QPushButton("Browse")
-        mods_browse_button.clicked.connect(self.browse_mods_folder)
-        
-        mods_layout.addWidget(self.mods_import_edit)
-        mods_layout.addWidget(mods_browse_button)
-        import_layout.addLayout(mods_layout)
 
         # clear imports button
         clear_imports_button = QPushButton("Clear Import Selections")
@@ -188,19 +199,22 @@ class FirstTimeSetupDialog(QDialog):
     
     def browse_settings_file(self):
         file_path, _ = QFileDialog.getOpenFileName(
-            self, "Select app_settings.json", "", "JSON files (*.json);;All files (*)"
+            self, "Select app_settings.json", "app_settings.json", 
+            "App Settings (app_settings.json);;JSON files (*.json);;All files (*)"
         )
         if file_path:
             self.import_settings_path = file_path
             self.settings_import_edit.setText(file_path)
+
+            settings_path = Path(file_path)
+            mods_path = settings_path.parent / "mods"
+            if mods_path.exists() and mods_path.is_dir():
+                self.import_mods_path = str(mods_path)
+            else:
+                self.import_mods_path = ""
+                
             self.update_import_status()
     
-    def browse_mods_folder(self):
-        directory = QFileDialog.getExistingDirectory(self, "Select mods/ folder")
-        if directory:
-            self.import_mods_path = directory
-            self.mods_import_edit.setText(directory)
-            self.update_import_status()
     
     def auto_detect_tf2(self):
         # attempt to automatically detect tf/ dir
@@ -235,7 +249,6 @@ class FirstTimeSetupDialog(QDialog):
         self.import_settings_path = ""
         self.import_mods_path = ""
         self.settings_import_edit.clear()
-        self.mods_import_edit.clear()
         self.update_import_status()
     
     def validate_tf_directory(self):
@@ -250,20 +263,26 @@ class FirstTimeSetupDialog(QDialog):
             settings_path = Path(self.import_settings_path)
             if settings_path.exists():
                 status_parts.append("Settings file selected")
+                
+                # check for mods folder in same directory
+                if self.import_mods_path:
+                    mods_path = Path(self.import_mods_path)
+                    if mods_path.exists() and mods_path.is_dir():
+                        status_parts.append("Mods folder found and will be imported")
+                    else:
+                        status_parts.append("Mods folder not found - settings only")
+                else:
+                    status_parts.append("No mods folder found - settings only")
             else:
                 status_parts.append("Settings file not found")
-        
-        if self.import_mods_path:
-            mods_path = Path(self.import_mods_path)
-            if mods_path.exists() and mods_path.is_dir():
-                status_parts.append(f"Mods folder selected")
-            else:
-                status_parts.append("Mods folder not found or empty")
         
         if not status_parts:
             status_parts.append("No import files selected (this is optional)")
         
         self.import_status_label.setText("\n".join(status_parts))
+    
+    def on_mods_checkbox_changed(self, checked):
+        self.install_included_mods = checked
     
     def validate_setup(self):
         tf_valid = bool(self.tf_directory and Path(self.tf_directory).exists())
@@ -278,19 +297,6 @@ class FirstTimeSetupDialog(QDialog):
         if not validate_tf_directory(self.tf_directory):
             QMessageBox.warning(self, "Invalid Directory", "The selected TF2 directory is not valid.")
             return
-        
-        # import settings if provided
-        if self.import_settings_path:
-            try:
-                settings_src = Path(self.import_settings_path)
-                settings_dst = folder_setup.settings_dir / "app_settings.json"
-                folder_setup.settings_dir.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(settings_src, settings_dst)
-            except Exception as e:
-                QMessageBox.warning(
-                    self, "Import Error", 
-                    f"Failed to import settings file:\n{e}\n\nSetup will continue without importing settings."
-                )
         
         # import mods folder if provided
         if self.import_mods_path:
@@ -308,6 +314,36 @@ class FirstTimeSetupDialog(QDialog):
                     f"Failed to import mods folder:\n{e}\n\nSetup will continue without importing mods."
                 )
         
+        # create or update app_settings.json
+        try:
+            folder_setup.settings_dir.mkdir(parents=True, exist_ok=True)
+            settings_file = folder_setup.settings_dir / "app_settings.json"
+            
+            # start with imported settings if available
+            settings_data = {}
+            if self.import_settings_path:
+                try:
+                    settings_src = Path(self.import_settings_path)
+                    with open(settings_src, 'r') as f:
+                        settings_data = json.load(f)
+                except Exception as e:
+                    QMessageBox.warning(
+                        self, "Import Error", 
+                        f"Failed to import settings file:\n{e}\n\nWill create new settings."
+                    )
+            
+            # update with current setup values
+            settings_data["tf_directory"] = self.tf_directory
+            settings_data["included_mods_installed"] = self.install_included_mods
+            
+            with open(settings_file, 'w') as f:
+                json.dump(settings_data, f, indent=2)
+        except Exception as e:
+            QMessageBox.warning(
+                self, "Settings Error", 
+                f"Failed to save settings:\n{e}\n\nSetup completed but settings may not persist."
+            )
+
         # emit the setup completion signal with tf/ directory
         self.setup_completed.emit(self.tf_directory)
         self.accept()
@@ -325,3 +361,138 @@ def run_first_time_setup(parent=None):
         return dialog.tf_directory
     else:
         return None
+
+
+def get_mods_zip_enabled():
+    # getter for mods.zip setting
+    settings_file = folder_setup.settings_dir / "app_settings.json"
+    
+    if not settings_file.exists():
+        return False
+    
+    try:
+        with open(settings_file, 'r') as f:
+            settings = json.load(f)
+        return settings.get("included_mods_installed", False)
+    except Exception as e:
+        print(f"Error reading mods setting: {e}")
+        return False
+
+
+def set_mods_zip_enabled(enabled):
+    # setter for mods.zip setting
+    settings_file = folder_setup.settings_dir / "app_settings.json"
+    
+    try:
+        settings = {}
+        if settings_file.exists():
+            with open(settings_file, 'r') as f:
+                settings = json.load(f)
+        
+        settings["included_mods_installed"] = enabled
+        
+        folder_setup.settings_dir.mkdir(parents=True, exist_ok=True)
+        with open(settings_file, 'w') as f:
+            json.dump(settings, f, indent=2)
+    except Exception as e:
+        print(f"Error saving mods setting: {e}")
+
+
+def should_install_mods_zip():
+    # check if included mods should be installed (checkbox enabled and mods.zip content not in mods/)
+    if not get_mods_zip_enabled():
+        return False
+    
+    mods_zip_path = folder_setup.install_dir / 'mods.zip'
+    mods_dir = folder_setup.mods_dir
+    
+    if not mods_zip_path.exists():
+        return False
+    
+    try:
+        # get files in mods.zip
+        with zipfile.ZipFile(mods_zip_path, 'r') as zip_ref:
+            zip_files = {Path(name).as_posix() for name in zip_ref.namelist() if not name.endswith('/')}
+        
+        # get files currently installed
+        installed_files = set()
+        if mods_dir.exists():
+            for file_path in mods_dir.rglob('*'):
+                if file_path.is_file():
+                    rel_path = file_path.relative_to(mods_dir)
+                    installed_files.add(rel_path.as_posix())
+        
+        # install if there are files in mods.zip that aren't installed
+        return bool(zip_files - installed_files)
+        
+    except Exception as e:
+        print(f"Error checking mods: {e}")
+        return False
+
+
+def should_uninstall_mods_zip():
+    # check if included mods should be removed (checkbox disabled and mods.zip content is in mods/)
+    if get_mods_zip_enabled():
+        return False
+    
+    mods_zip_path = folder_setup.install_dir / 'mods.zip'
+    mods_dir = folder_setup.mods_dir
+    
+    if not mods_zip_path.exists() or not mods_dir.exists():
+        return False
+    
+    try:
+        # get files in mods.zip
+        with zipfile.ZipFile(mods_zip_path, 'r') as zip_ref:
+            zip_files = {Path(name).as_posix() for name in zip_ref.namelist() if not name.endswith('/')}
+        
+        # get files currently installed
+        installed_files = set()
+        for file_path in mods_dir.rglob('*'):
+            if file_path.is_file():
+                rel_path = file_path.relative_to(mods_dir)
+                installed_files.add(rel_path.as_posix())
+        
+        # uninstall if there are mods.zip files found
+        return bool(zip_files & installed_files)
+        
+    except Exception as e:
+        print(f"Error checking mods: {e}")
+        return False
+
+
+def uninstall_mods_zip():
+    # remove files that came from mods.zip
+    mods_zip_path = folder_setup.install_dir / 'mods.zip'
+    mods_dir = folder_setup.mods_dir
+    
+    if not mods_zip_path.exists() or not mods_dir.exists():
+        return
+    
+    try:
+        # get files in mods.zip
+        with zipfile.ZipFile(mods_zip_path, 'r') as zip_ref:
+            zip_files = {Path(name).as_posix() for name in zip_ref.namelist() if not name.endswith('/')}
+        
+        removed_count = 0
+        for file_rel_path in zip_files:
+            file_path = mods_dir / file_rel_path
+            if file_path.exists() and file_path.is_file():
+                try:
+                    file_path.unlink()
+                    removed_count += 1
+                    print(f"Removed: {file_rel_path}")
+                    
+                    # remove empty parent directories
+                    parent = file_path.parent
+                    while parent != mods_dir and parent.exists() and not any(parent.iterdir()):
+                        parent.rmdir()
+                        parent = parent.parent
+                        
+                except Exception as e:
+                    print(f"Error removing {file_rel_path}: {e}")
+        
+        print(f"Removed {removed_count} mod files")
+        
+    except Exception as e:
+        print(f"Error uninstalling mods: {e}")

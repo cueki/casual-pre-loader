@@ -1,6 +1,6 @@
 import copy
 from core.constants import AttributeType, ELEMENT_DEFAULTS, ATTRIBUTE_DEFAULTS
-from core.parsers.pcf_file import PCFFile, PCFElement
+from valve_parsers import PCFFile, PCFElement
 
 
 def get_element_hash(element: PCFElement):

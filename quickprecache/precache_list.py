@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Set, List
-from core.constants import QUICKPRECACHE_FILE_SUFFIXES
-from core.parsers.vpk_file import VPKFile
+from core.constants import QUICKPRECACHE_FILE_SUFFIXES, QUICKPRECACHE_MODEL_LIST
+from valve_parsers import VPKFile
 
 
 def make_precache_list(game_path: str) -> Set[str]:
@@ -20,28 +20,33 @@ def make_precache_list(game_path: str) -> Set[str]:
     return {model for model in model_list if "decompiled " not in model and "competitive_badge" not in model}
 
 
+def _should_quickprecache(file_path: str) -> bool:
+    file_path_lower = file_path.lower()
+    return any(keyword in file_path_lower for keyword in QUICKPRECACHE_MODEL_LIST)
+
+
+def _process_file_to_model_path(file_path: str) -> str:
+    for suffix in QUICKPRECACHE_FILE_SUFFIXES:
+        if file_path.endswith(suffix):
+            return file_path[:-(len(suffix))] + ".mdl"
+    return file_path
+
+
 def manage_folder(folder_path: Path) -> List[str]:
     model_list = []
 
     for file_path in folder_path.glob("**/*"):
-        # we quickprecache these because they won't stay loaded between map changes
-        if not ("prop" in str(file_path).lower()
-                or "flag" in str(file_path).lower()
-                or "bots" in str(file_path).lower()
-                or "ammo_box" in str(file_path).lower()
-                or "ammopack" in str(file_path).lower()
-                or "medkit" in str(file_path).lower()):
+        if not file_path.is_file():
             continue
 
-        if file_path.is_file():
-            entry = str(file_path.relative_to(folder_path))
+        relative_path = str(file_path.relative_to(folder_path))
 
-            for suffix in QUICKPRECACHE_FILE_SUFFIXES:
-                if entry.endswith(suffix):
-                    # replace the suffix with .mdl
-                    model_path = Path(entry).with_suffix('.mdl').as_posix().lower()
-                    model_list.append(model_path)
-                    break
+        if not _should_quickprecache(relative_path):
+            continue
+
+        if any(relative_path.endswith(suffix) for suffix in QUICKPRECACHE_FILE_SUFFIXES):
+            model_path = Path(_process_file_to_model_path(relative_path)).as_posix().lower()
+            model_list.append(model_path)
 
     return model_list
 
@@ -59,22 +64,16 @@ def manage_vpk(vpk_path: Path) -> List[str]:
         model_files = vpk_file.find_files("models/")
 
         for file_path in model_files:
-            # we quickprecache these because they won't stay loaded between map changes
-            if not ("prop" in str(file_path).lower()
-                    or "flag" in str(file_path).lower()
-                    or "bots" in str(file_path).lower()
-                    or "ammo_box" in str(file_path).lower()
-                    or "ammopack" in str(file_path).lower()
-                    or "medkit" in str(file_path).lower()):
+            if not _should_quickprecache(file_path):
                 continue
 
-            for suffix in QUICKPRECACHE_FILE_SUFFIXES:
-                if file_path.endswith(suffix):
-                    if file_path.startswith("models/"):
-                        model_path = file_path[7:].lower()
-                        model_path = model_path[:-(len(suffix))] + ".mdl"
-                        model_list.append(model_path)
-                    break
+            # check if file has a quickprecache suffix
+            if any(file_path.endswith(suffix) for suffix in QUICKPRECACHE_FILE_SUFFIXES):
+                if file_path.startswith("models/"):
+                    # remove "models/" prefix and convert to model path
+                    relative_path = file_path[7:]
+                    model_path = _process_file_to_model_path(relative_path).lower()
+                    model_list.append(model_path)
 
     except Exception as e:
         print(f"Failed to process VPK {vpk_path}: {e}")

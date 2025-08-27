@@ -1,9 +1,8 @@
-import re
 import shutil
 from pathlib import Path
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler
-from core.parsers.vpk_file import VPKFile
+from valve_parsers import VPKFile
 
 
 def is_skybox_vmt(file_path: Path) -> bool:

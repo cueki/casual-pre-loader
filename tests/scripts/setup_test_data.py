@@ -4,11 +4,10 @@ from gui.settings_manager import SettingsManager
 
 
 def setup_test_data():
-
     test_fixtures = Path("tests/fixtures")
     test_fixtures.mkdir(exist_ok=True)
     test_settings_manager = SettingsManager()
-    tf2_path = test_settings_manager.get_last_directory()
+    tf2_path = test_settings_manager.get_tf_directory()
 
     if tf2_path:
         print(f"Found TF2 installation at: {tf2_path}")

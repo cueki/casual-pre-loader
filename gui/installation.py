@@ -29,8 +29,7 @@ class InstallationManager(QObject):
     def set_tf_path(self, path):
         self.tf_path = path
 
-
-    def install(self, selected_addons, mod_drop_zone=None, valve_rc_found=False):
+    def install(self, selected_addons, mod_drop_zone=None):
         if not validate_tf_directory(self.tf_path):
             self.operation_error.emit("Invalid TF2 directory!")
             self.operation_finished.emit()
@@ -39,7 +38,7 @@ class InstallationManager(QObject):
         self.processing = True
         thread = threading.Thread(
             target=self.interface.install,
-            args=(self.tf_path, selected_addons, mod_drop_zone, valve_rc_found)
+            args=(self.tf_path, selected_addons, mod_drop_zone)
         )
         thread.daemon = True
         thread.start()

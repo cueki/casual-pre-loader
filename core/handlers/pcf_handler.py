@@ -1,14 +1,19 @@
 from pathlib import Path
-from core.parsers.pcf_file import PCFFile, PCFElement
-from core.parsers.vpk_file import VPKFile
+from valve_parsers import VPKFile, PCFFile, PCFElement
 
 
 def restore_particle_files(tf_path: str) -> int:
     backup_particles_dir = Path("backup/particles")
     if not backup_particles_dir.exists():
+        print("Error, missing backup dir/")
         return 0
 
-    vpk = VPKFile(tf_path + "/tf2_misc_dir.vpk")
+    vpk_path = Path(tf_path) / "tf2_misc_dir.vpk"
+    if not vpk_path.exists():
+        print("Error, missing tf2_misc_dir.vpk, is the tf/ path correct?")
+        return 0
+
+    vpk = VPKFile(str(vpk_path))
     vpk.parse_directory()
     patched_count = 0
 

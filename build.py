@@ -9,6 +9,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Build script')
     parser.add_argument('--target_dir', help='Target directory to deploy the application')
     parser.add_argument('--user-mods-zip', help='Path to user_mods.zip file', default='mods.zip')
+    parser.add_argument('--skip-mods-zip', action='store_true', help='Skip creating mods.zip file')
     return parser.parse_args()
 
 
@@ -19,7 +20,6 @@ def copy_project_files(source_dir, target_dir):
     dirs_to_copy = [
         'core',
         'core/handlers',
-        'core/parsers',
         'gui',
         'operations',
         'backup',
@@ -88,7 +88,12 @@ def main():
     # copy project files
     target_dir.mkdir(exist_ok=True, parents=True)
     copy_project_files(source_dir, target_dir)
-    zip_mods_directory(source_dir, target_dir)
+    
+    if not args.skip_mods_zip:
+        zip_mods_directory(source_dir, target_dir)
+    else:
+        print("Skipping mods.zip creation")
+    
     shutil.copy2("READ_THIS.txt", target_dir.parent)
     print(f"Build completed successfully to {target_dir}")
     print('feathers wuz here')
