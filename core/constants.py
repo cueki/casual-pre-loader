@@ -231,5 +231,6 @@ MOD_TYPE_COLORS = {
     "animation": "#392C52",    # purple
     "experimental": "#EED202", # yellow
     "hud": "#00BCD4",          # cyan
+    "sound": "#E91E63",        # pink
     "unknown": "#FF0000"       # red
 }
