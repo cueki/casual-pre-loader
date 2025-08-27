@@ -20,24 +20,22 @@ def fix_child_references(pcf: PCFFile) -> bool:
     # this is just in case there are some invalid references, I only saw this once but better safe than sorry
     # first map all particle system definitions by name
     system_indices = {}
-    for i, element in enumerate(pcf.elements):
-        type_name = pcf.string_dictionary[element.type_name_index].decode('ascii')
-        if type_name == 'DmeParticleSystemDefinition':
-            name = element.element_name.decode('ascii')
-            system_indices[name] = i
+    system_defs = pcf.get_elements_by_type('DmeParticleSystemDefinition')
+    for element in system_defs:
+        name = element.element_name.decode('ascii')
+        system_indices[name] = pcf.elements.index(element)
 
     # look for DmeParticleChild elements that need fixing
     changes_made = False
-    for i, element in enumerate(pcf.elements):
-        type_name = pcf.string_dictionary[element.type_name_index].decode('ascii')
-        if type_name == 'DmeParticleChild':
-            if b'child' in element.attributes:
-                attr_type, value = element.attributes[b'child']
-                if value == 4294967295:  # invalid reference
-                    name = element.element_name.decode('ascii')
-                    if name in system_indices:
-                        element.attributes[b'child'] = (attr_type, system_indices[name])
-                        changes_made = True
+    child_elements = pcf.get_elements_by_type('DmeParticleChild')
+    for element in child_elements:
+        child_value = pcf.get_attribute_value(element, 'child')
+        if child_value == 4294967295:  # invalid reference
+            name = element.element_name.decode('ascii')
+            if name in system_indices:
+                attr_type, _ = element.attributes[b'child']
+                element.attributes[b'child'] = (attr_type, system_indices[name])
+                changes_made = True
 
     return changes_made
 
@@ -46,16 +44,16 @@ def clean_children_arrays(pcf: PCFFile) -> bool:
     # this removes any duplicate children from the array, if they exist, also only saw this once
     changes_made = False
 
-    for element in pcf.elements:
-        type_name = pcf.string_dictionary[element.type_name_index].decode('ascii')
-        if type_name == 'DmeParticleSystemDefinition':
-            if b'children' in element.attributes:
-                attr_type, value = element.attributes[b'children']
-                # convert to set to remove duplicates and back to list
-                unique_indices = list(dict.fromkeys(value))  # preserves order
-                if len(unique_indices) != len(value):
-                    element.attributes[b'children'] = (attr_type, unique_indices)
-                    changes_made = True
+    system_defs = pcf.get_elements_by_type('DmeParticleSystemDefinition')
+    for element in system_defs:
+        children_value = pcf.get_attribute_value(element, 'children')
+        if children_value is not None:
+            # convert to set to remove duplicates and back to list
+            unique_indices = list(dict.fromkeys(children_value))  # preserves order
+            if len(unique_indices) != len(children_value):
+                attr_type, _ = element.attributes[b'children']
+                element.attributes[b'children'] = (attr_type, unique_indices)
+                changes_made = True
 
     return changes_made
 
@@ -146,10 +144,9 @@ def reorder_elements(pcf: PCFFile, duplicates):
 
 def rename_operators(pcf: PCFFile):
     # this sets the operators name to '' because the name doesn't matter, only the index does
-    for i, element in enumerate(pcf.elements):
-        type_name = pcf.string_dictionary[element.type_name_index].decode('ascii')
-        if type_name == 'DmeParticleOperator':
-            element.element_name = str('').encode('ascii')
+    operators = pcf.get_elements_by_type('DmeParticleOperator')
+    for element in operators:
+        element.element_name = str('').encode('ascii')
 
 
 def check_and_remove_defaults(pcf: PCFFile):

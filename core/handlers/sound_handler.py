@@ -117,28 +117,9 @@ def copy_needed_scripts(needed_scripts: List[str], temp_scripts_dir: Path) -> Li
     return copied_scripts
 
 
-def update_script_files(script_files: List[str], moved_files: List[Tuple[str, str]]) -> List[str]:
+def update_script_files(script_files: List[str], path_mappings: List[Tuple[str, str]]) -> List[str]:
     # update script files to reference the new misc/ paths
-    path_mappings = {}
-
-    # create mapping of old paths to new paths
-    for source, target in moved_files:
-        if not Path(source).is_absolute() and '/' in source:
-            path_mappings[source] = target
-        else:
-            sounds_dir = None
-            for parent in Path(source).parents:
-                if parent.name == 'sound':
-                    sounds_dir = parent
-                    break
-
-            if sounds_dir:
-                old_rel = Path(source).relative_to(sounds_dir)
-                new_rel = Path(target).relative_to(sounds_dir)
-                path_mappings[str(old_rel).replace('\\', '/')] = str(new_rel).replace('\\', '/')
-
     modified_files = []
-
     for script_file in script_files:
         try:
             with open(script_file, 'r', encoding='utf-8', errors='ignore') as f:
@@ -148,8 +129,7 @@ def update_script_files(script_files: List[str], moved_files: List[Tuple[str, st
             continue
 
         original_content = content
-
-        for old_path, new_path in path_mappings.items():
+        for old_path, new_path in path_mappings:
             # convert backslashes to forward slashes for consistency
             old_path = old_path.replace('\\', '/')
             new_path = new_path.replace('\\', '/')
@@ -199,7 +179,6 @@ def create_vpk_based_mappings(sound_files: List[Path], vpk_path: Path) -> List[D
     # create mappings between mod sound files and their canonical VPK paths
     try:
         vpk = VPKFile(str(vpk_path))
-        vpk.parse_directory()
     except Exception as e:
         print(f"[ERROR] Error loading {vpk_path}: {e}")
         return []
@@ -289,8 +268,8 @@ def update_script_paths(script_files: List[str], file_mappings: List[Dict]) -> L
     # create mapping from canonical path to final path
     path_mappings = {}
     for mapping in file_mappings:
-        canonical_without_ext = str(Path(mapping['canonical_path']).with_suffix('')).replace('\\', '/')
-        final_without_ext = str(Path(mapping['final_path']).with_suffix('')).replace('\\', '/')
-        path_mappings[canonical_without_ext] = final_without_ext
+        canonical_with_ext = str(Path(mapping['canonical_path'])).replace('\\', '/')
+        final_with_ext = str(Path(mapping['final_path'])).replace('\\', '/')
+        path_mappings[canonical_with_ext] = final_with_ext
 
     return update_script_files(script_files, list(path_mappings.items()))

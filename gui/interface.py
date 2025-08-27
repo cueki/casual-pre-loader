@@ -35,7 +35,6 @@ class Interface(QObject):
         try:
             working_vpk_path = Path(tf_path) / "tf2_misc_dir.vpk"
             vpk_file = VPKFile(str(working_vpk_path))
-            vpk_file.parse_directory()
             file_handler = FileHandler(str(working_vpk_path))
             folder_setup.initialize_pcf()
             self.update_progress(0, "Installing addons...")

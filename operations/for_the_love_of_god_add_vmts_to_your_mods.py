@@ -57,21 +57,11 @@ def generate_vmt_content(texture_path: str, game_vpk: Optional[VPKFile] = None) 
     # try to find matching VMT in game VPK
     if game_vpk:
         vmt_path = f"materials/{texture_path}.vmt"
-        entry_info = game_vpk.get_file_entry(vmt_path)
-        
-        if entry_info:
-            try:
-                extension, directory, entry = entry_info
-                file_data = game_vpk.read_from_archive(entry.archive_index, entry.entry_offset, entry.entry_length)
-                
-                if file_data:
-                    if entry.preload_bytes > 0 and entry.preload_data:
-                        vmt_content = entry.preload_data + file_data
-                    else:
-                        vmt_content = file_data
-                    
-                    return vmt_content.decode('utf-8', errors='ignore')
-            except Exception as e:
+        try:
+            vmt_content = game_vpk.get_file_data(vmt_path)
+            if vmt_content:
+                return vmt_content.decode('utf-8', errors='ignore')
+        except Exception as e:
                 print(f"Error reading VMT from game VPK: {e}")
     
     # fallback to generic VMT
@@ -93,7 +83,6 @@ def generate_missing_vmt_files(temp_mods_dir: Path = None, tf_path: str = None) 
         if game_vpk_path.exists():
             try:
                 game_vpk = VPKFile(str(game_vpk_path))
-                game_vpk.parse_directory()
                 print(f"Loaded game VPK: {game_vpk_path}")
             except Exception as e:
                 print(f"Error loading game VPK: {e}")

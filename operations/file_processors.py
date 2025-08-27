@@ -106,7 +106,6 @@ def get_from_vpk(vpk_path: Path):
     try:
         # check if VPK contains target paths before processing
         vpk_handler = VPKFile(str(vpk_path))
-        vpk_handler.parse_directory()
         file_list = vpk_handler.list_files()
         should_process = any(should_process_file(file) for file in file_list)
 

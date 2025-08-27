@@ -184,20 +184,18 @@ class ModDropZone(QFrame):
                             shutil.copy2(source_file, folder_setup.temp_mods_dir / (particle_file + ".pcf"))
                             # get particle file mats from attrib
                             pcf = PCFFile(source_file).decode()
-                            for element in pcf.elements:
-                                type_name = pcf.string_dictionary[element.type_name_index]
-                                if type_name == b'DmeParticleSystemDefinition':
-                                    if b'material' in element.attributes:
-                                        attr_type, value = element.attributes[b'material']
-                                        if isinstance(value, bytes):
-                                            material_path = value.decode('ascii')
-                                            # ignore vgui/white
-                                            if material_path == 'vgui/white':
-                                                continue
-                                            if material_path.endswith('.vmt'):
-                                                required_materials.add(material_path)
-                                            else:
-                                                required_materials.add(material_path + ".vmt")
+                            system_defs = pcf.get_elements_by_type('DmeParticleSystemDefinition')
+                            for element in system_defs:
+                                material_value = pcf.get_attribute_value(element, 'material')
+                                if material_value and isinstance(material_value, bytes):
+                                    material_path = material_value.decode('ascii')
+                                    # ignore vgui/white
+                                    if material_path == 'vgui/white':
+                                        continue
+                                    if material_path.endswith('.vmt'):
+                                        required_materials.add(material_path)
+                                    else:
+                                        required_materials.add(material_path + ".vmt")
 
         for mod_name in used_mods:
             mod_dir = folder_setup.particles_dir / mod_name
@@ -435,22 +433,13 @@ class ModDropZone(QFrame):
 
             self.worker.progress.emit(10, f"Analyzing VPK: {vpk_name}")
             vpk_handler = VPKFile(str(file_path))
-            vpk_handler.parse_directory()
-            file_list = vpk_handler.list_files()
 
             # check for particles
-            has_particles = any('.pcf' in f for f in file_list)
+            has_particles = bool(vpk_handler.find_files("*.pcf"))
 
-            # extract all files
-            total_files_in_vpk = len(file_list)
-            for i, file_path_in_vpk in enumerate(file_list):
-                progress = 10 + int((i / total_files_in_vpk) * 40)
-                self.worker.progress.emit(progress, f"Extracting file {i + 1}/{total_files_in_vpk}")
-
-                relative_path = Path(file_path_in_vpk)
-                output_path = extracted_particles_dir / relative_path
-                output_path.parent.mkdir(parents=True, exist_ok=True)
-                vpk_handler.extract_file(file_path_in_vpk, str(output_path))
+            self.worker.progress.emit(15, f"Extracting all files from {vpk_name}")
+            extracted_count = vpk_handler.extract_all(str(extracted_particles_dir))
+            self.worker.progress.emit(45, f"Extracted {extracted_count} files from {vpk_name}")
 
             # process with AdvancedParticleMerger if it has particles
             if has_particles:
