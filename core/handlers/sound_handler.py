@@ -135,7 +135,7 @@ def update_script_files(script_files: List[str], moved_files: List[Tuple[str, st
             if sounds_dir:
                 old_rel = Path(source).relative_to(sounds_dir)
                 new_rel = Path(target).relative_to(sounds_dir)
-                path_mappings[str(old_rel)] = str(new_rel)
+                path_mappings[str(old_rel).replace('\\', '/')] = str(new_rel).replace('\\', '/')
 
     modified_files = []
 
@@ -289,8 +289,8 @@ def update_script_paths(script_files: List[str], file_mappings: List[Dict]) -> L
     # create mapping from canonical path to final path
     path_mappings = {}
     for mapping in file_mappings:
-        canonical_without_ext = str(Path(mapping['canonical_path']).with_suffix(''))
-        final_without_ext = str(Path(mapping['final_path']).with_suffix(''))
+        canonical_without_ext = str(Path(mapping['canonical_path']).with_suffix('')).replace('\\', '/')
+        final_without_ext = str(Path(mapping['final_path']).with_suffix('')).replace('\\', '/')
         path_mappings[canonical_without_ext] = final_without_ext
 
     return update_script_files(script_files, list(path_mappings.items()))
