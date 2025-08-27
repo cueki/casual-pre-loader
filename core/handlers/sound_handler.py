@@ -69,7 +69,7 @@ def identify_needed_scripts(canonical_paths: List[str], backup_scripts_dir: Path
     for path in canonical_paths:
         normalized_path = path.replace('\\', '/').lower()
         # remove extension
-        path_without_ext = str(Path(normalized_path).with_suffix(''))
+        path_without_ext = str(Path(normalized_path).with_suffix('')).replace('\\', '/')
         paths_to_match.add(path_without_ext)
     
     # scan all *sound*.txt files in backup directory

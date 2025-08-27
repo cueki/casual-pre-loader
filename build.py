@@ -20,7 +20,6 @@ def copy_project_files(source_dir, target_dir):
     dirs_to_copy = [
         'core',
         'core/handlers',
-        'core/parsers',
         'gui',
         'operations',
         'backup',
