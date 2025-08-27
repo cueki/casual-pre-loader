@@ -72,8 +72,6 @@ def identify_needed_scripts(canonical_paths: List[str], backup_scripts_dir: Path
         path_without_ext = str(Path(normalized_path).with_suffix(''))
         paths_to_match.add(path_without_ext)
     
-    print(f"[Sound Debug] Looking for canonical paths: {list(paths_to_match)}")
-    
     # scan all *sound*.txt files in backup directory
     script_files = list(backup_scripts_dir.glob('*sound*.txt'))
     found_sound_paths = set()
@@ -92,22 +90,11 @@ def identify_needed_scripts(canonical_paths: List[str], backup_scripts_dir: Path
                     found_sound_paths.add(path)
                     if str(script_file) not in needed_scripts:
                         needed_scripts.add(str(script_file))
-            
-            if found_matches:
-                print(f"[Sound Debug] {script_file.name} - contains: {found_matches}")
-            else:
-                print(f"[Sound Debug] {script_file.name} - no matches found")
 
         except Exception as e:
-            print(f"[Sound Debug] Error reading script file {script_file}: {e}")
+            print(f"[ERROR] Error reading sound script file {script_file}: {e}")
             continue
 
-    # debug stuff
-    unfound_sound_paths = paths_to_match - found_sound_paths
-    if unfound_sound_paths:
-        print(f"[Sound Debug] Sound paths not found in any script file: {list(unfound_sound_paths)}")
-    else:
-        print(f"[Sound Debug] All sound paths found in script files")
 
     return list(needed_scripts)
 
@@ -124,9 +111,8 @@ def copy_needed_scripts(needed_scripts: List[str], temp_scripts_dir: Path) -> Li
         try:
             shutil.copy2(script_path, target_path)
             copied_scripts.append(str(target_path))
-            print(f"[Sound Debug] Copied script: {script_path.name}")
         except Exception as e:
-            print(f"[Sound Debug] Error copying script file {script_file} to {target_path}: {e}")
+            print(f"[ERROR] Error copying script file {script_file} to {target_path}: {e}")
 
     return copied_scripts
 
@@ -137,16 +123,19 @@ def update_script_files(script_files: List[str], moved_files: List[Tuple[str, st
 
     # create mapping of old paths to new paths
     for source, target in moved_files:
-        sounds_dir = None
-        for parent in Path(source).parents:
-            if parent.name == 'sound':
-                sounds_dir = parent
-                break
+        if not Path(source).is_absolute() and '/' in source:
+            path_mappings[source] = target
+        else:
+            sounds_dir = None
+            for parent in Path(source).parents:
+                if parent.name == 'sound':
+                    sounds_dir = parent
+                    break
 
-        if sounds_dir:
-            old_rel = Path(source).relative_to(sounds_dir)
-            new_rel = Path(target).relative_to(sounds_dir)
-            path_mappings[str(old_rel)] = str(new_rel)
+            if sounds_dir:
+                old_rel = Path(source).relative_to(sounds_dir)
+                new_rel = Path(target).relative_to(sounds_dir)
+                path_mappings[str(old_rel)] = str(new_rel)
 
     modified_files = []
 
@@ -184,7 +173,7 @@ def update_script_files(script_files: List[str], moved_files: List[Tuple[str, st
                     special_prefix = ""
                     actual_path = wave_path
 
-                # replace the old path with new path, preserving prefix
+                # replace the old path with new path, keeping prefix
                 if old_path in actual_path:
                     new_actual_path = actual_path.replace(old_path, new_path)
                     new_wave_path = f"{special_prefix}{new_actual_path}"
@@ -201,19 +190,18 @@ def update_script_files(script_files: List[str], moved_files: List[Tuple[str, st
                     f.write(content)
                 modified_files.append(script_file)
             except Exception as e:
-                print(f"Error writing {script_file}: {e}")
+                print(f"[ERROR] Error writing {script_file}: {e}")
 
     return modified_files
 
 
 def create_vpk_based_mappings(sound_files: List[Path], vpk_path: Path) -> List[Dict]:
     # create mappings between mod sound files and their canonical VPK paths
-    print(f"[Sound Debug] Loading VPK: {vpk_path}")
     try:
         vpk = VPKFile(str(vpk_path))
         vpk.parse_directory()
     except Exception as e:
-        print(f"[Sound Debug] Error loading VPK: {e}")
+        print(f"[ERROR] Error loading {vpk_path}: {e}")
         return []
 
     file_mappings = []
@@ -222,7 +210,6 @@ def create_vpk_based_mappings(sound_files: List[Path], vpk_path: Path) -> List[D
 
     for sound_file in sound_files:
         filename = sound_file.name
-        print(f"[Sound Debug] Looking for '{filename}' in VPK...")
 
         # search VPK for this filename
         vpk_file_path = vpk.find_file_path(filename)
@@ -248,9 +235,8 @@ def create_vpk_based_mappings(sound_files: List[Path], vpk_path: Path) -> List[D
                 'filename': filename
             }
             file_mappings.append(mapping)
-            print(f"[Sound Debug] {filename}: {canonical_path} -> {final_path}")
+
         else:
-            print(f"[Sound Debug] {filename}: not found in VPK")
             files_to_remove.append(sound_file)
 
     # remove files not found in VPK
@@ -259,12 +245,8 @@ def create_vpk_based_mappings(sound_files: List[Path], vpk_path: Path) -> List[D
         try:
             file_to_remove.unlink()
             removed_count += 1
-            print(f"[Sound Debug] Removed: {file_to_remove.name}")
         except Exception as e:
-            print(f"[Sound Debug] Error removing {file_to_remove}: {e}")
-    
-    if removed_count > 0:
-        print(f"[Sound Debug] Removed {removed_count} custom sound files not found in VPK")
+            print(f"[ERROR] Error removing {file_to_remove}: {e}")
 
     return file_mappings
 
@@ -297,9 +279,8 @@ def move_sound_files(file_mappings: List[Dict]) -> List[Tuple[str, str]]:
             if source_file != target_path:  # only move if different
                 shutil.move(str(source_file), str(target_path))
                 moved_files.append((str(source_file), str(target_path)))
-                print(f"[Sound Debug] Moved: {source_file.name} -> {final_path}")
         except Exception as e:
-            print(f"[Sound Debug] Error moving {source_file} to {target_path}: {e}")
+            print(f"[ERROR] Error moving {source_file} to {target_path}: {e}")
 
     return moved_files
 
@@ -312,4 +293,4 @@ def update_script_paths(script_files: List[str], file_mappings: List[Dict]) -> L
         final_without_ext = str(Path(mapping['final_path']).with_suffix(''))
         path_mappings[canonical_without_ext] = final_without_ext
 
-    return update_script_files(script_files, [(k, v) for k, v in path_mappings.items()])
+    return update_script_files(script_files, list(path_mappings.items()))

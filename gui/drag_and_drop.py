@@ -413,8 +413,8 @@ class ModDropZone(QFrame):
                 self.worker.error.emit(f"Error processing {item_name}: {str(e)}")
 
         if successful_items:
+            self.addon_updated.emit()
             if len(successful_items) == 1:
-                self.addon_updated.emit()
                 self.worker.success.emit(f"Successfully processed {successful_items[0]}")
             else:
                 items_text = ",\n".join(successful_items)
