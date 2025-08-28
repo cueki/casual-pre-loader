@@ -57,10 +57,10 @@ def manage_vpk(vpk_path: Path) -> List[str]:
     failed_vpks = []
 
     try:
-        vpk_file = VPKFile(str(vpk_path))  # auto_parse=True by default
+        vpk_file = VPKFile(str(vpk_path))
 
         # find all files in the models directory in the vpk
-        model_files = vpk_file.find_files("models/*")
+        model_files = vpk_file.find_files("models/")
 
         for file_path in model_files:
             if not _should_quickprecache(file_path):
