@@ -10,8 +10,7 @@ class SoundHandler:
         self.sound_extensions = ['.wav', '.mp3']
         self.script_extensions = ['.txt']
 
-    def process_temp_sound_mods(self, temp_mods_dir: Path, backup_scripts_dir: Path, vpk_path: Path) -> Optional[dict]:
-        # process sound mods using VPK canonical paths
+    def process_temp_sound_mods(self, temp_mods_dir: Path, backup_scripts_dir: Path, vpk_paths: List[Path]) -> Optional[dict]:
         temp_sound_dir = temp_mods_dir / 'sound'
         if not temp_sound_dir.exists():
             return None
@@ -22,10 +21,8 @@ class SoundHandler:
         
         if not all_sound_files:
             return None
-        
-        # get canonical paths from VPK and create file mappings
-        file_mappings = create_vpk_based_mappings(all_sound_files, vpk_path)
-        
+
+        file_mappings = create_vpk_based_mappings(all_sound_files, vpk_paths)
         if not file_mappings:
             return {
                 'files_moved': 0,
@@ -34,10 +31,10 @@ class SoundHandler:
                 'message': 'No sound files found in VPK for mapping'
             }
         
-        # collect canonical paths for script searching
+        # collect paths for script searching
         canonical_paths = [mapping['canonical_path'] for mapping in file_mappings]
         
-        # identify which script files are needed based on canonical paths
+        # identify which script files are needed
         needed_scripts = identify_needed_scripts(canonical_paths, backup_scripts_dir)
         
         # copy needed script files to temp_mods_dir/scripts/ (excluding any sound script files from mods)
@@ -61,10 +58,10 @@ class SoundHandler:
 
 
 def identify_needed_scripts(canonical_paths: List[str], backup_scripts_dir: Path) -> List[str]:
-    # identify script files needed based on canonical VPK paths
+    # identify script files needed based on VPK paths
     needed_scripts = set()
     
-    # normalize canonical paths for matching
+    # normalize paths for matching
     paths_to_match = set()
     for path in canonical_paths:
         normalized_path = path.replace('\\', '/').lower()
@@ -82,7 +79,7 @@ def identify_needed_scripts(canonical_paths: List[str], backup_scripts_dir: Path
                 content = f.read()
                 normalized_content = content.lower().replace('\\', '/')
 
-            # check if any canonical paths appear in this script file
+            # check if any paths appear in this script file
             found_matches = []
             for path in paths_to_match:
                 if path in normalized_content:
@@ -130,7 +127,6 @@ def update_script_files(script_files: List[str], path_mappings: List[Tuple[str, 
 
         original_content = content
         for old_path, new_path in path_mappings:
-            # convert backslashes to forward slashes for consistency
             old_path = old_path.replace('\\', '/')
             new_path = new_path.replace('\\', '/')
 
@@ -153,7 +149,7 @@ def update_script_files(script_files: List[str], path_mappings: List[Tuple[str, 
                     special_prefix = ""
                     actual_path = wave_path
 
-                # replace the old path with new path, keeping prefix
+                # replace the old path with new path
                 if old_path in actual_path:
                     new_actual_path = actual_path.replace(old_path, new_path)
                     new_wave_path = f"{special_prefix}{new_actual_path}"
@@ -175,12 +171,19 @@ def update_script_files(script_files: List[str], path_mappings: List[Tuple[str, 
     return modified_files
 
 
-def create_vpk_based_mappings(sound_files: List[Path], vpk_path: Path) -> List[Dict]:
-    # create mappings between mod sound files and their canonical VPK paths
-    try:
-        vpk = VPKFile(str(vpk_path))
-    except Exception as e:
-        print(f"[ERROR] Error loading {vpk_path}: {e}")
+def create_vpk_based_mappings(sound_files: List[Path], vpk_paths: List[Path]) -> List[Dict]:
+    # create mappings between mod sound files and their VPK paths
+    vpk_files = []
+    for vpk_path in vpk_paths:
+        try:
+            vpk = VPKFile(str(vpk_path))
+            vpk_files.append(vpk)
+        except Exception as e:
+            print(f"[ERROR] Error loading {vpk_path}: {e}")
+            continue
+
+    if not vpk_files:
+        print("[ERROR] No valid VPK files could be loaded")
         return []
 
     file_mappings = []
@@ -189,13 +192,14 @@ def create_vpk_based_mappings(sound_files: List[Path], vpk_path: Path) -> List[D
 
     for sound_file in sound_files:
         filename = sound_file.name
-
-        # search VPK for this filename
-        vpk_file_path = vpk.find_file_path(filename)
         canonical_path = None
         
-        if vpk_file_path:
-            canonical_path = vpk_file_path[6:]  # remove 'sound/' prefix
+        # search all VPK files for this filename
+        for vpk in vpk_files:
+            vpk_file_path = vpk.find_file_path(filename)
+            if vpk_file_path:
+                canonical_path = vpk_file_path[6:]  # remove 'sound/' prefix
+                break
 
         if canonical_path:
             # determine final placement path
@@ -238,7 +242,6 @@ def move_sound_files(file_mappings: List[Dict]) -> List[Tuple[str, str]]:
         source_file = mapping['source_file']
         final_path = mapping['final_path']
 
-        # determine target location
         sound_dir = None
         for parent in source_file.parents:
             if parent.name == 'sound':
@@ -248,7 +251,6 @@ def move_sound_files(file_mappings: List[Dict]) -> List[Tuple[str, str]]:
         if sound_dir:
             target_path = sound_dir / final_path
         else:
-            # fallback if we can't find sound directory
             print(f"[ERROR] No {sound_dir} found!")
             break
 

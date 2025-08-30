@@ -78,10 +78,19 @@ class Interface(QObject):
             self.update_progress(35, "Processing sound mods...")
             backup_scripts_dir = folder_setup.backup_dir / 'scripts'
             
+            # collect VPK paths (vo and misc) for sound processing
+            vpk_paths = []
+            tf_path_obj = Path(tf_path)
+            misc_vpk = tf_path_obj / "tf2_sound_misc_dir.vpk"
+            if misc_vpk.exists():
+                vpk_paths.append(misc_vpk)
+            vo_vpks = list(tf_path_obj.glob("tf2_sound_vo_*_dir.vpk"))
+            vpk_paths.extend(vo_vpks)
+            
             sound_result = self.sound_handler.process_temp_sound_mods(
                 folder_setup.temp_mods_dir,
                 backup_scripts_dir,
-                Path(tf_path) / "tf2_sound_misc_dir.vpk"
+                vpk_paths
             )
             if sound_result:
                 self.update_progress(50, f"Sound processing: {sound_result['message']}")
