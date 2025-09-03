@@ -85,13 +85,3 @@ Enjoy it while you can :).
 [SonOfDiscordiA](https://gamebanana.com/members/2670597) for the [short_circuit](https://gamebanana.com/mods/446897).
 
 [agrastiOs](https://github.com/agrastiOs) for the [UltimateVisualFixPack](https://github.com/agrastiOs/Ultimate-TF2-Visual-Fix-Pack).
-
-### ALL THE HOMIES WHO TESTED IT OVER THE COURSE OF 3 MONTHS
-[Aslan](https://steamcommunity.com/id/caninecrucifix/)
-
-[Kelsey](https://steamcommunity.com/id/Kacey2K/) (also let me take over her discord server)
-
-[Evan](https://steamcommunity.com/id/evanjesus/)
-
-[Oske](https://steamcommunity.com/id/oskeB/)
-
