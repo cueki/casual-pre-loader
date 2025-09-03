@@ -17,6 +17,7 @@ from gui.addon_panel import AddonPanel
 from gui.first_time_setup import get_mods_zip_enabled, set_mods_zip_enabled
 from core.version import VERSION
 
+
 class SettingsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -98,6 +99,13 @@ class SettingsDialog(QDialog):
         version_label = QLabel(f"Version: {VERSION}")
         version_label.setStyleSheet("font-weight: bold;")
         version_layout.addWidget(version_label)
+        
+        # show update info if available
+        if self.update_info:
+            update_label = QLabel(f"Update available: v{self.update_info['version']}")
+            update_label.setStyleSheet("color: orange; font-weight: bold;")
+            version_layout.addWidget(update_label)
+        
         version_group.setLayout(version_layout)
         layout.addWidget(version_group)
         layout.addStretch()
@@ -132,10 +140,11 @@ class SettingsDialog(QDialog):
 
 
 class ParticleManagerGUI(QMainWindow):
-    def __init__(self, tf_directory=None):
+    def __init__(self, tf_directory=None, update_info=None):
         super().__init__()
         # store initial tf directory from first-time setup
         self.initial_tf_directory = tf_directory
+        self.update_info = update_info
         
         # managers
         self.settings_manager = SettingsManager()

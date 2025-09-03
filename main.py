@@ -10,6 +10,8 @@ from gui.first_time_setup import (check_first_time_setup, run_first_time_setup, 
                                   should_uninstall_mods_zip, uninstall_mods_zip)
 from core.folder_setup import folder_setup
 from core.backup_manager import prepare_working_copy
+from core.auto_updater import check_for_updates_sync
+from gui.update_dialog import show_update_dialog
 
 
 def main():
@@ -60,7 +62,19 @@ def main():
                        Qt.GlobalColor.white)
     prepare_working_copy()
 
-    window = ParticleManagerGUI(tf_directory)
+    # check for updates
+    splash.showMessage("Checking for updates...",
+                       Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
+                       Qt.GlobalColor.white)
+    update_info = check_for_updates_sync()
+    
+    # show update dialog if update is available
+    if update_info:
+        splash.hide()  # hide splash while showing dialog
+        show_update_dialog(update_info)
+        splash.show()  # show splash again after dialog
+
+    window = ParticleManagerGUI(tf_directory, update_info)
 
     # set icon for Windows
     if platform == 'win32':

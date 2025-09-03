@@ -29,12 +29,18 @@ class FirstTimeSetupDialog(QDialog):
         self.settings_manager = SettingsManager()
         self.import_mods_path = ""
         self.install_included_mods = True
+        self.mods_zip_available = self.check_mods_zip_available()
         
         self.setWindowTitle("First Time Setup")
         self.setMinimumSize(750, 500)
         self.setModal(True)
         
         self.setup_ui()
+    
+    def check_mods_zip_available(self):
+        """Check if mods.zip exists using the same logic as other functions"""
+        mods_zip_path = folder_setup.install_dir / 'mods.zip'
+        return mods_zip_path.exists()
     
     def setup_ui(self):
         layout = QVBoxLayout(self)
@@ -133,7 +139,12 @@ class FirstTimeSetupDialog(QDialog):
         mods_layout.addWidget(mods_description)
         
         self.install_mods_checkbox = QCheckBox("Install included mods (mods.zip)")
-        self.install_mods_checkbox.setChecked(True)
+        if self.mods_zip_available:
+            self.install_mods_checkbox.setChecked(True)
+        else:
+            self.install_mods_checkbox.setChecked(False)
+            self.install_mods_checkbox.setEnabled(False)
+            self.install_mods_checkbox.setText("Install included mods (mods.zip not available)")
         self.install_mods_checkbox.toggled.connect(self.on_mods_checkbox_changed)
         mods_layout.addWidget(self.install_mods_checkbox)
         
