@@ -54,7 +54,7 @@ class AdvancedParticleMerger:
         out_dir = folder_setup.particles_dir / vpk_folder_name
 
         # lazy copy whatever
-        excluded_patterns = ['unusual', 'dx80', 'dx90']
+        excluded_patterns = ['dx80', 'dx90']
         particles_filter = [f for f in Path(out_dir / "particles").glob("*.pcf")
                             if not any(pattern in str(f).lower() for pattern in excluded_patterns)]
 
