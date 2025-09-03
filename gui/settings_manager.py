@@ -60,7 +60,9 @@ class SettingsManager:
             "tf_directory": "",
             "addon_selections": [],
             "matrix_selections": {},
-            "skip_launch_options_popup": False
+            "skip_launch_options_popup": False,
+            "suppress_update_notifications": False,
+            "skipped_update_version": None
         }
 
         if self.settings_file.exists():
@@ -139,3 +141,22 @@ class SettingsManager:
     def set_skip_launch_options_popup(self, skip_popup):
         self.settings["skip_launch_options_popup"] = skip_popup
         self.save_settings()
+
+    def get_suppress_update_notifications(self):
+        return self.settings.get("suppress_update_notifications", False)
+
+    def set_suppress_update_notifications(self, suppress):
+        self.settings["suppress_update_notifications"] = suppress
+        self.save_settings()
+
+    def get_skipped_update_version(self):
+        return self.settings.get("skipped_update_version", None)
+
+    def set_skipped_update_version(self, version):
+        self.settings["skipped_update_version"] = version
+        self.save_settings()
+
+    def should_show_update_dialog(self, version):
+        if self.get_suppress_update_notifications():
+            return False
+        return version != self.get_skipped_update_version()

@@ -72,7 +72,6 @@ Enjoy it while you can :).
 
 -cukei
 # Thank you <3:
-### Mod makers
 
 [THE GOAT](https://gamebanana.com/members/2133251) This person made the [square_series](https://gamebanana.com/mods/435309) preset.
 
