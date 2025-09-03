@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QFont
 from core.auto_updater import AutoUpdater
+from gui.settings_manager import SettingsManager
 
 
 class UpdateWorker(QThread):
@@ -42,6 +43,7 @@ class UpdateDialog(QDialog):
         self.update_info = update_info
         self.updater = AutoUpdater()
         self.update_worker = None
+        self.settings_manager = SettingsManager()
         
         self.setWindowTitle("Update Available")
         self.setMinimumSize(500, 400)
@@ -107,6 +109,8 @@ class UpdateDialog(QDialog):
     def skip_version(self):
         if self.suppress_checkbox.isChecked():
             self.save_suppress_setting()
+        else:
+            self.save_skipped_version()
         self.reject()
     
     def remind_later(self):
@@ -120,7 +124,7 @@ class UpdateDialog(QDialog):
         self.suppress_checkbox.setEnabled(False)
         
         self.progress_bar.setVisible(True)
-        self.progress_bar.setRange(0, 0)  # indeterminate progress
+        self.progress_bar.setRange(0, 0)
         self.progress_label.setVisible(True)
         
         # start update worker
@@ -138,19 +142,27 @@ class UpdateDialog(QDialog):
         
         if success:
             QMessageBox.information(self, "Update Complete", message)
-            self.accept()  # close dialog and continue
+            self.accept()
         else:
             QMessageBox.critical(self, "Update Failed", message)
-            # re-enable buttons
             self.skip_button.setEnabled(True)
             self.later_button.setEnabled(True)
             self.update_button.setEnabled(True)
             self.suppress_checkbox.setEnabled(True)
     
     def save_suppress_setting(self):
-        """Save setting to suppress future update checks"""
-        # TODO: Save to settings file
-        print("Suppressing future update notifications")
+        try:
+            self.settings_manager.set_suppress_update_notifications(True)
+            print("Suppressing future update notifications")
+        except Exception as e:
+            print(f"Error saving suppress setting: {e}")
+    
+    def save_skipped_version(self):
+        try:
+            self.settings_manager.set_skipped_update_version(self.update_info["version"])
+            print(f"Skipped version {self.update_info['version']}")
+        except Exception as e:
+            print(f"Error saving skipped version: {e}")
 
 
 def show_update_dialog(update_info, parent=None):
