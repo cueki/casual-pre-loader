@@ -99,13 +99,7 @@ class SettingsDialog(QDialog):
         version_label = QLabel(f"Version: {VERSION}")
         version_label.setStyleSheet("font-weight: bold;")
         version_layout.addWidget(version_label)
-        
-        # show update info if available
-        if self.update_info:
-            update_label = QLabel(f"Update available: v{self.update_info['version']}")
-            update_label.setStyleSheet("color: orange; font-weight: bold;")
-            version_layout.addWidget(update_label)
-        
+
         version_group.setLayout(version_layout)
         layout.addWidget(version_group)
         layout.addStretch()
