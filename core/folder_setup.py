@@ -103,6 +103,15 @@ class FolderConfig:
             self.base_default_pcf = None
             self.base_default_parents = None
 
+    def cleanup_old_updater(self) -> None:
+        core_dir = self.install_dir / "core"
+        updater_old = core_dir / "updater_old.exe"
+        if not updater_old.exists():
+            return
+
+        updater_old.unlink()
+        print(f"Removed old updater: {updater_old.name}")
+
     def get_temp_path(self, filename: str) -> Path:
         return self.temp_dir / filename
 

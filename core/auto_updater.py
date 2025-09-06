@@ -68,12 +68,18 @@ class AutoUpdater:
     def _use_windows_updater(self, zip_path: Path, updater_path: Path):
         import subprocess
         import os
+
+        # rename cuz python will delete temp files on close
         zip_in_install = self.install_dir / "update.zip"
         shutil.copy2(zip_path, zip_in_install)
 
-        # launch updater process with our PID so it can kill us
+        # rename updater.exe to avoid file lock issues
+        renamed_updater = self.install_dir / "core" / f"updater_old.exe"
+        shutil.copy2(updater_path, renamed_updater)
+
+        # launch renamed updater process with our PID so it can kill us
         subprocess.Popen([
-            str(updater_path),
+            str(renamed_updater),
             str(zip_in_install),
             str(self.install_dir.parent),
             str(os.getpid())
@@ -84,7 +90,7 @@ class AutoUpdater:
     def extract_update_zip(self, zip_path: Path) -> bool:
         try:
             if platform.system() == "Windows":
-                updater_path = self.install_dir / "updater.exe"
+                updater_path = self.install_dir / "core" / "updater.exe"
                 if updater_path.exists():
                     return self._use_windows_updater(zip_path, updater_path)
 

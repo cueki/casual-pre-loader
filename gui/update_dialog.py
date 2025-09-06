@@ -25,7 +25,7 @@ class UpdateWorker(QThread):
             elif result.get("app_updated"):
                 self.update_completed.emit(True, "Update completed successfully! Please restart the application.")
             else:
-                self.update_completed.emit(False, "Update failed: No update file found")
+                self.update_completed.emit(False, "Update failed: No update file found", result)
         
         except Exception as e:
             self.update_completed.emit(False, f"Update failed: {str(e)}")

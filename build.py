@@ -2,7 +2,36 @@ import os
 import shutil
 import zipfile
 import argparse
+import subprocess
 from pathlib import Path
+
+
+def compile_updater(source_dir):
+    updater_c = Path(source_dir) / "core" / "updater.c"
+    updater_exe = Path(source_dir) / "core" / "updater.exe"
+    
+    if not updater_c.exists():
+        print(f"Warning: {updater_c} not found, skipping updater compilation")
+        return
+    
+    print("Compiling updater.exe...")
+    try:
+        # compile with mingw
+        subprocess.run([
+            "x86_64-w64-mingw32-gcc", 
+            str(updater_c), 
+            "-o", 
+            str(updater_exe)
+        ], check=True, capture_output=True, text=True)
+        
+        print(f"Successfully compiled updater.exe to {updater_exe}")
+        
+    except subprocess.CalledProcessError as e:
+        print(f"Error compiling updater.exe: {e}")
+        print(f"stdout: {e.stdout}")
+        print(f"stderr: {e.stderr}")
+    except FileNotFoundError:
+        print("Error: x86_64-w64-mingw32-gcc not found. Install mingw-w64 cross-compiler.")
 
 
 def parse_arguments():
@@ -110,9 +139,9 @@ def build_variant(source_dir, target_dir, include_mods_zip=True, variant_name=""
 
 def main():
     args = parse_arguments()
-
     source_dir = os.path.dirname(os.path.abspath(__file__))
     base_target_dir = Path(args.target_dir)
+    compile_updater(source_dir)
 
     if args.build_variant == 'both':
         full_dir = build_variant(source_dir, base_target_dir, True, "casual-preloader-full")
