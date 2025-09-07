@@ -55,7 +55,8 @@ def main():
                            Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
                            Qt.GlobalColor.white)
 
-    # temp
+    # cleanup old updater and temp folders
+    folder_setup.cleanup_old_updater()
     folder_setup.cleanup_temp_folders()
     folder_setup.create_required_folders()
     splash.showMessage("Preparing working copy...",
@@ -65,9 +66,9 @@ def main():
 
     window = ParticleManagerGUI(tf_directory)
     
-    # check for updates after first-time setup is complete
+    # check for updates after first-time setup is complete (only for portable)
     update_info = None
-    if not check_first_time_setup():
+    if not check_first_time_setup() and folder_setup.portable:
         settings_manager = SettingsManager()
 
         splash.showMessage("Checking for updates...",

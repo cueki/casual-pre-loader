@@ -1,3 +1,4 @@
+import platform
 import zipfile
 import requests
 import tempfile
@@ -12,12 +13,14 @@ from core.version import VERSION
 class AutoUpdater:
     GITHUB_REPO = "cueki/casual-pre-loader"
     GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
-    
+
     def __init__(self):
         self.install_dir = folder_setup.install_dir
 
     def check_for_updates(self) -> Optional[Dict[str, Any]]:
         try:
+            print(f"Install dir: {self.install_dir}")
+
             response = requests.get(self.GITHUB_API_URL, timeout=10)
             response.raise_for_status()
             
@@ -62,8 +65,35 @@ class AutoUpdater:
             print(f"Error downloading {url}: {e}")
             return False
 
+    def _use_windows_updater(self, zip_path: Path, updater_path: Path):
+        import subprocess
+        import os
+
+        # rename cuz python will delete temp files on close
+        zip_in_install = self.install_dir / "update.zip"
+        shutil.copy2(zip_path, zip_in_install)
+
+        # rename updater.exe to avoid file lock issues
+        renamed_updater = self.install_dir / "core" / f"updater_old.exe"
+        shutil.copy2(updater_path, renamed_updater)
+
+        # launch renamed updater process with our PID so it can kill us
+        subprocess.Popen([
+            str(renamed_updater),
+            str(zip_in_install),
+            str(self.install_dir.parent),
+            str(os.getpid())
+        ], creationflags=subprocess.CREATE_NEW_CONSOLE)
+
+        return True
+
     def extract_update_zip(self, zip_path: Path) -> bool:
         try:
+            if platform.system() == "Windows":
+                updater_path = self.install_dir / "core" / "updater.exe"
+                if updater_path.exists():
+                    return self._use_windows_updater(zip_path, updater_path)
+
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 temp_extract_dir = self.install_dir / "temp_update"
                 temp_extract_dir.mkdir(exist_ok=True)
