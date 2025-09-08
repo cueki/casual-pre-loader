@@ -73,8 +73,8 @@ class AutoUpdater:
         zip_in_install = self.install_dir / "update.zip"
         shutil.copy2(zip_path, zip_in_install)
 
-        # rename updater.exe to avoid file lock issues
-        renamed_updater = self.install_dir / "core" / f"updater_old.exe"
+        # rename updater to avoid file lock issues
+        renamed_updater = self.install_dir / "core" / f"updater_old.bat"
         shutil.copy2(updater_path, renamed_updater)
 
         # launch renamed updater process with our PID so it can kill us
@@ -90,7 +90,7 @@ class AutoUpdater:
     def extract_update_zip(self, zip_path: Path) -> bool:
         try:
             if platform.system() == "Windows":
-                updater_path = self.install_dir / "core" / "updater.exe"
+                updater_path = self.install_dir / "core" / "updater.bat"
                 if updater_path.exists():
                     return self._use_windows_updater(zip_path, updater_path)
 
