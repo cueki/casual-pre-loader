@@ -1,7 +1,6 @@
 [![Join Our Discord!](https://img.shields.io/badge/Discord-Join%20Us-7289DA.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/2SZbfXzKYQ)
 
 # Download the latest release [Here](https://github.com/cueki/casual-particle-pre-loader/releases/).
-# Most up-to-date tutorial [Here](https://gamebanana.com/tuts/18436)
 # If you want to run with python (Linux):
 
 We need studiomdl.exe from the Windows version of TF2.
