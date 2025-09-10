@@ -214,10 +214,7 @@ def validate_zip_structure(zip_file: zipfile.ZipFile) -> ValidationResult:
 
 
 class StructureValidator:
-    # validates folder and zip structures
-    INVALID_FILENAMES = {'info.vdf'}
-
-    # empty set that can be used to filter problematic files in the future
+     # empty set that can be used to filter problematic files in the future
     INVALID_EXTENSIONS = set()
 
     # valid mod root folders from constants
@@ -325,10 +322,6 @@ class StructureValidator:
                     if item.suffix.lower() in self.INVALID_EXTENSIONS:
                         errors.append(f"Found nested VPK file: {item.relative_to(folder_path)}")
                     
-                    # invalid filenames
-                    if item.name.lower() in self.INVALID_FILENAMES:
-                        found_files.add(item.name.lower())
-                    
                     found_files.add(item.name.lower())
                 
                 elif item.is_dir():
@@ -372,10 +365,6 @@ class StructureValidator:
                 # invalid extensions
                 if path_obj.suffix.lower() in self.INVALID_EXTENSIONS:
                     errors.append(f"Found nested VPK file in zip: {file_path}")
-                
-                # invalid filenames
-                if path_obj.name.lower() in self.INVALID_FILENAMES:
-                    found_files.add(path_obj.name.lower())
                 
                 # track file and directory names
                 found_files.add(path_obj.name.lower())
