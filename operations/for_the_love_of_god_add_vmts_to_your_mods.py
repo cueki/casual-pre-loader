@@ -1,6 +1,7 @@
 from pathlib import Path
-from typing import Set, List
+from typing import Set, List, Optional
 from core.folder_setup import folder_setup
+from valve_parsers import VPKFile
 
 
 def find_all_vtf_files(directory: Path) -> List[Path]:
@@ -52,17 +53,42 @@ def get_texture_path(vtf_path: Path, base_dir: Path) -> str:
     return texture_path
 
 
-def generate_vmt_content(texture_path: str) -> str:
+def generate_vmt_content(texture_path: str, game_vpk: Optional[VPKFile] = None) -> str:
+    # try to find matching VMT in game VPK
+    if game_vpk:
+        vmt_path = f"materials/{texture_path}.vmt"
+        try:
+            vmt_content = game_vpk.get_file_data(vmt_path)
+            if vmt_content:
+                return vmt_content.decode('utf-8', errors='ignore')
+        except Exception as e:
+                print(f"Error reading VMT from game VPK: {e}")
+    
+    # fallback to generic VMT
     return f'"LightmappedGeneric"\n{{\n\t"$basetexture" "{texture_path}"\n}}\n'
 
 
-def generate_missing_vmt_files(temp_mods_dir: Path = None) -> int:
+def generate_missing_vmt_files(temp_mods_dir: Path = None, tf_path: str = None) -> int:
     if temp_mods_dir is None:
         temp_mods_dir = folder_setup.temp_mods_dir
 
     if not temp_mods_dir.exists():
         print(f"Directory {temp_mods_dir} does not exist")
         return 0
+
+    # initialize VPK
+    game_vpk = None
+    if tf_path:
+        game_vpk_path = Path(tf_path) / "tf2_misc_dir.vpk"
+        if game_vpk_path.exists():
+            try:
+                game_vpk = VPKFile(str(game_vpk_path))
+                print(f"Loaded game VPK: {game_vpk_path}")
+            except Exception as e:
+                print(f"Error loading game VPK: {e}")
+                game_vpk = None
+        else:
+            print(f"Game VPK not found at: {game_vpk_path}")
 
     # find all vtf and vmt files
     vtf_files = find_all_vtf_files(temp_mods_dir)
@@ -84,14 +110,17 @@ def generate_missing_vmt_files(temp_mods_dir: Path = None) -> int:
             # generate vmt file in the same directory as the vtf
             vmt_path = vtf_file.with_suffix('.vmt')
             texture_path = get_texture_path(vtf_file, temp_mods_dir)
-            vmt_content = generate_vmt_content(texture_path)
+            vmt_content = generate_vmt_content(texture_path, game_vpk)
 
             try:
                 # write the vmt
                 with open(vmt_path, 'w', encoding='utf-8') as f:
                     f.write(vmt_content)
 
-                print(f"Created VMT: {vmt_path}")
+                if game_vpk:
+                    print(f"Created VMT from game VPK: {vmt_path}")
+                else:
+                    print(f"Created generic VMT: {vmt_path}")
 
             except Exception as e:
                 print(f"Error creating VMT file {vmt_path}: {e}")

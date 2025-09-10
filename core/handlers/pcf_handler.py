@@ -1,15 +1,19 @@
 from pathlib import Path
-from core.parsers.pcf_file import PCFFile, PCFElement
-from core.parsers.vpk_file import VPKFile
+from valve_parsers import VPKFile, PCFFile, PCFElement
 
 
 def restore_particle_files(tf_path: str) -> int:
     backup_particles_dir = Path("backup/particles")
     if not backup_particles_dir.exists():
+        print("Error, missing backup dir/")
         return 0
 
-    vpk = VPKFile(tf_path + "/tf2_misc_dir.vpk")
-    vpk.parse_directory()
+    vpk_path = Path(tf_path) / "tf2_misc_dir.vpk"
+    if not vpk_path.exists():
+        print("Error, missing tf2_misc_dir.vpk, is the tf/ path correct?")
+        return 0
+
+    vpk = VPKFile(str(vpk_path))
     patched_count = 0
 
     for pcf_file in backup_particles_dir.glob("*.pcf"):
@@ -31,17 +35,13 @@ def restore_particle_files(tf_path: str) -> int:
 
 
 def get_parent_elements(pcf: PCFFile) -> set[str]:
-    system_definitions = set()
-    child_elements = set()
-
-    for element in pcf.elements:
-        type_name = pcf.string_dictionary[element.type_name_index]
-        element_name = element.element_name.decode('ascii')
-
-        if type_name == b'DmeParticleSystemDefinition':
-            system_definitions.add(element_name)
-        elif type_name == b'DmeParticleChild':
-            child_elements.add(element_name)
+    # get all system definitions
+    system_defs = pcf.get_elements_by_type('DmeParticleSystemDefinition')
+    system_definitions = {elem.element_name.decode('ascii') for elem in system_defs}
+    
+    # get all child elements
+    child_elems = pcf.get_elements_by_type('DmeParticleChild')
+    child_elements = {elem.element_name.decode('ascii') for elem in child_elems}
 
     # parent elements are those that aren't also children
     parent_elements = system_definitions - child_elements
@@ -49,11 +49,12 @@ def get_parent_elements(pcf: PCFFile) -> set[str]:
 
 
 def check_parents(pcf: PCFFile, parents: set[str]) -> bool:
-    for element in pcf.elements:
-        if pcf.string_dictionary[element.type_name_index] == b'DmeParticleSystemDefinition':
-            element_name = element.element_name.decode('ascii')
-            if element_name in parents:
-                return True
+    # get all system definitions
+    system_defs = pcf.get_elements_by_type('DmeParticleSystemDefinition')
+    for element in system_defs:
+        element_name = element.element_name.decode('ascii')
+        if element_name in parents:
+            return True
     return False
 
 

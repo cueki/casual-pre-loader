@@ -1,7 +1,7 @@
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
-from core.parsers.pcf_file import PCFFile
+from valve_parsers import PCFFile
 from operations.pcf_rebuild import (
     load_particle_system_map,
     get_pcf_element_names,
@@ -17,7 +17,11 @@ def sequential_merge(pcf_files: List[PCFFile]):
         return None
     result = pcf_files[0]
     for pcf in pcf_files[1:]:
-        result = merge_pcf_files(result, pcf)
+        try:
+            result = merge_pcf_files(result, pcf)
+        except ValueError as e:
+            print(f"Warning: Skipping PCF file due to merge error: {e}")
+            continue
     return result
 
 
@@ -50,7 +54,7 @@ class AdvancedParticleMerger:
         out_dir = folder_setup.particles_dir / vpk_folder_name
 
         # lazy copy whatever
-        excluded_patterns = ['unusual', 'dx80', 'dx90']
+        excluded_patterns = ['dx80', 'dx90']
         particles_filter = [f for f in Path(out_dir / "particles").glob("*.pcf")
                             if not any(pattern in str(f).lower() for pattern in excluded_patterns)]
 
@@ -91,7 +95,11 @@ class AdvancedParticleMerger:
 
                 if duplicates:
                     game_elements = PCFFile(game_file_out).decode()
-                    result = merge_pcf_files(chosen_pcf, game_elements)
+                    try:
+                        result = merge_pcf_files(chosen_pcf, game_elements)
+                    except ValueError as e:
+                        print(f"Warning: Failed to merge with game elements: {e}")
+                        result = chosen_pcf
                 else:
                     group_files.append(game_file_out)
                     pcf_files = [PCFFile(particle).decode() for particle in group_files]

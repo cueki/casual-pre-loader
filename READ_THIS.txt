@@ -1,10 +1,7 @@
 Hi.
-Thank you for installing my preloader. (Ver 1.4.3)
+Thank you for installing my preloader. (Ver 1.5.2)
 Simply double click RUNME
 I recommend checking this file every update as there might be some extra info regarding upgrading from version to version.
-
-NON-VPK MODS:
-If you would like to install mods that are folders and not vpks, as long as that folder is meant to go into the tf/custom folder, you can put it into casual-preloader/mods/addons, and it will appear after an app restart.
 
 FOR MOD MAKERS:
 If you would like to produce mods that work alongside this tool, for both particles and model files, the easiest way to ensure compatibility is to copy the internal structure that is present in TF2. Don't use any custom folder names in your vmt $basetexture paths etc.
@@ -14,17 +11,14 @@ Take a look at particle_system_map.json, YOUR ELEMENT NAMES MUST MATCH WHAT IS I
 
 A mod.json can be added to any addon in its root folder (casual-preloader/mods/addons/super_cool_addon/mod.json) to provide extra info to users. This means that you can include it in your mods on gamebanana, and it will show up for the user when they put it in the preloader.
 mod.json structure:
+
 {
     "addon_name": "My mod name!", // Can be anything you want.
-    "type": "Texture", // Current supported types: "custom", "model", "texture", "misc", "animation", "unknown", default is "unknown"
+    "type": "Texture", // Current supported types: "skin", "model", "texture", "misc", "animation", "experimental", "hud", "sound" and "unknown".
     "version": "v500 super", // Optional, just whatever you want
     "description": "Some extra info about my awesome mod!" // Description, can be pretty long but your milage may vary on the formatting
 }
 
-05/31/2025 (update 1.4.3):
-Uh.
-Yeah.
-We got backpack icons and weapon wear figured out.
-If I ever get around to automating decals, then every single visual thing can be modified. Sounds I haven't really looked at yet...
-Thanks for 20k downloads :)
+09/03/2025 (update 1.5.2):
+yay unusuals
 

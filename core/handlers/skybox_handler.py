@@ -1,9 +1,8 @@
-import re
 import shutil
 from pathlib import Path
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler
-from core.parsers.vpk_file import VPKFile
+from valve_parsers import VPKFile
 
 
 def is_skybox_vmt(file_path: Path) -> bool:
@@ -67,7 +66,6 @@ def restore_skybox_files(tf_path: str) -> int:
         return 0
 
     vpk = VPKFile(tf_path + "/tf2_misc_dir.vpk")
-    vpk.parse_directory()
     restored_count = 0
 
     for skybox_vmt in backup_skybox_dir.glob("*.vmt"):

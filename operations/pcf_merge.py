@@ -1,4 +1,4 @@
-from core.parsers.pcf_file import PCFFile, PCFElement
+from valve_parsers import PCFFile, PCFElement
 from core.constants import AttributeType
 
 
@@ -19,7 +19,8 @@ def copy_element(element: PCFElement, offset: int, source_pcf: PCFFile,
                 new_type_name_index = len(target_pcf.string_dictionary)
                 target_pcf.string_dictionary.append(type_name)
     except Exception as e:
-        raise ValueError(f"Error processing type name '{type_name.decode('ascii')}': {str(e)}")
+        print(f"Error: Failed to process particle element '{type_name.decode('ascii', errors='replace')}' during merge: {str(e)}")
+        raise ValueError(f"PCF merge failed while processing element type '{type_name.decode('ascii', errors='replace')}')")
 
     new_element = PCFElement(
         type_name_index=new_type_name_index,

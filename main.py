@@ -6,9 +6,13 @@ from PyQt6.QtGui import QPixmap, QIcon
 from PyQt6.QtCore import Qt
 from gui.main_window import ParticleManagerGUI
 from gui.setup import initial_setup
-from gui.first_time_setup import check_first_time_setup, run_first_time_setup
+from gui.first_time_setup import (check_first_time_setup, run_first_time_setup, should_install_mods_zip,
+                                  should_uninstall_mods_zip, uninstall_mods_zip)
 from core.folder_setup import folder_setup
 from core.backup_manager import prepare_working_copy
+from core.auto_updater import check_for_updates_sync
+from gui.update_dialog import show_update_dialog
+from gui.settings_manager import SettingsManager
 
 
 def main():
@@ -32,13 +36,27 @@ def main():
                           Qt.WindowType.FramelessWindowHint)
     splash.show()
 
-    # initial setup
-    splash.showMessage("Initial setup...",
-                       Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
-                       Qt.GlobalColor.white)
-    initial_setup((folder_setup.install_dir / 'mods.zip', folder_setup.mods_dir))
+    # handle included mods - install or uninstall based on settings
+    should_install = should_install_mods_zip()
+    should_uninstall = should_uninstall_mods_zip()
+    
+    if should_install:
+        splash.showMessage("Installing included mods...",
+                           Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
+                           Qt.GlobalColor.white)
+        initial_setup((folder_setup.install_dir / 'mods.zip', folder_setup.mods_dir))
+    elif should_uninstall:
+        splash.showMessage("Removing included mods...",
+                           Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
+                           Qt.GlobalColor.white)
+        uninstall_mods_zip()
+    else:
+        splash.showMessage("Included mods up to date...",
+                           Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
+                           Qt.GlobalColor.white)
 
-    # temp
+    # cleanup old updater and temp folders
+    folder_setup.cleanup_old_updater()
     folder_setup.cleanup_temp_folders()
     folder_setup.create_required_folders()
     splash.showMessage("Preparing working copy...",
@@ -47,6 +65,25 @@ def main():
     prepare_working_copy()
 
     window = ParticleManagerGUI(tf_directory)
+    
+    # check for updates after first-time setup is complete (only for portable)
+    update_info = None
+    if not check_first_time_setup() and folder_setup.portable:
+        settings_manager = SettingsManager()
+
+        splash.showMessage("Checking for updates...",
+                           Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
+                           Qt.GlobalColor.white)
+        update_info = check_for_updates_sync()
+
+        if update_info and settings_manager.should_show_update_dialog(update_info["version"]):
+            splash.hide()
+            show_update_dialog(update_info)
+            splash.show()
+    
+    # pass update info to window for display
+    if update_info:
+        window.update_info = update_info
 
     # set icon for Windows
     if platform == 'win32':

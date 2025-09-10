@@ -10,15 +10,13 @@ from typing import Optional
 # `printf '%s\n' 'portable = False' >core/are_we_portable.py`
 # This will make the application use paths outside the installation location.
 from core.are_we_portable import portable
-
 from core.handlers.pcf_handler import get_parent_elements
-from core.parsers.pcf_file import PCFFile
+from valve_parsers import PCFFile
 
 
 @dataclass
 class FolderConfig:
     # configuration class for managing folder paths
-
     install_dir = Path(os.path.dirname(os.path.abspath(__file__))).parent  # INFO: I'm not too sure if this can break or not, oh well
     portable = portable  # make sure it is accessible via self.portable
 
@@ -44,6 +42,7 @@ class FolderConfig:
     # main folder names
     _backup_folder = "backup"
     _mods_folder = "mods"
+
     # mods subdir
     _mods_particles_folder = "particles"
     _mods_addons_folder = "addons"
@@ -103,6 +102,15 @@ class FolderConfig:
             self.temp_dir.rmdir()
             self.base_default_pcf = None
             self.base_default_parents = None
+
+    def cleanup_old_updater(self) -> None:
+        core_dir = self.install_dir / "core"
+        updater_old = core_dir / "updater_old.exe"
+        if not updater_old.exists():
+            return
+
+        updater_old.unlink()
+        print(f"Removed old updater: {updater_old.name}")
 
     def get_temp_path(self, filename: str) -> Path:
         return self.temp_dir / filename

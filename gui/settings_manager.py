@@ -57,10 +57,12 @@ class SettingsManager:
 
     def _load_settings(self):
         default_settings = {
-            "last_directory": "",
+            "tf_directory": "",
             "addon_selections": [],
             "matrix_selections": {},
-            "skip_valve_rc_warning": False
+            "skip_launch_options_popup": False,
+            "suppress_update_notifications": False,
+            "skipped_update_version": None
         }
 
         if self.settings_file.exists():
@@ -101,11 +103,11 @@ class SettingsManager:
         except Exception as e:
             print(f"Error saving addon metadata: {e}")
 
-    def get_last_directory(self):
-        return self.settings.get("last_directory", "")
+    def get_tf_directory(self):
+        return self.settings.get("tf_directory", "")
 
-    def set_last_directory(self, directory):
-        self.settings["last_directory"] = directory
+    def set_tf_directory(self, directory):
+        self.settings["tf_directory"] = directory
         self.save_settings()
 
     def get_addon_selections(self):
@@ -133,9 +135,28 @@ class SettingsManager:
         metadata = self.get_addon_metadata()
         return {name: data.get('files', []) for name, data in metadata.items()}
 
-    def get_skip_valve_rc_warning(self):
-        return self.settings.get("skip_valve_rc_warning", False)
+    def get_skip_launch_options_popup(self):
+        return self.settings.get("skip_launch_options_popup", False)
 
-    def set_skip_valve_rc_warning(self, skip_warning):
-        self.settings["skip_valve_rc_warning"] = skip_warning
+    def set_skip_launch_options_popup(self, skip_popup):
+        self.settings["skip_launch_options_popup"] = skip_popup
         self.save_settings()
+
+    def get_suppress_update_notifications(self):
+        return self.settings.get("suppress_update_notifications", False)
+
+    def set_suppress_update_notifications(self, suppress):
+        self.settings["suppress_update_notifications"] = suppress
+        self.save_settings()
+
+    def get_skipped_update_version(self):
+        return self.settings.get("skipped_update_version", None)
+
+    def set_skipped_update_version(self, version):
+        self.settings["skipped_update_version"] = version
+        self.save_settings()
+
+    def should_show_update_dialog(self, version):
+        if self.get_suppress_update_notifications():
+            return False
+        return version != self.get_skipped_update_version()
