@@ -27,7 +27,7 @@ def parse_vmt_texture(vmt_path):
 
         # this texture_paths_list should contain all the possible vtf files from a vmt that are mapped to these texture_params
         # this may need to be updated in the future to handle more possible paths
-        texture_params = ['$basetexture', '$detail', '$ramptexture']
+        texture_params = ['$basetexture', '$detail', '$ramptexture', '$normalmap', '$normalmap2']
         texture_paths_list = []
 
         # simple parsing for texture path
@@ -72,6 +72,7 @@ def parse_vmt_texture(vmt_path):
                         if value_start != -1:
                             texture_path = line[value_start + 1:value_end].strip()
                             texture_paths_list.append(Path(texture_path + '.vtf'))
+                            texture_paths_list.append(Path(texture_path + '.vmt'))
                     else:
                         # look for tab or space after the parameter
                         param_end = pos + len(texture_param)
@@ -82,6 +83,7 @@ def parse_vmt_texture(vmt_path):
                         value_start = param_end
                         texture_path = line[value_start:].strip()
                         texture_paths_list.append(Path(texture_path + '.vtf'))
+                        texture_paths_list.append(Path(texture_path + '.vmt'))
 
                     start_pos = line_end
                 else:
