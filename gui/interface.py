@@ -212,13 +212,10 @@ class Interface(QObject):
                 if item.is_dir() and not item.name.startswith('_'):
                     mod_json = item / 'mod.json'
                     if mod_json.exists():
-                        try:
-                            with open(mod_json, 'r') as f:
-                                mod_info = json.load(f)
-                                if mod_info.get('type', '').lower() == 'hud' and mod_info.get('preloader_installed', False):
-                                    shutil.rmtree(item)
-                        except Exception as e:
-                            print(f"Error checking HUD {item.name}: {e}")
+                        with open(mod_json, 'r') as f:
+                            mod_info = json.load(f)
+                            if mod_info.get('type', '').lower() == 'hud' and mod_info.get('preloader_installed', False):
+                                shutil.rmtree(item)
 
             for addon_name, addon_dir in hud_addons:
                 hud_dest = custom_dir / addon_name
@@ -229,14 +226,11 @@ class Interface(QObject):
                 # mark the HUD as installed by preloader
                 hud_mod_json = hud_dest / 'mod.json'
                 if hud_mod_json.exists():
-                    try:
-                        with open(hud_mod_json, 'r') as f:
-                            mod_info = json.load(f)
-                        mod_info['preloader_installed'] = True
-                        with open(hud_mod_json, 'w') as f:
-                            json.dump(mod_info, f, indent=2)
-                    except Exception as e:
-                        print(f"Error marking HUD as preloader installed: {e}")
+                    with open(hud_mod_json, 'r') as f:
+                        mod_info = json.load(f)
+                    mod_info['preloader_installed'] = True
+                    with open(hud_mod_json, 'w') as f:
+                        json.dump(mod_info, f, indent=2)
 
             # create new VPK for custom content & config
             custom_content_dir = folder_setup.temp_mods_dir
