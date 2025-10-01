@@ -1,4 +1,5 @@
 import shutil
+import json
 from pathlib import Path
 from typing import List
 from valve_parsers import VPKFile, PCFFile
@@ -41,17 +42,31 @@ class Interface(QObject):
 
             total_files = 0
             files_to_copy = []
+            hud_addons = []
 
             for addon_path in selected_addons:
                 addon_dir = folder_setup.addons_dir / addon_path
                 if addon_dir.exists() and addon_dir.is_dir():
+                    mod_json_path = addon_dir / 'mod.json'
+                    is_hud = False
+                    if mod_json_path.exists():
+                        with open(mod_json_path, 'r') as f:
+                            mod_info = json.load(f)
+                            if mod_info.get('type', '').lower() == 'hud':
+                                is_hud = True
+                                hud_addons.append((addon_path, addon_dir))
+
+                    # skip hud files for now
+                    if is_hud:
+                        continue
+
                     for src_path in addon_dir.glob('**/*'):
                         if src_path.is_file() and src_path.name != 'mod.json':
                             # skip sound script files from addons (we'll use our versions)
                             rel_path = src_path.relative_to(addon_dir)
-                            if (rel_path.parts[0] == 'scripts' and 
-                                len(rel_path.parts) >= 2 and 
-                                'sound' in src_path.name.lower() and 
+                            if (rel_path.parts[0] == 'scripts' and
+                                len(rel_path.parts) >= 2 and
+                                'sound' in src_path.name.lower() and
                                 src_path.suffix == '.txt'):
                                 continue
                             total_files += 1
@@ -188,6 +203,40 @@ class Interface(QObject):
                     vpk_path.unlink()
                 if cache_path.exists():
                     cache_path.unlink()
+
+            # copy hud as folder on its own
+            custom_dir = Path(tf_path) / 'custom'
+
+            # clean up old HUDs that we installed (they have mod.json with preloader_installed flag)
+            for item in custom_dir.iterdir():
+                if item.is_dir() and not item.name.startswith('_'):
+                    mod_json = item / 'mod.json'
+                    if mod_json.exists():
+                        try:
+                            with open(mod_json, 'r') as f:
+                                mod_info = json.load(f)
+                                if mod_info.get('type', '').lower() == 'hud' and mod_info.get('preloader_installed', False):
+                                    shutil.rmtree(item)
+                        except Exception as e:
+                            print(f"Error checking HUD {item.name}: {e}")
+
+            for addon_name, addon_dir in hud_addons:
+                hud_dest = custom_dir / addon_name
+                if hud_dest.exists():
+                    shutil.rmtree(hud_dest)
+                shutil.copytree(addon_dir, hud_dest)
+
+                # mark the HUD as installed by preloader
+                hud_mod_json = hud_dest / 'mod.json'
+                if hud_mod_json.exists():
+                    try:
+                        with open(hud_mod_json, 'r') as f:
+                            mod_info = json.load(f)
+                        mod_info['preloader_installed'] = True
+                        with open(hud_mod_json, 'w') as f:
+                            json.dump(mod_info, f, indent=2)
+                    except Exception as e:
+                        print(f"Error marking HUD as preloader installed: {e}")
 
             # create new VPK for custom content & config
             custom_content_dir = folder_setup.temp_mods_dir
