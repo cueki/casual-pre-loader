@@ -208,6 +208,7 @@ class Interface(QObject):
             custom_dir = Path(tf_path) / 'custom'
 
             # clean up old HUDs that we installed (they have mod.json with preloader_installed flag)
+            items_to_delete = []
             for item in custom_dir.iterdir():
                 if item.is_dir() and not item.name.startswith('_'):
                     mod_json = item / 'mod.json'
@@ -215,7 +216,11 @@ class Interface(QObject):
                         with open(mod_json, 'r') as f:
                             mod_info = json.load(f)
                             if mod_info.get('type', '').lower() == 'hud' and mod_info.get('preloader_installed', False):
-                                shutil.rmtree(item)
+                                items_to_delete.append(item)
+
+            # delete after closing all file handles
+            for item in items_to_delete:
+                shutil.rmtree(item)
 
             for addon_name, addon_dir in hud_addons:
                 hud_dest = custom_dir / addon_name
