@@ -1,5 +1,5 @@
 Hi.
-Thank you for installing my preloader. (Ver 1.5.2)
+Thank you for installing my preloader. (Ver 1.5.3)
 Simply double click RUNME
 I recommend checking this file every update as there might be some extra info regarding upgrading from version to version.
 
@@ -19,6 +19,6 @@ mod.json structure:
     "description": "Some extra info about my awesome mod!" // Description, can be pretty long but your milage may vary on the formatting
 }
 
-09/03/2025 (update 1.5.2):
-yay unusuals
-
+10/01/2025 (update 1.5.3):
+made it so huds are ignored and installed separately
+hopefully the auto updater works !
