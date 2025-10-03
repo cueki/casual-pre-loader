@@ -1,6 +1,7 @@
-#!/usr/bin/env python3\
+#!/usr/bin/env python3
 """
 Script for merging particle files manually.
+This needs to be moved into root, or you need to update imports for it to work.
 """
 
 import argparse
@@ -61,57 +62,72 @@ def resolve_conflicts(conflicts: Dict[str, List[int]], pcf_files: List[Path]) ->
     return decisions
 
 
-def create_merged_pcf(pcf_files: List[PCFFile], pcf_paths: List[Path], 
+def remap_element_attributes(element, old_to_new: Dict[int, int], string_dict, AttributeType, PCFElement):
+    type_name = string_dict['extracted'][element.type_name_index]
+    new_type_idx = string_dict['merged'].index(type_name)
+
+    new_element = PCFElement(
+        type_name_index=new_type_idx,
+        element_name=element.element_name,
+        data_signature=element.data_signature,
+        attributes={}
+    )
+
+    for attr_name, (attr_type, value) in element.attributes.items():
+        if attr_type == AttributeType.ELEMENT:
+            if value != 4294967295 and value in old_to_new:
+                new_element.attributes[attr_name] = (attr_type, old_to_new[value])
+            else:
+                new_element.attributes[attr_name] = (attr_type, value)
+        elif attr_type == AttributeType.ELEMENT_ARRAY:
+            new_value = [old_to_new[idx] if idx != 4294967295 and idx in old_to_new else idx for idx in value]
+            new_element.attributes[attr_name] = (attr_type, new_value)
+        else:
+            new_element.attributes[attr_name] = (attr_type, value)
+
+    return new_element
+
+
+def create_merged_pcf(pcf_files: List[PCFFile], pcf_paths: List[Path],
                      target_elements: List[str], conflict_decisions: Dict[str, int]) -> PCFFile:
-    # start with the first file as base
+    from core.constants import AttributeType
+    from valve_parsers import PCFElement
+
     base_pcf = pcf_files[0]
     merged_pcf = PCFFile(pcf_paths[0], version=base_pcf.version)
     merged_pcf.string_dictionary = base_pcf.string_dictionary.copy()
-    merged_pcf.elements = [base_pcf.elements[0]]
-    
+    merged_pcf.elements = base_pcf.elements.copy()
+
     for element_name in target_elements:
-        # check if this element has a conflict resolution
-        if element_name in conflict_decisions:
-            source_idx = conflict_decisions[element_name]
-            source_pcf = pcf_files[source_idx]
-            print(f" Using '{element_name}' from {pcf_paths[source_idx].name}")
-        else:
-            source_pcf = None
-            for i, pcf in enumerate(pcf_files):
-                available_elements = set(get_pcf_element_names(pcf))
-                if element_name in available_elements:
-                    source_pcf = pcf
-                    print(f" Using '{element_name}' from {pcf_paths[i].name}")
-                    break
-            
-            if source_pcf is None:
-                print(f"️  Warning: '{element_name}' not found in any input file")
-                continue
+        if element_name not in conflict_decisions or conflict_decisions[element_name] == 0:
+            continue
 
+        source_idx = conflict_decisions[element_name]
+        source_pcf = pcf_files[source_idx]
+        print(f" Replacing '{element_name}' with version from {pcf_paths[source_idx].name}")
 
-        
-        # add non-root elements to merged PCF
         extracted = extract_elements(source_pcf, [element_name])
-        for i, element in enumerate(extracted.elements[1:], 1):  # Skip root
-            merged_pcf.elements.append(element)
-        
-        # update string dictionary
+
         for string in extracted.string_dictionary:
             if string not in merged_pcf.string_dictionary:
                 merged_pcf.string_dictionary.append(string)
-    
-    # update root element's particleSystemDefinitions to include all particle systems
+
+        old_to_new = {old_idx: len(merged_pcf.elements) + old_idx - 1
+                      for old_idx in range(1, len(extracted.elements))}
+
+        string_dict = {'extracted': extracted.string_dictionary, 'merged': merged_pcf.string_dictionary}
+        for old_idx, element in enumerate(extracted.elements[1:], 1):
+            new_element = remap_element_attributes(element, old_to_new, string_dict, AttributeType, PCFElement)
+            merged_pcf.elements.append(new_element)
+
     root = merged_pcf.elements[0]
-    system_indices = []
-    for i, element in enumerate(merged_pcf.elements[1:], 1):
-        type_name = merged_pcf.string_dictionary[element.type_name_index]
-        if type_name == b'DmeParticleSystemDefinition':
-            system_indices.append(i)
-    
+    system_indices = [i for i, elem in enumerate(merged_pcf.elements[1:], 1)
+                      if merged_pcf.string_dictionary[elem.type_name_index] == b'DmeParticleSystemDefinition']
+
     if b'particleSystemDefinitions' in root.attributes:
         attr_type, _ = root.attributes[b'particleSystemDefinitions']
         root.attributes[b'particleSystemDefinitions'] = (attr_type, system_indices)
-    
+
     return merged_pcf
 
 
