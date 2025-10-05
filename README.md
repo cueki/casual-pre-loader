@@ -83,3 +83,8 @@ Enjoy it while you can :).
 [SonOfDiscordiA](https://gamebanana.com/members/2670597) for the [short_circuit](https://gamebanana.com/mods/446897).
 
 [agrastiOs](https://github.com/agrastiOs) for the [UltimateVisualFixPack](https://github.com/agrastiOs/Ultimate-TF2-Visual-Fix-Pack).
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=cueki/casual-pre-loader&type=Date)](https://www.star-history.com/#cueki/casual-pre-loader&Date)
+
