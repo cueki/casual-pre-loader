@@ -245,9 +245,9 @@ class ModDropZone(QFrame):
         
         return True
 
-    def process_folder(self, folder_path: Path) -> bool:
+    def process_folder(self, folder_path: Path, override_name: str = None) -> bool:
         # process a folder by copying it to the appropriate location
-        folder_name = folder_path.name
+        folder_name = override_name if override_name else folder_path.name
 
         # re-validate to get the type information for processing
         validation_result = self.validator.validate_folder(folder_path)
@@ -326,7 +326,13 @@ class ModDropZone(QFrame):
                         return success_count > 0
                 
                 else:
-                    # multiple items at root level, process each valid mod folder
+                    # check if the temp_path itself is a valid mod (has mod folders at root)
+                    root_validation = self.validator.validate_folder(temp_path)
+                    if root_validation.is_valid:
+                        # use zip filename as the mod name
+                        return self.process_folder(temp_path, override_name=zip_name)
+
+                    # otherwise, process each valid mod folder
                     success_count = 0
                     for item in extracted_items:
                         if item.is_dir():
