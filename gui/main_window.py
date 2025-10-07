@@ -247,7 +247,8 @@ class ParticleManagerGUI(QMainWindow):
         addon_panel.refresh_button_clicked.connect(self.load_addons)
         addon_panel.delete_button_clicked.connect(self.delete_selected_addons)
         addon_panel.open_addons_button_clicked.connect(self.open_addons_folder)
-        addon_panel.addon_selection_changed.connect(self.on_addon_select)
+        addon_panel.addon_selection_changed.connect(self.on_addon_click)
+        addon_panel.addon_checkbox_changed.connect(self.on_addon_checkbox_changed)
         install_splitter.addWidget(addon_panel)
 
         # install
@@ -290,8 +291,7 @@ class ParticleManagerGUI(QMainWindow):
         self.install_button.clicked.connect(self.start_install)
         self.restore_button.clicked.connect(self.start_restore)
 
-        # addon signals
-        self.addons_list.itemSelectionChanged.connect(self.on_addon_select)
+        # addon signals - handled by addon_panel connections
         self.mod_drop_zone.addon_updated.connect(self.load_addons)
 
         # installation signals
@@ -317,35 +317,73 @@ class ParticleManagerGUI(QMainWindow):
             self.status_label.setText("Addons refreshed")
             
     def get_selected_addons(self):
-        selected_addon_names = [item.text().split(' [#')[0] for item in self.addons_list.selectedItems()]
+        checked_addon_names = []
+        for i in range(self.addons_list.count()):
+            item = self.addons_list.item(i)
+            if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
+                if item.checkState() == Qt.CheckState.Checked:
+                    checked_addon_names.append(item.text().split(' [#')[0])
+
         file_paths = []
-        for name in selected_addon_names:
+        for name in checked_addon_names:
             if name in self.addon_manager.addons_file_paths:
                 file_paths.append(self.addon_manager.addons_file_paths[name]['file_path'])
         return file_paths
 
-    def on_addon_select(self):
+    def on_addon_click(self):
+        # when user clicks an addon, show its description
         try:
-            # first time setup - store original names
             selected_items = self.addons_list.selectedItems()
+            if selected_items:
+                selected_item = selected_items[0]
+                addon_name = selected_item.text().split(' [#')[0]
+
+                if addon_name in self.addon_manager.addons_file_paths:
+                    addon_info = self.addon_manager.addons_file_paths[addon_name]
+                    self.addon_description.update_content(addon_name, addon_info)
+                else:
+                    self.addon_description.clear()
+            else:
+                self.addon_description.clear()
+
+        except Exception as e:
+            print(f"Error in on_addon_click: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def on_addon_checkbox_changed(self):
+        # when checkboxes change, update numbering and conflicts
+        try:
+            # block signals to prevent recursion
+            self.addons_list.blockSignals(True)
+
+            # first time setup - store original names
             for i in range(self.addons_list.count()):
                 item = self.addons_list.item(i)
-                if item and item.flags() & Qt.ItemFlag.ItemIsSelectable:
+                if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
                     if not item.data(Qt.ItemDataRole.UserRole):
                         item.setData(Qt.ItemDataRole.UserRole, item.text())
 
             # reset all items to original names
             for i in range(self.addons_list.count()):
                 item = self.addons_list.item(i)
-                if item and item.flags() & Qt.ItemFlag.ItemIsSelectable:
+                if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
                     original_name = item.data(Qt.ItemDataRole.UserRole)
                     if original_name:
                         item.setText(original_name)
                     item.setToolTip("")
 
-            # mark selected items with order numbers and check conflicts
+            # get checked items
+            checked_items = []
+            for i in range(self.addons_list.count()):
+                item = self.addons_list.item(i)
+                if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
+                    if item.checkState() == Qt.CheckState.Checked:
+                        checked_items.append(item)
+
+            # mark checked items with order numbers and check conflicts
             addon_contents = self.settings_manager.get_addon_contents()
-            for pos, item in enumerate(selected_items, 1):
+            for pos, item in enumerate(checked_items, 1):
                 original_name = item.data(Qt.ItemDataRole.UserRole) or item.text()
                 display_text = f"{original_name} [#{pos}]"
 
@@ -353,8 +391,8 @@ class ParticleManagerGUI(QMainWindow):
                     conflicts = {}
                     addon_files = set(addon_contents[original_name])
 
-                    # check against other addons
-                    for other_item in selected_items:
+                    # check against other checked addons
+                    for other_item in checked_items:
                         if other_item != item:
                             other_name = other_item.data(Qt.ItemDataRole.UserRole) or other_item.text()
                             if other_name in addon_contents:
@@ -377,27 +415,24 @@ class ParticleManagerGUI(QMainWindow):
 
                 item.setText(display_text)
 
-            # description panel
-            if selected_items:
-                selected_item = selected_items[-1]
-                original_name = selected_item.data(Qt.ItemDataRole.UserRole) or selected_item.text()
-
-                if original_name in self.addon_manager.addons_file_paths:
-                    addon_info = self.addon_manager.addons_file_paths[original_name]
-                    self.addon_description.update_content(original_name, addon_info)
+            # save checkbox states (use original names from UserRole)
+            saved_names = []
+            for item in checked_items:
+                original_name = item.data(Qt.ItemDataRole.UserRole)
+                if original_name:
+                    saved_names.append(original_name)
                 else:
-                    self.addon_description.clear()
-            else:
-                self.addon_description.clear()
+                    # fallback: strip the [#N] suffix if present
+                    saved_names.append(item.text().split(' [#')[0])
 
-            # save selections
-            self.settings_manager.set_addon_selections([
-                item.data(Qt.ItemDataRole.UserRole) or item.text()
-                for item in selected_items
-            ])
+            self.settings_manager.set_addon_selections(saved_names)
+
+            # unblock signals
+            self.addons_list.blockSignals(False)
 
         except Exception as e:
-            print(f"Error in on_addon_select: {e}")
+            self.addons_list.blockSignals(False)
+            print(f"Error in on_addon_checkbox_changed: {e}")
             import traceback
             traceback.print_exc()
 
@@ -409,22 +444,19 @@ class ParticleManagerGUI(QMainWindow):
         # block signals temporarily
         self.addons_list.blockSignals(True)
 
-        # clear current selections
-        self.addons_list.clearSelection()
-
-        # apply saved selections
+        # apply saved checkbox states
         item_map = {}
         for i in range(self.addons_list.count()):
             item = self.addons_list.item(i)
-            if item and item.flags() & Qt.ItemFlag.ItemIsSelectable:
+            if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
                 item_map[item.text()] = item
 
         for addon_name in saved_selections:
             if addon_name in item_map:
-                item_map[addon_name].setSelected(True)
+                item_map[addon_name].setCheckState(Qt.CheckState.Checked)
 
         self.addons_list.blockSignals(False)
-        self.on_addon_select()
+        self.on_addon_checkbox_changed()
 
     def scan_for_mcp_files(self):
         tf_path = self.install_manager.tf_path

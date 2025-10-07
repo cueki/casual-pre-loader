@@ -45,6 +45,8 @@ class AddonManager(QObject):
 
                 for addon_info_dict in addon_groups[addon_type]:
                     item = QListWidgetItem(addon_info_dict['addon_name'])
+                    item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+                    item.setCheckState(Qt.CheckState.Unchecked)
                     addons_list.addItem(item)
                     self.addons_file_paths[addon_info_dict['addon_name']] = addon_info_dict
 
@@ -57,6 +59,8 @@ class AddonManager(QObject):
 
             for addon_info_dict in addon_groups["unknown"]:
                 item = QListWidgetItem(addon_info_dict['addon_name'])
+                item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+                item.setCheckState(Qt.CheckState.Unchecked)
                 addons_list.addItem(item)
                 self.addons_file_paths[addon_info_dict['addon_name']] = addon_info_dict
 

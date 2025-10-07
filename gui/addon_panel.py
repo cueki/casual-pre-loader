@@ -6,6 +6,7 @@ from gui.mod_descriptor import AddonDescription
 
 class AddonPanel(QWidget):
     addon_selection_changed = pyqtSignal()
+    addon_checkbox_changed = pyqtSignal()
     delete_button_clicked = pyqtSignal()
     refresh_button_clicked = pyqtSignal()
     open_addons_button_clicked = pyqtSignal()
@@ -24,8 +25,17 @@ class AddonPanel(QWidget):
         addons_group = QGroupBox("Addons")
         addons_layout = QVBoxLayout()
         self.addons_list = QListWidget()
-        self.addons_list.setSelectionMode(QListWidget.SelectionMode.MultiSelection)
-        self.addons_list.itemSelectionChanged.connect(self.on_selection_changed)
+        self.addons_list.setSelectionMode(QListWidget.SelectionMode.SingleSelection)
+        self.addons_list.itemClicked.connect(self.on_selection_changed)
+        self.addons_list.itemChanged.connect(self.on_checkbox_changed)
+
+        # make unchecked checkboxes more visible
+        self.addons_list.setStyleSheet("""
+            QListWidget::indicator:unchecked {
+                background: #555;
+            }
+        """)
+
         addons_layout.addWidget(self.addons_list)
 
         # button container
@@ -44,7 +54,7 @@ class AddonPanel(QWidget):
         button_layout.addWidget(refresh_button)
 
         # delete button
-        delete_button = QPushButton("Delete Selected Addons")
+        delete_button = QPushButton("Delete Selected Addon")
         delete_button.clicked.connect(self.delete_button_clicked)
         button_layout.addWidget(delete_button)
 
@@ -91,16 +101,29 @@ class AddonPanel(QWidget):
 
     def select_items_by_name(self, names):
         self.addons_list.blockSignals(True)
-        self.addons_list.clearSelection()
 
         for i in range(self.addons_list.count()):
             item = self.addons_list.item(i)
-            if item and item.flags() & Qt.ItemFlag.ItemIsSelectable:
+            if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
                 if item.text() in names:
-                    item.setSelected(True)
+                    item.setCheckState(Qt.CheckState.Checked)
+                else:
+                    item.setCheckState(Qt.CheckState.Unchecked)
 
         self.addons_list.blockSignals(False)
-        self.on_selection_changed()
+        self.on_checkbox_changed()
 
     def on_selection_changed(self):
         self.addon_selection_changed.emit()
+
+    def on_checkbox_changed(self):
+        self.addon_checkbox_changed.emit()
+
+    def get_checked_items(self):
+        checked_items = []
+        for i in range(self.addons_list.count()):
+            item = self.addons_list.item(i)
+            if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
+                if item.checkState() == Qt.CheckState.Checked:
+                    checked_items.append(item)
+        return checked_items
