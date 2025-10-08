@@ -20,21 +20,22 @@ class FolderConfig:
     install_dir = Path(os.path.dirname(os.path.abspath(__file__))).parent  # INFO: I'm not too sure if this can break or not, oh well
     portable = portable  # make sure it is accessible via self.portable
 
+    program_name = 'casual-pre-loader'
+    program_author = 'cueki'
+
     # TODO: allow windows users to use non-portable installs (would allow us to remove this entire platform check)
-    if portable or platform == 'win32':  # Windows
+    if portable:
         # default portable values
         project_dir = install_dir
         settings_dir = project_dir
-    elif platform in ('linux', 'darwin'):  # Linux and MacOS
-        from xdg import BaseDirectory
+    else:
+        import platformdirs
 
         # default non-portable values
-        project_dir = Path(BaseDirectory.xdg_data_home) / 'casual-pre-loader'
-        shutil.copytree(install_dir / "backup", project_dir / "backup", dirs_exist_ok=True)
-        settings_dir = Path(BaseDirectory.xdg_config_home) / 'casual-pre-loader'
+        project_dir = Path(platformdirs.user_data_dir(program_name, program_author))
+        settings_dir = Path(platformdirs.user_config_dir(program_name, program_author))
 
-    else:  # Other (unsupported)
-        raise NotImplementedError(f'Unknown platform: {platform}')
+        shutil.copytree(install_dir / "backup", project_dir / "backup", dirs_exist_ok=True)
 
     base_default_pcf: Optional[PCFFile] = field(default=None)
     base_default_parents: Optional[set[str]] = field(default=None)
