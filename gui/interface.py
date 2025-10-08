@@ -61,7 +61,7 @@ class Interface(QObject):
                         continue
 
                     for src_path in addon_dir.glob('**/*'):
-                        if src_path.is_file() and src_path.name != 'mod.json':
+                        if src_path.is_file() and src_path.name != 'mod.json' and src_path.name != 'sound.cache':
                             # skip sound script files from addons (we'll use our versions)
                             rel_path = src_path.relative_to(addon_dir)
                             if (rel_path.parts[0] == 'scripts' and
