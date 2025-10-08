@@ -6,8 +6,8 @@ from pathlib import Path
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit,
                              QLabel, QFileDialog, QMessageBox, QGroupBox, QTabWidget,
-                             QCheckBox,  QDialog, QProgressDialog)
-from PyQt6.QtGui import QAction
+                             QCheckBox,  QDialog, QProgressDialog, QStyle)
+from PyQt6.QtGui import QAction, QIcon
 from core.folder_setup import folder_setup
 from gui.settings_manager import SettingsManager, validate_tf_directory
 from gui.drag_and_drop import ModDropZone
@@ -183,12 +183,14 @@ class ParticleManagerGUI(QMainWindow):
         options_menu = menubar.addMenu("Options")
 
         # refresh addons
-        refresh_action = QAction("Refresh Addons", self)
+        refresh_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
+        refresh_action = QAction(refresh_icon, "Refresh Addons", self)
         refresh_action.triggered.connect(self.load_addons)
         options_menu.addAction(refresh_action)
 
         # open addons folder
-        open_folder_action = QAction("Open Addons Folder", self)
+        folder_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_DirOpenIcon)
+        open_folder_action = QAction(folder_icon, "Open Addons Folder", self)
         open_folder_action.triggered.connect(self.open_addons_folder)
         options_menu.addAction(open_folder_action)
 
@@ -196,7 +198,8 @@ class ParticleManagerGUI(QMainWindow):
         options_menu.addSeparator()
 
         # settings action
-        settings_action = QAction("Settings...", self)
+        settings_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogDetailedView)
+        settings_action = QAction(settings_icon, "Settings...", self)
         settings_action.triggered.connect(self.open_settings_dialog)
         options_menu.addAction(settings_action)
 
