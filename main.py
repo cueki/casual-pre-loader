@@ -5,7 +5,6 @@ from PyQt6.QtWidgets import QApplication, QSplashScreen
 from PyQt6.QtGui import QPixmap, QIcon
 from PyQt6.QtCore import Qt
 from gui.main_window import ParticleManagerGUI
-from gui.setup import initial_setup
 from gui.first_time_setup import check_first_time_setup, run_first_time_setup
 from core.folder_setup import folder_setup
 from core.backup_manager import prepare_working_copy
