@@ -175,6 +175,9 @@ class ParticleManagerGUI(QMainWindow):
         self.scan_for_mcp_files()
         self.rescan_addon_contents()
 
+        # ensure load order display is updated on startup
+        self.update_load_order_display()
+
 
     def setup_menu_bar(self):
         menubar = self.menuBar()
@@ -377,12 +380,19 @@ class ParticleManagerGUI(QMainWindow):
             if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
                 item_map[item.text()] = item
 
+        # only include addons that still exist
+        valid_selections = []
         for addon_name in saved_selections:
             if addon_name in item_map:
                 item_map[addon_name].setCheckState(Qt.CheckState.Checked)
+                valid_selections.append(addon_name)
 
-        # restore load order
-        self.addon_panel.load_order_panel.restore_order(saved_selections)
+        # restore load order with only valid addons
+        self.addon_panel.load_order_panel.restore_order(valid_selections)
+
+        # save the cleaned-up selections if any were removed
+        if len(valid_selections) != len(saved_selections):
+            self.settings_manager.set_addon_selections(valid_selections)
 
         self.addons_list.blockSignals(False)
         self.on_addon_checkbox_changed()
