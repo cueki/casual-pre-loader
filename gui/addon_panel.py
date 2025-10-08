@@ -47,18 +47,18 @@ class AddonPanel(QWidget):
         addons_group.setLayout(addons_layout)
         panels_layout.addWidget(addons_group)
 
-        # middle: load order panel
-        self.load_order_panel = LoadOrderPanel()
-        self.load_order_panel.load_order_changed.connect(self.on_load_order_changed)
-        panels_layout.addWidget(self.load_order_panel)
-
-        # right: description
+        # middle: description
         description_group = QGroupBox("Details")
         description_layout = QVBoxLayout()
         self.addon_description = AddonDescription()
         description_layout.addWidget(self.addon_description)
         description_group.setLayout(description_layout)
         panels_layout.addWidget(description_group)
+
+        # right: load order panel
+        self.load_order_panel = LoadOrderPanel()
+        self.load_order_panel.load_order_changed.connect(self.on_load_order_changed)
+        panels_layout.addWidget(self.load_order_panel)
 
         layout.addLayout(panels_layout)
 

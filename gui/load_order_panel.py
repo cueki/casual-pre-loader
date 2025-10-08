@@ -44,7 +44,8 @@ class LoadOrderPanel(QWidget):
             # strip [#N] prefix and ⚠️suffix if present
             clean_name = text.split('] ', 1)[-1].replace(' ⚠️', '')
             load_order.append(clean_name)
-        return load_order
+        # reverse the order so that top item is installed last and wins conflicts
+        return list(reversed(load_order))
 
     def update_display(self, addon_contents):
         # add numbering and conflict detection to load order list
@@ -138,6 +139,6 @@ class LoadOrderPanel(QWidget):
         # restore load order from saved list
         self.load_order_list.blockSignals(True)
         self.load_order_list.clear()
-        for name in addon_names:
+        for name in reversed(addon_names):
             self.load_order_list.addItem(name)
         self.load_order_list.blockSignals(False)
