@@ -1,12 +1,11 @@
 import json
+import shutil
 from PyQt6.QtWidgets import QListWidgetItem, QMessageBox
-from PyQt6.QtCore import Qt, QObject, pyqtSignal
+from PyQt6.QtCore import Qt, QObject
 from core.folder_setup import folder_setup
 
 
 class AddonManager(QObject):
-    addon_list_updated = pyqtSignal()
-
     def __init__(self, settings_manager):
         super().__init__()
         self.settings_manager = settings_manager
@@ -37,7 +36,7 @@ class AddonManager(QObject):
 
         # add addons to list widget with group splitters
         for addon_type in addon_groups:
-            if addon_type != "unknown":
+            if addon_type != "unknown" and addon_groups[addon_type]:
                 splitter = QListWidgetItem("──── " + str.title(addon_type) + " ────")
                 splitter.setFlags(Qt.ItemFlag.NoItemFlags)
                 splitter.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -162,10 +161,9 @@ class AddonManager(QObject):
 
         errors = []
         for display_name, folder_name in zip(selected_addon_names, selected_folder_names):
-            addon_path = folder_setup.addons_dir / folder_name  # ← Use folder name
+            addon_path = folder_setup.addons_dir / folder_name
             if addon_path.exists() and addon_path.is_dir():
                 try:
-                    import shutil
                     shutil.rmtree(addon_path)
                 except Exception as e:
                     errors.append(f"Failed to delete {display_name}: {str(e)}")

@@ -1,33 +1,40 @@
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QGroupBox, QListWidget, QPushButton, QSplitter, QListWidgetItem,
-                             QHBoxLayout)
+from PyQt6.QtGui import QAction
+from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QGroupBox, QListWidget, QPushButton, QHBoxLayout, QMenu)
 from PyQt6.QtCore import Qt, pyqtSignal
 from gui.mod_descriptor import AddonDescription
+from gui.load_order_panel import LoadOrderPanel
 
 
 class AddonPanel(QWidget):
     addon_selection_changed = pyqtSignal()
     addon_checkbox_changed = pyqtSignal()
+    load_order_changed = pyqtSignal()
     delete_button_clicked = pyqtSignal()
-    refresh_button_clicked = pyqtSignal()
-    open_addons_button_clicked = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.restore_button = None
+        self.install_button = None
         self.addons_list = None
+        self.load_order_panel = None
         self.addon_description = None
         self.setup_ui()
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
-        splitter = QSplitter(Qt.Orientation.Horizontal)
 
-        # addons list
-        addons_group = QGroupBox("Addons")
+        # horizontal layout for the three panels
+        panels_layout = QHBoxLayout()
+
+        # left: addons list
+        addons_group = QGroupBox("Available Addons")
         addons_layout = QVBoxLayout()
         self.addons_list = QListWidget()
         self.addons_list.setSelectionMode(QListWidget.SelectionMode.SingleSelection)
         self.addons_list.itemClicked.connect(self.on_selection_changed)
         self.addons_list.itemChanged.connect(self.on_checkbox_changed)
+        self.addons_list.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.addons_list.customContextMenuRequested.connect(self.show_context_menu)
 
         # make unchecked checkboxes more visible
         self.addons_list.setStyleSheet("""
@@ -37,87 +44,95 @@ class AddonPanel(QWidget):
         """)
 
         addons_layout.addWidget(self.addons_list)
-
-        # button container
-        button_container = QWidget()
-        button_layout = QHBoxLayout(button_container)
-        button_layout.setContentsMargins(0, 0, 0, 0)
-
-        # open addons folder
-        open_addons_button = QPushButton("Open Addons Folder")
-        open_addons_button.clicked.connect(self.open_addons_button_clicked)
-        button_layout.addWidget(open_addons_button)
-
-        # refresh button
-        refresh_button = QPushButton("Refresh Addons")
-        refresh_button.clicked.connect(self.refresh_button_clicked)
-        button_layout.addWidget(refresh_button)
-
-        # delete button
-        delete_button = QPushButton("Delete Selected Addon")
-        delete_button.clicked.connect(self.delete_button_clicked)
-        button_layout.addWidget(delete_button)
-
-        # add button container to layout
-        addons_layout.addWidget(button_container)
         addons_group.setLayout(addons_layout)
-        splitter.addWidget(addons_group)
+        panels_layout.addWidget(addons_group)
 
-        # description
+        # middle: load order panel
+        self.load_order_panel = LoadOrderPanel()
+        self.load_order_panel.load_order_changed.connect(self.on_load_order_changed)
+        panels_layout.addWidget(self.load_order_panel)
+
+        # right: description
         description_group = QGroupBox("Details")
         description_layout = QVBoxLayout()
         self.addon_description = AddonDescription()
         description_layout.addWidget(self.addon_description)
         description_group.setLayout(description_layout)
-        splitter.addWidget(description_group)
+        panels_layout.addWidget(description_group)
 
-        # set initial split sizes
-        splitter.setSizes([400, 300])
+        layout.addLayout(panels_layout)
 
-        layout.addWidget(splitter)
+        # install/uninstall buttons at the bottom
+        button_container = QWidget()
+        button_layout = QHBoxLayout(button_container)
+        button_layout.setContentsMargins(0, 8, 0, 0)
 
-    def add_group_header(self, title):
-        header = QListWidgetItem(f"──── {title} ────")
-        header.setFlags(Qt.ItemFlag.NoItemFlags)
-        header.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.addons_list.addItem(header)
-        return header
+        button_layout.addStretch()
 
-    def add_addon_item(self, name, data=None):
-        item = QListWidgetItem(name)
-        if data:
-            item.setData(Qt.ItemDataRole.UserRole, data)
-        self.addons_list.addItem(item)
-        return item
+        self.install_button = QPushButton("Install")
+        self.install_button.setFixedWidth(100)
+        self.install_button.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                font-weight: bold;
+                padding: 6px;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+            QPushButton:disabled {
+                background-color: #cccccc;
+                color: #666666;
+            }
+        """)
+        button_layout.addWidget(self.install_button)
 
-    def get_selected_items(self):
-        return self.addons_list.selectedItems()
+        self.restore_button = QPushButton("Uninstall")
+        self.restore_button.setFixedWidth(100)
+        self.restore_button.setStyleSheet("""
+            QPushButton {
+                background-color: #f44336;
+                color: white;
+                font-weight: bold;
+                padding: 6px;
+            }
+            QPushButton:hover {
+                background-color: #da190b;
+            }
+            QPushButton:disabled {
+                background-color: #cccccc;
+                color: #666666;
+            }
+        """)
+        button_layout.addWidget(self.restore_button)
 
-    def update_description(self, name, info):
-        self.addon_description.update_content(name, info)
-
-    def clear_description(self):
-        self.addon_description.clear()
-
-    def select_items_by_name(self, names):
-        self.addons_list.blockSignals(True)
-
-        for i in range(self.addons_list.count()):
-            item = self.addons_list.item(i)
-            if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
-                if item.text() in names:
-                    item.setCheckState(Qt.CheckState.Checked)
-                else:
-                    item.setCheckState(Qt.CheckState.Unchecked)
-
-        self.addons_list.blockSignals(False)
-        self.on_checkbox_changed()
+        layout.addWidget(button_container)
 
     def on_selection_changed(self):
         self.addon_selection_changed.emit()
 
     def on_checkbox_changed(self):
+        self.update_load_order_list()
         self.addon_checkbox_changed.emit()
+
+    def on_load_order_changed(self):
+        self.load_order_changed.emit()
+
+    def update_load_order_list(self):
+        # sync checked addons to load order list
+        # get currently checked items (preserve their original names)
+        checked_items = []
+        for i in range(self.addons_list.count()):
+            item = self.addons_list.item(i)
+            if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
+                if item.checkState() == Qt.CheckState.Checked:
+                    # get original name without [#N] suffix
+                    original_name = item.data(Qt.ItemDataRole.UserRole) or item.text().split(' [#')[0]
+                    checked_items.append(original_name)
+
+        # delegate to load order panel
+        self.load_order_panel.sync_from_checked_addons(checked_items)
 
     def get_checked_items(self):
         checked_items = []
@@ -127,3 +142,16 @@ class AddonPanel(QWidget):
                 if item.checkState() == Qt.CheckState.Checked:
                     checked_items.append(item)
         return checked_items
+
+    def get_load_order(self):
+        # delegate to load order panel
+        return self.load_order_panel.get_load_order()
+
+    def show_context_menu(self, position):
+        item = self.addons_list.itemAt(position)
+        if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
+            menu = QMenu()
+            delete_action = QAction("Delete", self.addons_list)
+            delete_action.triggered.connect(lambda: self.delete_button_clicked.emit())
+            menu.addAction(delete_action)
+            menu.exec(self.addons_list.mapToGlobal(position))
