@@ -5,8 +5,8 @@ import threading
 from pathlib import Path
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit,
-                             QLabel, QProgressBar, QFileDialog, QMessageBox, QGroupBox, QSplitter, QTabWidget,
-                             QCheckBox,  QDialog)
+                             QLabel, QFileDialog, QMessageBox, QGroupBox, QTabWidget,
+                             QCheckBox,  QDialog, QProgressDialog)
 from PyQt6.QtGui import QAction
 from core.folder_setup import folder_setup
 from gui.settings_manager import SettingsManager, validate_tf_directory
@@ -137,6 +137,7 @@ class ParticleManagerGUI(QMainWindow):
     def __init__(self, tf_directory=None, update_info=None):
         super().__init__()
         # store initial tf directory from first-time setup
+        self.addon_panel = None
         self.initial_tf_directory = tf_directory
         self.update_info = update_info
         
@@ -146,17 +147,16 @@ class ParticleManagerGUI(QMainWindow):
         self.install_manager = InstallationManager(self.settings_manager)
 
         # UI components
-        self.status_label = None
-        self.progress_bar = None
         self.restore_button = None
         self.install_button = None
         self.addons_list = None
         self.addon_description = None
+        self.progress_dialog = None
         self.mod_drop_zone = None
 
         # setup UI and connect signals
         self.setWindowTitle("cukei's casual pre-loader :)")
-        self.setMinimumSize(800, 400)
+        self.setMinimumSize(1200, 700)
         self.resize(1200, 700)
         self.setAcceptDrops(True)
         self.setup_menu_bar()
@@ -178,10 +178,23 @@ class ParticleManagerGUI(QMainWindow):
 
     def setup_menu_bar(self):
         menubar = self.menuBar()
-        
+
         # options menu
         options_menu = menubar.addMenu("Options")
-        
+
+        # refresh addons
+        refresh_action = QAction("Refresh Addons", self)
+        refresh_action.triggered.connect(self.load_addons)
+        options_menu.addAction(refresh_action)
+
+        # open addons folder
+        open_folder_action = QAction("Open Addons Folder", self)
+        open_folder_action.triggered.connect(self.open_addons_folder)
+        options_menu.addAction(open_folder_action)
+
+        # separator
+        options_menu.addSeparator()
+
         # settings action
         settings_action = QAction("Settings...", self)
         settings_action.triggered.connect(self.open_settings_dialog)
@@ -237,52 +250,21 @@ class ParticleManagerGUI(QMainWindow):
         tab = QWidget()
         layout = QVBoxLayout(tab)
 
-        # main splitter
-        install_splitter = QSplitter(Qt.Orientation.Vertical)
-        addon_panel = AddonPanel()
-        self.addons_list = addon_panel.addons_list
-        self.addon_description = addon_panel.addon_description
+        # addon panel with install buttons
+        self.addon_panel = AddonPanel()
+        self.addons_list = self.addon_panel.addons_list
+        self.addon_description = self.addon_panel.addon_description
+        self.install_button = self.addon_panel.install_button
+        self.restore_button = self.addon_panel.restore_button
 
         # linking addon signals to main
-        addon_panel.refresh_button_clicked.connect(self.load_addons)
-        addon_panel.delete_button_clicked.connect(self.delete_selected_addons)
-        addon_panel.open_addons_button_clicked.connect(self.open_addons_folder)
-        addon_panel.addon_selection_changed.connect(self.on_addon_select)
-        install_splitter.addWidget(addon_panel)
+        self.addon_panel.delete_button_clicked.connect(self.delete_selected_addons)
+        self.addon_panel.addon_selection_changed.connect(self.on_addon_click)
+        self.addon_panel.addon_checkbox_changed.connect(self.on_addon_checkbox_changed)
+        self.addon_panel.load_order_changed.connect(self.on_load_order_changed)
+        self.addon_description.addon_modified.connect(self.load_addons)
 
-        # install
-        controls_widget = QWidget()
-        controls_layout = QVBoxLayout(controls_widget)
-        install_group = QGroupBox("Installation")
-        install_controls_layout = QVBoxLayout()
-
-        # buttons
-        button_layout = QHBoxLayout()
-        self.install_button = QPushButton("Install")
-        button_layout.addWidget(self.install_button)
-
-        self.restore_button = QPushButton("Uninstall")
-        button_layout.addWidget(self.restore_button)
-        install_controls_layout.addLayout(button_layout)
-
-        # progress
-        progress_group = QGroupBox("Progress")
-        progress_layout = QVBoxLayout()
-        self.progress_bar = QProgressBar()
-        self.status_label = QLabel()
-        progress_layout.addWidget(self.progress_bar)
-        progress_layout.addWidget(self.status_label)
-        progress_group.setLayout(progress_layout)
-        install_controls_layout.addWidget(progress_group)
-
-        install_group.setLayout(install_controls_layout)
-        controls_layout.addWidget(install_group)
-        controls_layout.addStretch()
-
-        install_splitter.addWidget(controls_widget)
-        install_splitter.setSizes([1000, 300]) # forces install widget to bottom on resize
-
-        layout.addWidget(install_splitter)
+        layout.addWidget(self.addon_panel)
         return tab
 
     def setup_signals(self):
@@ -290,8 +272,7 @@ class ParticleManagerGUI(QMainWindow):
         self.install_button.clicked.connect(self.start_install)
         self.restore_button.clicked.connect(self.start_restore)
 
-        # addon signals
-        self.addons_list.itemSelectionChanged.connect(self.on_addon_select)
+        # addon signals - handled by addon_panel connections
         self.mod_drop_zone.addon_updated.connect(self.load_addons)
 
         # installation signals
@@ -311,95 +292,72 @@ class ParticleManagerGUI(QMainWindow):
         updates_found = self.addon_manager.scan_addon_contents()
         self.addon_manager.load_addons(self.addons_list)
         self.apply_saved_addon_selections()
-        if updates_found:
-            self.status_label.setText("Addons refreshed - updates found")
-        else:
-            self.status_label.setText("Addons refreshed")
             
     def get_selected_addons(self):
-        selected_addon_names = [item.text().split(' [#')[0] for item in self.addons_list.selectedItems()]
+        # get addons from load order list (which preserves user's drag-drop order)
+        load_order = self.addon_panel.get_load_order()
+
         file_paths = []
-        for name in selected_addon_names:
+        for name in load_order:
             if name in self.addon_manager.addons_file_paths:
                 file_paths.append(self.addon_manager.addons_file_paths[name]['file_path'])
         return file_paths
 
-    def on_addon_select(self):
+    def on_addon_click(self):
+        # when user clicks an addon, show its description
         try:
-            # first time setup - store original names
             selected_items = self.addons_list.selectedItems()
-            for i in range(self.addons_list.count()):
-                item = self.addons_list.item(i)
-                if item and item.flags() & Qt.ItemFlag.ItemIsSelectable:
-                    if not item.data(Qt.ItemDataRole.UserRole):
-                        item.setData(Qt.ItemDataRole.UserRole, item.text())
-
-            # reset all items to original names
-            for i in range(self.addons_list.count()):
-                item = self.addons_list.item(i)
-                if item and item.flags() & Qt.ItemFlag.ItemIsSelectable:
-                    original_name = item.data(Qt.ItemDataRole.UserRole)
-                    if original_name:
-                        item.setText(original_name)
-                    item.setToolTip("")
-
-            # mark selected items with order numbers and check conflicts
-            addon_contents = self.settings_manager.get_addon_contents()
-            for pos, item in enumerate(selected_items, 1):
-                original_name = item.data(Qt.ItemDataRole.UserRole) or item.text()
-                display_text = f"{original_name} [#{pos}]"
-
-                if addon_contents and original_name in addon_contents:
-                    conflicts = {}
-                    addon_files = set(addon_contents[original_name])
-
-                    # check against other addons
-                    for other_item in selected_items:
-                        if other_item != item:
-                            other_name = other_item.data(Qt.ItemDataRole.UserRole) or other_item.text()
-                            if other_name in addon_contents:
-                                other_files = set(addon_contents[other_name])
-                                common_files = addon_files.intersection(other_files)
-                                if common_files:
-                                    conflicts[other_name] = list(common_files)
-
-                    if conflicts:
-                        display_text += " ⚠️"
-                        tooltip = "Conflicts with:\n"
-                        for conflict_addon, conflict_files in conflicts.items():
-                            tooltip += f"• {conflict_addon}: "
-                            if conflict_files:
-                                tooltip += f"{len(conflict_files)} files including {conflict_files[0]}\n"
-                            else:
-                                tooltip += "Unknown files\n"
-
-                        item.setToolTip(tooltip)
-
-                item.setText(display_text)
-
-            # description panel
             if selected_items:
-                selected_item = selected_items[-1]
-                original_name = selected_item.data(Qt.ItemDataRole.UserRole) or selected_item.text()
+                selected_item = selected_items[0]
+                addon_name = selected_item.text().split(' [#')[0]
 
-                if original_name in self.addon_manager.addons_file_paths:
-                    addon_info = self.addon_manager.addons_file_paths[original_name]
-                    self.addon_description.update_content(original_name, addon_info)
+                if addon_name in self.addon_manager.addons_file_paths:
+                    addon_info = self.addon_manager.addons_file_paths[addon_name]
+                    self.addon_description.update_content(addon_name, addon_info)
                 else:
                     self.addon_description.clear()
             else:
                 self.addon_description.clear()
 
-            # save selections
-            self.settings_manager.set_addon_selections([
-                item.data(Qt.ItemDataRole.UserRole) or item.text()
-                for item in selected_items
-            ])
-
         except Exception as e:
-            print(f"Error in on_addon_select: {e}")
+            print(f"Error in on_addon_click: {e}")
             import traceback
             traceback.print_exc()
+
+    def on_addon_checkbox_changed(self):
+        # when checkboxes change, update load order and save
+        try:
+            # update load order list with numbering and conflicts
+            self.update_load_order_display()
+
+            # save load order
+            load_order = self.addon_panel.get_load_order()
+            self.settings_manager.set_addon_selections(load_order)
+
+        except Exception as e:
+            print(f"Error in on_addon_checkbox_changed: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def on_load_order_changed(self):
+        # when user drags to reorder, update display and save
+        try:
+            # update numbering and conflicts for new order
+            self.update_load_order_display()
+
+            # save the new order
+            load_order = self.addon_panel.get_load_order()
+            self.settings_manager.set_addon_selections(load_order)
+
+        except Exception as e:
+            print(f"Error in on_load_order_changed: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def update_load_order_display(self):
+        # delegate to load order panel
+        addon_contents = self.settings_manager.get_addon_contents()
+        self.addon_panel.load_order_panel.update_display(addon_contents)
 
     def apply_saved_addon_selections(self):
         saved_selections = self.settings_manager.get_addon_selections()
@@ -409,22 +367,22 @@ class ParticleManagerGUI(QMainWindow):
         # block signals temporarily
         self.addons_list.blockSignals(True)
 
-        # clear current selections
-        self.addons_list.clearSelection()
-
-        # apply saved selections
+        # apply saved checkbox states
         item_map = {}
         for i in range(self.addons_list.count()):
             item = self.addons_list.item(i)
-            if item and item.flags() & Qt.ItemFlag.ItemIsSelectable:
+            if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
                 item_map[item.text()] = item
 
         for addon_name in saved_selections:
             if addon_name in item_map:
-                item_map[addon_name].setSelected(True)
+                item_map[addon_name].setCheckState(Qt.CheckState.Checked)
+
+        # restore load order
+        self.addon_panel.load_order_panel.restore_order(saved_selections)
 
         self.addons_list.blockSignals(False)
-        self.on_addon_select()
+        self.on_addon_checkbox_changed()
 
     def scan_for_mcp_files(self):
         tf_path = self.install_manager.tf_path
@@ -490,11 +448,26 @@ class ParticleManagerGUI(QMainWindow):
     def start_install(self):
         selected_addons = self.get_selected_addons()
         self.set_processing_state(True)
+
+        self.progress_dialog = QProgressDialog("Installing...", None, 0, 100, self)
+        self.progress_dialog.setWindowTitle("Installing")
+        self.progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
+        self.progress_dialog.setMinimumDuration(0)
+        self.progress_dialog.setCancelButton(None)
+        self.progress_dialog.show()
+
         self.install_manager.install(selected_addons, self.mod_drop_zone)
 
     def start_restore(self):
         if self.install_manager.restore():
             self.set_processing_state(True)
+
+            self.progress_dialog = QProgressDialog("Restoring...", None, 0, 100, self)
+            self.progress_dialog.setWindowTitle("Restoring")
+            self.progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
+            self.progress_dialog.setMinimumDuration(0)
+            self.progress_dialog.setCancelButton(None)
+            self.progress_dialog.show()
 
     def update_restore_button_state(self):
         is_modified = self.install_manager.is_modified()
@@ -509,10 +482,13 @@ class ParticleManagerGUI(QMainWindow):
             self.restore_button.setEnabled(False)
 
     def update_progress(self, progress, message):
-        self.progress_bar.setValue(progress)
-        self.status_label.setText(message)
+        if self.progress_dialog:
+            self.progress_dialog.setValue(progress)
 
     def on_operation_finished(self):
+        if self.progress_dialog:
+            self.progress_dialog.close()
+            self.progress_dialog = None
         self.set_processing_state(False)
 
     def show_error(self, message):
@@ -523,11 +499,21 @@ class ParticleManagerGUI(QMainWindow):
         self.show_launch_options_popup()
 
     def delete_selected_addons(self):
+        selected_items = self.addons_list.selectedItems()
+        deleted_addon_names = []
+        for item in selected_items:
+            display_name = item.data(Qt.ItemDataRole.UserRole) or item.text().split(' [#')[0]
+            deleted_addon_names.append(display_name)
+
         success, message = self.addon_manager.delete_selected_addons(self.addons_list)
         if success is None:
             return
         elif success:
-            self.show_success(message)
+            # remove deleted addons from saved load order
+            current_load_order = self.settings_manager.get_addon_selections()
+            updated_load_order = [name for name in current_load_order if name not in deleted_addon_names]
+            self.settings_manager.set_addon_selections(updated_load_order)
+
             self.load_addons()
         else:
             self.show_error(message)
@@ -544,8 +530,6 @@ class ParticleManagerGUI(QMainWindow):
                 os.startfile(str(addons_path))
             else:
                 subprocess.run(["xdg-open", str(addons_path)])
-
-            self.status_label.setText("Opened addons folder")
         except Exception as e:
             self.show_error(f"Failed to open addons folder: {str(e)}")
 
@@ -559,7 +543,6 @@ class ParticleManagerGUI(QMainWindow):
                 self.settings_manager.set_tf_directory(new_tf_dir)
                 self.update_restore_button_state()
                 self.scan_for_mcp_files()
-                self.status_label.setText("TF2 directory updated successfully")
 
     def dragEnterEvent(self, event):
         if hasattr(self, 'mod_drop_zone') and self.mod_drop_zone:
