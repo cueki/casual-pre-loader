@@ -2,13 +2,15 @@ import os
 import json
 import shutil
 import zipfile
+import urllib.request
 from pathlib import Path
 from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit,
-                             QLabel, QFileDialog, QMessageBox, QGroupBox, QTabWidget, 
-                             QWidget, QFrame, QCheckBox)
+                             QLabel, QFileDialog, QMessageBox, QGroupBox, QTabWidget,
+                             QWidget, QFrame, QProgressDialog, QApplication)
 from PyQt6.QtCore import Qt, pyqtSignal
 from core.folder_setup import folder_setup
 from gui.settings_manager import SettingsManager, validate_tf_directory
+from core.constants import CUEKI_MODS_URL
 
 
 class FirstTimeSetupDialog(QDialog):
@@ -16,9 +18,7 @@ class FirstTimeSetupDialog(QDialog):
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.install_mods_checkbox = None
         self.import_status_label = None
-        self.mods_import_edit = None
         self.settings_import_edit = None
         self.validation_label = None
         self.browse_button = None
@@ -28,19 +28,12 @@ class FirstTimeSetupDialog(QDialog):
         self.import_settings_path = ""
         self.settings_manager = SettingsManager()
         self.import_mods_path = ""
-        self.install_included_mods = True
-        self.mods_zip_available = self.check_mods_zip_available()
         
         self.setWindowTitle("First Time Setup")
         self.setMinimumSize(750, 500)
         self.setModal(True)
         
         self.setup_ui()
-    
-    def check_mods_zip_available(self):
-        """Check if mods.zip exists using the same logic as other functions"""
-        mods_zip_path = folder_setup.install_dir / 'mods.zip'
-        return mods_zip_path.exists()
     
     def setup_ui(self):
         layout = QVBoxLayout(self)
@@ -125,31 +118,9 @@ class FirstTimeSetupDialog(QDialog):
         
         tf_group.setLayout(tf_layout)
         layout.addWidget(tf_group)
-        
-        # included mods group
-        mods_group = QGroupBox("Included Mods")
-        mods_layout = QVBoxLayout()
-        
-        mods_description = QLabel(
-            "This preloader comes with a collection of popular TF2 mods.\n"
-            "Would you like to include these in the app?\n\n"
-            "IMPORTANT: Enable this if you 'Import Previous Settings' from another version and used the pre-installed mods."
-        )
-        mods_description.setWordWrap(True)
-        mods_layout.addWidget(mods_description)
-        
-        self.install_mods_checkbox = QCheckBox("Install included mods (mods.zip)")
-        if self.mods_zip_available:
-            self.install_mods_checkbox.setChecked(True)
-        else:
-            self.install_mods_checkbox.setChecked(False)
-            self.install_mods_checkbox.setEnabled(False)
-            self.install_mods_checkbox.setText("Install included mods (mods.zip not available)")
-        self.install_mods_checkbox.toggled.connect(self.on_mods_checkbox_changed)
-        mods_layout.addWidget(self.install_mods_checkbox)
-        
-        mods_group.setLayout(mods_layout)
-        layout.addWidget(mods_group)
+
+        # mods download group
+        layout.addWidget(mods_download_group(self))
         
         layout.addStretch()
         return tab
@@ -292,9 +263,6 @@ class FirstTimeSetupDialog(QDialog):
         
         self.import_status_label.setText("\n".join(status_parts))
     
-    def on_mods_checkbox_changed(self, checked):
-        self.install_included_mods = checked
-    
     def validate_setup(self):
         tf_valid = bool(self.tf_directory and Path(self.tf_directory).exists())
         self.finish_button.setEnabled(tf_valid)
@@ -345,7 +313,6 @@ class FirstTimeSetupDialog(QDialog):
             
             # update with current setup values
             settings_data["tf_directory"] = self.tf_directory
-            settings_data["included_mods_installed"] = self.install_included_mods
             
             with open(settings_file, 'w') as f:
                 json.dump(settings_data, f, indent=2)
@@ -374,136 +341,86 @@ def run_first_time_setup(parent=None):
         return None
 
 
-def get_mods_zip_enabled():
-    # getter for mods.zip setting
-    settings_file = folder_setup.settings_dir / "app_settings.json"
-    
-    if not settings_file.exists():
-        return False
-    
+def mods_download_group(parent_dialog):
+    mods_group = QGroupBox("Recommended Mods (Optional)")
+    mods_layout = QVBoxLayout()
+
+    mods_description = QLabel(
+        "Download cueki's fixed mods pack (~77 MB)?\n"
+        "This collection contains TF2 particles + addons that have been personally fixed "
+        "by me to work with this preloader."
+    )
+    mods_description.setWordWrap(True)
+    mods_layout.addWidget(mods_description)
+
+    download_mods_button = QPushButton("Download cueki's Mods")
+    download_mods_button.clicked.connect(lambda: download_cueki_mods(parent_dialog))
+    mods_layout.addWidget(download_mods_button)
+
+    mods_group.setLayout(mods_layout)
+    return mods_group
+
+
+def download_cueki_mods(parent=None):
     try:
-        with open(settings_file, 'r') as f:
-            settings = json.load(f)
-        return settings.get("included_mods_installed", False)
+        # create progress dialog
+        progress = QProgressDialog("Downloading cueki's mods (~77 MB)...", "Cancel", 0, 100, parent)
+        progress.setWindowTitle("Downloading Mods")
+        progress.setWindowModality(Qt.WindowModality.WindowModal)
+        progress.setMinimumDuration(0)
+        progress.setValue(0)
+        progress.show()
+        QApplication.processEvents()
+
+        # download to temp location
+        temp_zip = folder_setup.temp_dir / "cueki_mods.zip"
+        folder_setup.temp_dir.mkdir(parents=True, exist_ok=True)
+
+        def download_progress(block_num, block_size, total_size):
+            if progress.wasCanceled():
+                raise Exception("Download cancelled by user")
+            if total_size > 0:
+                percent = int((block_num * block_size / total_size) * 100)
+                progress.setValue(min(percent, 99))
+                QApplication.processEvents()
+
+        urllib.request.urlretrieve(CUEKI_MODS_URL, temp_zip, download_progress)
+
+        progress.setLabelText("Extracting mods...")
+        progress.setValue(99)
+        QApplication.processEvents()
+
+        # extract to mods/
+        folder_setup.mods_dir.mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(temp_zip, 'r') as zip_ref:
+            zip_ref.extractall(folder_setup.mods_dir)
+
+        temp_zip.unlink()
+        progress.setValue(100)
+        progress.close()
+
+        # refresh main window if not called from first time setup
+        if not isinstance(parent, FirstTimeSetupDialog):
+            main_window = parent.parent()
+            if main_window and hasattr(main_window, 'refresh_all'):
+                main_window.refresh_all()
+
+        QMessageBox.information(
+            parent,
+            "Download Complete",
+            "cueki's mods have been successfully downloaded and installed!"
+        )
+        return True
+
     except Exception as e:
-        print(f"Error reading mods setting: {e}")
+        if progress:
+            progress.close()
+
+        if "cancelled" not in str(e).lower():
+            QMessageBox.critical(
+                parent,
+                "Download Failed",
+                f"Failed to download mods:\n{str(e)}\n\n"
+                f"You can manually download from:\n{CUEKI_MODS_URL}"
+            )
         return False
-
-
-def set_mods_zip_enabled(enabled):
-    # setter for mods.zip setting
-    settings_file = folder_setup.settings_dir / "app_settings.json"
-    
-    try:
-        settings = {}
-        if settings_file.exists():
-            with open(settings_file, 'r') as f:
-                settings = json.load(f)
-        
-        settings["included_mods_installed"] = enabled
-        
-        folder_setup.settings_dir.mkdir(parents=True, exist_ok=True)
-        with open(settings_file, 'w') as f:
-            json.dump(settings, f, indent=2)
-    except Exception as e:
-        print(f"Error saving mods setting: {e}")
-
-
-def should_install_mods_zip():
-    # check if included mods should be installed (checkbox enabled and mods.zip content not in mods/)
-    if not get_mods_zip_enabled():
-        return False
-    
-    mods_zip_path = folder_setup.install_dir / 'mods.zip'
-    mods_dir = folder_setup.mods_dir
-    
-    if not mods_zip_path.exists():
-        return False
-    
-    try:
-        # get files in mods.zip
-        with zipfile.ZipFile(mods_zip_path, 'r') as zip_ref:
-            zip_files = {Path(name).as_posix() for name in zip_ref.namelist() if not name.endswith('/')}
-        
-        # get files currently installed
-        installed_files = set()
-        if mods_dir.exists():
-            for file_path in mods_dir.rglob('*'):
-                if file_path.is_file():
-                    rel_path = file_path.relative_to(mods_dir)
-                    installed_files.add(rel_path.as_posix())
-        
-        # install if there are files in mods.zip that aren't installed
-        return bool(zip_files - installed_files)
-        
-    except Exception as e:
-        print(f"Error checking mods: {e}")
-        return False
-
-
-def should_uninstall_mods_zip():
-    # check if included mods should be removed (checkbox disabled and mods.zip content is in mods/)
-    if get_mods_zip_enabled():
-        return False
-    
-    mods_zip_path = folder_setup.install_dir / 'mods.zip'
-    mods_dir = folder_setup.mods_dir
-    
-    if not mods_zip_path.exists() or not mods_dir.exists():
-        return False
-    
-    try:
-        # get files in mods.zip
-        with zipfile.ZipFile(mods_zip_path, 'r') as zip_ref:
-            zip_files = {Path(name).as_posix() for name in zip_ref.namelist() if not name.endswith('/')}
-        
-        # get files currently installed
-        installed_files = set()
-        for file_path in mods_dir.rglob('*'):
-            if file_path.is_file():
-                rel_path = file_path.relative_to(mods_dir)
-                installed_files.add(rel_path.as_posix())
-        
-        # uninstall if there are mods.zip files found
-        return bool(zip_files & installed_files)
-        
-    except Exception as e:
-        print(f"Error checking mods: {e}")
-        return False
-
-
-def uninstall_mods_zip():
-    # remove files that came from mods.zip
-    mods_zip_path = folder_setup.install_dir / 'mods.zip'
-    mods_dir = folder_setup.mods_dir
-    
-    if not mods_zip_path.exists() or not mods_dir.exists():
-        return
-    
-    try:
-        # get files in mods.zip
-        with zipfile.ZipFile(mods_zip_path, 'r') as zip_ref:
-            zip_files = {Path(name).as_posix() for name in zip_ref.namelist() if not name.endswith('/')}
-        
-        removed_count = 0
-        for file_rel_path in zip_files:
-            file_path = mods_dir / file_rel_path
-            if file_path.exists() and file_path.is_file():
-                try:
-                    file_path.unlink()
-                    removed_count += 1
-                    print(f"Removed: {file_rel_path}")
-                    
-                    # remove empty parent directories
-                    parent = file_path.parent
-                    while parent != mods_dir and parent.exists() and not any(parent.iterdir()):
-                        parent.rmdir()
-                        parent = parent.parent
-                        
-                except Exception as e:
-                    print(f"Error removing {file_rel_path}: {e}")
-        
-        print(f"Removed {removed_count} mod files")
-        
-    except Exception as e:
-        print(f"Error uninstalling mods: {e}")

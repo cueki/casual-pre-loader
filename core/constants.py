@@ -234,3 +234,7 @@ MOD_TYPE_COLORS = {
     "sound": "#E91E63",        # pink
     "unknown": "#FF0000"       # red
 }
+
+
+# cueki's fixed mods download URL
+CUEKI_MODS_URL = "https://github.com/cueki/casual-pre-loader/raw/main/mods.zip"

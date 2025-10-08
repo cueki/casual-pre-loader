@@ -7,14 +7,14 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit,
                              QLabel, QFileDialog, QMessageBox, QGroupBox, QTabWidget,
                              QCheckBox,  QDialog, QProgressDialog, QStyle)
-from PyQt6.QtGui import QAction, QIcon
+from PyQt6.QtGui import QAction
 from core.folder_setup import folder_setup
 from gui.settings_manager import SettingsManager, validate_tf_directory
 from gui.drag_and_drop import ModDropZone
 from gui.addon_manager import AddonManager
 from gui.installation import InstallationManager
 from gui.addon_panel import AddonPanel
-from gui.first_time_setup import get_mods_zip_enabled, set_mods_zip_enabled
+from gui.first_time_setup import mods_download_group
 from core.version import VERSION
 
 
@@ -26,7 +26,6 @@ class SettingsDialog(QDialog):
         self.browse_button = None
         self.tf_path_edit = None
         self.tf_directory = ""
-        self.mods_checkbox = None
         
         self.setWindowTitle("Settings")
         self.setMinimumSize(500, 375)
@@ -74,24 +73,9 @@ class SettingsDialog(QDialog):
         # validate initial directory
         if self.tf_directory:
             validate_tf_directory(self.tf_directory, self.validation_label)
-        
-        # included mods group
-        mods_group = QGroupBox("Included Mods")
-        mods_layout = QVBoxLayout()
-        
-        mods_description = QLabel(
-            "Control whether included mods (mods.zip) should be available in the app.\n"
-            "Note: Changing this setting will take effect on next app restart."
-        )
-        mods_description.setWordWrap(True)
-        mods_layout.addWidget(mods_description)
-        
-        self.mods_checkbox = QCheckBox("Include built-in mods (mods.zip)")
-        # set current value from settings
-        self.mods_checkbox.setChecked(get_mods_zip_enabled())
-        mods_layout.addWidget(self.mods_checkbox)
-        mods_group.setLayout(mods_layout)
-        layout.addWidget(mods_group)
+
+        # mods download group
+        layout.addWidget(mods_download_group(self))
         
         # version group
         version_group = QGroupBox("About")
@@ -128,8 +112,6 @@ class SettingsDialog(QDialog):
         return self.tf_directory
 
     def save_and_accept(self):
-        # save mods.zip setting
-        set_mods_zip_enabled(self.mods_checkbox.isChecked())
         self.accept()
 
 
@@ -185,10 +167,10 @@ class ParticleManagerGUI(QMainWindow):
         # options menu
         options_menu = menubar.addMenu("Options")
 
-        # refresh addons
+        # refresh all
         refresh_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
-        refresh_action = QAction(refresh_icon, "Refresh Addons", self)
-        refresh_action.triggered.connect(self.load_addons)
+        refresh_action = QAction(refresh_icon, "Refresh All", self)
+        refresh_action.triggered.connect(self.refresh_all)
         options_menu.addAction(refresh_action)
 
         # open addons folder
@@ -298,7 +280,12 @@ class ParticleManagerGUI(QMainWindow):
         updates_found = self.addon_manager.scan_addon_contents()
         self.addon_manager.load_addons(self.addons_list)
         self.apply_saved_addon_selections()
-            
+
+    def refresh_all(self):
+        # refresh both particles and addons
+        self.mod_drop_zone.update_matrix()
+        self.load_addons()
+
     def get_selected_addons(self):
         # get addons from load order list (which preserves user's drag-drop order)
         load_order = self.addon_panel.get_load_order()
@@ -390,7 +377,7 @@ class ParticleManagerGUI(QMainWindow):
         # restore load order with only valid addons
         self.addon_panel.load_order_panel.restore_order(valid_selections)
 
-        # save the cleaned-up selections if any were removed
+        # save the selections if any were removed
         if len(valid_selections) != len(saved_selections):
             self.settings_manager.set_addon_selections(valid_selections)
 

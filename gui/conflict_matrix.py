@@ -1,12 +1,11 @@
 import json
 import webbrowser
-from pathlib import Path
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QTableWidget, QHeaderView, QCheckBox, QHBoxLayout, QWidget, QPushButton, QAbstractItemView
 )
-
 from core.folder_setup import folder_setup
+
 
 def load_mod_urls():
     # load saved URLs from a file
@@ -133,7 +132,7 @@ class ConflictMatrix(QTableWidget):
             select_all_layout = QHBoxLayout(select_all_widget)
             select_all_layout.setContentsMargins(0, 0, 0, 0)
 
-            select_all_button = QPushButton() # text updated later
+            select_all_button = QPushButton("Select All (0/0)") # 0/0 text just placeholder
             select_all_button.setFixedWidth(102)
             # use lambda with default argument to capture current row value
             select_all_button.clicked.connect(lambda checked=False, r=row: self.select_all_row(r))
@@ -245,6 +244,11 @@ class ConflictMatrix(QTableWidget):
                      select_all_button = button_layout.itemAt(0).widget()
                      if isinstance(select_all_button, QPushButton):
                         select_all_button.setText(f"Select All ({selected_count}/{enabled_count})")
+
+        # force the resize to make sure buttons don't eat each other
+        self.resizeColumnToContents(0)
+        for row in range(self.rowCount()):
+            self.resizeRowToContents(row)
 
     def uncheck_column_except(self, col, target_row):
         for row in range(self.rowCount()):

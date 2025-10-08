@@ -6,8 +6,7 @@ from PyQt6.QtGui import QPixmap, QIcon
 from PyQt6.QtCore import Qt
 from gui.main_window import ParticleManagerGUI
 from gui.setup import initial_setup
-from gui.first_time_setup import (check_first_time_setup, run_first_time_setup, should_install_mods_zip,
-                                  should_uninstall_mods_zip, uninstall_mods_zip)
+from gui.first_time_setup import check_first_time_setup, run_first_time_setup
 from core.folder_setup import folder_setup
 from core.backup_manager import prepare_working_copy
 from core.auto_updater import check_for_updates_sync
@@ -35,25 +34,6 @@ def main():
     splash.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint |
                           Qt.WindowType.FramelessWindowHint)
     splash.show()
-
-    # handle included mods - install or uninstall based on settings
-    should_install = should_install_mods_zip()
-    should_uninstall = should_uninstall_mods_zip()
-    
-    if should_install:
-        splash.showMessage("Installing included mods...",
-                           Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
-                           Qt.GlobalColor.white)
-        initial_setup((folder_setup.install_dir / 'mods.zip', folder_setup.mods_dir))
-    elif should_uninstall:
-        splash.showMessage("Removing included mods...",
-                           Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
-                           Qt.GlobalColor.white)
-        uninstall_mods_zip()
-    else:
-        splash.showMessage("Included mods up to date...",
-                           Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
-                           Qt.GlobalColor.white)
 
     # cleanup old updater and temp folders
     folder_setup.cleanup_old_updater()
