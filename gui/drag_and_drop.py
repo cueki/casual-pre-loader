@@ -7,10 +7,13 @@ from pathlib import Path
 from PyQt6.QtCore import Qt, pyqtSignal, QObject
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QLabel, QMessageBox, QProgressDialog
 from core.folder_setup import folder_setup
+from core.constants import PARTICLE_SPLITS
 from core.structure_validator import StructureValidator, ValidationResult
 from valve_parsers import VPKFile, PCFFile
 from gui.conflict_matrix import ConflictMatrix
 from operations.advanced_particle_merger import AdvancedParticleMerger
+from operations.pcf_merge import merge_pcf_files
+from operations.pcf_rebuild import load_particle_system_map, get_pcf_element_names, extract_elements
 
 
 def parse_vmt_texture(vmt_path):
@@ -218,6 +221,56 @@ class ModDropZone(QFrame):
                                 texture_destination.parent.mkdir(parents=True, exist_ok=True)
                                 shutil.copy2(Path(full_texture_path), texture_destination)
 
+        # merge split files back into original files
+        for original_file, split_defs in PARTICLE_SPLITS.items():
+            split_files_in_temp = []
+
+            # check which split files exist in temp_mods_dir
+            for split_name in split_defs.keys():
+                split_path = folder_setup.temp_mods_dir / (split_name + ".pcf")
+                if split_path.exists():
+                    split_files_in_temp.append(split_path)
+
+            # if we have splits for this original file, merge them
+            if split_files_in_temp:
+                pcf_parts = [PCFFile(split_file).decode() for split_file in split_files_in_temp]
+
+                if len(pcf_parts) > 1:
+                    merged = pcf_parts[0]
+                    for pcf in pcf_parts[1:]:
+                        merged = merge_pcf_files(merged, pcf)
+                else:
+                    merged = pcf_parts[0]
+
+                output_path = folder_setup.temp_mods_dir / (original_file + ".pcf")
+                merged.encode(output_path)
+
+                for split_file in split_files_in_temp:
+                    split_file.unlink()
+
+        # fill in missing vanilla elements for reconstructed split files
+        particle_map = load_particle_system_map(folder_setup.install_dir / 'particle_system_map.json')
+
+        for original_file in PARTICLE_SPLITS.keys():
+            merged_file = folder_setup.temp_mods_dir / (original_file + ".pcf")
+
+            if merged_file.exists():
+                merged_pcf = PCFFile(merged_file).decode()
+                elements_we_have = get_pcf_element_names(merged_pcf)
+
+                elements_we_still_need = set()
+                for element in particle_map[f'particles/{original_file}']:
+                    if element not in elements_we_have:
+                        elements_we_still_need.add(element)
+
+                if elements_we_still_need:
+                    vanilla_file = folder_setup.temp_game_files_dir / (original_file + ".pcf")
+                    if vanilla_file.exists():
+                        vanilla_pcf = PCFFile(vanilla_file).decode()
+                        vanilla_elements = extract_elements(vanilla_pcf, elements_we_still_need)
+                        complete_pcf = merge_pcf_files(merged_pcf, vanilla_elements)
+                        complete_pcf.encode(merged_file)
+
         return len(selections) > 0
 
     def validate_and_show_warnings(self, validation_result: ValidationResult, item_name: str) -> bool:
@@ -361,15 +414,7 @@ class ModDropZone(QFrame):
 
         mods = list(mod_particles.keys())
         self.conflict_matrix.update_matrix(mods, all_particles)
-
-        # enable/disable checkboxes based on which mods have which particles
-        for row, mod_name in enumerate(mods):
-            mod_particles_set = set(mod_particles[mod_name])
-            for col, particle in enumerate(all_particles):
-                cell_widget = self.conflict_matrix.cellWidget(row, col + 1)  # add +1 for Select All column
-                if cell_widget:
-                    checkbox = cell_widget.layout().itemAt(0).widget()
-                    checkbox.setEnabled(particle in mod_particles_set)
+        # checkbox enable/disable logic is now handled inside update_matrix() / _setup_matrix_cells()
 
     def update_progress(self, value, message):
         if self.progress_dialog:

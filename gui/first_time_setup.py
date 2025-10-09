@@ -1,5 +1,6 @@
 import os
 import json
+import socket
 import shutil
 import zipfile
 import urllib.request
@@ -8,9 +9,10 @@ from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLi
                              QLabel, QFileDialog, QMessageBox, QGroupBox, QTabWidget,
                              QWidget, QFrame, QProgressDialog, QApplication)
 from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QCursor
 from core.folder_setup import folder_setup
-from gui.settings_manager import SettingsManager, validate_tf_directory
 from core.constants import CUEKI_MODS_URL
+from gui.settings_manager import SettingsManager, validate_tf_directory
 
 
 class FirstTimeSetupDialog(QDialog):
@@ -354,14 +356,23 @@ def mods_download_group(parent_dialog):
     mods_layout.addWidget(mods_description)
 
     download_mods_button = QPushButton("Download cueki's Mods")
-    download_mods_button.clicked.connect(lambda: download_cueki_mods(parent_dialog))
+    download_mods_button.clicked.connect(lambda: download_cueki_mods(parent_dialog, download_mods_button))
     mods_layout.addWidget(download_mods_button)
 
     mods_group.setLayout(mods_layout)
     return mods_group
 
 
-def download_cueki_mods(parent=None):
+def download_cueki_mods(parent=None, button=None):
+    # disable button and show loading state
+    original_text = ""
+    if button:
+        original_text = button.text()
+        button.setEnabled(False)
+        button.setText("Downloading...")
+        button.setCursor(QCursor(Qt.CursorShape.WaitCursor))
+        QApplication.processEvents()
+
     try:
         # create progress dialog
         progress = QProgressDialog("Downloading cueki's mods (~77 MB)...", "Cancel", 0, 100, parent)
@@ -384,7 +395,14 @@ def download_cueki_mods(parent=None):
                 progress.setValue(min(percent, 99))
                 QApplication.processEvents()
 
-        urllib.request.urlretrieve(CUEKI_MODS_URL, temp_zip, download_progress)
+        # set timeout (10 seconds for connection/response)
+        old_timeout = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(10)
+
+        try:
+            urllib.request.urlretrieve(CUEKI_MODS_URL, temp_zip, download_progress)
+        finally:
+            socket.setdefaulttimeout(old_timeout)
 
         progress.setLabelText("Extracting mods...")
         progress.setValue(99)
@@ -410,6 +428,13 @@ def download_cueki_mods(parent=None):
             "Download Complete",
             "cueki's mods have been successfully downloaded and installed!"
         )
+
+        # re-enable button
+        if button:
+            button.setEnabled(True)
+            button.setText(original_text)
+            button.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
+
         return True
 
     except Exception as e:
@@ -423,4 +448,11 @@ def download_cueki_mods(parent=None):
                 f"Failed to download mods:\n{str(e)}\n\n"
                 f"You can manually download from:\n{CUEKI_MODS_URL}"
             )
+
+        # re-enable button
+        if button:
+            button.setEnabled(True)
+            button.setText(original_text)
+            button.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
+
         return False

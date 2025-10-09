@@ -9,13 +9,14 @@ from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPu
                              QCheckBox,  QDialog, QProgressDialog, QStyle)
 from PyQt6.QtGui import QAction
 from core.folder_setup import folder_setup
+from core.particle_splits import migrate_old_particle_files
+from core.version import VERSION
 from gui.settings_manager import SettingsManager, validate_tf_directory
 from gui.drag_and_drop import ModDropZone
 from gui.addon_manager import AddonManager
 from gui.installation import InstallationManager
 from gui.addon_panel import AddonPanel
 from gui.first_time_setup import mods_download_group
-from core.version import VERSION
 
 
 class SettingsDialog(QDialog):
@@ -134,7 +135,7 @@ class ParticleManagerGUI(QMainWindow):
         self.addons_list = None
         self.addon_description = None
         self.progress_dialog = None
-        self.mod_drop_zone = None
+        self.mod_drop_zone: ModDropZone | None = None
 
         # setup UI and connect signals
         self.setWindowTitle("cukei's casual pre-loader :)")
@@ -153,6 +154,16 @@ class ParticleManagerGUI(QMainWindow):
         else:
             self.load_tf_directory()
         
+        # migrate old particle files to new split format
+        migrate_old_particle_files()
+
+        # apply saved simple mode preference
+        saved_mode = self.settings_manager.get_simple_particle_mode()
+        if saved_mode:
+            self.mod_drop_zone.conflict_matrix.set_simple_mode(True)
+
+        self.mod_drop_zone.update_matrix()
+
         self.load_addons()
         self.scan_for_mcp_files()
         self.rescan_addon_contents()
@@ -166,6 +177,19 @@ class ParticleManagerGUI(QMainWindow):
 
         # options menu
         options_menu = menubar.addMenu("Options")
+
+        # simple mode toggle
+        simple_mode_action = QAction("Simple Particle Mode", self)
+        simple_mode_action.setCheckable(True)
+        # load saved preference
+        saved_mode = self.settings_manager.get_simple_particle_mode()
+        simple_mode_action.setChecked(saved_mode)
+        simple_mode_action.triggered.connect(self.toggle_particle_mode)
+        options_menu.addAction(simple_mode_action)
+        self.simple_mode_action = simple_mode_action
+
+        # separator
+        options_menu.addSeparator()
 
         # refresh all
         refresh_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
@@ -188,6 +212,12 @@ class ParticleManagerGUI(QMainWindow):
         settings_action.triggered.connect(self.open_settings_dialog)
         options_menu.addAction(settings_action)
 
+    def toggle_particle_mode(self, checked):
+        """Toggle between simple and advanced particle matrix modes"""
+        if self.mod_drop_zone and self.mod_drop_zone.conflict_matrix:
+            self.mod_drop_zone.conflict_matrix.set_simple_mode(checked)
+            self.settings_manager.set_simple_particle_mode(checked)
+
     def setup_ui(self):
         # main layout
         central_widget = QWidget()
@@ -209,7 +239,7 @@ class ParticleManagerGUI(QMainWindow):
         # mod drop zone
         self.mod_drop_zone = ModDropZone(self, self.settings_manager, self.rescan_addon_contents)
         layout.addWidget(self.mod_drop_zone)
-        self.mod_drop_zone.update_matrix()
+        # don't call update_matrix here - it will be called after setting simple mode in __init__
 
         # nav buttons
         nav_container = QWidget()

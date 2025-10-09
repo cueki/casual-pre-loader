@@ -1,10 +1,9 @@
 import json
 import webbrowser
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import (
-    QTableWidget, QHeaderView, QCheckBox, QHBoxLayout, QWidget, QPushButton, QAbstractItemView
-)
+from PyQt6.QtWidgets import QTableWidget, QHeaderView, QCheckBox, QHBoxLayout, QWidget, QPushButton, QAbstractItemView
 from core.folder_setup import folder_setup
+from core.constants import PARTICLE_GROUP_MAPPING
 
 
 def load_mod_urls():
@@ -28,6 +27,9 @@ class ConflictMatrix(QTableWidget):
         self.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
         self.settings_manager = settings_manager
         self.mod_urls = {}
+        self.simple_mode = False  # track whether we're in simple or advanced mode
+        self.mod_particles_cache = {}  # cache mod particle data
+        self.all_particles_cache = []  # cache all particle files
         self.verticalHeader().sectionClicked.connect(self.on_mod_name_clicked)
 
         # smooth scrolling
@@ -51,7 +53,10 @@ class ConflictMatrix(QTableWidget):
 
     def load_selections(self):
         if self.settings_manager:
-            return self.settings_manager.get_matrix_selections()
+            if self.simple_mode:
+                return self.settings_manager.get_matrix_selections_simple()
+            else:
+                return self.settings_manager.get_matrix_selections()
         return {}
 
     def _get_current_selections_dict(self):
@@ -62,7 +67,7 @@ class ConflictMatrix(QTableWidget):
             if not header_item:
                 print(f"Warning: Missing header item for column {col}")
                 continue
-            particle_file = header_item.text()
+            column_name = header_item.text().strip()
 
             for row in range(self.rowCount()):
                 cell_widget = self.cellWidget(row, col)
@@ -78,7 +83,14 @@ class ConflictMatrix(QTableWidget):
                                     print(f"Warning: Missing vertical header item for row {row}")
                                     continue
                                 mod_name = v_header_item.text()
-                                selections[particle_file] = mod_name
+
+                                # if in simple mode, expand group to individual particles
+                                if self.simple_mode and column_name in PARTICLE_GROUP_MAPPING:
+                                    for particle_file in PARTICLE_GROUP_MAPPING[column_name]:
+                                        if particle_file.replace('.pcf', '') in self.mod_particles_cache.get(mod_name, []):
+                                            selections[particle_file.replace('.pcf', '')] = mod_name
+                                else:
+                                    selections[column_name] = mod_name
                                 break
 
         return selections
@@ -88,26 +100,75 @@ class ConflictMatrix(QTableWidget):
             return
 
         selections = self._get_current_selections_dict()
-        self.settings_manager.set_matrix_selections(selections)
+        if self.simple_mode:
+            self.settings_manager.set_matrix_selections_simple(selections)
+        else:
+            self.settings_manager.set_matrix_selections(selections)
 
     def get_selected_particles(self):
         selections = self._get_current_selections_dict()
-        return selections  # return the dictionary
+        return selections
+
+    def set_simple_mode(self, enabled):
+        self.simple_mode = enabled
+        # rebuild matrix with cached data
+        if self.mod_particles_cache:
+            mods = list(self.mod_particles_cache.keys())
+            if self.simple_mode:
+                self.update_matrix_simple(mods)
+            else:
+                self.update_matrix_advanced(mods, self.all_particles_cache)
 
     def update_matrix(self, mods, pcf_files):
+        # cache the data
+        self.all_particles_cache = pcf_files
+
+        # build mod_particles_cache (which particles each mod has)
+        from gui.drag_and_drop import get_mod_particle_files
+        mod_particles, _ = get_mod_particle_files()
+        self.mod_particles_cache = mod_particles
+
+        if self.simple_mode:
+            self.update_matrix_simple(mods)
+        else:
+            self.update_matrix_advanced(mods, pcf_files)
+
+    def update_matrix_simple(self, mods):
         # load mod URLs
         self.mod_urls = load_mod_urls()
-        self.clearContents() # clear existing widgets before rebuilding
+        self.clearContents()
+
+        # use group names as columns
+        groups = list(PARTICLE_GROUP_MAPPING.keys())
+
+        # add one extra column for the Select All button
+        self.setColumnCount(len(groups) + 1)
+        self.setRowCount(len(mods))
+
+        # headers with padding
+        headers = ["Select All"] + [f" {group} " for group in groups]
+        self.setHorizontalHeaderLabels(headers)
+        self.setVerticalHeaderLabels(mods)
+
+        self._setup_matrix_cells(mods, groups)
+
+    def update_matrix_advanced(self, mods, pcf_files):
+        # load mod URLs
+        self.mod_urls = load_mod_urls()
+        self.clearContents()
 
         # add one extra column for the Select All button
         self.setColumnCount(len(pcf_files) + 1)
         self.setRowCount(len(mods))
 
-        # headers
+        # headers (no padding in advanced mode to save space)
         headers = ["Select All"] + pcf_files
         self.setHorizontalHeaderLabels(headers)
         self.setVerticalHeaderLabels(mods)
 
+        self._setup_matrix_cells(mods, pcf_files)
+
+    def _setup_matrix_cells(self, mods, columns):
         # make vertical header interactive
         self.verticalHeader().setStyleSheet("""
             QHeaderView::section {
@@ -132,15 +193,17 @@ class ConflictMatrix(QTableWidget):
             select_all_layout = QHBoxLayout(select_all_widget)
             select_all_layout.setContentsMargins(0, 0, 0, 0)
 
-            select_all_button = QPushButton("Select All (0/0)") # 0/0 text just placeholder
+            select_all_button = QPushButton("Select All (0/0)")
             select_all_button.setFixedWidth(102)
-            # use lambda with default argument to capture current row value
             select_all_button.clicked.connect(lambda checked=False, r=row: self.select_all_row(r))
             select_all_layout.addWidget(select_all_button)
             self.setCellWidget(row, 0, select_all_widget)
 
-            for col_idx, pcf_file in enumerate(pcf_files):
-                col = col_idx + 1 # actual table column index (col 0 is Select All)
+            # get the particles this mod has
+            mod_particles_set = set(self.mod_particles_cache.get(mod, []))
+
+            for col_idx, column_name in enumerate(columns):
+                col = col_idx + 1  # actual table column index (col 0 is Select All)
                 cell_widget = QWidget()
                 layout = QHBoxLayout(cell_widget)
                 layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -148,13 +211,28 @@ class ConflictMatrix(QTableWidget):
 
                 checkbox = self.create_checkbox(row, col)
 
-                # check if this checkbox should be checked based on saved selections
-                if pcf_file in saved_selections and saved_selections[pcf_file] == mod:
+                # determine if checkbox should be enabled/checked based on whether mod has this particle/group
+                if self.simple_mode and column_name in PARTICLE_GROUP_MAPPING:
+                    group_particles = PARTICLE_GROUP_MAPPING[column_name]
+                    should_enable = any(
+                        p.replace('.pcf', '') in mod_particles_set
+                        for p in group_particles
+                    )
+                    should_check = should_enable and any(
+                        saved_selections.get(p.replace('.pcf', '')) == mod
+                        for p in group_particles
+                    )
+                else:
+                    should_enable = column_name in mod_particles_set
+                    should_check = should_enable and column_name in saved_selections and saved_selections[column_name] == mod
+
+                checkbox.setEnabled(should_enable)
+
+                if should_check:
                     saved_checkboxes_to_check.append(checkbox)
 
                 layout.addWidget(checkbox)
                 self.setCellWidget(row, col, cell_widget)
-
 
         # apply saved selections *after* all cells and widgets are created and signals are connected
         for checkbox in saved_checkboxes_to_check:

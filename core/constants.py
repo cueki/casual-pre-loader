@@ -185,24 +185,39 @@ DECAL_MAPPING = {
 
 PARTICLE_GROUP_MAPPING = {
     "explosions": ["drg_cowmangler.pcf", "stickybomb.pcf", "rocketbackblast.pcf",
-                "explosion.pcf", "rockettrail.pcf", "classic_rocket_trail.pcf"],
+                   "explosion.pcf", "rockettrail.pcf", "classic_rocket_trail.pcf"],
     "fire": ["drg_pyro.pcf", "burningplayer.pcf", "flamethrower_mvm.pcf", "flamethrower.pcf"],
     "bullets": ["impact_fx.pcf", "shellejection.pcf", "bullet_tracers.pcf",
-               "nailtrails.pcf", "muzzle_flash.pcf", "blood_impact.pcf"],
+                "nailtrails.pcf", "muzzle_flash.pcf"],
+    "blood": ["blood_impact.pcf", "blood_trail.pcf"],
     "weapons": ["rocketpack.pcf", "invasion_ray_gun_fx.pcf", "firstperson_weapon_fx.pcf",
-               "items_engineer.pcf", "items_demo.pcf", "xms.pcf", "drg_engineer.pcf",
-               "dxhr_fx.pcf", "drg_bison.pcf", "soldierbuff.pcf", "medicgun_attrib.pcf", "medicgun_beam.pcf"],
+                "items_engineer.pcf", "items_demo.pcf", "xms.pcf", "drg_engineer.pcf",
+                "dxhr_fx.pcf", "drg_bison.pcf", "soldierbuff.pcf", "medicgun_attrib.pcf", "medicgun_beam.pcf"],
     "maps": ["urban_fx.pcf", "smoke_island_volcano.pcf", "doomsday_fx.pcf", "harbor_fx.pcf",
-            "rain_custom.pcf", "stormfront.pcf", "dirty_explode.pcf", "water.pcf",
-            "bigboom.pcf", "smoke_blackbillow.pcf"],
+             "rain_custom.pcf", "stormfront.pcf", "dirty_explode.pcf", "water.pcf",
+             "bigboom.pcf", "smoke_blackbillow.pcf"],
     "game_modes": ["powerups.pcf", "passtime_tv_projection.pcf", "passtime_beam.pcf", "passtime.pcf",
-                 "halloween.pcf", "mvm.pcf", "eyeboss.pcf", "scary_ghost.pcf", "flag_particles.pcf"],
+                   "halloween.pcf", "mvm.pcf", "eyeboss.pcf", "scary_ghost.pcf", "flag_particles.pcf"],
+    "unusuals_hats": ["item_fx_unusuals.pcf", "unusual_burning_flames.pcf", "unusual_darkblaze.pcf",
+                      "unusual_demonflame.pcf", "unusual_ghostly_ghosts.pcf", "unusual_purple_energy.pcf",
+                      "unusual_scorching_flames.pcf", "unusual_tesla_coil.pcf",
+                      "halloween2015_unusuals.pcf", "halloween2016_unusuals.pcf", "halloween2018_unusuals.pcf",
+                      "halloween2019_unusuals.pcf", "halloween2020_unusuals.pcf", "halloween2021_unusuals.pcf",
+                      "halloween2022_unusuals.pcf", "halloween2023_unusuals.pcf", "halloween2024_unusuals.pcf",
+                      "invasion_unusuals.pcf", "smissmas2019_unusuals.pcf", "smissmas2020_unusuals.pcf",
+                      "smissmas2021_unusuals.pcf", "smissmas2022_unusuals.pcf", "smissmas2023_unusuals.pcf",
+                      "smissmas2024_unusuals.pcf", "summer2020_unusuals.pcf", "summer2021_unusuals.pcf",
+                      "summer2022_unusuals.pcf", "summer2023_unusuals.pcf", "summer2024_unusuals.pcf",
+                      "summer2025_unusuals.pcf"],
+    "unusual_weapons": ["weapon_unusual_cool.pcf", "weapon_unusual_energyorb.pcf", "weapon_unusual_hot.pcf",
+                        "weapon_unusual_isotope.pcf"],
     "player": ["taunt_fx.pcf", "rps.pcf", "killstreak.pcf", "bl_killtaunt.pcf", "class_fx.pcf",
-              "conc_stars.pcf", "item_fx.pcf", "disguise.pcf", "nemesis.pcf", "speechbubbles.pcf",
-              "crit.pcf", "cig_smoke.pcf", "blood_trail.pcf", "rocketjumptrail.pcf"],
-    "buildings": ["teleport_status.pcf", "player_recent_teleport.pcf", "teleported_fx.pcf", "buildingdamage.pcf"],
-    "misc": ["bombinomicon.pcf", "training.pcf", "cinefx.pcf", "sparks.pcf", "vgui_menu_particles.pcf",
-            "rankup.pcf", "stamp_spin.pcf", "coin_spin.pcf", "npc_fx.pcf"]
+               "conc_stars.pcf", "item_fx_gameplay.pcf", "disguise.pcf", "nemesis.pcf", "speechbubbles.pcf",
+               "crit.pcf", "cig_smoke.pcf", "rocketjumptrail.pcf"],
+    "buildings": ["teleport_status.pcf", "player_recent_teleport.pcf", "teleported_fx.pcf", "buildingdamage.pcf",
+                  "sparks.pcf"],
+    "misc": ["bombinomicon.pcf", "training.pcf", "cinefx.pcf", "vgui_menu_particles.pcf", "rankup.pcf",
+             "stamp_spin.pcf", "coin_spin.pcf", "npc_fx.pcf"]
 }
 
 
@@ -238,3 +253,16 @@ MOD_TYPE_COLORS = {
 
 # cueki's fixed mods download URL
 CUEKI_MODS_URL = "https://github.com/cueki/casual-pre-loader/raw/main/mods.zip"
+
+
+# particle split configuration
+PARTICLE_SPLITS = {
+    "item_fx.pcf": {
+        "item_fx_unusuals.pcf": lambda name: (
+            name.startswith("unusual_") or
+            name.startswith("superrare_") or
+            name == "superare_balloon"  # typo in original Valve file (lol)
+        ),
+        "item_fx_gameplay.pcf": "**EVERYTHING_ELSE**"
+    }
+}

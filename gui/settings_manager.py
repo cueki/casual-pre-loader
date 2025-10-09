@@ -60,6 +60,8 @@ class SettingsManager:
             "tf_directory": "",
             "addon_selections": [],
             "matrix_selections": {},
+            "matrix_selections_simple": {},
+            "simple_particle_mode": True,
             "skip_launch_options_popup": False,
             "suppress_update_notifications": False,
             "skipped_update_version": None
@@ -122,6 +124,20 @@ class SettingsManager:
 
     def set_matrix_selections(self, selections):
         self.settings["matrix_selections"] = selections
+        self.save_settings()
+
+    def get_matrix_selections_simple(self):
+        return self.settings.get("matrix_selections_simple", {})
+
+    def set_matrix_selections_simple(self, selections):
+        self.settings["matrix_selections_simple"] = selections
+        self.save_settings()
+
+    def get_simple_particle_mode(self):
+        return self.settings.get("simple_particle_mode", True)
+
+    def set_simple_particle_mode(self, enabled):
+        self.settings["simple_particle_mode"] = enabled
         self.save_settings()
 
     def get_addon_metadata(self):
