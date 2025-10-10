@@ -21,10 +21,14 @@ def check_root_lod(game_path: str) -> bool:
 
         # replace with r_rootlod "0"
         config_text = config_text.replace(old_line, 'r_rootlod "0"')
-
-        # write the updated config
-        config_file.write_text(config_text)
         print(f"Updated r_rootlod setting to 0 in {config_file}")
-        return True
+    else:
+        # r_rootlod not found, add it to the end of the file
+        if not config_text.endswith("\n"):
+            config_text += "\n"
+        config_text += 'r_rootlod "0"\n'
+        print(f"Added r_rootlod setting to {config_file}")
 
-    return False
+    # write the updated config
+    config_file.write_text(config_text)
+    return True
