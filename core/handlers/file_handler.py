@@ -91,10 +91,10 @@ class FileHandler:
             # check if the processed file size matches the original size
             if len(new_data) != original_size:
                 if len(new_data) < original_size:
-                    # maintain proper termination
+                    # pad to match original size
                     padding_needed = original_size - len(new_data)
                     print(f"Adding {padding_needed} bytes of padding to {file_name}")
-                    new_data = new_data[:-1] + b' ' * padding_needed + new_data[-1:]
+                    new_data = new_data + b' ' * padding_needed
 
                 else:
                     print(f"ERROR: {file_name} is {len(new_data) - original_size} bytes larger than original! "

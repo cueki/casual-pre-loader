@@ -2,14 +2,11 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
 from valve_parsers import PCFFile
-from operations.pcf_rebuild import (
-    load_particle_system_map,
-    get_pcf_element_names,
-    extract_elements,
-    rebuild_particle_files
-)
+from operations.pcf_rebuild import (load_particle_system_map, get_pcf_element_names, extract_elements,
+                                    rebuild_particle_files)
 from operations.pcf_merge import merge_pcf_files
 from core.folder_setup import folder_setup
+from core.constants import PARTICLE_SPLITS
 
 
 def sequential_merge(pcf_files: List[PCFFile]):
@@ -37,6 +34,30 @@ def find_duplicate_elements(pcf_files: List[PCFFile]) -> Dict[str, List[int]]:
         for element_name in get_pcf_element_names(pcf):
             element_sources[element_name].append(i)
     return {elem: sources for elem, sources in element_sources.items() if len(sources) > 1}
+
+
+def save_split_files(merged_pcf: PCFFile, out_dir: Path, split_filters: dict) -> None:
+    mod_elements = get_pcf_element_names(merged_pcf)
+    split_elements = {}  # {split_name: set(elements)}
+    unmatched_elements = set(mod_elements)
+
+    # apply filter to elements
+    for split_name, filter_func in split_filters.items():
+        if filter_func == "**EVERYTHING_ELSE**":
+            if unmatched_elements:
+                split_elements[split_name] = unmatched_elements
+        else:
+            matched = {elem for elem in mod_elements if filter_func(elem)}
+            if matched:
+                split_elements[split_name] = matched
+                unmatched_elements -= matched
+
+    # save splits to actual_particles/
+    for split_name, elements in split_elements.items():
+        split_pcf = extract_elements(merged_pcf, elements)
+        output_path = out_dir / "actual_particles" / split_name
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        split_pcf.encode(output_path)
 
 
 class AdvancedParticleMerger:
@@ -70,6 +91,8 @@ class AdvancedParticleMerger:
         self.process_vpk_group(vpk_folder_name, out_dir)
 
     def process_vpk_group(self, vpk_name: str, out_dir: Path) -> None:
+        splits_config = PARTICLE_SPLITS
+
         for particle_group, group_files in self.vpk_groups[vpk_name].items():
             pcf_files = [PCFFile(particle).decode() for particle in group_files]
             duplicates = find_duplicate_elements(pcf_files)
@@ -107,9 +130,12 @@ class AdvancedParticleMerger:
             else:
                 result = chosen_pcf if duplicates else result
 
-            actual_particles = Path(out_dir / "actual_particles" / particle_group)
-            actual_particles.parent.mkdir(parents=True, exist_ok=True)
-            result.encode(actual_particles)
+            if particle_group in splits_config:
+                save_split_files(result, out_dir, splits_config[particle_group])
+            else:
+                actual_particles = Path(out_dir / "actual_particles" / particle_group)
+                actual_particles.parent.mkdir(parents=True, exist_ok=True)
+                result.encode(actual_particles)
 
         for file in folder_setup.temp_output_dir.iterdir():
             file.unlink()

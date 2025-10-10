@@ -1,5 +1,5 @@
-from PyQt6.QtGui import QAction
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QGroupBox, QListWidget, QPushButton, QHBoxLayout, QMenu)
+from PyQt6.QtGui import QAction, QIcon
+from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QGroupBox, QListWidget, QPushButton, QHBoxLayout, QMenu, QStyle)
 from PyQt6.QtCore import Qt, pyqtSignal
 from gui.mod_descriptor import AddonDescription
 from gui.load_order_panel import LoadOrderPanel
@@ -150,8 +150,9 @@ class AddonPanel(QWidget):
     def show_context_menu(self, position):
         item = self.addons_list.itemAt(position)
         if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
-            menu = QMenu()
-            delete_action = QAction("Delete", self.addons_list)
+            menu = QMenu(self)
+            delete_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_TrashIcon)
+            delete_action = QAction(delete_icon, "Delete", self)
             delete_action.triggered.connect(lambda: self.delete_button_clicked.emit())
             menu.addAction(delete_action)
             menu.exec(self.addons_list.mapToGlobal(position))

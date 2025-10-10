@@ -6,16 +6,17 @@ from pathlib import Path
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit,
                              QLabel, QFileDialog, QMessageBox, QGroupBox, QTabWidget,
-                             QCheckBox,  QDialog, QProgressDialog)
+                             QCheckBox,  QDialog, QProgressDialog, QStyle)
 from PyQt6.QtGui import QAction
 from core.folder_setup import folder_setup
+from core.particle_splits import migrate_old_particle_files
+from core.version import VERSION
 from gui.settings_manager import SettingsManager, validate_tf_directory
 from gui.drag_and_drop import ModDropZone
 from gui.addon_manager import AddonManager
 from gui.installation import InstallationManager
 from gui.addon_panel import AddonPanel
-from gui.first_time_setup import get_mods_zip_enabled, set_mods_zip_enabled
-from core.version import VERSION
+from gui.first_time_setup import mods_download_group
 
 
 class SettingsDialog(QDialog):
@@ -26,7 +27,6 @@ class SettingsDialog(QDialog):
         self.browse_button = None
         self.tf_path_edit = None
         self.tf_directory = ""
-        self.mods_checkbox = None
         
         self.setWindowTitle("Settings")
         self.setMinimumSize(500, 375)
@@ -74,24 +74,9 @@ class SettingsDialog(QDialog):
         # validate initial directory
         if self.tf_directory:
             validate_tf_directory(self.tf_directory, self.validation_label)
-        
-        # included mods group
-        mods_group = QGroupBox("Included Mods")
-        mods_layout = QVBoxLayout()
-        
-        mods_description = QLabel(
-            "Control whether included mods (mods.zip) should be available in the app.\n"
-            "Note: Changing this setting will take effect on next app restart."
-        )
-        mods_description.setWordWrap(True)
-        mods_layout.addWidget(mods_description)
-        
-        self.mods_checkbox = QCheckBox("Include built-in mods (mods.zip)")
-        # set current value from settings
-        self.mods_checkbox.setChecked(get_mods_zip_enabled())
-        mods_layout.addWidget(self.mods_checkbox)
-        mods_group.setLayout(mods_layout)
-        layout.addWidget(mods_group)
+
+        # mods download group
+        layout.addWidget(mods_download_group(self))
         
         # version group
         version_group = QGroupBox("About")
@@ -128,8 +113,6 @@ class SettingsDialog(QDialog):
         return self.tf_directory
 
     def save_and_accept(self):
-        # save mods.zip setting
-        set_mods_zip_enabled(self.mods_checkbox.isChecked())
         self.accept()
 
 
@@ -152,7 +135,7 @@ class ParticleManagerGUI(QMainWindow):
         self.addons_list = None
         self.addon_description = None
         self.progress_dialog = None
-        self.mod_drop_zone = None
+        self.mod_drop_zone: ModDropZone | None = None
 
         # setup UI and connect signals
         self.setWindowTitle("cukei's casual pre-loader :)")
@@ -171,9 +154,22 @@ class ParticleManagerGUI(QMainWindow):
         else:
             self.load_tf_directory()
         
+        # migrate old particle files to new split format
+        migrate_old_particle_files()
+
+        # apply saved simple mode preference
+        saved_mode = self.settings_manager.get_simple_particle_mode()
+        if saved_mode:
+            self.mod_drop_zone.conflict_matrix.set_simple_mode(True)
+
+        self.mod_drop_zone.update_matrix()
+
         self.load_addons()
         self.scan_for_mcp_files()
         self.rescan_addon_contents()
+
+        # ensure load order display is updated on startup
+        self.update_load_order_display()
 
 
     def setup_menu_bar(self):
@@ -182,13 +178,28 @@ class ParticleManagerGUI(QMainWindow):
         # options menu
         options_menu = menubar.addMenu("Options")
 
-        # refresh addons
-        refresh_action = QAction("Refresh Addons", self)
-        refresh_action.triggered.connect(self.load_addons)
+        # simple mode toggle
+        simple_mode_action = QAction("Simple Particle Mode", self)
+        simple_mode_action.setCheckable(True)
+        # load saved preference
+        saved_mode = self.settings_manager.get_simple_particle_mode()
+        simple_mode_action.setChecked(saved_mode)
+        simple_mode_action.triggered.connect(self.toggle_particle_mode)
+        options_menu.addAction(simple_mode_action)
+        self.simple_mode_action = simple_mode_action
+
+        # separator
+        options_menu.addSeparator()
+
+        # refresh all
+        refresh_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_BrowserReload)
+        refresh_action = QAction(refresh_icon, "Refresh All", self)
+        refresh_action.triggered.connect(self.refresh_all)
         options_menu.addAction(refresh_action)
 
         # open addons folder
-        open_folder_action = QAction("Open Addons Folder", self)
+        folder_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_DirOpenIcon)
+        open_folder_action = QAction(folder_icon, "Open Addons Folder", self)
         open_folder_action.triggered.connect(self.open_addons_folder)
         options_menu.addAction(open_folder_action)
 
@@ -196,9 +207,16 @@ class ParticleManagerGUI(QMainWindow):
         options_menu.addSeparator()
 
         # settings action
-        settings_action = QAction("Settings...", self)
+        settings_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogDetailedView)
+        settings_action = QAction(settings_icon, "Settings...", self)
         settings_action.triggered.connect(self.open_settings_dialog)
         options_menu.addAction(settings_action)
+
+    def toggle_particle_mode(self, checked):
+        """Toggle between simple and advanced particle matrix modes"""
+        if self.mod_drop_zone and self.mod_drop_zone.conflict_matrix:
+            self.mod_drop_zone.conflict_matrix.set_simple_mode(checked)
+            self.settings_manager.set_simple_particle_mode(checked)
 
     def setup_ui(self):
         # main layout
@@ -221,7 +239,7 @@ class ParticleManagerGUI(QMainWindow):
         # mod drop zone
         self.mod_drop_zone = ModDropZone(self, self.settings_manager, self.rescan_addon_contents)
         layout.addWidget(self.mod_drop_zone)
-        self.mod_drop_zone.update_matrix()
+        # don't call update_matrix here - it will be called after setting simple mode in __init__
 
         # nav buttons
         nav_container = QWidget()
@@ -292,7 +310,12 @@ class ParticleManagerGUI(QMainWindow):
         updates_found = self.addon_manager.scan_addon_contents()
         self.addon_manager.load_addons(self.addons_list)
         self.apply_saved_addon_selections()
-            
+
+    def refresh_all(self):
+        # refresh both particles and addons
+        self.mod_drop_zone.update_matrix()
+        self.load_addons()
+
     def get_selected_addons(self):
         # get addons from load order list (which preserves user's drag-drop order)
         load_order = self.addon_panel.get_load_order()
@@ -374,12 +397,19 @@ class ParticleManagerGUI(QMainWindow):
             if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
                 item_map[item.text()] = item
 
+        # only include addons that still exist
+        valid_selections = []
         for addon_name in saved_selections:
             if addon_name in item_map:
                 item_map[addon_name].setCheckState(Qt.CheckState.Checked)
+                valid_selections.append(addon_name)
 
-        # restore load order
-        self.addon_panel.load_order_panel.restore_order(saved_selections)
+        # restore load order with only valid addons
+        self.addon_panel.load_order_panel.restore_order(valid_selections)
+
+        # save the selections if any were removed
+        if len(valid_selections) != len(saved_selections):
+            self.settings_manager.set_addon_selections(valid_selections)
 
         self.addons_list.blockSignals(False)
         self.on_addon_checkbox_changed()

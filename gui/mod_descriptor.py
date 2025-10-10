@@ -4,7 +4,11 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QScrollArea, QFrame, 
                              QFormLayout, QMessageBox)
 from core.constants import MOD_TYPE_COLORS
 from core.folder_setup import folder_setup
+from valve_parsers import VPKFile
+import os
 import json
+import subprocess
+from sys import platform
 
 
 class ModJsonEditor(QDialog):
@@ -112,6 +116,7 @@ class AddonDescription(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.export_button = None
         self.gamebanana_label = None
         self.content_layout = None
         self.name_label = None
@@ -176,10 +181,20 @@ class AddonDescription(QWidget):
 
         self.content_layout.addStretch()
 
+        # buttons layout
+        buttons_layout = QHBoxLayout()
+
         # edit button
         self.edit_button = QPushButton("Edit mod.json")
         self.edit_button.clicked.connect(self.open_editor)
-        self.content_layout.addWidget(self.edit_button)
+        buttons_layout.addWidget(self.edit_button)
+
+        # export button
+        self.export_button = QPushButton("Export as VPK")
+        self.export_button.clicked.connect(self.export_addon)
+        buttons_layout.addWidget(self.export_button)
+
+        self.content_layout.addLayout(buttons_layout)
 
         scroll.setWidget(content)
         layout.addWidget(scroll)
@@ -235,6 +250,7 @@ class AddonDescription(QWidget):
             self.features_list.hide()
 
         self.edit_button.show()
+        self.export_button.show()
 
     def clear(self):
         self.current_addon_name = None
@@ -246,6 +262,7 @@ class AddonDescription(QWidget):
         self.features_label.hide()
         self.features_list.hide()
         self.edit_button.hide()
+        self.export_button.hide()
 
     def open_editor(self):
         if self.current_addon_name and self.current_addon_info:
@@ -253,6 +270,62 @@ class AddonDescription(QWidget):
             dialog.addon_updated.connect(self.addon_modified.emit)
             dialog.addon_updated.connect(self.refresh_current_addon)
             dialog.exec()
+
+    def export_addon(self):
+        if not self.current_addon_name or not self.current_addon_info:
+            return
+
+        folder_name = self.current_addon_info.get("file_path", self.current_addon_name)
+        addon_dir = folder_setup.addons_dir / folder_name
+        default_name = folder_name.replace(" ", "_")
+
+        # custom dialog with .vpk suffix
+        dialog = QDialog(self)
+        layout = QVBoxLayout(dialog)
+
+        label = QLabel("VPK filename:")
+        layout.addWidget(label)
+
+        input_layout = QHBoxLayout()
+        name_input = QLineEdit(default_name)
+        input_layout.addWidget(name_input)
+        suffix_label = QLabel(".vpk")
+        input_layout.addWidget(suffix_label)
+        layout.addLayout(input_layout)
+
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.clicked.connect(dialog.reject)
+        button_layout.addWidget(cancel_btn)
+        ok_btn = QPushButton("Export")
+        ok_btn.clicked.connect(dialog.accept)
+        button_layout.addWidget(ok_btn)
+        layout.addLayout(button_layout)
+
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+
+        vpk_name = name_input.text()
+        if not vpk_name:
+            return
+
+        exports_dir = folder_setup.mods_dir / 'exports'
+        exports_dir.mkdir(exist_ok=True)
+        vpk_path = exports_dir / vpk_name
+
+        try:
+            if not VPKFile.create(str(addon_dir), str(vpk_path)):
+                QMessageBox.critical(self, "Export Failed", "Failed to create VPK file.")
+                return
+            # open exports folder for user
+            if platform == "win32":
+                os.startfile(str(exports_dir))
+            else:
+                subprocess.run(["xdg-open", str(exports_dir)])
+
+        except Exception as e:
+            QMessageBox.critical(self, "Export Failed", f"Error exporting addon: {str(e)}")
 
     def refresh_current_addon(self):
         if self.current_addon_name and self.current_addon_info:
