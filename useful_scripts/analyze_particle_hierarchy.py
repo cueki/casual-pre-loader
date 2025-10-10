@@ -61,15 +61,40 @@ def analyze_particle_hierarchy(pcf_file: PCFFile, verbose: bool = False) -> Dict
                         particle_systems[value_str]['referenced_by'].append(system_name)
                         if verbose:
                             print(f"  -> Child: {value_str} (via {attr_name_str})")
-            
+
+            elif attr_type == AttributeType.ELEMENT and attr_value is not None:
+                # handle single ELEMENT references (e.g., DmeParticleChild's 'child' attribute)
+                if isinstance(attr_value, int) and 0 <= attr_value < len(pcf_file.elements):
+                    ref_element = pcf_file.elements[attr_value]
+                    ref_name = ref_element.element_name.decode('ascii', errors='replace')
+                    if ref_name in particle_systems:
+                        attr_lower = attr_name_str.lower()
+                        if 'child' in attr_lower or 'definition' in attr_lower:
+                            system_info['children'].append(ref_name)
+                            particle_systems[ref_name]['referenced_by'].append(system_name)
+                            if verbose:
+                                print(f"  -> Child: {ref_name} (via {attr_name_str})")
+
             elif attr_type in [AttributeType.STRING_ARRAY, AttributeType.ELEMENT_ARRAY] and attr_value:
                 references = []
-                
+
                 if attr_type == AttributeType.ELEMENT_ARRAY:
                     for element_index in attr_value:
                         if 0 <= element_index < len(pcf_file.elements):
                             ref_element = pcf_file.elements[element_index]
+                            ref_type = pcf_file.string_dictionary[ref_element.type_name_index].decode('ascii', errors='replace')
                             ref_name = ref_element.element_name.decode('ascii', errors='replace')
+
+                            # if it's a DmeParticleChild, follow its 'child' attribute to get the actual system
+                            if ref_type == 'DmeParticleChild':
+                                for child_attr_name, (child_attr_type, child_attr_value) in ref_element.attributes.items():
+                                    child_attr_name_str = child_attr_name.decode('ascii', errors='replace')
+                                    if child_attr_name_str == 'child' and child_attr_type == AttributeType.ELEMENT:
+                                        if isinstance(child_attr_value, int) and 0 <= child_attr_value < len(pcf_file.elements):
+                                            actual_system = pcf_file.elements[child_attr_value]
+                                            ref_name = actual_system.element_name.decode('ascii', errors='replace')
+                                        break
+
                             if ref_name in particle_systems:
                                 references.append(ref_name)
                 else:
