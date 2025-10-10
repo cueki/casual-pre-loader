@@ -44,7 +44,7 @@ class AutoUpdater:
     def find_update_asset(assets: list) -> Optional[str]:
         for asset in assets:
             name = asset["name"].lower()
-            if "light" in name and name.endswith(".zip"):
+            if "casual-preloader" in name and name.endswith(".zip"):
                 return asset["browser_download_url"]
         
         return None
