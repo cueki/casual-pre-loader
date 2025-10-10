@@ -1,6 +1,5 @@
-import shutil
-from sys import platform
 import os
+import shutil
 from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional
