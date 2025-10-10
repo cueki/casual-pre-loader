@@ -176,8 +176,3 @@ class AutoUpdater:
 def check_for_updates_sync() -> Optional[Dict[str, Any]]:
     updater = AutoUpdater()
     return updater.check_for_updates()
-
-
-def perform_update_sync() -> Dict[str, Any]:
-    updater = AutoUpdater()
-    return updater.perform_update()
