@@ -50,11 +50,14 @@ class Interface(QObject):
                     mod_json_path = addon_dir / 'mod.json'
                     is_hud = False
                     if mod_json_path.exists():
-                        with open(mod_json_path, 'r') as f:
-                            mod_info = json.load(f)
-                            if mod_info.get('type', '').lower() == 'hud':
-                                is_hud = True
-                                hud_addons.append((addon_path, addon_dir))
+                        try:
+                            with open(mod_json_path, 'r') as f:
+                                mod_info = json.load(f)
+                                if mod_info.get('type', '').lower() == 'hud':
+                                    is_hud = True
+                                    hud_addons.append((addon_path, addon_dir))
+                        except json.JSONDecodeError as e:
+                            print(f"Warning: Invalid JSON in {mod_json_path}: {e}")
 
                     # skip hud files for now
                     if is_hud:
@@ -213,10 +216,13 @@ class Interface(QObject):
                 if item.is_dir() and not item.name.startswith('_'):
                     mod_json = item / 'mod.json'
                     if mod_json.exists():
-                        with open(mod_json, 'r') as f:
-                            mod_info = json.load(f)
-                            if mod_info.get('type', '').lower() == 'hud' and mod_info.get('preloader_installed', False):
-                                items_to_delete.append(item)
+                        try:
+                            with open(mod_json, 'r') as f:
+                                mod_info = json.load(f)
+                                if mod_info.get('type', '').lower() == 'hud' and mod_info.get('preloader_installed', False):
+                                    items_to_delete.append(item)
+                        except json.JSONDecodeError as e:
+                            print(f"Warning: Invalid JSON in {mod_json}: {e}")
 
             # delete after closing all file handles
             for item in items_to_delete:
@@ -231,11 +237,14 @@ class Interface(QObject):
                 # mark the HUD as installed by preloader
                 hud_mod_json = hud_dest / 'mod.json'
                 if hud_mod_json.exists():
-                    with open(hud_mod_json, 'r') as f:
-                        mod_info = json.load(f)
-                    mod_info['preloader_installed'] = True
-                    with open(hud_mod_json, 'w') as f:
-                        json.dump(mod_info, f, indent=2)
+                    try:
+                        with open(hud_mod_json, 'r') as f:
+                            mod_info = json.load(f)
+                        mod_info['preloader_installed'] = True
+                        with open(hud_mod_json, 'w') as f:
+                            json.dump(mod_info, f, indent=2)
+                    except json.JSONDecodeError as e:
+                        print(f"Warning: Invalid JSON in {hud_mod_json}: {e}, skipping preloader_installed flag")
 
             # create new VPK for custom content & config
             custom_content_dir = folder_setup.temp_mods_dir
