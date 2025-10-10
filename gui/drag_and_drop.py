@@ -227,7 +227,7 @@ class ModDropZone(QFrame):
 
             # check which split files exist in temp_mods_dir
             for split_name in split_defs.keys():
-                split_path = folder_setup.temp_mods_dir / (split_name + ".pcf")
+                split_path = folder_setup.temp_mods_dir / split_name
                 if split_path.exists():
                     split_files_in_temp.append(split_path)
 
@@ -242,7 +242,7 @@ class ModDropZone(QFrame):
                 else:
                     merged = pcf_parts[0]
 
-                output_path = folder_setup.temp_mods_dir / (original_file + ".pcf")
+                output_path = folder_setup.temp_mods_dir / original_file
                 merged.encode(output_path)
 
                 for split_file in split_files_in_temp:
@@ -252,7 +252,7 @@ class ModDropZone(QFrame):
         particle_map = load_particle_system_map(folder_setup.install_dir / 'particle_system_map.json')
 
         for original_file in PARTICLE_SPLITS.keys():
-            merged_file = folder_setup.temp_mods_dir / (original_file + ".pcf")
+            merged_file = folder_setup.temp_mods_dir / original_file
 
             if merged_file.exists():
                 merged_pcf = PCFFile(merged_file).decode()
@@ -264,7 +264,7 @@ class ModDropZone(QFrame):
                         elements_we_still_need.add(element)
 
                 if elements_we_still_need:
-                    vanilla_file = folder_setup.temp_game_files_dir / (original_file + ".pcf")
+                    vanilla_file = folder_setup.temp_game_files_dir / original_file
                     if vanilla_file.exists():
                         vanilla_pcf = PCFFile(vanilla_file).decode()
                         vanilla_elements = extract_elements(vanilla_pcf, elements_we_still_need)
