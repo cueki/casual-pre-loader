@@ -1,5 +1,5 @@
 Hi.
-Thank you for installing my preloader. (Ver 1.5.3)
+Thank you for installing my preloader. (Ver 1.6.0)
 Simply double click RUNME
 I recommend checking this file every update as there might be some extra info regarding upgrading from version to version.
 
@@ -9,16 +9,7 @@ If you would like to produce mods that work alongside this tool, for both partic
 FOR PARTICLE MAKERS SPECIFICALLY:
 Take a look at particle_system_map.json, YOUR ELEMENT NAMES MUST MATCH WHAT IS IN THAT FILE, WITH PROPER CASING. ExplosionCore_MidAir cannot be ExplosionCore_Midair, for example, and it needs to be in explosion.pcf, anywhere else and other effects will get deleted.
 
-A mod.json can be added to any addon in its root folder (casual-preloader/mods/addons/super_cool_addon/mod.json) to provide extra info to users. This means that you can include it in your mods on gamebanana, and it will show up for the user when they put it in the preloader.
-mod.json structure:
+10/09/2025 (update 1.6.0):
+ive been working on this silently in the background for a while, its a pretty big update, im sorry if it breaks anything :(
 
-{
-    "addon_name": "My mod name!", // Can be anything you want.
-    "type": "Texture", // Current supported types: "skin", "model", "texture", "misc", "animation", "experimental", "hud", "sound" and "unknown".
-    "version": "v500 super", // Optional, just whatever you want
-    "description": "Some extra info about my awesome mod!" // Description, can be pretty long but your milage may vary on the formatting
-}
-
-10/01/2025 (update 1.5.3):
-made it so huds are ignored and installed separately
-hopefully the auto updater works !
+hopefully all the changes make sense :)
