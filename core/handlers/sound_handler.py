@@ -130,8 +130,9 @@ def update_script_files(script_files: List[str], path_mappings: List[Tuple[str, 
             old_path = old_path.replace('\\', '/')
             new_path = new_path.replace('\\', '/')
 
-            # pattern to match wave entries
-            pattern = rf'("wave"\s*")([^"]*{re.escape(old_path)}[^"]*?)(")'
+            # escape the path, then make pattern flexible to match both slash types (thanks, valve)
+            escaped_old_path = re.escape(old_path).replace('/', r'[/\\]')
+            pattern = rf'("wave"\s*")([^"]*{escaped_old_path}[^"]*?)(")'
 
             def replace_wave(match):
                 prefix = match.group(1)  # "wave"    "
@@ -149,9 +150,10 @@ def update_script_files(script_files: List[str], path_mappings: List[Tuple[str, 
                     special_prefix = ""
                     actual_path = wave_path
 
-                # replace the old path with new path
-                if old_path in actual_path:
-                    new_actual_path = actual_path.replace(old_path, new_path)
+                # normalize actual_path to handle mixed slash types
+                normalized_actual_path = actual_path.replace('\\', '/')
+                if old_path in normalized_actual_path:
+                    new_actual_path = normalized_actual_path.replace(old_path, new_path)
                     new_wave_path = f"{special_prefix}{new_actual_path}"
                     return f"{prefix}{new_wave_path}{suffix}"
 

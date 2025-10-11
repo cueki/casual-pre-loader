@@ -1,5 +1,5 @@
 Hi.
-Thank you for installing my preloader. (Ver 1.6.0)
+Thank you for installing my preloader. (Ver 1.6.+)
 Simply double click RUNME
 I recommend checking this file every update as there might be some extra info regarding upgrading from version to version.
 
