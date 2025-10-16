@@ -120,6 +120,7 @@ class ParticleManagerGUI(QMainWindow):
     def __init__(self, tf_directory=None, update_info=None):
         super().__init__()
         # store initial tf directory from first-time setup
+        self.simple_mode_action = None
         self.addon_panel = None
         self.initial_tf_directory = tf_directory
         self.update_info = update_info
@@ -213,7 +214,6 @@ class ParticleManagerGUI(QMainWindow):
         options_menu.addAction(settings_action)
 
     def toggle_particle_mode(self, checked):
-        """Toggle between simple and advanced particle matrix modes"""
         if self.mod_drop_zone and self.mod_drop_zone.conflict_matrix:
             self.mod_drop_zone.conflict_matrix.set_simple_mode(checked)
             self.settings_manager.set_simple_particle_mode(checked)
