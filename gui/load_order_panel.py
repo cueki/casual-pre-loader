@@ -47,7 +47,7 @@ class LoadOrderPanel(QWidget):
         # reverse the order so that top item is installed last and wins conflicts
         return list(reversed(load_order))
 
-    def update_display(self, addon_contents):
+    def update_display(self, addon_contents, addon_name_mapping=None):
         # add numbering and conflict detection to load order list
         try:
             self.load_order_list.blockSignals(True)
@@ -65,18 +65,28 @@ class LoadOrderPanel(QWidget):
                 priority_number = total_items - pos
                 display_text = f"[#{priority_number}] {addon_name}"
 
+                # resolve display name to folder name for conflict detection
+                folder_name = addon_name
+                if addon_name_mapping and addon_name in addon_name_mapping:
+                    folder_name = addon_name_mapping[addon_name].get('file_path', addon_name)
+
                 # check for conflicts
-                if addon_contents and addon_name in addon_contents:
+                if addon_contents and folder_name in addon_contents:
                     overwrites = {}
-                    addon_files = set(addon_contents[addon_name])
+                    addon_files = set(addon_contents[folder_name])
 
                     # check against lower priority addons
                     for other_pos, other_name in enumerate(load_order_items):
-                        if other_pos > pos and other_name in addon_contents:
-                            other_files = set(addon_contents[other_name])
-                            common_files = addon_files.intersection(other_files)
-                            if common_files:
-                                overwrites[other_name] = list(common_files)
+                        if other_pos > pos:
+                            other_folder_name = other_name
+                            if addon_name_mapping and other_name in addon_name_mapping:
+                                other_folder_name = addon_name_mapping[other_name].get('file_path', other_name)
+
+                            if other_folder_name in addon_contents:
+                                other_files = set(addon_contents[other_folder_name])
+                                common_files = addon_files.intersection(other_files)
+                                if common_files:
+                                    overwrites[other_name] = list(common_files)
 
                     if overwrites:
                         display_text += " ⚠️"

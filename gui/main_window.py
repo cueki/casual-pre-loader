@@ -380,7 +380,8 @@ class ParticleManagerGUI(QMainWindow):
     def update_load_order_display(self):
         # delegate to load order panel
         addon_contents = self.settings_manager.get_addon_contents()
-        self.addon_panel.load_order_panel.update_display(addon_contents)
+        addon_name_mapping = self.addon_manager.addons_file_paths
+        self.addon_panel.load_order_panel.update_display(addon_contents, addon_name_mapping)
 
     def apply_saved_addon_selections(self):
         saved_selections = self.settings_manager.get_addon_selections()
