@@ -118,183 +118,183 @@ class Interface(QObject):
                     except json.JSONDecodeError as e:
                         print(f"Warning: Invalid JSON in {hud_mod_json}: {e}, skipping preloader_installed flag")
 
-            # progress bar
-            progress_range = 25
-            completed_files = 0
-            self.update_progress(10, f"Installing addons... (0/{total_files} files)")
+            if files_to_copy:  # do not process any more files if we're only installing HUDs
+                # progress bar
+                progress_range = 25
+                completed_files = 0
+                self.update_progress(10, f"Installing addons... (0/{total_files} files)")
 
-            for src_path, addon_dir in files_to_copy:
-                # relative path from addon directory
-                rel_path = src_path.relative_to(addon_dir)
-                dest_path = folder_setup.temp_mods_dir / rel_path
-                dest_path.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(src_path, dest_path)
+                for src_path, addon_dir in files_to_copy:
+                    # relative path from addon directory
+                    rel_path = src_path.relative_to(addon_dir)
+                    dest_path = folder_setup.temp_mods_dir / rel_path
+                    dest_path.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(src_path, dest_path)
 
-                # progress bar update
-                completed_files += 1
-                current_progress = 10 + int((completed_files / total_files) * progress_range)
-                self.update_progress(current_progress, f"Installing addons... ({completed_files}/{total_files} files)")
+                    # progress bar update
+                    completed_files += 1
+                    current_progress = 10 + int((completed_files / total_files) * progress_range)
+                    self.update_progress(current_progress, f"Installing addons... ({completed_files}/{total_files} files)")
 
-            # process sound mods and copy needed script files from backup
-            self.update_progress(35, "Processing sound mods...")
-            backup_scripts_dir = folder_setup.backup_dir / 'scripts'
+                # process sound mods and copy needed script files from backup
+                self.update_progress(35, "Processing sound mods...")
+                backup_scripts_dir = folder_setup.backup_dir / 'scripts'
 
-            # collect VPK paths (vo and misc) for sound processing
-            vpk_paths = []
-            tf_path_obj = Path(tf_path)
-            misc_vpk = tf_path_obj / "tf2_sound_misc_dir.vpk"
-            if misc_vpk.exists():
-                vpk_paths.append(misc_vpk)
-            vo_vpks = list(tf_path_obj.glob("tf2_sound_vo_*_dir.vpk"))
-            vpk_paths.extend(vo_vpks)
+                # collect VPK paths (vo and misc) for sound processing
+                vpk_paths = []
+                tf_path_obj = Path(tf_path)
+                misc_vpk = tf_path_obj / "tf2_sound_misc_dir.vpk"
+                if misc_vpk.exists():
+                    vpk_paths.append(misc_vpk)
+                vo_vpks = list(tf_path_obj.glob("tf2_sound_vo_*_dir.vpk"))
+                vpk_paths.extend(vo_vpks)
 
-            sound_result = self.sound_handler.process_temp_sound_mods(
-                folder_setup.temp_mods_dir,
-                backup_scripts_dir,
-                vpk_paths
-            )
-            if sound_result:
-                self.update_progress(50, f"Sound processing: {sound_result['message']}")
+                sound_result = self.sound_handler.process_temp_sound_mods(
+                    folder_setup.temp_mods_dir,
+                    backup_scripts_dir,
+                    vpk_paths
+                )
+                if sound_result:
+                    self.update_progress(50, f"Sound processing: {sound_result['message']}")
 
-            # remove any skybox mods if present then patch new ones in if selected
-            restore_skybox_files(tf_path)
-            handle_skybox_mods(folder_setup.temp_mods_dir, tf_path)
+                # remove any skybox mods if present then patch new ones in if selected
+                restore_skybox_files(tf_path)
+                handle_skybox_mods(folder_setup.temp_mods_dir, tf_path)
 
-            # clear the in-game particle files
-            restore_particle_files(tf_path)
+                # clear the in-game particle files
+                restore_particle_files(tf_path)
 
-            if mod_drop_zone:
-                mod_drop_zone.apply_particle_selections()
+                if mod_drop_zone:
+                    mod_drop_zone.apply_particle_selections()
 
-            # these 4 particle files contain duplicate elements that are found elsewhere, this is an oversight by valve.
-            # what im doing is simply fixing this oversight using context from the elements themselves
-            # they now should only appear once in the game, and in the correct file :)
-            # previous code dictates that if any custom particle effect is chosen, it is already fixed, this is to fix if they are not chosen
-            duplicate_effects = [
-                "item_fx.pcf",
-                "halloween.pcf",
-                "bigboom.pcf",
-                "dirty_explode.pcf",
-            ]
-            for duplicate_effect in duplicate_effects:
-                target_path = folder_setup.temp_mods_dir / duplicate_effect
-                if not target_path.exists():
-                    # copy from game_files if not in
-                    source_path = folder_setup.temp_game_files_dir / duplicate_effect
-                    if source_path.exists():
-                        extract_elements(PCFFile(source_path).decode(),
-                                         load_particle_system_map(folder_setup.install_dir / 'particle_system_map.json')
-                                         [f'particles/{target_path.name}']).encode(target_path)
+                # these 4 particle files contain duplicate elements that are found elsewhere, this is an oversight by valve.
+                # what im doing is simply fixing this oversight using context from the elements themselves
+                # they now should only appear once in the game, and in the correct file :)
+                # previous code dictates that if any custom particle effect is chosen, it is already fixed, this is to fix if they are not chosen
+                duplicate_effects = [
+                    "item_fx.pcf",
+                    "halloween.pcf",
+                    "bigboom.pcf",
+                    "dirty_explode.pcf",
+                ]
+                for duplicate_effect in duplicate_effects:
+                    target_path = folder_setup.temp_mods_dir / duplicate_effect
+                    if not target_path.exists():
+                        # copy from game_files if not in
+                        source_path = folder_setup.temp_game_files_dir / duplicate_effect
+                        if source_path.exists():
+                            extract_elements(PCFFile(source_path).decode(),
+                                             load_particle_system_map(folder_setup.install_dir / 'particle_system_map.json')
+                                             [f'particles/{target_path.name}']).encode(target_path)
 
-            if (folder_setup.temp_mods_dir / "blood_trail.pcf").exists():
-                # hacky fix for blood_trail being so small
-                shutil.move((folder_setup.temp_mods_dir / "blood_trail.pcf"),
-                            (folder_setup.temp_mods_dir / "npc_fx.pcf"))
+                if (folder_setup.temp_mods_dir / "blood_trail.pcf").exists():
+                    # hacky fix for blood_trail being so small
+                    shutil.move((folder_setup.temp_mods_dir / "blood_trail.pcf"),
+                                (folder_setup.temp_mods_dir / "npc_fx.pcf"))
 
-            # more progress bar math yippee
-            particle_files = list(folder_setup.temp_mods_dir.glob("*.pcf"))
-            dx8_files = sum(1 for pcf_file in particle_files if pcf_file.stem in DX8_LIST)
-            total_files = len(particle_files) + dx8_files
-            start_progress = 50
-            progress_range = 30
-            completed_files = 0
-            self.update_progress(start_progress, f"Processing particle files... (0/{total_files})")
+                # more progress bar math yippee
+                particle_files = list(folder_setup.temp_mods_dir.glob("*.pcf"))
+                dx8_files = sum(1 for pcf_file in particle_files if pcf_file.stem in DX8_LIST)
+                total_files = len(particle_files) + dx8_files
+                start_progress = 50
+                progress_range = 30
+                completed_files = 0
+                self.update_progress(start_progress, f"Processing particle files... (0/{total_files})")
 
-            particle_files = folder_setup.temp_mods_dir.glob("*.pcf")
-            for pcf_file in particle_files:
-                base_name = pcf_file.name
+                particle_files = folder_setup.temp_mods_dir.glob("*.pcf")
+                for pcf_file in particle_files:
+                    base_name = pcf_file.name
 
-                if (base_name != folder_setup.base_default_pcf.input_file.name and check_parents(PCFFile(pcf_file).decode(), folder_setup.base_default_parents)):
-                    continue
+                    if (base_name != folder_setup.base_default_pcf.input_file.name and check_parents(PCFFile(pcf_file).decode(), folder_setup.base_default_parents)):
+                        continue
 
-                if base_name == folder_setup.base_default_pcf.input_file.name:
-                    update_materials(folder_setup.base_default_pcf, PCFFile(pcf_file).decode()).encode(pcf_file)
+                    if base_name == folder_setup.base_default_pcf.input_file.name:
+                        update_materials(folder_setup.base_default_pcf, PCFFile(pcf_file).decode()).encode(pcf_file)
 
-                if pcf_file.stem in DX8_LIST:  # dx80 first
-                    dx_80_ver = Path(pcf_file.stem + "_dx80.pcf")
-                    shutil.copy2(pcf_file, folder_setup.temp_mods_dir / dx_80_ver)
+                    if pcf_file.stem in DX8_LIST:  # dx80 first
+                        dx_80_ver = Path(pcf_file.stem + "_dx80.pcf")
+                        shutil.copy2(pcf_file, folder_setup.temp_mods_dir / dx_80_ver)
 
+                        file_handler.process_file(
+                            dx_80_ver.name,
+                            pcf_mod_processor(str(folder_setup.temp_mods_dir / dx_80_ver)),
+                            create_backup=False
+                        )
+                        (folder_setup.temp_mods_dir / dx_80_ver).unlink()  # get them out of temp mods/ since they are patched directly into game vpk
+
+                        # update progress bar
+                        completed_files += 1
+                        current_progress = start_progress + int((completed_files / total_files) * progress_range)
+                        self.update_progress(current_progress, f"Processing particle files... ({completed_files}/{total_files})")
+
+                    # now the rest
                     file_handler.process_file(
-                        dx_80_ver.name,
-                        pcf_mod_processor(str(folder_setup.temp_mods_dir / dx_80_ver)),
+                        base_name,
+                        pcf_mod_processor(str(pcf_file)),
                         create_backup=False
                     )
-
-                    (folder_setup.temp_mods_dir / dx_80_ver).unlink()  # get them out of temp mods/ since they are patched directly into game vpk
+                    pcf_file.unlink()  # get them out of temp mods/ since they are patched directly into game vpk
 
                     # update progress bar
                     completed_files += 1
                     current_progress = start_progress + int((completed_files / total_files) * progress_range)
-                    self.update_progress(current_progress, f"Processing particle files... ({completed_files}/{total_files})")
+                    self.update_progress(current_progress,f"Processing particle files... ({completed_files}/{total_files})")
 
-                # now the rest
-                file_handler.process_file(
-                    base_name,
-                    pcf_mod_processor(str(pcf_file)),
-                    create_backup=False
-                )
-                pcf_file.unlink()  # get them out of temp mods/ since they are patched directly into game vpk
+                # handle custom folder
+                self.update_progress(80, "Making custom VPK")
+                game_type(Path(tf_path) / 'gameinfo.txt', uninstall=False)
 
-                # update progress bar
-                completed_files += 1
-                current_progress = start_progress + int((completed_files / total_files) * progress_range)
-                self.update_progress(current_progress,f"Processing particle files... ({completed_files}/{total_files})")
+                for custom_vpk in CUSTOM_VPK_NAMES:
+                    vpk_path = custom_dir / custom_vpk
+                    cache_path = custom_dir / (custom_vpk + ".sound.cache")
+                    if vpk_path.exists():
+                        vpk_path.unlink()
+                    if cache_path.exists():
+                        cache_path.unlink()
 
-            # handle custom folder
-            self.update_progress(80, "Making custom VPK")
-            game_type(Path(tf_path) / 'gameinfo.txt', uninstall=False)
+                # create new VPK for custom content & config
+                custom_content_dir = folder_setup.temp_mods_dir
+                copy_config_files(custom_content_dir)
+                patch_mainmenuoverride(tf_path)
+                # make vmts
+                generate_missing_vmt_files(custom_content_dir, tf_path)
 
-            for custom_vpk in CUSTOM_VPK_NAMES:
-                vpk_path = custom_dir / custom_vpk
-                cache_path = custom_dir / (custom_vpk + ".sound.cache")
-                if vpk_path.exists():
-                    vpk_path.unlink()
-                if cache_path.exists():
-                    cache_path.unlink()
+                for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
+                    split_file.unlink()
+                    # also remove any cache files
+                    cache_file = custom_dir / (split_file.name + ".sound.cache")
+                    if cache_file.exists():
+                        cache_file.unlink()
 
-            # create new VPK for custom content & config
-            custom_content_dir = folder_setup.temp_mods_dir
-            copy_config_files(custom_content_dir)
-            patch_mainmenuoverride(tf_path)
-            # make vmts
-            generate_missing_vmt_files(custom_content_dir, tf_path)
+                if custom_content_dir.exists() and any(custom_content_dir.iterdir()):
+                    # 2GB split size
+                    split_size = 2 ** 31
+                    vpk_base_path = custom_dir / CUSTOM_VPK_NAME.replace('.vpk', '')
 
-            for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
-                split_file.unlink()
-                # also remove any cache files
-                cache_file = custom_dir / (split_file.name + ".sound.cache")
-                if cache_file.exists():
-                    cache_file.unlink()
+                    if not VPKFile.create(str(custom_content_dir), str(vpk_base_path), split_size):
+                        self.error_signal.emit("Failed to create custom VPK")
+                        return
 
-            if custom_content_dir.exists() and any(custom_content_dir.iterdir()):
-                # 2GB split size
-                split_size = 2 ** 31
-                vpk_base_path = custom_dir / CUSTOM_VPK_NAME.replace('.vpk', '')
+                # flush quick precache every install
+                QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
+                quick_precache_path = custom_dir / "_QuickPrecache.vpk"
+                if quick_precache_path.exists():
+                    quick_precache_path.unlink()
 
-                if not VPKFile.create(str(custom_content_dir), str(vpk_base_path), split_size):
-                    self.error_signal.emit("Failed to create custom VPK")
-                    return
+                # legacy name
+                old_quick_precache_path = custom_dir / "QuickPrecache.vpk"
+                if old_quick_precache_path.exists():
+                    old_quick_precache_path.unlink()
 
-            # flush quick precache every install
-            QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
-            quick_precache_path = custom_dir / "_QuickPrecache.vpk"
-            if quick_precache_path.exists():
-                quick_precache_path.unlink()
+                # run quick precache if needed (by having props)
+                precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]))
+                if precache_prop_set:
+                    precache = QuickPrecache(str(Path(tf_path).parents[0]), debug=False)
+                    precache.run(auto=True)
+                    shutil.copy2(folder_setup.install_dir / 'quickprecache/_QuickPrecache.vpk', custom_dir)
+                    self.update_progress(90, "QuickPrecaching some models...")
 
-            # legacy name
-            old_quick_precache_path = custom_dir / "QuickPrecache.vpk"
-            if old_quick_precache_path.exists():
-                old_quick_precache_path.unlink()
-
-            # run quick precache if needed (by having props)
-            precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]))
-            if precache_prop_set:
-                precache = QuickPrecache(str(Path(tf_path).parents[0]), debug=False)
-                precache.run(auto=True)
-                shutil.copy2(folder_setup.install_dir / 'quickprecache/_QuickPrecache.vpk', custom_dir)
-                self.update_progress(90, "QuickPrecaching some models...")
-
-            get_from_custom_dir(custom_dir)
+                get_from_custom_dir(custom_dir)
 
             self.update_progress(100, "Installation complete")
             self.success_signal.emit("Mods installed successfully!")
