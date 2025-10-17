@@ -32,6 +32,25 @@ class Interface(QObject):
     def update_progress(self, progress: int, message: str):
         self.progress_signal.emit(progress, message)
 
+    def cleanup_huds(self, custom_dir: Path) -> None:
+        # clean up old HUDs that we installed (they have mod.json with preloader_installed flag)
+        items_to_delete = []
+        for item in custom_dir.iterdir():
+            if item.is_dir() and not item.name.startswith('_'):
+                mod_json = item / 'mod.json'
+                if mod_json.exists():
+                    try:
+                        with open(mod_json, 'r') as f:
+                            mod_info = json.load(f)
+                            if mod_info.get('type', '').lower() == 'hud' and mod_info.get('preloader_installed', False):
+                                items_to_delete.append(item)
+                    except json.JSONDecodeError as e:
+                        print(f"Warning: Invalid JSON in {mod_json}: {e}")
+
+        # delete after closing all file handles
+        for item in items_to_delete:
+            shutil.rmtree(item)
+
     def install(self, tf_path: str, selected_addons: List[str], mod_drop_zone=None):
         try:
             working_vpk_path = Path(tf_path) / "tf2_misc_dir.vpk"
@@ -210,28 +229,13 @@ class Interface(QObject):
             # copy hud as folder on its own
             custom_dir = Path(tf_path) / 'custom'
 
-            # clean up old HUDs that we installed (they have mod.json with preloader_installed flag)
-            items_to_delete = []
-            for item in custom_dir.iterdir():
-                if item.is_dir() and not item.name.startswith('_'):
-                    mod_json = item / 'mod.json'
-                    if mod_json.exists():
-                        try:
-                            with open(mod_json, 'r') as f:
-                                mod_info = json.load(f)
-                                if mod_info.get('type', '').lower() == 'hud' and mod_info.get('preloader_installed', False):
-                                    items_to_delete.append(item)
-                        except json.JSONDecodeError as e:
-                            print(f"Warning: Invalid JSON in {mod_json}: {e}")
-
-            # delete after closing all file handles
-            for item in items_to_delete:
-                shutil.rmtree(item)
+            self.cleanup_huds(custom_dir)
 
             for addon_name, addon_dir in hud_addons.items():
                 hud_dest = custom_dir / addon_name
                 if hud_dest.exists():
-                    shutil.rmtree(hud_dest)
+                    print(f'{hud_dest} already exists, skipping as to not overwrite possible user-modified files')
+                    continue
                 shutil.copytree(addon_dir, hud_dest)
 
                 # mark the HUD as installed by preloader
@@ -313,6 +317,9 @@ class Interface(QObject):
 
             # restore particles
             restore_particle_files(tf_path)
+
+            # remove preloader-installed HUDs
+            self.cleanup_huds(custom_dir)
 
             # flush quick precache
             QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
