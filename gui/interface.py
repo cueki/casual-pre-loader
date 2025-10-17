@@ -42,26 +42,21 @@ class Interface(QObject):
 
             total_files = 0
             files_to_copy = []
-            hud_addons = []
+            hud_addons = {}
 
             for addon_path in selected_addons:
                 addon_dir = folder_setup.addons_dir / addon_path
                 if addon_dir.exists() and addon_dir.is_dir():
                     mod_json_path = addon_dir / 'mod.json'
-                    is_hud = False
                     if mod_json_path.exists():
                         try:
                             with open(mod_json_path, 'r') as f:
                                 mod_info = json.load(f)
                                 if mod_info.get('type', '').lower() == 'hud':
-                                    is_hud = True
-                                    hud_addons.append((addon_path, addon_dir))
+                                    hud_addons[addon_path.lower()] = addon_dir
+                                    continue  # skip hud files for now
                         except json.JSONDecodeError as e:
                             print(f"Warning: Invalid JSON in {mod_json_path}: {e}")
-
-                    # skip hud files for now
-                    if is_hud:
-                        continue
 
                     for src_path in addon_dir.glob('**/*'):
                         if src_path.is_file() and src_path.name != 'mod.json' and src_path.name != 'sound.cache':
@@ -228,7 +223,7 @@ class Interface(QObject):
             for item in items_to_delete:
                 shutil.rmtree(item)
 
-            for addon_name, addon_dir in hud_addons:
+            for addon_name, addon_dir in hud_addons.items():
                 hud_dest = custom_dir / addon_name
                 if hud_dest.exists():
                     shutil.rmtree(hud_dest)
