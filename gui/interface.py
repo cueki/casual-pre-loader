@@ -94,6 +94,30 @@ class Interface(QObject):
                             total_files += 1
                             files_to_copy.append((src_path, addon_dir))
 
+            custom_dir = Path(tf_path) / 'custom'
+            custom_dir.mkdir(exist_ok=True)
+
+            self.cleanup_huds(custom_dir)
+
+            for addon_name, addon_dir in hud_addons.items():
+                hud_dest = custom_dir / addon_name
+                if hud_dest.exists():
+                    print(f'{hud_dest} already exists, skipping as to not overwrite possible user-modified files')
+                    continue
+                shutil.copytree(addon_dir, hud_dest)
+
+                # mark the HUD as installed by preloader
+                hud_mod_json = hud_dest / 'mod.json'
+                if hud_mod_json.exists():
+                    try:
+                        with open(hud_mod_json, 'r') as f:
+                            mod_info = json.load(f)
+                        mod_info['preloader_installed'] = True
+                        with open(hud_mod_json, 'w') as f:
+                            json.dump(mod_info, f, indent=2)
+                    except json.JSONDecodeError as e:
+                        print(f"Warning: Invalid JSON in {hud_mod_json}: {e}, skipping preloader_installed flag")
+
             # progress bar
             progress_range = 25
             completed_files = 0
@@ -214,8 +238,6 @@ class Interface(QObject):
 
             # handle custom folder
             self.update_progress(80, "Making custom VPK")
-            custom_dir = Path(tf_path) / 'custom'
-            custom_dir.mkdir(exist_ok=True)
             game_type(Path(tf_path) / 'gameinfo.txt', uninstall=False)
 
             for custom_vpk in CUSTOM_VPK_NAMES:
@@ -225,30 +247,6 @@ class Interface(QObject):
                     vpk_path.unlink()
                 if cache_path.exists():
                     cache_path.unlink()
-
-            # copy hud as folder on its own
-            custom_dir = Path(tf_path) / 'custom'
-
-            self.cleanup_huds(custom_dir)
-
-            for addon_name, addon_dir in hud_addons.items():
-                hud_dest = custom_dir / addon_name
-                if hud_dest.exists():
-                    print(f'{hud_dest} already exists, skipping as to not overwrite possible user-modified files')
-                    continue
-                shutil.copytree(addon_dir, hud_dest)
-
-                # mark the HUD as installed by preloader
-                hud_mod_json = hud_dest / 'mod.json'
-                if hud_mod_json.exists():
-                    try:
-                        with open(hud_mod_json, 'r') as f:
-                            mod_info = json.load(f)
-                        mod_info['preloader_installed'] = True
-                        with open(hud_mod_json, 'w') as f:
-                            json.dump(mod_info, f, indent=2)
-                    except json.JSONDecodeError as e:
-                        print(f"Warning: Invalid JSON in {hud_mod_json}: {e}, skipping preloader_installed flag")
 
             # create new VPK for custom content & config
             custom_content_dir = folder_setup.temp_mods_dir
