@@ -53,8 +53,13 @@ class Interface(QObject):
                             with open(mod_json_path, 'r') as f:
                                 mod_info = json.load(f)
                                 if mod_info.get('type', '').lower() == 'hud':
-                                    hud_addons[addon_path.lower()] = addon_dir
-                                    continue  # skip hud files for now
+                                    addon_path = addon_path.lower()
+
+                                    if hud_addons.get(addon_path) is None:
+                                        hud_addons[addon_path] = addon_dir
+                                        continue  # skip hud files for now
+                                    else:
+                                        raise Exception(f"There are 2 mods that have directory names which resolve to the same case-insensitive name:\n'{hud_addons[addon_path].name}'\n'{addon_dir.name}'")
                         except json.JSONDecodeError as e:
                             print(f"Warning: Invalid JSON in {mod_json_path}: {e}")
 
