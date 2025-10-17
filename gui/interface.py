@@ -138,7 +138,7 @@ class Interface(QObject):
             # process sound mods and copy needed script files from backup
             self.update_progress(35, "Processing sound mods...")
             backup_scripts_dir = folder_setup.backup_dir / 'scripts'
-            
+
             # collect VPK paths (vo and misc) for sound processing
             vpk_paths = []
             tf_path_obj = Path(tf_path)
@@ -147,7 +147,7 @@ class Interface(QObject):
                 vpk_paths.append(misc_vpk)
             vo_vpks = list(tf_path_obj.glob("tf2_sound_vo_*_dir.vpk"))
             vpk_paths.extend(vo_vpks)
-            
+
             sound_result = self.sound_handler.process_temp_sound_mods(
                 folder_setup.temp_mods_dir,
                 backup_scripts_dir,
@@ -203,34 +203,38 @@ class Interface(QObject):
             particle_files = folder_setup.temp_mods_dir.glob("*.pcf")
             for pcf_file in particle_files:
                 base_name = pcf_file.name
-                if (base_name != folder_setup.base_default_pcf.input_file.name and
-                        check_parents(PCFFile(pcf_file).decode(), folder_setup.base_default_parents)):
+
+                if (base_name != folder_setup.base_default_pcf.input_file.name and check_parents(PCFFile(pcf_file).decode(), folder_setup.base_default_parents)):
                     continue
+
                 if base_name == folder_setup.base_default_pcf.input_file.name:
                     update_materials(folder_setup.base_default_pcf, PCFFile(pcf_file).decode()).encode(pcf_file)
-                if pcf_file.stem in DX8_LIST:
-                    # dx80 first
+
+                if pcf_file.stem in DX8_LIST:  # dx80 first
                     dx_80_ver = Path(pcf_file.stem + "_dx80.pcf")
                     shutil.copy2(pcf_file, folder_setup.temp_mods_dir / dx_80_ver)
+
                     file_handler.process_file(
                         dx_80_ver.name,
                         pcf_mod_processor(str(folder_setup.temp_mods_dir / dx_80_ver)),
                         create_backup=False
                     )
-                    # get them out of temp mods/ since they are patched directly into game vpk
-                    (folder_setup.temp_mods_dir / dx_80_ver).unlink()
+
+                    (folder_setup.temp_mods_dir / dx_80_ver).unlink()  # get them out of temp mods/ since they are patched directly into game vpk
+
                     # update progress bar
                     completed_files += 1
                     current_progress = start_progress + int((completed_files / total_files) * progress_range)
                     self.update_progress(current_progress, f"Processing particle files... ({completed_files}/{total_files})")
+
                 # now the rest
                 file_handler.process_file(
                     base_name,
                     pcf_mod_processor(str(pcf_file)),
                     create_backup=False
                 )
-                # get them out of temp mods/ since they are patched directly into game vpk
-                pcf_file.unlink()
+                pcf_file.unlink()  # get them out of temp mods/ since they are patched directly into game vpk
+
                 # update progress bar
                 completed_files += 1
                 current_progress = start_progress + int((completed_files / total_files) * progress_range)
@@ -288,15 +292,13 @@ class Interface(QObject):
                 precache = QuickPrecache(str(Path(tf_path).parents[0]), debug=False)
                 precache.run(auto=True)
                 shutil.copy2(folder_setup.install_dir / 'quickprecache/_QuickPrecache.vpk', custom_dir)
-                self.update_progress(90, f"QuickPrecaching some models...")
+                self.update_progress(90, "QuickPrecaching some models...")
 
             get_from_custom_dir(custom_dir)
 
             self.update_progress(100, "Installation complete")
             self.success_signal.emit("Mods installed successfully!")
-            # reset progress bar
-            self.update_progress(0, "Installation complete")
-
+            self.update_progress(0, "Installation complete")  # reset progress bar
         except Exception as e:
             self.error_signal.emit(f"An error occurred: {str(e)}")
         finally:
