@@ -472,8 +472,10 @@ class ParticleManagerGUI(QMainWindow):
                 self.settings_manager.set_skip_launch_options_popup(True)
 
     def rescan_addon_contents(self):
-        thread = threading.Thread(target=self.addon_manager.scan_addon_contents)
-        thread.daemon = True
+        thread = threading.Thread(
+				target=self.addon_manager.scan_addon_contents,
+				daemon=True
+		)
         thread.start()
 
     def start_install(self):
