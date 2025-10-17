@@ -25,14 +25,20 @@ If done right, you should now see `studiomdl.exe` inside the bin/ folder!
 
 ![](images/studiomdl.png)
 
-Now you can clone the repo, or install it as an AUR package!
+Now you can clone the repo, or install it as an [AUR package](https://aur.archlinux.org/packages/casual-pre-loader-git)!
 
-After installing yay: https://github.com/Jguer/yay 
-
+Using [yay](https://github.com/Jguer/yay):
 ```
 yay -S casual-pre-loader-git
 casual-pre-loader
 ```
+
+Using [paru](https://github.com/Morganamilo/paru):
+```
+paru -S casual-pre-loader-git
+casual-pre-loader
+```
+
 Or with git:
 ```
 git clone https://github.com/cueki/casual-pre-loader
