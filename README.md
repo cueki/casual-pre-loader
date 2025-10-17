@@ -28,19 +28,19 @@ If done right, you should now see `studiomdl.exe` inside the bin/ folder!
 Now you can clone the repo, or install it as an [AUR package](https://aur.archlinux.org/packages/casual-pre-loader-git)!
 
 Using [yay](https://github.com/Jguer/yay):
-```
+```sh
 yay -S casual-pre-loader-git
 casual-pre-loader
 ```
 
 Using [paru](https://github.com/Morganamilo/paru):
-```
+```sg
 paru -S casual-pre-loader-git
 casual-pre-loader
 ```
 
 Or with git:
-```
+```sh
 git clone https://github.com/cueki/casual-pre-loader
 cd casual-pre-loader
 python -m venv .venv
@@ -54,7 +54,7 @@ If you're on Ubuntu, or an Ubuntu-based derivative (such as Mint or PopOS), you 
 This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
 ```
 Installing `libxcb-cursor-dev` should solve the issue:
-```
+```sh
 sudo apt-get install -y libxcb-cursor-dev
 ```
 
