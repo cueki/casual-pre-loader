@@ -38,9 +38,9 @@ class InstallationManager(QObject):
         self.processing = True
         thread = threading.Thread(
             target=self.interface.install,
-            args=(self.tf_path, selected_addons, mod_drop_zone)
+            args=(self.tf_path, selected_addons, mod_drop_zone),
+			daemon=True
         )
-        thread.daemon = True
         thread.start()
 
     def restore(self):
@@ -61,9 +61,9 @@ class InstallationManager(QObject):
         self.processing = True
         thread = threading.Thread(
             target=self.interface.restore_backup,
-            args=(self.tf_path,)
+            args=(self.tf_path,),
+			daemon=True
         )
-        thread.daemon = True
         thread.start()
         return True
 
