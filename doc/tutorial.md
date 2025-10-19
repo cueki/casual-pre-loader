@@ -46,23 +46,23 @@ If you want a video supplement, please refer to the [**Video Supplement**](#vide
 ## Linux Tutorial:
 1. We need studiomdl.exe from the Windows version of TF2. First, force the use of proton in game properties, make sure to click "update" after.
 
-![](images/proton.png)
+![proton](images/proton.png)
 
 2. Once updated, navigate to your `Steam/steamapps/common/Team Fortress 2/` and rename bin/ to something other than bin/, for example, bin_/.
 
-![](images/bin.png)
+![bin](images/bin.png)
 
 3. Disable proton in game properties, and update again.
 
-![](images/disable_proton.png)
+![disable proton](images/disable_proton.png)
 
 4. Back in `Steam/steamapps/common/Team Fortress 2/`, rename `bin_/` back to `bin/` to merge the directories, or copy its contents into `bin/`.
 
-![](images/bin_merge.png)
+![bin merge](images/bin_merge.png)
 
 5. If done right, you should now see `studiomdl.exe` inside the `bin/` folder!
 
-![](images/studiomdl.png)
+![studiomdl](images/studiomdl.png)
 
 6. Now you can clone the repo, or install it as an [AUR package](https://aur.archlinux.org/packages/casual-pre-loader-git)!
 
