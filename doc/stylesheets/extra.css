@@ -1,0 +1,77 @@
+:root {
+	--md-typeset-a-color: var(--md-primary-fg-color);
+
+	.md-typeset a:focus, .md-typeset a:hover {
+		color: var(--md-accent-fg-color);
+	}
+}
+
+[data-md-color-scheme="default"] {
+	/* Primary color shades */
+	--md-primary-fg-color:                hsl(30, 80%, 47%);
+	--md-primary-bg-color:                hsl(30, 100%, 80%);
+
+	--md-default-bg-color:                var(--md-primary-bg-color);
+
+	/* Accent color shades */
+	--md-accent-fg-color:              hsl(30, 48%, 40%);
+	--md-accent-bg-color:              hsl(30, 48%, 25%);
+}
+
+[data-md-color-scheme="slate"] {
+	/* Primary color shades */
+	--md-primary-fg-color:                hsl(33, 66%, 55%);
+	--md-primary-bg-color:                hsl(30, 30%, 10%);
+
+	--md-default-bg-color:                var(--md-primary-bg-color);
+
+	/* Accent color shades */
+	--md-accent-fg-color:                 hsl(30, 100%, 80%);
+	--md-accent-bg-color:                 hsl(10, 100%, 56.1%);
+}
+
+
+body {
+	font-family: Verdana, sans-serif;
+	font-weight: 400;
+}
+
+strong, b {
+	font-weight: 700;
+}
+
+html {
+	--font-mono: 'JetBrains Mono', 'Space Mono', monospace;
+
+	--background:           oklch(98% 0.02 80);  /* bg */
+	--foreground:           oklch(15% 0.02 80);  /* icon and table of contents and chapter hover */
+	--primary:              oklch(30% 0.12 280); /* link text and search text and arrow button */
+	--primary-foreground:   oklch(98% 0.02 80);  /* i dont know */
+	--secondary:            oklch(85% 0.02 80);  /* search bar hover and page buttons bg */
+	--secondary-foreground: oklch(20% 0.02 80);  /* page button text */
+	--muted:                oklch(92% 0.02 80);  /* code block bg */
+	--muted-foreground:     oklch(45% 0.02 80);  /* chapters text */
+	--accent:               oklch(85% 0.02 80);  /* table of contents selected bg */
+	--accent-foreground:    oklch(15% 0.02 80);  /* hover text color for header text and icons */
+	--border:               oklch(80% 0.02 80);  /* border of search bar and header seperators, and also indents*/
+	--input:                oklch(85% 0.02 80);  /* only god knows */
+	--ring:                 oklch(40% 0.02 80);  /* another no clue banger */
+	--surface:              oklch(93% 0.02 80);  /* search bar hover */
+}
+
+html.dark {
+	--background:           oklch(10% 0.02 80);
+	--foreground:           oklch(95% 0.02 80);
+	--primary:              oklch(70% 0.12 280);
+	--primary-foreground:   oklch(15% 0.02 80);
+	--secondary:            oklch(20% 0.02 80);
+	--secondary-foreground: oklch(90% 0.02 80);
+	--muted:                oklch(18% 0.02 80);
+	--muted-foreground:     oklch(65% 0.02 80);
+	--accent:               oklch(25% 0.02 80);
+	--accent-foreground:    oklch(95% 0.02 80);
+	--border:               oklch(35% 0.02 80);
+	--input:                oklch(25% 0.02 80);
+	--ring:                 oklch(60% 0.02 80);
+	--card:                 oklch(15% 0.02 80);
+}

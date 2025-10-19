@@ -1,0 +1,60 @@
+site_name: Casual-Pre-loader
+site_author: fethas & djsigmann
+
+repo_url: https://github.com/djsigmann/casual-pre-loader
+site_url: https://djsigmann.github.io/casual-pre-loader
+
+docs_dir: doc
+
+nav:
+  - Home: index.md
+  - Tutorial: tutorial.md
+  - FAQ: faq.md
+  - Troubleshooting: troubleshooting.md
+  - How does this work?: howwork.md
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+      # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  favicon: images/cueki_icon.png
+  logo: images/cueki_icon.png
+
+  topbar_sections: false
+  show_datetime: true
+  katex_options: # optional
+    macros: # example of macros
+      "\\RR": "\\mathbb{R}"
+      "\\dx": "\\mathrm{d}x"
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+      baselevel: 1
+      # separator: "_"
+
+plugins:
+  - search
+
+extra_css:
+  - stylesheets/extra.css
+  - https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap
+  - https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap
