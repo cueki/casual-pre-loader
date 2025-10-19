@@ -1,3 +1,4 @@
+import collections
 import json
 import shutil
 from PyQt6.QtWidgets import QListWidgetItem, QMessageBox
@@ -17,14 +18,12 @@ class AddonManager(QObject):
         addons_list.blockSignals(True)
         addons_list.clear()
         addons_list.blockSignals(False)
-        addon_groups = {"texture": [], "model": [], "misc": [], "animation": [], "unknown": []}
+        addon_groups = collections.defaultdict(list)
 
         for addon_path in addons_dir.iterdir():
             if addon_path.is_dir():
                 addon_info = self.load_addon_info(addon_path.name)
                 addon_type = addon_info.get("type", "unknown").lower()
-                if addon_type not in addon_groups:
-                    addon_groups[addon_type] = []
                 addon_groups[addon_type].append(addon_info)
 
         # sort the addon groups alphabetically
@@ -36,7 +35,7 @@ class AddonManager(QObject):
 
         # add addons to list widget with group splitters
         for addon_type in addon_groups:
-            if addon_type != "unknown" and addon_groups[addon_type]:
+            if addon_type != "unknown":
                 splitter = QListWidgetItem("──── " + str.title(addon_type) + " ────")
                 splitter.setFlags(Qt.ItemFlag.NoItemFlags)
                 splitter.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
