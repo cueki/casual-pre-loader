@@ -1,0 +1,26 @@
+site_name: Documentation
+nav:
+  - Home: index.md
+  - Tutorial: tutorial.md
+  - FAQ: faq.md
+  - Troubleshooting: troubleshooting.md
+  - How does this work?: howwork.md
+theme:
+  name: shadcn
+  show_title: true # show the title in the top bar
+  show_stargazers: true # show the stargazers in the top bar
+  pygments_style: # default styles 
+        light: solarized-light
+        dark: coffee
+  icon: img/favicon.ico # use the shadcn svg if not defined
+  topbar_sections: false # NEW!
+  katex_options: # optional
+    macros: # example of macros
+      "\\RR": "\\mathbb{R}" 
+      "\\dx": "\\mathrm{d}x"
+  show_datetime: false 
+markdown_extensions:
+  - admonition
+extra_css:
+  - stylesheets/extra.css
+  - https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700;800;900&display=swap

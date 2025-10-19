@@ -1,0 +1,46 @@
+body {
+  font-family: 'Comfortaa', sans-serif;
+  font-weight: 600;  /* or 600 for even heavier */
+}
+
+/* Make bold text heavier */
+strong, b {
+  font-weight: 800;  /* or even 800/900 if available */
+  text-shadow: 0.5px 0 0 currentColor;
+}
+
+html {
+  --background: oklch(98% 0.02 80);        /* bg */
+  --foreground: oklch(15% 0.02 80);        /* icon and table of contents and chapter hover */
+  --primary: oklch(30% 0.12 280);           /* link text and search text and arrow button */
+  --primary-foreground: oklch(98% 0.02 80); /* i dont know */
+  --secondary: oklch(85% 0.02 80);         /* search bar hover and page buttons bg */
+  --secondary-foreground: oklch(20% 0.02 80); /* page button text */
+  --muted: oklch(92% 0.02 80);             /* code block bg */
+  --muted-foreground: oklch(45% 0.02 80);  /* chapters text */
+  --accent: oklch(85% 0.02 80);            /* table of contents selected bg */
+  --accent-foreground: oklch(15% 0.02 80); /* hover text color for header text and icons */
+  --border: oklch(80% 0.02 80);            /* border of search bar and header seperators, and also indents*/
+  --input: oklch(85% 0.02 80);             /* only god knows */
+  --ring: oklch(40% 0.02 80);              /* another no clue banger */
+  --surface: oklch(93% 0.02 80);           /* search bar hover */
+}
+
+
+html.dark {
+  --background: oklch(10% 0.02 80);
+  --foreground: oklch(95% 0.02 80);
+  --primary: oklch(70% 0.12 280);
+  --primary-foreground: oklch(15% 0.02 80);
+  --secondary: oklch(20% 0.02 80);
+  --secondary-foreground: oklch(90% 0.02 80);
+  --muted: oklch(18% 0.02 80);
+  --muted-foreground: oklch(65% 0.02 80);
+  --accent: oklch(25% 0.02 80);
+  --accent-foreground: oklch(95% 0.02 80);
+  --border: oklch(35% 0.02 80);
+  --input: oklch(25% 0.02 80);
+  --ring: oklch(60% 0.02 80);
+  --card: oklch(15% 0.02 80);
+}
+
