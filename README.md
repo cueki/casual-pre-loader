@@ -25,23 +25,39 @@ If done right, you should now see `studiomdl.exe` inside the bin/ folder!
 
 ![](images/studiomdl.png)
 
-Now you can clone the repo, or install it as an AUR package!
+Now you can clone the repo, or install it as an [AUR package](https://aur.archlinux.org/packages/casual-pre-loader-git)!
 
-After installing yay: https://github.com/Jguer/yay 
-
-```
+Using [yay](https://github.com/Jguer/yay):
+```sh
 yay -S casual-pre-loader-git
 casual-pre-loader
 ```
-Or with git:
+
+Using [paru](https://github.com/Morganamilo/paru):
+```sg
+paru -S casual-pre-loader-git
+casual-pre-loader
 ```
+
+Or with git:
+```sh
 git clone https://github.com/cueki/casual-pre-loader
 cd casual-pre-loader
 python -m venv .venv
-source .venv/bin/activate (you will need activate the venv each time)
+source .venv/bin/activate # (you will need to activate the venv each time)
 pip install -r requirements.txt
 python main.py
 ```
+
+If you're on Ubuntu, or an Ubuntu-based derivative (such as Mint or PopOS), you may get an error similiar to the following:
+```
+This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+```
+Installing `libxcb-cursor-dev` should solve the issue:
+```sh
+sudo apt-get install -y libxcb-cursor-dev
+```
+
 # How does this work?
 
 There are two exploits im using, one that many are familiar with, being the game_info change (nothing really noteworthy here, known widely since at least ~~2018-2019~~ **2020!** my bad, incorrectly recalled dates, should have double-checked), and the second being that the game doesn't actually check the md5 hashes outlined in the directory vpk.
