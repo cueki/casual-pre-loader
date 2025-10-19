@@ -1,0 +1,53 @@
+site_name: Casual-Pre-loader
+site_author: Feathers & djsigmann
+
+repo_url: https://github.com/cueki/casual-pre-loader
+site_url: https://cueki.github.io/casual-pre-loader/
+
+docs_dir: doc
+
+nav:
+  - Home: index.md
+  - Tutorial: tutorial.md
+  - FAQ: faq.md
+  - Troubleshooting: troubleshooting.md
+  - How It Works: how_it_works.md
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+      # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  favicon: images/cueki_icon.png
+  logo: images/cueki_icon.png
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+      baselevel: 1
+      separator: "-"
+
+plugins:
+  - search
+
+extra_css:
+  - stylesheets/extra.css
+  - https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap
+  - https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap
