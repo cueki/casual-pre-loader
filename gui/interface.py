@@ -13,7 +13,7 @@ from core.handlers.sound_handler import SoundHandler
 from core.backup_manager import prepare_working_copy
 from operations.for_the_love_of_god_add_vmts_to_your_mods import generate_missing_vmt_files
 from operations.pcf_rebuild import load_particle_system_map, extract_elements
-from operations.file_processors import pcf_mod_processor, game_type, get_from_custom_dir
+from operations.file_processors import pcf_from_decoded, game_type, get_from_custom_dir
 from operations.vgui_preload import patch_mainmenuoverride
 from quickprecache.precache_list import make_precache_list
 from quickprecache.quick_precache import QuickPrecache
@@ -201,39 +201,36 @@ class Interface(QObject):
                 completed_files = 0
                 self.update_progress(start_progress, f"Processing particle files... (0/{total_files})")
 
-                particle_files = folder_setup.temp_mods_dir.glob("*.pcf")
                 for pcf_file in particle_files:
                     base_name = pcf_file.name
 
-                    if (base_name != folder_setup.base_default_pcf.input_file.name and check_parents(PCFFile(pcf_file).decode(), folder_setup.base_default_parents)):
+                    mod_pcf = PCFFile(pcf_file).decode()
+
+                    if base_name != folder_setup.base_default_pcf.input_file.name and check_parents(mod_pcf, folder_setup.base_default_parents):
                         continue
 
                     if base_name == folder_setup.base_default_pcf.input_file.name:
-                        update_materials(folder_setup.base_default_pcf, PCFFile(pcf_file).decode()).encode(pcf_file)
+                        mod_pcf = update_materials(folder_setup.base_default_pcf, mod_pcf)
 
                     if pcf_file.stem in DX8_LIST:  # dx80 first
-                        dx_80_ver = Path(pcf_file.stem + "_dx80.pcf")
-                        shutil.copy2(pcf_file, folder_setup.temp_mods_dir / dx_80_ver)
-
+                        dx_80_name = pcf_file.stem + "_dx80.pcf"
                         file_handler.process_file(
-                            dx_80_ver.name,
-                            pcf_mod_processor(str(folder_setup.temp_mods_dir / dx_80_ver)),
+                            dx_80_name,
+                            pcf_from_decoded(mod_pcf),
                             create_backup=False
                         )
-                        (folder_setup.temp_mods_dir / dx_80_ver).unlink()  # get them out of temp mods/ since they are patched directly into game vpk
 
                         # update progress bar
                         completed_files += 1
                         current_progress = start_progress + int((completed_files / total_files) * progress_range)
                         self.update_progress(current_progress, f"Processing particle files... ({completed_files}/{total_files})")
 
-                    # now the rest
                     file_handler.process_file(
                         base_name,
-                        pcf_mod_processor(str(pcf_file)),
+                        pcf_from_decoded(mod_pcf),
                         create_backup=False
                     )
-                    pcf_file.unlink()  # get them out of temp mods/ since they are patched directly into game vpk
+                    pcf_file.unlink()  # delete temp file
 
                     # update progress bar
                     completed_files += 1

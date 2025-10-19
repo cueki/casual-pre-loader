@@ -113,19 +113,16 @@ class AdvancedParticleMerger:
             if elements_we_still_need:
                 game_file_path = folder_setup.temp_game_files_dir / particle_group
                 game_file_in = PCFFile(game_file_path).decode()
-                game_file_out = folder_setup.get_output_path(f"game_{particle_group}")
-                extract_elements(game_file_in, elements_we_still_need).encode(game_file_out)
+                game_elements = extract_elements(game_file_in, elements_we_still_need)
 
                 if duplicates:
-                    game_elements = PCFFile(game_file_out).decode()
                     try:
                         result = merge_pcf_files(chosen_pcf, game_elements)
                     except ValueError as e:
                         print(f"Warning: Failed to merge with game elements: {e}")
                         result = chosen_pcf
                 else:
-                    group_files.append(game_file_out)
-                    pcf_files = [PCFFile(particle).decode() for particle in group_files]
+                    pcf_files.append(game_elements)
                     result = sequential_merge(pcf_files)
             else:
                 result = chosen_pcf if duplicates else result

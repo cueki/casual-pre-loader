@@ -13,11 +13,9 @@ def pcf_empty_root_processor():
     return process_pcf
 
 
-def pcf_mod_processor(mod_path: str):
+def pcf_from_decoded(decoded_pcf: PCFFile):
     def process_pcf(game_pcf) -> PCFFile:
-        mod_pcf = PCFFile(mod_path)
-        mod_pcf.decode()
-        result = remove_duplicate_elements(mod_pcf)
+        result = remove_duplicate_elements(decoded_pcf)
         return result
 
     return process_pcf
