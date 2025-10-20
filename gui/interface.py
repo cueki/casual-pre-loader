@@ -287,13 +287,18 @@ class Interface(QObject):
                 old_quick_precache_path.unlink()
 
             # run quick precache if needed (by having props)
+            self.update_progress(85, "Scanning for models to precache...")
             precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]))
             if precache_prop_set:
-                precache = QuickPrecache(str(Path(tf_path).parents[0]), debug=False)
+                precache = QuickPrecache(
+                    str(Path(tf_path).parents[0]),
+                    debug=False,
+                    progress_callback=self.update_progress
+                )
                 precache.run(auto=True)
                 shutil.copy2(folder_setup.install_dir / 'quickprecache/_QuickPrecache.vpk', custom_dir)
-                self.update_progress(90, "QuickPrecaching some models...")
 
+            self.update_progress(97, "Finalizing...")
             get_from_custom_dir(custom_dir)
 
             self.update_progress(100, "Installation complete")
