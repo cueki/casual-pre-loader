@@ -49,7 +49,7 @@ class AddonManager(QObject):
                     self.addons_file_paths[addon_info_dict['addon_name']] = addon_info_dict
 
         # add unknown addons at the end
-        if addon_groups["unknown"]:
+        if addon_groups.get("unknown"):
             splitter = QListWidgetItem("──── Unknown Addons ────")
             splitter.setFlags(Qt.ItemFlag.NoItemFlags)
             splitter.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
