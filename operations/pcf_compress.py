@@ -72,7 +72,6 @@ def reorder_elements(pcf: PCFFile, duplicates):
     old_to_new = {}
     new_index = 0
 
-    # process elements in order
     for old_index, element in enumerate(pcf.elements):
         if old_index not in duplicate_indices:
             old_to_new[old_index] = new_index
@@ -133,6 +132,7 @@ def optimize_string_dictionary(pcf: PCFFile):
 
 
 def _remove_default_attributes(element: PCFElement, defaults_dict: dict):
+    # helper
     attributes_to_remove = []
     for attr_name, (attr_type, value) in element.attributes.items():
         attr_name_str = attr_name.decode('ascii')
