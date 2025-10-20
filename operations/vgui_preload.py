@@ -31,11 +31,11 @@ def patch_mainmenuoverride(tf_path: str):
                 found_mainmenuoverride = True
 
     if not found_mainmenuoverride:
-        custom_content_dir = folder_setup.temp_mods_dir / "resource" / "ui"
+        custom_content_dir = folder_setup.temp_to_be_vpk_dir / "resource" / "ui"
         custom_content_dir.mkdir(parents=True, exist_ok=True)
         shutil.copy2(folder_setup.install_dir / 'backup/resource/ui/mainmenuoverride.res', custom_content_dir / 'mainmenuoverride.res')
         # info.vdf so tf2 accepts res file
-        shutil.copy2(folder_setup.install_dir / 'backup/info.vdf', folder_setup.temp_mods_dir / 'info.vdf')
+        shutil.copy2(folder_setup.install_dir / 'backup/info.vdf', folder_setup.temp_to_be_vpk_dir / 'info.vdf')
         _add_vguipreload_string(custom_content_dir / "mainmenuoverride.res")
 
 
