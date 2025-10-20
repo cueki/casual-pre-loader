@@ -55,13 +55,16 @@ def update_array_indices(pcf: PCFFile, duplicates):
 
 
 def reorder_elements(pcf: PCFFile, duplicates):
-    # get indices of all duplicate elements (except first occurrences)
+    # deduplicate indices lists and build mapping
+    # same index can appear multiple times if referenced from multiple arrays
     duplicate_indices = set()
     duplicate_to_first = {}
+
     for indices in duplicates.values():
-        first_idx = indices[0]
-        duplicate_indices.update(indices[1:])
-        for dup_idx in indices[1:]:
+        unique_indices = list(dict.fromkeys(indices))
+        first_idx = unique_indices[0]
+        for dup_idx in unique_indices[1:]:
+            duplicate_indices.add(dup_idx)
             duplicate_to_first[dup_idx] = first_idx
 
     # create new list without duplicates and mapping of old to new indices
@@ -83,14 +86,14 @@ def reorder_elements(pcf: PCFFile, duplicates):
                 # map each index to its new position
                 new_value = []
                 for idx in value:
-                    # if it's a duplicate, use the index of first occurrence
-                    if idx in duplicate_indices:
+                    # if it's a duplicate, use the first occurrence
+                    if idx in duplicate_to_first:
                         idx = duplicate_to_first[idx]
                     new_value.append(old_to_new[idx])
                 element.attributes[attr_name] = (attr_type, new_value)
             elif attr_type == AttributeType.ELEMENT:
                 # handle single element references
-                if value in duplicate_indices:
+                if value in duplicate_to_first:
                     value = duplicate_to_first[value]
                 element.attributes[attr_name] = (attr_type, old_to_new[value])
 
