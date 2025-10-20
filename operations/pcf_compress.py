@@ -40,9 +40,10 @@ def update_array_indices(pcf: PCFFile, duplicates):
     # create a mapping of old indices to their replacement
     index_map = {}
     for indices in duplicates.values():
-        first_index = indices[0]  # keep the first occurrence
-        # map all other indices to the first one
-        for idx in indices[1:]:
+        # deduplicate the indices list first
+        unique_indices = list(dict.fromkeys(indices))
+        first_index = unique_indices[0]
+        for idx in unique_indices[1:]:
             index_map[idx] = first_index
 
     # update all ELEMENT_ARRAY attributes in the PCF
@@ -113,17 +114,10 @@ def optimize_string_dictionary(pcf: PCFFile):
     new_dictionary = sorted(list(used_strings))  # sort for consistency
     old_to_new = {old_str: i for i, old_str in enumerate(new_dictionary)}
 
-    # update element references in-place
+    # update element type name indices
     for element in pcf.elements:
-        # update type name index
         old_type = pcf.string_dictionary[element.type_name_index]
         element.type_name_index = old_to_new[old_type]
-
-        # update attribute dictionary
-        new_attributes = {}
-        for attr_name, value in element.attributes.items():
-            new_attributes[attr_name] = value
-        element.attributes = new_attributes
 
     # set new dictionary
     pcf.string_dictionary = new_dictionary
