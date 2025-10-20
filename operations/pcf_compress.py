@@ -89,13 +89,17 @@ def reorder_elements(pcf: PCFFile, duplicates):
                     # if it's a duplicate, use the first occurrence
                     if idx in duplicate_to_first:
                         idx = duplicate_to_first[idx]
-                    new_value.append(old_to_new[idx])
+                    # only add if valid index
+                    if idx in old_to_new:
+                        new_value.append(old_to_new[idx])
                 element.attributes[attr_name] = (attr_type, new_value)
             elif attr_type == AttributeType.ELEMENT:
                 # handle single element references
                 if value in duplicate_to_first:
                     value = duplicate_to_first[value]
-                element.attributes[attr_name] = (attr_type, old_to_new[value])
+                # only update if valid index, otherwise leave alone
+                if value in old_to_new:
+                    element.attributes[attr_name] = (attr_type, old_to_new[value])
 
     # replace the elements list with our reordered version
     pcf.elements = new_elements
