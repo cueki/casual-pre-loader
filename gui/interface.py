@@ -135,7 +135,14 @@ class Interface(QObject):
                 for src_path, addon_dir in files_to_copy:
                     # relative path from addon directory
                     rel_path = src_path.relative_to(addon_dir)
-                    dest_path = folder_setup.temp_mods_dir / rel_path
+
+                    # route files to appropriate temp directory
+                    # PCF files go to to_be_patched, everything else goes to to_be_vpk
+                    if src_path.suffix.lower() == '.pcf':
+                        dest_path = folder_setup.temp_to_be_patched_dir / rel_path
+                    else:
+                        dest_path = folder_setup.temp_to_be_vpk_dir / rel_path
+
                     dest_path.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(src_path, dest_path)
 
@@ -158,7 +165,7 @@ class Interface(QObject):
                 vpk_paths.extend(vo_vpks)
 
                 sound_result = self.sound_handler.process_temp_sound_mods(
-                    folder_setup.temp_mods_dir,
+                    folder_setup.temp_to_be_vpk_dir,
                     backup_scripts_dir,
                     vpk_paths
                 )
@@ -166,7 +173,7 @@ class Interface(QObject):
                     self.update_progress(50, f"Sound processing: {sound_result['message']}")
 
                 # patch in skybox mods if present in addon files
-                handle_skybox_mods(folder_setup.temp_mods_dir, tf_path)
+                handle_skybox_mods(folder_setup.temp_to_be_vpk_dir, tf_path)
 
             # these 4 particle files contain duplicate elements that are found elsewhere, this is an oversight by valve.
             # what im doing is simply fixing this oversight using context from the elements themselves
@@ -179,22 +186,22 @@ class Interface(QObject):
                 "dirty_explode.pcf",
             ]
             for duplicate_effect in duplicate_effects:
-                target_path = folder_setup.temp_mods_dir / duplicate_effect
+                target_path = folder_setup.temp_to_be_patched_dir / duplicate_effect
                 if not target_path.exists():
                     # copy from game_files if not in
-                    source_path = folder_setup.temp_game_files_dir / duplicate_effect
+                    source_path = folder_setup.temp_to_be_referenced_dir / duplicate_effect
                     if source_path.exists():
                         extract_elements(PCFFile(source_path).decode(),
                                          load_particle_system_map(folder_setup.install_dir / 'particle_system_map.json')
                                          [f'particles/{target_path.name}']).encode(target_path)
 
-            if (folder_setup.temp_mods_dir / "blood_trail.pcf").exists():
+            if (folder_setup.temp_to_be_patched_dir / "blood_trail.pcf").exists():
                 # hacky fix for blood_trail being so small
-                shutil.move((folder_setup.temp_mods_dir / "blood_trail.pcf"),
-                            (folder_setup.temp_mods_dir / "npc_fx.pcf"))
+                shutil.move((folder_setup.temp_to_be_patched_dir / "blood_trail.pcf"),
+                            (folder_setup.temp_to_be_patched_dir / "npc_fx.pcf"))
 
             # more progress bar math yippee
-            particle_files = list(folder_setup.temp_mods_dir.glob("*.pcf"))
+            particle_files = list(folder_setup.temp_to_be_patched_dir.glob("*.pcf"))
             dx8_files = sum(1 for pcf_file in particle_files if pcf_file.stem in DX8_LIST)
             total_files = len(particle_files) + dx8_files
             start_progress = 50
@@ -246,7 +253,7 @@ class Interface(QObject):
                     cache_path.unlink()
 
             # create new VPK for custom content & config
-            custom_content_dir = folder_setup.temp_mods_dir
+            custom_content_dir = folder_setup.temp_to_be_vpk_dir
             copy_config_files(custom_content_dir)
             patch_mainmenuoverride(tf_path)
             # make vmts

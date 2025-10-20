@@ -141,10 +141,19 @@ def get_from_custom_dir(custom_dir: Path):
     for vpk_file in custom_dir.glob("*.vpk"):
         get_from_vpk(vpk_file)
 
+    target_paths = [
+        "materials/effects/",
+        "materials/models/",
+        "materials/particle/",
+        "materials/particles/",
+        "materials/prediction/",
+        "materials/sprites/healbeam"
+    ]
+
     for directory in custom_dir.glob("*"):
         if directory.is_dir():
-            for pattern in ["materials/effects/**/*", "materials/models/**/*", "materials/particle/**/*",
-                            "materials/particles/", "materials/prediction/**/*", "materials/sprites/healbeam*"]:
-                for file_path in directory.glob(pattern):
-                    if file_path.is_file():
+            for file_path in directory.glob("**/*"):
+                if file_path.is_file():
+                    rel_path = str(file_path.relative_to(directory)).replace('\\', '/')
+                    if any(rel_path.startswith(target) for target in target_paths):
                         get_from_file(file_path)
