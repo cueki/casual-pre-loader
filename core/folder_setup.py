@@ -49,10 +49,10 @@ class FolderConfig:
 
     # temp and it's nested folders (to be cleared every run)
     _temp_folder = "temp"
-    _temp_working_folder = "working"
-    _temp_output_folder = "output"
-    _temp_mods_folder = "mods"
-    _temp_game_files_folder = "game_files"
+    _temp_to_be_processed_folder = "to_be_processed"
+    _temp_to_be_referenced_folder = "to_be_referenced"
+    _temp_to_be_patched_folder = "to_be_patched"
+    _temp_to_be_vpk_folder = "to_be_vpk"
 
     def __post_init__(self):
         self.backup_dir = self.project_dir / self._backup_folder
@@ -62,10 +62,10 @@ class FolderConfig:
         self.addons_dir = self.mods_dir / self._mods_addons_folder
 
         self.temp_dir = self.project_dir / self._temp_folder
-        self.temp_working_dir = self.temp_dir / self._temp_working_folder
-        self.temp_output_dir = self.temp_dir / self._temp_output_folder
-        self.temp_mods_dir = self.temp_dir / self._temp_mods_folder
-        self.temp_game_files_dir = self.temp_dir / self._temp_game_files_folder
+        self.temp_to_be_processed_dir = self.temp_dir / self._temp_to_be_processed_folder
+        self.temp_to_be_referenced_dir = self.temp_dir / self._temp_to_be_referenced_folder
+        self.temp_to_be_patched_dir = self.temp_dir / self._temp_to_be_patched_folder
+        self.temp_to_be_vpk_dir = self.temp_dir / self._temp_to_be_vpk_folder
 
     def create_required_folders(self) -> None:
         folders = [
@@ -74,18 +74,18 @@ class FolderConfig:
             self.particles_dir,
 
             self.temp_dir,
-            self.temp_working_dir,
-            self.temp_output_dir,
-            self.temp_mods_dir,
-            self.temp_game_files_dir
+            self.temp_to_be_processed_dir,
+            self.temp_to_be_referenced_dir,
+            self.temp_to_be_patched_dir,
+            self.temp_to_be_vpk_dir
         ]
 
         for folder in folders:
             folder.mkdir(parents=True, exist_ok=True)
 
     def initialize_pcf(self):
-        if self.temp_game_files_dir.exists():
-            default_base_path = self.temp_game_files_dir / "disguise.pcf"
+        if self.temp_to_be_referenced_dir.exists():
+            default_base_path = self.temp_to_be_referenced_dir / "disguise.pcf"
             if default_base_path.exists():
                 self.base_default_pcf = PCFFile(default_base_path).decode()
                 self.base_default_parents = get_parent_elements(self.base_default_pcf)
@@ -93,13 +93,7 @@ class FolderConfig:
     def cleanup_temp_folders(self) -> None:
         # anything put in temp/ will be gone !!!!!
         if self.temp_dir.exists():
-            for file in self.temp_dir.glob('**/*'):
-                if file.is_file():
-                    file.unlink()
-            for subfolder in reversed(list(self.temp_dir.glob('**/*'))):
-                if subfolder.is_dir():
-                    subfolder.rmdir()
-            self.temp_dir.rmdir()
+            shutil.rmtree(self.temp_dir)
             self.base_default_pcf = None
             self.base_default_parents = None
 
@@ -115,20 +109,14 @@ class FolderConfig:
     def get_temp_path(self, filename: str) -> Path:
         return self.temp_dir / filename
 
-    def get_working_path(self, filename: str) -> Path:
-        return self.temp_working_dir / filename
-
     def get_output_path(self, filename: str) -> Path:
-        return self.temp_output_dir / filename
+        return self.temp_to_be_processed_dir / filename
 
     def get_backup_path(self, filename: str) -> Path:
         return self.backup_dir / filename
 
-    def get_temp_mods_path(self, filename: str) -> Path:
-        return self.temp_mods_dir / filename
-
     def get_game_files_path(self, filename: str) -> Path:
-        return self.temp_game_files_dir / filename
+        return self.temp_to_be_referenced_dir / filename
 
 
 # create a default instance for import
