@@ -13,7 +13,8 @@ from core.handlers.sound_handler import SoundHandler
 from core.backup_manager import prepare_working_copy
 from operations.for_the_love_of_god_add_vmts_to_your_mods import generate_missing_vmt_files
 from operations.pcf_rebuild import load_particle_system_map, extract_elements
-from operations.file_processors import pcf_from_decoded, game_type, get_from_custom_dir
+from operations.file_processors import game_type, get_from_custom_dir
+from operations.pcf_compress import remove_duplicate_elements
 from operations.vgui_preload import patch_mainmenuoverride
 from quickprecache.precache_list import make_precache_list
 from quickprecache.quick_precache import QuickPrecache
@@ -32,7 +33,8 @@ class Interface(QObject):
     def update_progress(self, progress: int, message: str):
         self.progress_signal.emit(progress, message)
 
-    def cleanup_huds(self, custom_dir: Path) -> None:
+    @staticmethod
+    def cleanup_huds(custom_dir: Path) -> None:
         # clean up old HUDs that we installed (they have mod.json with preloader_installed flag)
         items_to_delete = []
         for item in custom_dir.iterdir():
@@ -54,7 +56,6 @@ class Interface(QObject):
     def install(self, tf_path: str, selected_addons: List[str], mod_drop_zone=None):
         try:
             working_vpk_path = Path(tf_path) / "tf2_misc_dir.vpk"
-            vpk_file = VPKFile(str(working_vpk_path))
             file_handler = FileHandler(str(working_vpk_path))
             folder_setup.initialize_pcf()
             self.update_progress(0, "Installing addons...")
@@ -212,24 +213,19 @@ class Interface(QObject):
                     if base_name == folder_setup.base_default_pcf.input_file.name:
                         mod_pcf = update_materials(folder_setup.base_default_pcf, mod_pcf)
 
+                    # process the mod PCF
+                    processed_pcf = remove_duplicate_elements(mod_pcf)
+
                     if pcf_file.stem in DX8_LIST:  # dx80 first
                         dx_80_name = pcf_file.stem + "_dx80.pcf"
-                        file_handler.process_file(
-                            dx_80_name,
-                            pcf_from_decoded(mod_pcf),
-                            create_backup=False
-                        )
+                        file_handler.process_file(dx_80_name, processed_pcf)
 
                         # update progress bar
                         completed_files += 1
                         current_progress = start_progress + int((completed_files / total_files) * progress_range)
                         self.update_progress(current_progress, f"Processing particle files... ({completed_files}/{total_files})")
 
-                    file_handler.process_file(
-                        base_name,
-                        pcf_from_decoded(mod_pcf),
-                        create_backup=False
-                    )
+                    file_handler.process_file(base_name, processed_pcf)
                     pcf_file.unlink()  # delete temp file
 
                     # update progress bar

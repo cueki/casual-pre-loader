@@ -22,7 +22,7 @@ def handle_skybox_mods(temp_dir: Path, tf_path) -> int:
     for vmt_path in skybox_vmts:
         try:
             with open(vmt_path, 'rb') as f:
-                original_content = f.read()
+                vmt_content = f.read()
 
             # get the original texture path
             texture_path = Path("skybox/" + Path(vmt_path).stem)
@@ -42,11 +42,8 @@ def handle_skybox_mods(temp_dir: Path, tf_path) -> int:
                 print(f"Error: Could not find {vmt_filename} in VPK")
                 continue
 
-            def processor(content):
-                return original_content
-
             # patch vmt into vpk
-            success = file_handler.process_file(target_path, processor, create_backup=False)
+            success = file_handler.process_file(target_path, vmt_content)
             vmt_path.unlink()
 
             if success:

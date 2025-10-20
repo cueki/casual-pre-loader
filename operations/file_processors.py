@@ -1,6 +1,5 @@
 from pathlib import Path
 from valve_parsers import VPKFile, PCFFile
-from operations.pcf_compress import remove_duplicate_elements
 
 
 def pcf_empty_root_processor():
@@ -9,14 +8,6 @@ def pcf_empty_root_processor():
         attr_type, _ = root_element.attributes[b'particleSystemDefinitions']
         root_element.attributes[b'particleSystemDefinitions'] = (attr_type, [])
         return pcf
-
-    return process_pcf
-
-
-def pcf_from_decoded(decoded_pcf: PCFFile):
-    def process_pcf(game_pcf) -> PCFFile:
-        result = remove_duplicate_elements(decoded_pcf)
-        return result
 
     return process_pcf
 
