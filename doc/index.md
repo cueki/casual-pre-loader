@@ -19,6 +19,9 @@
 
 [agrastiOs](https://github.com/agrastiOs) for the [UltimateVisualFixPack](https://github.com/agrastiOs/Ultimate-TF2-Visual-Fix-Pack).
 
+[Feathers](https://github.com/FeathersTheChick) and [djsigmann](https://github.com/djsigmann) for help with the [documentation](https://djsigmann.github.io/casual-pre-loader) and misc development.
+
+[Akuji](https://gamebanana.com/members/2017711) for being a huge help with [discord support](https://discord.gg/BGFs4M6y3C) and misc development.
 ## Star History
 
 <a href="https://www.star-history.com/#cueki/casual-pre-loader&Date">

@@ -8,7 +8,7 @@ There are **two exploits** in use, one that many are familiar with, being the `g
 When first approaching this, I had no idea about the md5 hash being unchecked, I stumbled across that fact by accident some time in August 2023. *(Surely this has no correlation to any events whatsoever.)*
 
 While the game may not enforce the hashes, it *does enforce* the file sizes, therefore, in order to replace any of the files in the game, I need to ensure that the replacement is the same size or less than whats already there, if it's smaller, I can simply pad it out with whitespace bytes to keep the dir vpk happy. This ultimately means that, in order to get custom particles working, I had to learn how particle files were structured, and then use that knowledge to remove any redundant data so that I could use that extra space for modded data.
-    
+
 ### So fundamentally, the process works as follows:
 
 1. **Figure out what mods the user is actually adding**

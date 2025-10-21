@@ -1,5 +1,5 @@
 # Tutorial
-Here you can find two tutorials, one for [**Windows**](#windows-tutorial), and one for [**Linux**](#linux-tutorial). If youre having trouble with your *already installed* preloader, please refer to the **[troubleshooting doc](troubleshooting.md)**. 
+Here you can find two tutorials, one for [**Windows**](#windows-tutorial), and one for [**Linux**](#linux-tutorial). If youre having trouble with your *already installed* preloader, please refer to the **[troubleshooting doc](troubleshooting.md)**.
 
 **If you encounter any error, please try upgrading to the [latest version](https://github.com/cueki/casual-pre-loader/releases) first.**
 
@@ -12,7 +12,7 @@ If you want a video supplement, please refer to the [**Video Supplement**](#vide
 ### Step 1: Installation
 
 1. **Install the latest version of the preloader from [GitHub](https://github.com/cueki/casual-pre-loader/releases) or [Gamebanana](https://gamebanana.com/tools/19049).**
-2. **Once you have the zip file, extract it, and put the folder anywhere youd like (OTHER THAN CUSTOM, <u>DO NOT PUT IT IN CUSTOM!</u>). Personally, I keep mine on my desktop.** 
+2. **Once you have the zip file, extract it, and put the folder anywhere youd like (OTHER THAN CUSTOM, <u>DO NOT PUT IT IN CUSTOM!</u>). Personally, I keep mine on my desktop.**
 
 ### Step 2: Adding your mods
 
@@ -24,9 +24,10 @@ If you want a video supplement, please refer to the [**Video Supplement**](#vide
 
 1. **The first tab of the preloader is for your particles, on this tab you can mix and match your different particle packs for whatever look youre going for.** *If you want even more in-depth customization, instead of the general groups we put the particles into, navigate to the top right of your window, and un-check "simple particle mode".*
 
-2. **The second tab of the preloader is everything else, including your models, animations, huds, skins, skyboxes, etc. You first check all the mods you want to use on the left by clicking on the check box next to them, then change the load order on the right by clicking and dragging.** *If you have an animation pack, and any model mod, make sure  to load your animation pack last!* 
->NOTE: some mods you install may have the same files included. The preloader warns you of this with this caution symbol.
-For mods like this, make sure the one you want to see more of is HIGHER in your load order (bigger number). You can also hover over the caution symbol to see how many files are the same (its like a minecraft texture pack!).
+2. **The second tab of the preloader is everything else, including your models, animations, huds, skins, skyboxes, etc. You first check all the mods you want to use on the left by clicking on the check box next to them, then change the load order on the right by clicking and dragging.** *If you have an animation pack, and any model mod, make sure  to load your animation pack last!*
+>NOTE: Some mods you install may have the same files included. The preloader warns you of this with this caution symbol.
+For mods like this, make sure the one you want to see more of is HIGHER in your load order *(bigger number)*. You can also hover over the caution symbol to see how many files are the same *(like a minecraft texture pack!)*.
+
 
 ### Step 4: Installing your mods to TF2
 
@@ -38,7 +39,7 @@ For mods like this, make sure the one you want to see more of is HIGHER in your 
 
 ## Linux Tutorial:
 **ples fix  and format dis for me im not familiar with the steps needed for the linux version, or just send me the general steps on discord and ill rewrite and format :D**
--Fethars the chick 
+-Fethars the chick
 
 We need studiomdl.exe from the Windows version of TF2.
 
