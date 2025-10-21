@@ -1,5 +1,9 @@
-# force CRLF line endings for VMT files
-*.vmt text eol=crlf
+* text=auto eol=lf
+
+# force CRLF line endings for VMT files and sound scripts
+[attr]gillbates text eol=crlf
+*.vmt gillbates
+backup/scripts/*.txt gillbates
 
 # remove .res files from stats
 backup/** linguist-vendored
