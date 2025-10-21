@@ -74,7 +74,6 @@ def manage_vpk(vpk_path: Path) -> Set[str]:
                     relative_path = file_path[7:]
                     model_path = _process_file_to_model_path(relative_path).lower()
                     model_set.add(model_path)
-                    print(model_path)
 
     except Exception as e:
         print(f"Failed to process VPK {vpk_path}: {e}")
