@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Set, List
+from typing import Set
 from core.constants import QUICKPRECACHE_FILE_SUFFIXES, QUICKPRECACHE_MODEL_LIST
 from valve_parsers import VPKFile
 
