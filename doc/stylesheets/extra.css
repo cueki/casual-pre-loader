@@ -1,77 +1,353 @@
-:root {
-	--md-typeset-a-color: var(--md-primary-fg-color);
-
-	.md-typeset a:focus, .md-typeset a:hover {
-		color: var(--md-accent-fg-color);
-	}
-}
-
+/* Light mode */
 [data-md-color-scheme="default"] {
-	/* Primary color shades */
-	--md-primary-fg-color:                hsl(30, 80%, 47%);
-	--md-primary-bg-color:                hsl(30, 100%, 80%);
+  /* Primary colors (links, buttons, active elements) */
+  --md-primary-fg-color: oklch(30% 0.12 280);           /* lavender primary */
+  --md-primary-fg-color--light: oklch(50% 0.12 280);
+  --md-primary-fg-color--dark: oklch(20% 0.12 280);
 
-	--md-default-bg-color:                var(--md-primary-bg-color);
+  /* Accent colors */
+  --md-accent-fg-color: oklch(30% 0.12 280);            /* lavender accent */
+  --md-accent-fg-color--transparent: oklch(30% 0.12 280 / 0.1);
 
-	/* Accent color shades */
-	--md-accent-fg-color:              hsl(30, 48%, 40%);
-	--md-accent-bg-color:              hsl(30, 48%, 25%);
+  /* Background and text */
+  --md-default-bg-color: oklch(98% 0.02 80);            /* light tan-grey bg */
+  --md-default-fg-color: oklch(15% 0.02 80);            /* dark text */
+  --md-default-fg-color--light: oklch(45% 0.02 80);     /* muted text */
+  --md-default-fg-color--lighter: oklch(65% 0.02 80);
+  --md-default-fg-color--lightest: oklch(80% 0.02 80);
+
+  /* Code blocks */
+  --md-code-bg-color: oklch(92% 0.02 80);               /* code bg */
+  --md-code-fg-color: oklch(15% 0.02 80);
+
+  /* Typography */
+  --md-typeset-a-color: oklch(45% 0.15 280);            /* link color - lavender */
+  --md-typeset-color: oklch(15% 0.02 80);               /* body text */
+
+  /* UI elements */
+  --md-typeset-kbd-color: oklch(85% 0.02 80);
+  --md-typeset-kbd-border-color: oklch(80% 0.02 80);
+  --md-typeset-mark-color: oklch(85% 0.02 80 / 0.5);
+  --md-typeset-table-color: oklch(92% 0.02 80);
+
+  /* Admonitions and boxes */
+  --md-admonition-bg-color: oklch(92% 0.02 80);
 }
 
+/* Dark mode */
 [data-md-color-scheme="slate"] {
-	/* Primary color shades */
-	--md-primary-fg-color:                hsl(33, 66%, 55%);
-	--md-primary-bg-color:                hsl(30, 30%, 10%);
+  /* Primary colors */
+  --md-primary-fg-color: oklch(70% 0.12 280);           /* lavender primary */
+  --md-primary-fg-color--light: oklch(80% 0.12 280);
+  --md-primary-fg-color--dark: oklch(60% 0.12 280);
 
-	--md-default-bg-color:                var(--md-primary-bg-color);
+  /* Accent colors */
+  --md-accent-fg-color: oklch(70% 0.12 280);            /* lavender accent */
+  --md-accent-fg-color--transparent: oklch(70% 0.12 280 / 0.1);
 
-	/* Accent color shades */
-	--md-accent-fg-color:                 hsl(30, 100%, 80%);
-	--md-accent-bg-color:                 hsl(10, 100%, 56.1%);
+  /* Background and text */
+  --md-default-bg-color: oklch(10% 0.04 280);           /* dark lavender bg */
+  --md-default-fg-color: oklch(90% 0.04 280);           /* light lavender text */
+  --md-default-fg-color--light: oklch(65% 0.04 280);    /* muted text */
+  --md-default-fg-color--lighter: oklch(50% 0.04 280);
+  --md-default-fg-color--lightest: oklch(40% 0.04 280);
+
+  /* Code blocks */
+  --md-code-bg-color: oklch(20% 0.04 280);              /* code bg */
+  --md-code-fg-color: oklch(90% 0.04 280);
+
+  /* Typography */
+  --md-typeset-a-color: oklch(70% 0.12 280);            /* link color - lavender */
+  --md-typeset-color: oklch(90% 0.04 280);              /* body text */
+
+  /* UI elements */
+  --md-typeset-kbd-color: oklch(30% 0.04 280);
+  --md-typeset-kbd-border-color: oklch(40% 0.04 280);
+  --md-typeset-mark-color: oklch(30% 0.04 280 / 0.5);
+  --md-typeset-table-color: oklch(20% 0.04 280);
+
+  /* Admonitions and boxes */
+  --md-admonition-bg-color: oklch(20% 0.04 280);
 }
 
-
+/* Font family and weights */
 body {
-	font-family: Verdana, sans-serif;
-	font-weight: 400;
+  font-family: 'Space Mono', monospace;
+  font-weight: 400;
 }
 
 strong, b {
-	font-weight: 700;
+  font-weight: 700;
 }
 
-html {
-	--font-mono: 'JetBrains Mono', 'Space Mono', monospace;
-
-	--background:           oklch(98% 0.02 80);  /* bg */
-	--foreground:           oklch(15% 0.02 80);  /* icon and table of contents and chapter hover */
-	--primary:              oklch(30% 0.12 280); /* link text and search text and arrow button */
-	--primary-foreground:   oklch(98% 0.02 80);  /* i dont know */
-	--secondary:            oklch(85% 0.02 80);  /* search bar hover and page buttons bg */
-	--secondary-foreground: oklch(20% 0.02 80);  /* page button text */
-	--muted:                oklch(92% 0.02 80);  /* code block bg */
-	--muted-foreground:     oklch(45% 0.02 80);  /* chapters text */
-	--accent:               oklch(85% 0.02 80);  /* table of contents selected bg */
-	--accent-foreground:    oklch(15% 0.02 80);  /* hover text color for header text and icons */
-	--border:               oklch(80% 0.02 80);  /* border of search bar and header seperators, and also indents*/
-	--input:                oklch(85% 0.02 80);  /* only god knows */
-	--ring:                 oklch(40% 0.02 80);  /* another no clue banger */
-	--surface:              oklch(93% 0.02 80);  /* search bar hover */
+.md-typeset {
+  font-family: 'Space Mono', monospace;
 }
 
-html.dark {
-	--background:           oklch(10% 0.02 80);
-	--foreground:           oklch(95% 0.02 80);
-	--primary:              oklch(70% 0.12 280);
-	--primary-foreground:   oklch(15% 0.02 80);
-	--secondary:            oklch(20% 0.02 80);
-	--secondary-foreground: oklch(90% 0.02 80);
-	--muted:                oklch(18% 0.02 80);
-	--muted-foreground:     oklch(65% 0.02 80);
-	--accent:               oklch(25% 0.02 80);
-	--accent-foreground:    oklch(95% 0.02 80);
-	--border:               oklch(35% 0.02 80);
-	--input:                oklch(25% 0.02 80);
-	--ring:                 oklch(60% 0.02 80);
-	--card:                 oklch(15% 0.02 80);
+/* Code blocks use JetBrains Mono */
+.md-typeset code,
+.md-typeset pre,
+.md-typeset kbd {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+[data-md-color-scheme="default"] .md-typeset a:focus,
+[data-md-color-scheme="default"] .md-typeset a:hover {
+	color: oklch(50% 0.12 280);
+}
+
+[data-md-color-scheme="slate"] .md-typeset a:focus,
+[data-md-color-scheme="slate"] .md-typeset a:hover {
+	color: oklch(80% 0.12 280);
+}
+
+/* Remove header background bar */
+.md-header {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+/* Adjust header text and icon colors for visibility - Light mode */
+[data-md-color-scheme="default"] .md-header__title,
+[data-md-color-scheme="default"] .md-header__button,
+[data-md-color-scheme="default"] .md-header__topic {
+  color: oklch(25% 0.02 80);
+}
+
+[data-md-color-scheme="default"] .md-header__button {
+  background-color: oklch(92% 0.02 80);
+  border-radius: 1rem;
+  padding: 0.15rem;
+  border: 0.15rem solid oklch(90% 0.02 80);
+}
+
+[data-md-color-scheme="default"] .md-header__button:hover {
+  color: oklch(20% 0.02 80);
+  background-color: oklch(92% 0.02 80);
+  border-color: oklch(70% 0.02 80);
+}
+
+[data-md-color-scheme="default"] .md-source {
+  color: oklch(25% 0.02 80);
+}
+
+[data-md-color-scheme="default"] .md-search__input {
+  background-color: oklch(92% 0.02 80);
+  border-radius: 1rem;
+  font-family: 'Space Mono', monospace;
+  color: oklch(15% 0.02 80);
+}
+
+[data-md-color-scheme="default"] .md-search__form {
+  border-radius: 1rem;
+  padding: 0.15rem;
+  background-color: oklch(90% 0.02 80);
+}
+
+[data-md-color-scheme="default"] .md-search__form:hover {
+  background-color: oklch(70% 0.02 80);
+}
+
+[data-md-color-scheme="default"] .md-search__input::placeholder {
+  color: oklch(45% 0.02 80);
+}
+
+[data-md-color-scheme="default"] .md-search__icon {
+  color: oklch(25% 0.02 80);
+}
+
+/* Adjust header text and icon colors for visibility - Dark mode */
+[data-md-color-scheme="slate"] .md-header__title,
+[data-md-color-scheme="slate"] .md-header__button,
+[data-md-color-scheme="slate"] .md-header__topic {
+  color: oklch(70% 0.12 280);
+}
+
+[data-md-color-scheme="slate"] .md-header__button {
+  background-color: oklch(20% 0.04 280);
+  border-radius: 1rem;
+  padding: 0.15rem;
+  border: 0.15rem solid oklch(25% 0.04 280);
+}
+
+[data-md-color-scheme="slate"] .md-header__button:hover {
+  color: oklch(75% 0.12 280);
+  background-color: oklch(20% 0.04 280);
+  border-color: oklch(50% 0.08 280);
+}
+
+[data-md-color-scheme="slate"] .md-source {
+  color: oklch(70% 0.12 280);
+}
+
+[data-md-color-scheme="slate"] .md-search__input {
+  background-color: oklch(20% 0.04 280);
+  border-radius: 1rem;
+  font-family: 'Space Mono', monospace;
+  color: oklch(90% 0.04 280);
+}
+
+[data-md-color-scheme="slate"] .md-search__form {
+  border-radius: 1rem;
+  padding: 0.15rem;
+  background-color: oklch(25% 0.04 280);
+}
+
+[data-md-color-scheme="slate"] .md-search__form:hover {
+  background-color: oklch(50% 0.08 280);
+}
+
+[data-md-color-scheme="slate"] .md-search__input::placeholder {
+  color: oklch(65% 0.04 280);
+}
+
+[data-md-color-scheme="slate"] .md-search__icon {
+  color: oklch(70% 0.12 280);
+}
+
+/* Round edges on search results window */
+.md-search__output {
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.md-search__scrollwrap {
+  border-radius: 1rem;
+}
+
+/* Keep search form wrapper color when active */
+[data-md-color-scheme="default"] .md-search__form:focus-within,
+[data-md-color-scheme="default"] .md-search--active .md-search__form {
+  background-color: oklch(70% 0.02 80) !important;
+  border-radius: 1rem !important;
+  padding: 0.15rem;
+}
+
+[data-md-color-scheme="slate"] .md-search__form:focus-within,
+[data-md-color-scheme="slate"] .md-search--active .md-search__form {
+  background-color: oklch(50% 0.08 280) !important;
+  border-radius: 1rem !important;
+  padding: 0.15rem;
+}
+
+/* Search input in active search window */
+[data-md-color-scheme="default"] .md-search--active .md-search__input {
+  border-radius: 1rem !important;
+  background-color: oklch(92% 0.02 80) !important;
+}
+
+[data-md-color-scheme="slate"] .md-search--active .md-search__input {
+  border-radius: 1rem !important;
+  background-color: oklch(20% 0.04 280) !important;
+}
+
+/* Blockquote backgrounds */
+[data-md-color-scheme="default"] .md-typeset blockquote {
+  background-color: oklch(92% 0.02 80);
+  border-radius: 0.5rem;
+  padding: 0.3rem 1rem;
+}
+
+[data-md-color-scheme="slate"] .md-typeset blockquote {
+  background-color: oklch(20% 0.04 280);
+  border-radius: 0.5rem;
+  padding: 0.3rem 1rem;
+}
+
+/* Sidebar and table of contents backgrounds */
+[data-md-color-scheme="default"] .md-sidebar__inner {
+  background-color: oklch(92% 0.02 80);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  border: 0.15rem solid oklch(90% 0.02 80);
+}
+
+[data-md-color-scheme="slate"] .md-sidebar__inner {
+  background-color: oklch(20% 0.04 280);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  border: 0.15rem solid oklch(25% 0.04 280);
+}
+
+/* Remove shaded background from sidebar titles */
+[data-md-color-scheme="default"] .md-nav__title,
+[data-md-color-scheme="default"] .md-nav__title[for] {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+[data-md-color-scheme="slate"] .md-nav__title,
+[data-md-color-scheme="slate"] .md-nav__title[for] {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Style admonitions like sidebar - Light mode */
+[data-md-color-scheme="default"] .md-typeset .admonition {
+  background-color: oklch(92% 0.02 80);
+  border-radius: 0.5rem;
+  border: 0.15rem solid oklch(90% 0.02 80);
+  border-left: 0.15rem solid oklch(90% 0.02 80);
+}
+
+[data-md-color-scheme="default"] .md-typeset .admonition-title {
+  border-top-left-radius: 0.36rem;
+  border-top-right-radius: 0.36rem;
+}
+
+/* Style admonitions like sidebar - Dark mode */
+[data-md-color-scheme="slate"] .md-typeset .admonition {
+  background-color: oklch(20% 0.04 280);
+  border-radius: 0.5rem;
+  border: 0.15rem solid oklch(25% 0.04 280);
+  border-left: 0.15rem solid oklch(25% 0.04 280);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .admonition-title {
+  border-top-left-radius: 0.36rem;
+  border-top-right-radius: 0.36rem;
+}
+
+/* Admonition icon and title colors - Light mode */
+[data-md-color-scheme="default"] .md-typeset .admonition .admonition-title::before {
+  background-color: oklch(25% 0.02 80);
+}
+
+[data-md-color-scheme="default"] .md-typeset .admonition > .admonition-title {
+  background-color: oklch(92% 0.02 80);
+}
+
+/* Admonition icon and title colors - Dark mode */
+[data-md-color-scheme="slate"] .md-typeset .admonition .admonition-title::before {
+  background-color: oklch(70% 0.12 280);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .admonition > .admonition-title {
+  background-color: oklch(20% 0.04 280);
+}
+
+/* Image styling - Light mode */
+[data-md-color-scheme="default"] .md-typeset img {
+  border-radius: 0.5rem;
+  border: 0.15rem solid oklch(90% 0.02 80);
+}
+
+/* Image styling - Dark mode */
+[data-md-color-scheme="slate"] .md-typeset img {
+  border-radius: 0.5rem;
+  border: 0.15rem solid oklch(25% 0.04 280);
+}
+
+/* Code block styling - Light mode */
+[data-md-color-scheme="default"] .md-typeset pre {
+  border-radius: 0.5rem;
+  border: 0.15rem solid oklch(90% 0.02 80);
+  overflow: hidden;
+}
+
+/* Code block styling - Dark mode */
+[data-md-color-scheme="slate"] .md-typeset pre {
+  border-radius: 0.5rem;
+  border: 0.15rem solid oklch(25% 0.04 280);
+  overflow: hidden;
 }
