@@ -16,8 +16,9 @@ def make_precache_list(game_path: str) -> Set[str]:
             elif file.is_file() and file.name.endswith(".vpk"):
                 model_list.update(manage_vpk(file))
 
-    # filter for "decompiled " and "competitive_badge"
-    return {model for model in model_list if "decompiled " not in model and "competitive_badge" not in model}
+    # filter out cosmetics and other non-gameplay models
+    exclusions = ["decompiled ", "competitive_badge", "gameplay_cosmetic", "player/items/", "workshop/player/items/"]
+    return {model for model in model_list if not any(exclusion in model for exclusion in exclusions)}
 
 
 def _should_quickprecache(file_path: str) -> bool:
@@ -32,8 +33,8 @@ def _process_file_to_model_path(file_path: str) -> str:
     return file_path
 
 
-def manage_folder(folder_path: Path) -> List[str]:
-    model_list = []
+def manage_folder(folder_path: Path) -> Set[str]:
+    model_set = set()
 
     for file_path in folder_path.glob("**/*"):
         if not file_path.is_file():
@@ -46,14 +47,14 @@ def manage_folder(folder_path: Path) -> List[str]:
 
         if any(relative_path.endswith(suffix) for suffix in QUICKPRECACHE_FILE_SUFFIXES):
             model_path = Path(_process_file_to_model_path(relative_path)).as_posix().lower()
-            model_list.append(model_path)
+            model_set.add(model_path)
 
-    return model_list
+    return model_set
 
 
-def manage_vpk(vpk_path: Path) -> List[str]:
-    # extract model paths from a VPK file (using my vpk handler)
-    model_list = []
+def manage_vpk(vpk_path: Path) -> Set[str]:
+    # extract model paths from a VPK file
+    model_set = set()
     failed_vpks = []
 
     try:
@@ -72,10 +73,11 @@ def manage_vpk(vpk_path: Path) -> List[str]:
                     # remove "models/" prefix and convert to model path
                     relative_path = file_path[7:]
                     model_path = _process_file_to_model_path(relative_path).lower()
-                    model_list.append(model_path)
+                    model_set.add(model_path)
+                    print(model_path)
 
     except Exception as e:
         print(f"Failed to process VPK {vpk_path}: {e}")
         failed_vpks.append(str(vpk_path))
 
-    return model_list
+    return model_set
