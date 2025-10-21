@@ -101,6 +101,12 @@ strong, b {
 	color: oklch(80% 0.12 280);
 }
 
+/* Remove header background bar */
+.md-header {
+  background-color: transparent;
+  box-shadow: none;
+}
+
 /* Adjust header text and icon colors for visibility - Light mode */
 [data-md-color-scheme="default"] .md-header__title,
 [data-md-color-scheme="default"] .md-header__button,
