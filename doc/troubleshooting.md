@@ -16,7 +16,20 @@ Here you can find common troublshooting problems and potential fixes/solutions. 
     - While the preloader can handle most mods, even non casual compatible ones, they will need to reflect the file structure of TF2. You can either contact the mod author to fix it, or follow the instructions in the [*"For users creating mods:"*](#for-users-creating-mods) section to fix it yourself.
 6. **If you change huds after installing your mods, make sure to run the preloader again.**
 7. **If there was a TF2 update, run the preloader again.**
-
+> NOTE: There are a select few mods that **WONT** work when put in the preloader, they are as follows:
+> 
+> - Bsp packed content (think modern community maps).
+> 
+> - Blacklisted sounds (for now).
+> 
+> - Decals (for now).
+> 
+> - Configs (these can stay in custom).
+> 
+> - No hats mod (this should also stay in custom).
+> 
+> - Custom named materials and models (ONLY works with casual compatible file paths).
+<!-- i know it looks strange, but this is how it needs to be formatted for the list to be nested within the blockquote. im sorry -->
 
 ### For users creating mods:
 While this tool doesn't need a mod to be "*casual compatible*" for it to work, there's still some issues that will need to be addressed. <br>
