@@ -19,7 +19,9 @@
 
 [agrastiOs](https://github.com/agrastiOs) for the [UltimateVisualFixPack](https://github.com/agrastiOs/Ultimate-TF2-Visual-Fix-Pack).
 
-[Feathers](https://github.com/FeathersTheChick) and [djsigmann](https://github.com/djsigmann) for help with the [documentation](https://djsigmann.github.io/casual-pre-loader) and misc development.
+[Feathers](https://github.com/FeathersTheChick) for help with [documentation](https://github.com/FeathersTheChick/casual-pre-loader). <!-- [IMPORTANT] this needs to be changed to the actual docs thing once thats up. all links to the documentation home will need to be changed also - feathers -->
+
+[djsigmann](https://github.com/djsigmann) for help with AUR packaging, documentation, and other misc development.
 
 [Akuji](https://gamebanana.com/members/2017711) for being a huge help with [discord support](https://discord.gg/BGFs4M6y3C) and misc development.
 ## Star History
