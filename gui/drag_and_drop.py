@@ -185,8 +185,8 @@ class ModDropZone(QFrame):
                     if selected_mod == mod_name:
                         source_file = source_particles_dir / (particle_file + ".pcf")
                         if source_file.exists():
-                            # copy particle file
-                            shutil.copy2(source_file, folder_setup.temp_mods_dir / (particle_file + ".pcf"))
+                            # copy particle file to to_be_patched
+                            shutil.copy2(source_file, folder_setup.temp_to_be_patched_dir / (particle_file + ".pcf"))
                             # get particle file mats from attrib
                             pcf = PCFFile(source_file).decode()
                             system_defs = pcf.get_elements_by_type('DmeParticleSystemDefinition')
@@ -208,7 +208,7 @@ class ModDropZone(QFrame):
             for material_path in required_materials:
                 full_material_path = mod_dir / 'materials' / material_path.replace('\\', '/')
                 if full_material_path.exists():
-                    material_destination = folder_setup.temp_mods_dir / Path(full_material_path).relative_to(mod_dir)
+                    material_destination = folder_setup.temp_to_be_vpk_dir / Path(full_material_path).relative_to(mod_dir)
                     material_destination.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(Path(full_material_path), material_destination)
                     texture_paths = parse_vmt_texture(full_material_path)
@@ -216,7 +216,7 @@ class ModDropZone(QFrame):
                         for texture_path in texture_paths:
                             full_texture_path = mod_dir / 'materials' / str(texture_path).replace('\\', '/')
                             if full_texture_path.exists():
-                                texture_destination = folder_setup.temp_mods_dir / Path(full_texture_path).relative_to(
+                                texture_destination = folder_setup.temp_to_be_vpk_dir / Path(full_texture_path).relative_to(
                                     mod_dir)
                                 texture_destination.parent.mkdir(parents=True, exist_ok=True)
                                 shutil.copy2(Path(full_texture_path), texture_destination)
@@ -225,9 +225,9 @@ class ModDropZone(QFrame):
         for original_file, split_defs in PARTICLE_SPLITS.items():
             split_files_in_temp = []
 
-            # check which split files exist in temp_mods_dir
+            # check which split files exist in to_be_patched
             for split_name in split_defs.keys():
-                split_path = folder_setup.temp_mods_dir / split_name
+                split_path = folder_setup.temp_to_be_patched_dir / split_name
                 if split_path.exists():
                     split_files_in_temp.append(split_path)
 
@@ -242,7 +242,7 @@ class ModDropZone(QFrame):
                 else:
                     merged = pcf_parts[0]
 
-                output_path = folder_setup.temp_mods_dir / original_file
+                output_path = folder_setup.temp_to_be_patched_dir / original_file
                 merged.encode(output_path)
 
                 for split_file in split_files_in_temp:
@@ -252,7 +252,7 @@ class ModDropZone(QFrame):
         particle_map = load_particle_system_map(folder_setup.install_dir / 'particle_system_map.json')
 
         for original_file in PARTICLE_SPLITS.keys():
-            merged_file = folder_setup.temp_mods_dir / original_file
+            merged_file = folder_setup.temp_to_be_patched_dir / original_file
 
             if merged_file.exists():
                 merged_pcf = PCFFile(merged_file).decode()
@@ -264,7 +264,7 @@ class ModDropZone(QFrame):
                         elements_we_still_need.add(element)
 
                 if elements_we_still_need:
-                    vanilla_file = folder_setup.temp_game_files_dir / original_file
+                    vanilla_file = folder_setup.temp_to_be_referenced_dir / original_file
                     if vanilla_file.exists():
                         vanilla_pcf = PCFFile(vanilla_file).decode()
                         vanilla_elements = extract_elements(vanilla_pcf, elements_we_still_need)

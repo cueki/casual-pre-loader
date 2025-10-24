@@ -34,7 +34,7 @@ class FileHandler:
     def list_vmt_files(self) -> List[str]:
         return self.vpk.find_files('*.vmt')
 
-    def process_file(self, file_name: str, processor: callable, create_backup: bool = True) -> bool | None:
+    def process_file(self, file_name: str, content) -> bool | None:
         # if it's just a filename, find its full path
         if '/' not in file_name:
             full_path = self.vpk.find_file_path(file_name)
@@ -55,37 +55,16 @@ class FileHandler:
                 return False
             original_size = file_info['size']
 
-            # process based on file type
-            file_type = Path(file_name).suffix.lower()
-            if file_type == '.pcf':
-                # get file data directly into memory for PCF processing
-                pcf_data = self.vpk.get_file_data(full_path)
-                if not pcf_data:
-                    print(f"Failed to get data for {full_path}")
-                    return False
-                
-                # write to temp file for PCF processing
-                with open(temp_path, 'wb') as f:
-                    f.write(pcf_data)
-                
-                pcf = PCFFile(temp_path).decode()
-                processed = processor(pcf)
-                processed.encode(temp_path)
-
-                # read processed PCF data and check size
+            if isinstance(content, PCFFile):
+                # encode PCF to get bytes
+                content.encode(temp_path)
                 with open(temp_path, 'rb') as f:
                     new_data = f.read()
-
-            elif file_type in ['.vmt', '.txt', '.res']:
-                # get file data directly into memory for text processing
-                content = self.vpk.get_file_data(full_path)
-                if not content:
-                    print(f"Failed to get data for {full_path}")
-                    return False
-                new_data = processor(content)
-
+            elif isinstance(content, bytes):
+                # already have bytes
+                new_data = content
             else:
-                print(f"Error: Unsupported file type '{file_type}' for file {file_name}")
+                print(f"Error: Unsupported content type '{type(content).__name__}' for file {file_name}")
                 return False
 
             # check if the processed file size matches the original size
@@ -102,7 +81,7 @@ class FileHandler:
                     return False
 
             # patch back into VPK
-            return self.vpk.patch_file(full_path, new_data, create_backup)
+            return self.vpk.patch_file(full_path, new_data, create_backup=False)
 
         except Exception as e:
             print(f"Error processing file {file_name}:")

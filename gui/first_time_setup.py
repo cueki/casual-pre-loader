@@ -207,7 +207,6 @@ class FirstTimeSetupDialog(QDialog):
             "D:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2/tf",
             "~/.steam/steam/steamapps/common/Team Fortress 2/tf",
             "~/.local/share/Steam/steamapps/common/Team Fortress 2/tf",
-            "/home/{}/Steam/steamapps/common/Team Fortress 2/tf".format(os.getenv('USER', '')),
         ]
         
         for path_str in common_paths:

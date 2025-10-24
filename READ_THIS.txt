@@ -9,7 +9,7 @@ If you would like to produce mods that work alongside this tool, for both partic
 FOR PARTICLE MAKERS SPECIFICALLY:
 Take a look at particle_system_map.json, YOUR ELEMENT NAMES MUST MATCH WHAT IS IN THAT FILE, WITH PROPER CASING. ExplosionCore_MidAir cannot be ExplosionCore_Midair, for example, and it needs to be in explosion.pcf, anywhere else and other effects will get deleted.
 
-10/09/2025 (update 1.6.0):
-ive been working on this silently in the background for a while, its a pretty big update, im sorry if it breaks anything :(
+10/19/2025 (update 1.6.3):
+should be a lot faster, its sorta just based on how fast your pc is now !
 
 hopefully all the changes make sense :)

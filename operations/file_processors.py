@@ -1,6 +1,5 @@
 from pathlib import Path
 from valve_parsers import VPKFile, PCFFile
-from operations.pcf_compress import remove_duplicate_elements
 
 
 def pcf_empty_root_processor():
@@ -9,16 +8,6 @@ def pcf_empty_root_processor():
         attr_type, _ = root_element.attributes[b'particleSystemDefinitions']
         root_element.attributes[b'particleSystemDefinitions'] = (attr_type, [])
         return pcf
-
-    return process_pcf
-
-
-def pcf_mod_processor(mod_path: str):
-    def process_pcf(game_pcf) -> PCFFile:
-        mod_pcf = PCFFile(mod_path)
-        mod_pcf.decode()
-        result = remove_duplicate_elements(mod_pcf)
-        return result
 
     return process_pcf
 
@@ -152,10 +141,19 @@ def get_from_custom_dir(custom_dir: Path):
     for vpk_file in custom_dir.glob("*.vpk"):
         get_from_vpk(vpk_file)
 
+    target_paths = [
+        "materials/effects/",
+        "materials/models/",
+        "materials/particle/",
+        "materials/particles/",
+        "materials/prediction/",
+        "materials/sprites/healbeam"
+    ]
+
     for directory in custom_dir.glob("*"):
         if directory.is_dir():
-            for pattern in ["materials/effects/**/*", "materials/models/**/*", "materials/particle/**/*",
-                            "materials/particles/", "materials/prediction/**/*", "materials/sprites/healbeam*"]:
-                for file_path in directory.glob(pattern):
-                    if file_path.is_file():
+            for file_path in directory.glob("**/*"):
+                if file_path.is_file():
+                    rel_path = str(file_path.relative_to(directory)).replace('\\', '/')
+                    if any(rel_path.startswith(target) for target in target_paths):
                         get_from_file(file_path)

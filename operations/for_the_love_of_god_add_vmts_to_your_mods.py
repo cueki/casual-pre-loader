@@ -4,8 +4,9 @@ from core.folder_setup import folder_setup
 from valve_parsers import VPKFile
 
 
-def find_all_vtf_files(directory: Path) -> List[Path]:
+def find_material_files(directory: Path) -> tuple[List[Path], Set[str]]:
     vtf_files = []
+    vmt_stems = set()
 
     # target directories
     target_dirs = [
@@ -15,28 +16,20 @@ def find_all_vtf_files(directory: Path) -> List[Path]:
 
     for target_dir in target_dirs:
         if target_dir.exists():
-            vtf_files.extend(target_dir.glob("**/*.vtf"))
-            print(f"Scanning {target_dir} - found {len(list(target_dir.glob('**/*.vtf')))} VTF files")
+            for file_path in target_dir.glob("**/*"):
+                if file_path.is_file():
+                    suffix_lower = file_path.suffix.lower()
+                    if suffix_lower == '.vtf':
+                        vtf_files.append(file_path)
+                    elif suffix_lower == '.vmt':
+                        vmt_stems.add(file_path.stem.lower())
+
+            vtf_count = sum(1 for f in vtf_files if target_dir in f.parents)
+            print(f"Scanned {target_dir} - found {vtf_count} VTF files")
         else:
             print(f"Directory {target_dir} does not exist, skipping")
 
-    return vtf_files
-
-
-def find_all_vmt_files(directory: Path) -> Set[str]:
-    vmt_files = []
-
-    # same as VTF search
-    target_dirs = [
-        directory / "materials" / "models" / "weapons",
-        directory / "materials" / "patterns"
-    ]
-
-    for target_dir in target_dirs:
-        if target_dir.exists():
-            vmt_files.extend(target_dir.glob("**/*.vmt"))
-
-    return {vmt.stem.lower() for vmt in vmt_files}
+    return vtf_files, vmt_stems
 
 
 def get_texture_path(vtf_path: Path, base_dir: Path) -> str:
@@ -70,7 +63,7 @@ def generate_vmt_content(texture_path: str, game_vpk: Optional[VPKFile] = None) 
 
 def generate_missing_vmt_files(temp_mods_dir: Path = None, tf_path: str = None) -> int:
     if temp_mods_dir is None:
-        temp_mods_dir = folder_setup.temp_mods_dir
+        temp_mods_dir = folder_setup.temp_to_be_vpk_dir
 
     if not temp_mods_dir.exists():
         print(f"Directory {temp_mods_dir} does not exist")
@@ -90,9 +83,8 @@ def generate_missing_vmt_files(temp_mods_dir: Path = None, tf_path: str = None) 
         else:
             print(f"Game VPK not found at: {game_vpk_path}")
 
-    # find all vtf and vmt files
-    vtf_files = find_all_vtf_files(temp_mods_dir)
-    existing_vmts = find_all_vmt_files(temp_mods_dir)
+    # find all vtf and vmt files in one scan
+    vtf_files, existing_vmts = find_material_files(temp_mods_dir)
 
     if not vtf_files:
         print("No VTF files found")
