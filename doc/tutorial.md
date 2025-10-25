@@ -1,5 +1,5 @@
 # Tutorial
-Here you can find two tutorials, one for [**Windows**](#windows-tutorial), and one for [**Linux**](#linux-tutorial). If youre having trouble with your *already installed* preloader, please refer to the **[troubleshooting doc](troubleshooting.md)**.
+Here you can find two tutorials, one for [**Windows**](#windows-tutorial), and one for [**Linux**](#linux-tutorial). If you're having trouble with your *already installed* preloader, please refer to the **[troubleshooting doc](troubleshooting.md)**.
 
 **If you encounter any error, please try upgrading to the [latest version](https://github.com/cueki/casual-pre-loader/releases) first.**
 
@@ -12,21 +12,21 @@ If you want a video supplement, please refer to the [**Video Supplement**](#vide
 ### Step 1: Installation
 
 1. **Install the latest version of the preloader from [GitHub](https://github.com/cueki/casual-pre-loader/releases) or [Gamebanana](https://gamebanana.com/tools/19049).**
-2. **Once you have the zip file, extract it, and put the folder anywhere youd like (OTHER THAN CUSTOM, <u>DO NOT PUT IT IN CUSTOM!</u>). Personally, I keep mine on my desktop.**
+2. **Once you have the zip file, extract it, and put the folder anywhere you'd like (OTHER THAN CUSTOM, <u>DO NOT PUT IT IN CUSTOM!</u>). Personally, I keep mine on my desktop.**
 
 ### Step 2: Adding your mods
 
-1. **Prepare your mods. The preloader can handle all mods, even mods that arent *"casual compatible",* so dont be afraid to use whatever youd like! Once you have all the mods you want, set them aside.** *While you can put your hud in the preloader, it does the exact same thing as putting it in custom, so you dont have to if you dont want to.*
-2. **Open the preloader by running `RUNME.bat`, and follow the first-time setup instructions that pop up.** *The "import" tab can be ignored unless youre updating from a super old version of the preloader, or decided not to let the auto-updater update your preloader.*
+1. **Prepare your mods. The preloader can handle all mods, even mods that aren't *'casual compatible',* so don't be afraid to use whatever you'd like! Once you have all the mods you want, set them aside.** *While you can put your hud in the preloader, it does the exact same thing as putting it in custom, so you don't have to if you don't want to.*
+2. **Open the preloader by running `RUNME.bat`, and follow the first-time set-up instructions that pop up.** *The 'import' tab can be ignored unless you're updating from a super old version of the preloader, or decided not to let the auto-updater update your preloader.*
 3. **Once the preloader is open, drag and drop your mods anywhere over the window to import them.**
 
 ### Step 3: Configuring your mods
 
-1. **The first tab of the preloader is for your particles, on this tab you can mix and match your different particle packs for whatever look youre going for.** *If you want even more in-depth customization, instead of the general groups we put the particles into, navigate to the top right of your window, and un-check "simple particle mode".*
+1. **The first tab of the preloader is for your particles, on this tab you can mix and match your different particle packs for whatever look you're going for.** *If you want even more in-depth customization, instead of the general groups we put the particles into, navigate to the top left of your window, and un-check 'simple particle mode'.*
 
-2. **The second tab of the preloader is everything else, including your models, animations, huds, skins, skyboxes, etc. You first check all the mods you want to use on the left by clicking on the check box next to them, then change the load order on the right by clicking and dragging.** *If you have an animation pack, and any model mod, make sure  to load your animation pack last!*
+2. **The second tab of the preloader is everything else, including your models, animations, huds, skins, skyboxes, etc. You first check all the mods you want to use on the left by clicking on the check box next to them, then change the load order on the right by clicking and dragging.** *If you have an animation pack, and any model mod, make sure to load your animation pack last!*
 >NOTE: Some mods you install may have the same files included. The preloader warns you of this with this caution symbol.
-For mods like this, make sure the one you want to see more of is HIGHER in your load order *(bigger number)*. You can also hover over the caution symbol to see how many files are the same *(like a minecraft texture pack!)*.
+For mods like this, make sure the one you want to see **more** of is **HIGHER** in your load order *(bigger number)*. You can also hover over the caution symbol to see how many files are the same *(like a minecraft texture pack!)*.
 
 
 ### Step 4: Installing your mods to TF2

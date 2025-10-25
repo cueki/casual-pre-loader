@@ -19,7 +19,7 @@
 
 [agrastiOs](https://github.com/agrastiOs) for the [UltimateVisualFixPack](https://github.com/agrastiOs/Ultimate-TF2-Visual-Fix-Pack).
 
-[Feathers](https://github.com/FeathersTheChick) for help with [documentation](https://github.com/FeathersTheChick/casual-pre-loader). <!-- [IMPORTANT] this needs to be changed to the actual docs thing once thats up. all links to the documentation home will need to be changed also - feathers -->
+[Feathers](https://github.com/FeathersTheChick) for help with [documentation](http://cueki.github.io/casual-pre-loader). <!-- [IMPORTANT] this is a guess as to what the link will be, if its not actually this, CHANGE IT - feathers -->
 
 [djsigmann](https://github.com/djsigmann) for help with AUR packaging, documentation, and other misc development.
 

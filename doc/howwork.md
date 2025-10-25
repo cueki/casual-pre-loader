@@ -32,3 +32,5 @@ There are many details of the problem-solving process that I may elaborate on in
 Therefore, skipping over the details of me slowly figuring this all out, the most difficult problem I wanted to solve was providing a solution that actually worked for the average TF2 player, and that's how we got here.
 
 -cueki :)
+
+<!-- this entire section will be replaced by maddies blurb thing. I may rename it, i may not, we shall see -->
