@@ -13,7 +13,7 @@ Here you can find common troublshooting problems and potential fixes/solutions. 
 3. **Make sure you have all of your desired mods checked off before installing.**
 4. **Make sure you're launching with `+exec w/config.cfg`**.
 5. **Make sure the mod has correct file pathing.**
-    - While the preloader can handle most mods, even non-casual compatible ones, they will need to reflect the file structure of TF2. You can either contact the mod author to fix it, or follow the instructions in the [*'For users creating mods:'*](#for-users-creating-mods) section to fix it yourself.
+    - While the preloader can handle most mods, even non-'*casual compatible*' ones, they will need to reflect the file structure of TF2. You can either contact the mod author to fix it, or follow the instructions in the [*'For users creating mods:'*](#for-users-creating-mods) section to fix it yourself.
 6. **If you change huds after installing your mods, make sure to run the preloader again.**
 7. **If there was a TF2 update, run the preloader again.**
 > NOTE: There are a select few mods that **WON'T** work when put in the preloader, they are as follows:
@@ -32,7 +32,7 @@ Here you can find common troublshooting problems and potential fixes/solutions. 
 <!-- i know it looks strange, but this is how it needs to be formatted for the list to be nested within the blockquote. im sorry -->
 
 ### For users creating mods:
-While this tool doesn't need a mod to be "*casual compatible*" for it to work, there's still some issues that will need to be addressed. <br>
+While this tool doesn't need a mod to be '*casual compatible*' for it to work, there's still some issues that will need to be addressed. <br>
 
 1. **When making mods, please make sure to include *at least* the VTF and the base TF2 model itself. If the model is a custom model, please add in a VMT as well.**
 2. **Make sure that your paths reflect the structure of tf2!**
@@ -40,6 +40,7 @@ While this tool doesn't need a mod to be "*casual compatible*" for it to work, t
     - **NOT** like this: `models/alaxe/tf2/cosmetics/pyro_female/charred_chainmail.mdl`
 3. **If you're using '*casual compatible*' paths, custom names are valid for materials ONLY.**
 4. **Double check your VMT's are calling the correct paths.**
+5. **Make sure your textures (VTF'S) have `no mipmap` and `no level of detail` checkmarked so textures don't break.**
 
 The preloader also includes an easy sorting system with the use of `mod.json`, which can help end users sort their mods in the preloader easier. To use it, create a json file called mod.json, and paste this example inside: <br>
 ```
