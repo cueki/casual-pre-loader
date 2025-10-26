@@ -19,6 +19,8 @@
 
 [Feathers](https://github.com/FeathersTheChick) for help with documentation.
 
+[Allen Scott](https://gamebanana.com/members/1242417) for the logo.
+
 [THE GOAT](https://gamebanana.com/members/2133251) This person made the [square_series](https://gamebanana.com/mods/435309) preset.
 
 [Skeleton Hotel](https://gamebanana.com/members/1414545).
