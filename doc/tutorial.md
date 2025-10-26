@@ -1,9 +1,9 @@
 # Tutorial
 Here you can find two tutorials, one for [**Windows**](#windows-tutorial), and one for [**Linux**](#linux-tutorial). If you're having trouble with your *already installed* preloader, please refer to the **[troubleshooting doc](troubleshooting.md)**.
 
-**If you encounter any error, please try upgrading to the [latest version](https://github.com/cueki/casual-pre-loader/releases) first.**
+**If you encounter any error, please try upgrading to the [latest version]({{ config.repo_url }}/releases) first.**
 
-If you need further assistance installing the preloader, or just want to chat, join the **[discord](https://discord.gg/64sNFhqUaB)**!
+If you need further assistance installing the preloader, or just want to chat, join the **[discord]({{ discord_url }})**!
 
 If you want a video supplement, please refer to the [**Video Supplement**](#video-supplement) section!
 
@@ -11,7 +11,7 @@ If you want a video supplement, please refer to the [**Video Supplement**](#vide
 
 ### Step 1: Installation
 
-1. **Install the latest version of the preloader from [GitHub](https://github.com/cueki/casual-pre-loader/releases) or [Gamebanana](https://gamebanana.com/tools/19049).**
+1. **Install the latest version of the preloader from [GitHub]({{ config.repo_url }}/releases) or [Gamebanana](https://gamebanana.com/tools/19049).**
 2. **Once you have the zip file, extract it, and put the folder anywhere you'd like (OTHER THAN CUSTOM, <u>DO NOT PUT IT IN CUSTOM!</u>). Personally, I keep mine on my desktop.**
 
 ### Step 2: Adding your mods

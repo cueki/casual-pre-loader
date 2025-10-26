@@ -1,7 +1,7 @@
 # Troubleshooting
-Here you can find common troubleshooting problems and potential fixes/solutions. If none of these work, or your problem isn't listed here, please join the **[discord](https://discord.gg/64sNFhqUaB)** and open a support ticket.
+Here you can find common troubleshooting problems and potential fixes/solutions. If none of these work, or your problem isn't listed here, please join the **[discord]({{ discord_url }})** and open a support ticket.
 
-**If you encounter any error, please try upgrading to the [latest version](https://github.com/cueki/casual-pre-loader/releases) first.**
+**If you encounter any error, please try upgrading to the [latest version]({{ config.repo_url }}/releases) first.**
 
 ## For users installing mods:
 
@@ -49,8 +49,8 @@ This section contains known bugs/issues with the preloader, and fixes for them i
     If your game is crashing out of the blue, it is most likely an issue with the mods you have installed, and not the preloader. Please troubleshoot your mods FIRST before seeking further assistance in the discord.
 
 ### Linux
-1. I have personally encountered a bug with quickprecache, where with some mods, not all, TF2 will crash *every other launch*. If this is happening to you, please **contact me** in the [discord](https://discord.gg/64sNFhqUaB).
+1. I have personally encountered a bug with quickprecache, where with some mods, not all, TF2 will crash *every other launch*. If this is happening to you, please **contact me** in the [discord]{{ discord_url }}).
 2. Black weapons/models. Just reboot.
 
 ### Windows
-1. Auto updater not working. This could be for a plethora of reasons, but the easiest fix is to just install the [new version](https://github.com/cueki/casual-pre-loader/releases) of the preloader manually.
+1. Auto updater not working. This could be for a plethora of reasons, but the easiest fix is to just install the [new version]({{ config.repo_url }}/releases) of the preloader manually.

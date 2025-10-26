@@ -1,6 +1,6 @@
 # Home
 
-[![Join Our Discord!](https://img.shields.io/badge/Discord-Join%20Us-7289DA.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/2SZbfXzKYQ)
+[![Join Our Discord!](https://img.shields.io/badge/Discord-Join%20Us-7289DA.svg?style=for-the-badge&logo=discord&logoColor=white)]({{ discord_url }})
 
 !!! warning "Important: HUD Changes"
     If you change your HUD after installing, you must either:
@@ -9,7 +9,7 @@
     - Manually add `#base vguipreload.res` to the top of `resource/ui/mainmenuoverride.res`
         - **Note:** This manual method **does not work** if migrating from the default TF2 HUD
 
-## Download the latest release [Here](https://github.com/cueki/casual-particle-pre-loader/releases/).
+## Download the latest release [Here]({{ config.repo_url }}/releases/).
 
 
 ## Thank you <3:

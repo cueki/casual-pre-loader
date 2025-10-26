@@ -1,7 +1,7 @@
 # Frequently Asked Questions
 Here you can find common questions and info about them. For more in-depth troubleshooting, please refer to **[this](troubleshooting.md)** page.
 
-**If you encounter any error, please try upgrading to the [latest version](https://github.com/cueki/casual-pre-loader/releases) first.**
+**If you encounter any error, please try upgrading to the [latest version]({{ config.repo_url  }}/releases) first.**
 
 ## What is this?
 This is an all-in-one preloading tool intended to be used in Valve casual servers.

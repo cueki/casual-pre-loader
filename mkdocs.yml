@@ -46,6 +46,11 @@ markdown_extensions:
 
 plugins:
   - search
+  - macros:
+      verbose: true
+      module_name: doc/.macros
+extra:
+  discord_url: !ENV [DISCORD_URL, "https://discord.gg/64sNFhqUaB"]
 
 extra_css:
   - stylesheets/extra.css
