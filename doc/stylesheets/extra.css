@@ -313,7 +313,7 @@ strong, b {
   background-color: oklch(25% 0.02 80);
 }
 
-[data-md-color-scheme="default"] .md-typeset .admonition.note > .admonition-title {
+[data-md-color-scheme="default"] .md-typeset .admonition > .admonition-title {
   background-color: oklch(92% 0.02 80);
 }
 
@@ -322,6 +322,6 @@ strong, b {
   background-color: oklch(70% 0.12 280);
 }
 
-[data-md-color-scheme="slate"] .md-typeset .admonition.note > .admonition-title {
+[data-md-color-scheme="slate"] .md-typeset .admonition > .admonition-title {
   background-color: oklch(20% 0.04 280);
 }
