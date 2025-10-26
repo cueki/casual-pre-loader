@@ -1,5 +1,5 @@
 # Troubleshooting
-Here you can find common troublshooting problems and potential fixes/solutions. If none of these work, or your problem isn't listed here, please join the **[discord](https://discord.gg/64sNFhqUaB)** and open a support ticket.
+Here you can find common troubleshooting problems and potential fixes/solutions. If none of these work, or your problem isn't listed here, please join the **[discord](https://discord.gg/64sNFhqUaB)** and open a support ticket.
 
 **If you encounter any error, please try upgrading to the [latest version](https://github.com/cueki/casual-pre-loader/releases) first.**
 
@@ -16,20 +16,16 @@ Here you can find common troublshooting problems and potential fixes/solutions. 
     - While the preloader can handle most mods, even non-'*casual compatible*' ones, they will need to reflect the file structure of TF2. You can either contact the mod author to fix it, or follow the instructions in the [*'For users creating mods:'*](#for-users-creating-mods) section to fix it yourself.
 6. **If you change huds after installing your mods, make sure to run the preloader again.**
 7. **If there was a TF2 update, run the preloader again.**
-> NOTE: There are a select few mods that **WON'T** work when put in the preloader, they are as follows:
-> 
-> - Bsp packed content (think modern community maps).
-> 
-> - Blacklisted sounds (for now).
-> 
-> - Decals (for now).
-> 
-> - Configs (these can stay in custom).
-> 
-> - No hats mod (this should also stay in custom).
-> 
-> - Custom named materials and models (ONLY works with casual compatible file paths).
-<!-- i know it looks strange, but this is how it needs to be formatted for the list to be nested within the blockquote. im sorry -->
+
+!!! note
+    There are a select few mods that **WON'T** work when put in the preloader, they are as follows:
+
+    - Bsp packed content (think modern community maps).
+    - Blacklisted sounds (for now).
+    - Decals (for now).
+    - Configs (these can stay in custom).
+    - No hats mod (this should also stay in custom).
+    - Custom named materials and models (ONLY works with casual compatible file paths).
 
 ### For users creating mods:
 While this tool doesn't need a mod to be '*casual compatible*' for it to work, there's still some issues that will need to be addressed. <br>
@@ -47,18 +43,19 @@ The preloader also includes an easy sorting system with the use of `mod.json`, w
 {
   "addon_name": "your mod name here",
   "type": "use one of these categories: Experimental, HUD, Misc, Texture, Animation, Sound, Skin, or Model",
-  "description": "a brief desctription of what your mod is and what it does",
+  "description": "a brief description of what your mod is and what it does",
   "gamebanana_link": "the link to your mods gamebanana page",
 }
 ```
 
-## I got a VAC error! I dont wanna get banned!
-The "`Disconnected: An issue with your computer is blocking the VAC system. You cannot play on secure servers.`" error has nothing to do with the preloader, and is a pretty common Steam bug. **To fix it, simply restart steam.** If that doesnt work, try verifying the integrity of your game files, and running the preloader again.
+## I got a VAC error! I don't wanna get banned!
+The "`Disconnected: An issue with your computer is blocking the VAC system. You cannot play on secure servers.`" error has nothing to do with the preloader, and is a pretty common Steam bug. **To fix it, simply restart steam.** If that doesn't work, try verifying the integrity of your game files, and running the preloader again.
 
 ## Common issues/bugs
 This section contains known bugs/issues with the preloader, and fixes for them in case you happen to encounter any.
->NOTE:
-If your game is crashing out of the blue, it is most likely an issue with the mods you have installed, and not the preloader. Please troubleshoot your mods FIRST before seeking further assistance in the discord.
+
+!!! note
+    If your game is crashing out of the blue, it is most likely an issue with the mods you have installed, and not the preloader. Please troubleshoot your mods FIRST before seeking further assistance in the discord.
 
 ### Linux
 1. Sometimes a bug with quickprecache can crash your TF2 instance on launch. Just launch again to fix it.

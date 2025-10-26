@@ -281,3 +281,47 @@ strong, b {
   background-color: transparent !important;
   box-shadow: none !important;
 }
+
+/* Style admonitions like sidebar - Light mode */
+[data-md-color-scheme="default"] .md-typeset .admonition {
+  background-color: oklch(92% 0.02 80);
+  border-radius: 0.5rem;
+  border: 0.15rem solid oklch(90% 0.02 80);
+  border-left: 0.15rem solid oklch(90% 0.02 80);
+}
+
+[data-md-color-scheme="default"] .md-typeset .admonition-title {
+  border-top-left-radius: 0.36rem;
+  border-top-right-radius: 0.36rem;
+}
+
+/* Style admonitions like sidebar - Dark mode */
+[data-md-color-scheme="slate"] .md-typeset .admonition {
+  background-color: oklch(20% 0.04 280);
+  border-radius: 0.5rem;
+  border: 0.15rem solid oklch(25% 0.04 280);
+  border-left: 0.15rem solid oklch(25% 0.04 280);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .admonition-title {
+  border-top-left-radius: 0.36rem;
+  border-top-right-radius: 0.36rem;
+}
+
+/* Admonition icon and title colors - Light mode */
+[data-md-color-scheme="default"] .md-typeset .admonition .admonition-title::before {
+  background-color: oklch(25% 0.02 80);
+}
+
+[data-md-color-scheme="default"] .md-typeset .admonition.note > .admonition-title {
+  background-color: oklch(92% 0.02 80);
+}
+
+/* Admonition icon and title colors - Dark mode */
+[data-md-color-scheme="slate"] .md-typeset .admonition .admonition-title::before {
+  background-color: oklch(70% 0.12 280);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .admonition.note > .admonition-title {
+  background-color: oklch(20% 0.04 280);
+}

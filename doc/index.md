@@ -2,6 +2,13 @@
 
 [![Join Our Discord!](https://img.shields.io/badge/Discord-Join%20Us-7289DA.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/2SZbfXzKYQ)
 
+!!! warning "Important: HUD Changes"
+    If you change your HUD after installing, you must either:
+
+    - Open the app and re-run the preloader installation, **OR**
+    - Manually add `#base vguipreload.res` to the top of `resource/ui/mainmenuoverride.res`
+        - **Note:** This manual method **does not work** if migrating from the default TF2 HUD 
+
 ## Download the latest release [Here](https://github.com/cueki/casual-particle-pre-loader/releases/).
 
 
@@ -19,7 +26,7 @@
 
 [agrastiOs](https://github.com/agrastiOs) for the [UltimateVisualFixPack](https://github.com/agrastiOs/Ultimate-TF2-Visual-Fix-Pack).
 
-[Feathers](https://github.com/FeathersTheChick) for help with [documentation](http://cueki.github.io/casual-pre-loader). <!-- [IMPORTANT] this is a guess as to what the link will be, if its not actually this, CHANGE IT - feathers -->
+[Feathers](https://github.com/FeathersTheChick) for help with documentation.
 
 [djsigmann](https://github.com/djsigmann) for help with AUR packaging, documentation, and other misc development.
 

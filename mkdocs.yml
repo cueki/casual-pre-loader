@@ -11,7 +11,7 @@ nav:
   - Tutorial: tutorial.md
   - FAQ: faq.md
   - Troubleshooting: troubleshooting.md
-  - How does this work?: howwork.md
+  - How It Works: how_it_works.md
 
 theme:
   name: material
