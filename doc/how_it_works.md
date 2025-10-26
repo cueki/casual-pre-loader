@@ -284,7 +284,7 @@ The various mod makers whose passion breathes new life into this 18 year old gam
 
 My discord community for helping me test and debug each iteration of this process.
 
-djsigmann, feathers, akuji, and astrid for helping me write and edit this document.
+djsigmann, Feathers, akuji, and astrid for helping me write and edit this document.
 
 And finally,
 

@@ -13,6 +13,11 @@
 
 
 ## Thank you <3:
+[djsigmann](https://github.com/djsigmann) for help with AUR packaging, documentation, and other misc development.
+
+[akuji](https://gamebanana.com/members/2017711) for being a huge help with discord support, documentation, and misc development.
+
+[Feathers](https://github.com/FeathersTheChick) for help with documentation.
 
 [THE GOAT](https://gamebanana.com/members/2133251) This person made the [square_series](https://gamebanana.com/mods/435309) preset.
 
@@ -25,12 +30,6 @@
 [SonOfDiscordiA](https://gamebanana.com/members/2670597) for the [short_circuit](https://gamebanana.com/mods/446897).
 
 [agrastiOs](https://github.com/agrastiOs) for the [UltimateVisualFixPack](https://github.com/agrastiOs/Ultimate-TF2-Visual-Fix-Pack).
-
-[Feathers](https://github.com/FeathersTheChick) for help with documentation.
-
-[djsigmann](https://github.com/djsigmann) for help with AUR packaging, documentation, and other misc development.
-
-[Akuji](https://gamebanana.com/members/2017711) for being a huge help with [discord support](https://discord.gg/BGFs4M6y3C) and misc development.
 ## Star History
 
 <a href="https://www.star-history.com/#cueki/casual-pre-loader&Date">

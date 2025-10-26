@@ -4,16 +4,17 @@ Here you can find common troubleshooting problems and potential fixes/solutions.
 **If you encounter any error, please try upgrading to the [latest version](https://github.com/cueki/casual-pre-loader/releases) first.**
 
 ## For users installing mods:
-1. **All of your mods should be in the preloader, not custom.**
+
+1. **If there was a TF2 update, run the preloader again.**
+2. **All of your mods should be in the preloader, not custom.**
     - The only thing you should keep in custom (if you want to) is your hud.
-2. **Check your load order.**
+3. **Check your load order.**
     - The preloader will tell you if any files are conflicting with one another and use that to decide what should take priority. **Animations should be installed last in the load order if you have custom weapon models.**
-3. **Make sure you have all of your desired mods checked off before installing.**
-4. **Make sure you're launching with `+exec w/config.cfg`**.
-5. **Make sure the mod has correct file pathing.**
-    - While the preloader can handle most mods, even non-'*casual compatible*' ones, they will need to reflect the file structure of TF2. You can either contact the mod author to fix it, or follow the instructions in the [*'For users creating mods:'*](#for-users-creating-mods) section to fix it yourself.
-6. **If you change huds after installing your mods, make sure to run the preloader again.**
-7. **If there was a TF2 update, run the preloader again.**
+4. **Make sure you have all of your desired mods have their boxes checked before installing.**
+5. **Make sure you're launching with `+exec w/config.cfg`**.
+6. **Make sure the mod has correct file pathing.**
+    - While the preloader can handle most mods, even non-'*casual compatible*' ones, they will need to reflect the file structure of TF2. You can either contact the mod author to fix it, or follow the instructions in the [*'For users creating mods'*](#for-users-creating-mods) section to fix it yourself.
+7. **If you change huds after installing your mods, make sure to run the preloader again.**
 
 !!! note
     There are a select few mods that **WON'T** work when put in the preloader, they are as follows:
@@ -22,7 +23,7 @@ Here you can find common troubleshooting problems and potential fixes/solutions.
     - Blacklisted sounds (for now).
     - Decals (for now).
     - Configs (these can stay in custom).
-    - No hats mod (this should also stay in custom).
+    - No hats bgum ([this version](https://gamebanana.com/tools/20969) works with the preloader).
     - Custom named materials and models (ONLY works with casual compatible file paths).
 
 ## For developers creating mods:
@@ -36,18 +37,10 @@ While this tool doesn't need a mod to be '*casual compatible*' for it to work, t
 4. **Double check your VMT's are calling the correct paths.**
 5. **Make sure your textures (VTF'S) have `no mipmap` and `no level of detail` checkmarked so textures don't break.**
 
-The preloader also includes an easy sorting system with the use of `mod.json`, which can help end users sort their mods in the preloader easier. To use it, create a json file called mod.json, and paste this example inside: <br>
-```
-{
-  "addon_name": "your mod name here",
-  "type": "use one of these categories: Experimental, HUD, Misc, Texture, Animation, Sound, Skin, or Model",
-  "description": "a brief description of what your mod is and what it does",
-  "gamebanana_link": "the link to your mods gamebanana page",
-}
-```
+The preloader also includes an easy sorting system with the use of `mod.json`, which can help end users sort their mods in the preloader easier. To use it, put your mod in the prelaoder, select it, then navigate to the bottom of the 'details' area. Then, click 'edit mod.json', and fill in all the information. Once you're finished, click save, then navigate back to the bottom of the 'details' area, and click 'export as vpk'. This is the file you will upload to Gamebanana.
 
 ## I got a VAC error! I don't wanna get banned!
-The "`Disconnected: An issue with your computer is blocking the VAC system. You cannot play on secure servers.`" error has nothing to do with the preloader, and is a pretty common Steam bug. **To fix it, simply restart steam.** If that doesn't work, try verifying the integrity of your game files, and running the preloader again.
+The "`Disconnected: An issue with your computer is blocking the VAC system. You cannot play on secure servers.`" or error has nothing to do with the preloader, and is a pretty common Steam bug. **To fix it, simply restart steam.** If that doesn't work, restart your computer. This error usually will resolve itself in a few minutes with no user input. 
 
 ## Common issues/bugs
 This section contains known bugs/issues with the preloader, and fixes for them in case you happen to encounter any.
@@ -56,7 +49,7 @@ This section contains known bugs/issues with the preloader, and fixes for them i
     If your game is crashing out of the blue, it is most likely an issue with the mods you have installed, and not the preloader. Please troubleshoot your mods FIRST before seeking further assistance in the discord.
 
 ### Linux
-1. Sometimes a bug with quickprecache can crash your TF2 instance on launch. Just launch again to fix it.
+1. I have personally encountered a bug with quickprecache, where with some mods, not all, TF2 will crash *every other launch*. If this is happening to you, please **contact me** in the [discord](https://discord.gg/64sNFhqUaB). 
 2. Black weapons/models. Just reboot.
 
 ### Windows
