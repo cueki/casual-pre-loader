@@ -3,9 +3,7 @@ Here you can find common troubleshooting problems and potential fixes/solutions.
 
 **If you encounter any error, please try upgrading to the [latest version](https://github.com/cueki/casual-pre-loader/releases) first.**
 
-## This mod doesn't work!/My mod doesn't work!
-
-### For users installing mods:
+## For users installing mods:
 1. **All of your mods should be in the preloader, not custom.**
     - The only thing you should keep in custom (if you want to) is your hud.
 2. **Check your load order.**
@@ -27,7 +25,7 @@ Here you can find common troubleshooting problems and potential fixes/solutions.
     - No hats mod (this should also stay in custom).
     - Custom named materials and models (ONLY works with casual compatible file paths).
 
-### For users creating mods:
+## For developers creating mods:
 While this tool doesn't need a mod to be '*casual compatible*' for it to work, there's still some issues that will need to be addressed. <br>
 
 1. **When making mods, please make sure to include *at least* the VTF and the base TF2 model itself. If the model is a custom model, please add in a VMT as well.**

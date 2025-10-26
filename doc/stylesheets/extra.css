@@ -325,3 +325,29 @@ strong, b {
 [data-md-color-scheme="slate"] .md-typeset .admonition > .admonition-title {
   background-color: oklch(20% 0.04 280);
 }
+
+/* Image styling - Light mode */
+[data-md-color-scheme="default"] .md-typeset img {
+  border-radius: 0.5rem;
+  border: 0.15rem solid oklch(90% 0.02 80);
+}
+
+/* Image styling - Dark mode */
+[data-md-color-scheme="slate"] .md-typeset img {
+  border-radius: 0.5rem;
+  border: 0.15rem solid oklch(25% 0.04 280);
+}
+
+/* Code block styling - Light mode */
+[data-md-color-scheme="default"] .md-typeset pre {
+  border-radius: 0.5rem;
+  border: 0.15rem solid oklch(90% 0.02 80);
+  overflow: hidden;
+}
+
+/* Code block styling - Dark mode */
+[data-md-color-scheme="slate"] .md-typeset pre {
+  border-radius: 0.5rem;
+  border: 0.15rem solid oklch(25% 0.04 280);
+  overflow: hidden;
+}
