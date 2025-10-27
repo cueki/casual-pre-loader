@@ -135,17 +135,18 @@ STRING DICTIONARY:
 ELEMENTS:
 
 [0] root
-├── Type: 0 [DmeElement]
-├── Name: "root"
-└── Attributes (1):
-    └── 1: [particleSystemDefinitions] -> references element 1 [my_particle]
+    ├── Type: 0 [DmeElement]
+    ├── Name: "root"
+    └── Attributes (1):
+        └── 1: [particleSystemDefinitions]
+            └── references element 1 [my_particle]
 
 [1] my_particle
-├── Type: 2 (DmeParticleSystemDefinition)
-├── Name: "my_particle"
-└── Attributes (2):
-    ├── 3: 5.0 [radius]
-    └── 4: RGBA(255, 255, 255, 255) [color]
+    ├── Type: 2 (DmeParticleSystemDefinition)
+    ├── Name: "my_particle"
+    └── Attributes (2):
+        ├── 3: 5.0 [radius]
+        └── 4: RGBA(255, 255, 255, 255) [color]
 
 And so on...
 ```
