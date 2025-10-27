@@ -138,7 +138,7 @@ ELEMENTS:
     Type: 0 [DmeElement]
     Name: "root"
     Attributes (1):
-      - 1: [particleSystemDefinitions] → references element 1 [my_particle]
+      - 1: [particleSystemDefinitions] -> references element 1 [my_particle]
 
 [1] my_particle
     Type: 2 (DmeParticleSystemDefinition)
@@ -167,8 +167,8 @@ DIRECTORY TREE:
 Files organized as: extension -> path -> filename
 
 Extension: "cfg"
-    Path: "cfg/addons"
-        Filename: "flat-mouse"
+└── Path: "cfg/addons"
+    └── Filename: "flat-mouse"
         CRC: 0xB497242C
         Archive Index: 0x7FFF (not a multi-part vpk)
         Offset: 0 (relative to tree)
@@ -257,9 +257,9 @@ Contained within the _QuickPreCache.vpk is an already compiled competitive_badge
 Which creates a dependency chain:
 ```
 competitive_badge.mdl (in _QuickPrecache.vpk)
-    - $includemodel precache.mdl (in /tf/models/)
-        - $includemodel precache_0.mdl (in /tf/models/)
-            - $includemodel
+└── $includemodel precache.mdl (in /tf/models/)
+    └── $includemodel precache_0.mdl (in /tf/models/)
+        └── $includemodel
             ├── props/model1.mdl (in /tf/custom/cool_maps_mod/)
             └── props/model2.mdl (in /tf/custom/cool_maps_mod/)
 ```
