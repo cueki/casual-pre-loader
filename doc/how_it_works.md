@@ -63,7 +63,7 @@ Basically, changing one line in tf/gameinfo.txt disables large portions of the m
 ### MD5
 The md5 hash being unchecked was something I mostly figured out on my own. [The knowledge was out there](https://github.com/ValveSoftware/Source-1-Games/issues/887), but my only clue was [this](https://www.youtube.com/watch?v=67LPSFtVlsk) shounic video, in which he deletes VPK files in tf/ to see if the game was still playable. This might seem innocuous, but from the perspective of a developer, this is a huge red flag; the game is not properly verifying files on launch. So, I started poking at it. I learned that when TF2 loads a VPK archive, it reads from a 'directory file'. This directory contains three pieces of information: the file's size, its MD5 hash (a cryptographic fingerprint used to verify the file hasn't been tampered with), and its location within the archive. See my [example](#vpk-structure) of a VPK for more info.
 
-In 2023, I was blindly patching bytes within random files based on string lookups. My assumption was that this hash check was causing corruption. I didn't understand it at the time, but I was simply invalidating pointers in the directory header. When I reported myself in March of 2024, I forwarded the existence of these two exploits, aswell as the CS:GO bug repository to the RGL staff.
+In 2023, I was blindly patching bytes within random files based on string lookups. My assumption was that this hash check was causing corruption. I didn't understand it at the time, but I was simply invalidating pointers in the directory header. When I reported myself in March of 2024, I forwarded the existence of these two exploits, as well as the CS:GO bug repository to the RGL staff.
 
 And that was that, for a while.
 
