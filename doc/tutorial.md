@@ -98,6 +98,6 @@ sudo apt-get install -y libxcb-cursor-dev
 ```
 
 ## Video Supplement:
-<iframe width="560" height="315" src="https://www.youtube.com/watch?v=2L1A86x_m5A" frameborder="3" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/2L1A86x_m5A" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 *This will eventually be updated to the most recent version, and have a linux section - Feathers*

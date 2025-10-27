@@ -135,17 +135,18 @@ STRING DICTIONARY:
 ELEMENTS:
 
 [0] root
-    Type: 0 [DmeElement]
-    Name: "root"
-    Attributes (1):
-      - 1: [particleSystemDefinitions] → references element 1 [my_particle]
+    ├── Type: 0 [DmeElement]
+    ├── Name: "root"
+    └── Attributes (1):
+        └── 1: [particleSystemDefinitions]
+            └── references element 1 [my_particle]
 
 [1] my_particle
-    Type: 2 (DmeParticleSystemDefinition)
-    Name: "my_particle"
-    Attributes (2):
-      - 3: 5.0 [radius]
-      - 4: RGBA(255, 255, 255, 255) [color]
+    ├── Type: 2 (DmeParticleSystemDefinition)
+    ├── Name: "my_particle"
+    └── Attributes (2):
+        ├── 3: 5.0 [radius]
+        └── 4: RGBA(255, 255, 255, 255) [color]
 
 And so on...
 ```
@@ -167,12 +168,12 @@ DIRECTORY TREE:
 Files organized as: extension -> path -> filename
 
 Extension: "cfg"
-    Path: "cfg/addons"
-        Filename: "flat-mouse"
-        CRC: 0xB497242C
-        Archive Index: 0x7FFF (not a multi-part vpk)
-        Offset: 0 (relative to tree)
-        Length: 149 bytes (size)
+└── Path: "cfg/addons"
+    └── Filename: "flat-mouse"
+        ├── CRC: 0xB497242C
+        ├── Archive Index: 0x7FFF (not a multi-part vpk)
+        ├── Offset: 0 (relative to tree)
+        └── Length: 149 bytes (size)
 
 
 EMBEDDED DATA (149 bytes at offset 75)
@@ -211,7 +212,7 @@ This took me another month or two to iron out. There are problems that require m
 
 Also, I had to get all of this in front of an end user and not have their head explode.
 
-Let's recap. At this point we have the ability to load some custom materials via preloading with the gameinfo exploit, as well as animations, models, lightwarps, and now particles via direct VPK modification. What we couldn't load yet were skyboxes, props (which would start to throw caching errors), sounds, and decals. I also had no idea if anything further was realistic. I knew that directly modifying the VPKs would always be a solution, but there was no guarantee I would find a way to compress the data like I did with particle files.
+Let's recap. At this point we have the ability to load some custom materials via preloading with the gameinfo exploit, as well as animations, models, lightwarps, and now particles via direct VPK modification. What we couldn't load yet were skyboxes, props (which would start to throw caching errors), sounds, warpaints, and decals. I also had no idea if anything further was realistic. I knew that directly modifying the VPKs would always be a solution, but there was no guarantee I would find a way to compress the data like I did with particle files.
 
 ### Model Dependency Chaining
 The most impactful issue facing the app was model unloading. This was because the other two methods of preloading did not have this error.
@@ -239,27 +240,27 @@ props/model2.mdl
 It creates a file called precache_0.qc and compiles it with studiomdl:
 ```
 // precache_0.qc
-    $modelname "precache_0.mdl"
-    $includemodel "props/model1.mdl"
-    $includemodel "props/model2.mdl"
+$modelname "precache_0.mdl"
+$includemodel "props/model1.mdl"
+$includemodel "props/model2.mdl"
 ```
 Then it creates precache.qc and also compiles it with studiomdl:
 ```
 // precache.qc
-    $modelname "precache.mdl"
-    $includemodel "precache_0.mdl"
+$modelname "precache.mdl"
+$includemodel "precache_0.mdl"
 ```
 Contained within the _QuickPreCache.vpk is an already compiled competitive_badge.mdl that contains:
 ```
 // competitive_badge.mdl
-    $includemodel "precache.mdl"
+$includemodel "precache.mdl"
 ```
 Which creates a dependency chain:
 ```
 competitive_badge.mdl (in _QuickPrecache.vpk)
-    - $includemodel precache.mdl (in /tf/models/)
-        - $includemodel precache_0.mdl (in /tf/models/)
-            - $includemodel
+└── $includemodel precache.mdl (in /tf/models/)
+    └── $includemodel precache_0.mdl (in /tf/models/)
+        └── $includemodel
             ├── props/model1.mdl (in /tf/custom/cool_maps_mod/)
             └── props/model2.mdl (in /tf/custom/cool_maps_mod/)
 ```
