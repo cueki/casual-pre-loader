@@ -212,7 +212,7 @@ This took me another month or two to iron out. There are problems that require m
 
 Also, I had to get all of this in front of an end user and not have their head explode.
 
-Let's recap. At this point we have the ability to load some custom materials via preloading with the gameinfo exploit, as well as animations, models, lightwarps, and now particles via direct VPK modification. What we couldn't load yet were skyboxes, props (which would start to throw caching errors), sounds, and decals. I also had no idea if anything further was realistic. I knew that directly modifying the VPKs would always be a solution, but there was no guarantee I would find a way to compress the data like I did with particle files.
+Let's recap. At this point we have the ability to load some custom materials via preloading with the gameinfo exploit, as well as animations, models, lightwarps, and now particles via direct VPK modification. What we couldn't load yet were skyboxes, props (which would start to throw caching errors), sounds, warpaints, and decals. I also had no idea if anything further was realistic. I knew that directly modifying the VPKs would always be a solution, but there was no guarantee I would find a way to compress the data like I did with particle files.
 
 ### Model Dependency Chaining
 The most impactful issue facing the app was model unloading. This was because the other two methods of preloading did not have this error.
