@@ -351,3 +351,15 @@ strong, b {
   border: 0.15rem solid oklch(25% 0.04 280);
   overflow: hidden;
 }
+
+/* iframe styling - Light mode */
+[data-md-color-scheme="default"] .md-typeset iframe {
+  border-radius: 0.5rem;
+  border: 0.15rem solid oklch(90% 0.02 80);
+}
+
+/* iframe styling - Dark mode */
+[data-md-color-scheme="slate"] .md-typeset iframe {
+  border-radius: 0.5rem;
+  border: 0.15rem solid oklch(25% 0.04 280);
+}
