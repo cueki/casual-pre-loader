@@ -135,17 +135,17 @@ STRING DICTIONARY:
 ELEMENTS:
 
 [0] root
-    Type: 0 [DmeElement]
-    Name: "root"
-    Attributes (1):
-      - 1: [particleSystemDefinitions] -> references element 1 [my_particle]
+├── Type: 0 [DmeElement]
+├── Name: "root"
+└── Attributes (1):
+    └── 1: [particleSystemDefinitions] -> references element 1 [my_particle]
 
 [1] my_particle
-    Type: 2 (DmeParticleSystemDefinition)
-    Name: "my_particle"
-    Attributes (2):
-      - 3: 5.0 [radius]
-      - 4: RGBA(255, 255, 255, 255) [color]
+├── Type: 2 (DmeParticleSystemDefinition)
+├── Name: "my_particle"
+└── Attributes (2):
+    ├── 3: 5.0 [radius]
+    └── 4: RGBA(255, 255, 255, 255) [color]
 
 And so on...
 ```
@@ -169,10 +169,10 @@ Files organized as: extension -> path -> filename
 Extension: "cfg"
 └── Path: "cfg/addons"
     └── Filename: "flat-mouse"
-        CRC: 0xB497242C
-        Archive Index: 0x7FFF (not a multi-part vpk)
-        Offset: 0 (relative to tree)
-        Length: 149 bytes (size)
+        ├── CRC: 0xB497242C
+        ├── Archive Index: 0x7FFF (not a multi-part vpk)
+        ├── Offset: 0 (relative to tree)
+        └── Length: 149 bytes (size)
 
 
 EMBEDDED DATA (149 bytes at offset 75)
@@ -239,20 +239,20 @@ props/model2.mdl
 It creates a file called precache_0.qc and compiles it with studiomdl:
 ```
 // precache_0.qc
-    $modelname "precache_0.mdl"
-    $includemodel "props/model1.mdl"
-    $includemodel "props/model2.mdl"
+$modelname "precache_0.mdl"
+$includemodel "props/model1.mdl"
+$includemodel "props/model2.mdl"
 ```
 Then it creates precache.qc and also compiles it with studiomdl:
 ```
 // precache.qc
-    $modelname "precache.mdl"
-    $includemodel "precache_0.mdl"
+$modelname "precache.mdl"
+$includemodel "precache_0.mdl"
 ```
 Contained within the _QuickPreCache.vpk is an already compiled competitive_badge.mdl that contains:
 ```
 // competitive_badge.mdl
-    $includemodel "precache.mdl"
+$includemodel "precache.mdl"
 ```
 Which creates a dependency chain:
 ```
