@@ -274,54 +274,55 @@ The next thing I thought to tackle was decals. I underestimated just how annoyin
 Decals were not all in vain, as when attempting different methods of getting the game to accept larger textures, I started tinkering with another method that opened the door for further caching. Thankfully this 'VGUI preloading' is not nearly as complicated. Similar to how quickprecache creates a dependency chain for models, by loading textures in the HUD (offscreen), they will persist between map changes. I wrote a standalone script to generate the .res file structure given a set of input files. First thing I got working was [skyboxes](https://github.com/cueki/casual-pre-loader/blob/main/core/handlers/skybox_handler.py) (which still required me directly patching the VPK with skybox VMTs) but once I had that figured out, akuji came up with the idea of loading warpaints in the same way. This involved locating every single warpaint path in the game, and the result was a 50,000 line long [vguipreload.res](https://github.com/cueki/casual-pre-loader/blob/main/backup/resource/ui/vguipreload.res) file. These textures are not actively rendered, but their reference stays in memory, and that's what matters.
 
 ```
-VGUI Caching Structure:
-└── HUD System (mainmenuoverride.res)
-    └── #base "vguipreload.res"
-        └── ImagePanel elements (loaded offscreen)
-            ├── Skybox Textures
-            │   ├── skybox/sky_01bk
-            │   ├── skybox/sky_01dn
-            │   ├── skybox/sky_01ft
-            │   ├── skybox/sky_01lf
-            │   ├── skybox/sky_01rt
-            │   ├── skybox/sky_01up
-            │   └── ... (all skybox paths in game)
-            │
-            └── Warpaint Textures
-                ├── models/player/items/scout/scout_xms2013_s01
-                ├── models/player/items/soldier/soldier_xms2013_s01
-                ├── models/player/items/pyro/pyro_xms2013_s01
-                └── ... (all warpaint paths in game)
+HUD System (mainmenuoverride.res)
+└── #base "vguipreload.res"
+    └── ImagePanel elements (loaded offscreen)
+        ├── Skybox Textures
+        │   ├── skybox/sky_01bk
+        │   ├── skybox/sky_01dn
+        │   ├── skybox/sky_01ft
+        │   ├── skybox/sky_01lf
+        │   ├── skybox/sky_01rt
+        │   ├── skybox/sky_01up
+        │   └── ... (all skybox paths in game)
+        │
+        └── Warpaint Textures
+            ├── models/player/items/scout/scout_xms2013_s01
+            ├── models/player/items/soldier/soldier_xms2013_s01
+            ├── models/player/items/pyro/pyro_xms2013_s01
+            └── ... (all warpaint paths in game)
 ```
 
 ### Soundscripts
 This leaves sounds as the last thing to be modifiable, but at this point, the burnout was starting to get to me. I first heard of the soundscripts method via the [tf.tv](https://www.teamfortress.tv/51593/cheating-to-hear-spies-is-painfully-easy) post by pete, but the idea of adding it to the preloader felt demotivating because all the discovery had already been done. Alas, akuji came to me after some testing to verify that the bypass was as simple as putting the sound files in `misc/`, and then [updating the sound scripts](https://github.com/cueki/casual-pre-loader/blob/main/core/handlers/sound_handler.py#L119-L175) to reflect the new location.
 
+Let's say you want to install this mod:
 ```
-Soundscripts Structure:
-└── Sound File Processing
-    ├── Original Location (from mod)
-    │   └── sound/
-    │       └── weapons/
-    │           └── some_sound.wav
+sound_mod/
+└── sound/
+    └── weapons/
+        └── some_sound.wav
+```
+We check the game files for this sound:
+```
+Search tf2_sound_*.vpk for "some_sound.wav"
+└── Found: "sound/weapons/some_sound.wav"
+```
+Then it determines the final path based on the directory:
+```
+Path Relocation Logic:
+├── If path starts with: misc/, vo/, ui/
+│   └── Keep original: sound/misc/...
+│
+└── Else (weapons/, player/, etc.)
+    ├── Add misc/ prefix: sound/misc/weapons/some_sound.wav
     │
-    ├── VPK Path
-    │   └── Search tf2_sound_*.vpk for canonical path
-    │       └── Found: "weapons/some_sound.wav"
-    │
-    ├── Path Relocation
-    │   ├── If path starts with: misc/, vo/, ui/
-    │   │   └── Keep original: sound/misc/...
-    │   │
-    │   └── Else (weapons/, player/, etc.)
-    │       └── Add misc/ prefix: sound/misc/weapons/...
-    │
-    └── Script Update
+    └── Update sound scripts:
         └── backup/scripts/*sound*.txt
-            ├── Identify scripts referencing sound
-            └── Update "wave" entries:
-                ├── OLD: "wave" "weapons/some_sound.wav"
-                └── NEW: "wave" "misc/weapons/some_sound.wav"
+            └── Find scripts referencing "weapons/some_sound.wav"
+                └── Update "wave" entries:
+                    ├── Old: "wave" "weapons/some_sound.wav"
+                    └── New: "wave" "misc/weapons/some_sound.wav"
 ```
 
 ### Thank You!
