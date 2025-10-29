@@ -271,10 +271,58 @@ The competitive badge never gets unloaded because it exists on the scoreboard. T
 The next thing I thought to tackle was decals. I underestimated just how annoying their implementation was in the engine. Decals use a material shader called a [‘subrect’](https://developer.valvesoftware.com/wiki/Subrect) so that they can be rendered both on the world and on models. There are some weird rules about this, in order to modulate the decal to feign depth, they use the difference between the texture the decal is being applied to and the grey scale (RGB 127, 127, 127). The [wiki](https://developer.valvesoftware.com/wiki/Decals#DecalModulate) explains this better than I can. Decals also use a sprite sheet, mod2x, which allocates small squares (think 128x128) for each texture. This means that if the mod maker created their own textures, and kept them as individual files at a higher resolution, I would need to simultaneously convert them to this awkward grey scale alpha channel, as well as compress them into lower-quality versions. The reason this remains unfinished to this day is because doing it all automatically looks terrible.
 
 ### VGUI Caching
-Decals were not all in vain, as when attempting different methods of getting the game to accept larger textures, I started tinkering with another method that opened the door for further caching. Thankfully this ‘VGUI preloading’ is not nearly as complicated. Similar to how quickprecache creates a dependency chain for models, by loading textures in the HUD (offscreen), they will persist between map changes. I wrote a standalone script to generate the .res file structure given a set of input files. First thing I got working was [skyboxes](https://github.com/cueki/casual-pre-loader/blob/main/core/handlers/skybox_handler.py) (which still required me directly patching the VPK with skybox VMTs) but once I had that figured out, akuji came up with the idea of loading warpaints in the same way. This involved locating every single warpaint path in the game, and the result was a 50,000 line long [vguipreload.res](https://github.com/cueki/casual-pre-loader/blob/main/backup/resource/ui/vguipreload.res) file. These textures are not actively rendered, but their reference stays in memory, and that's what matters.
+Decals were not all in vain, as when attempting different methods of getting the game to accept larger textures, I started tinkering with another method that opened the door for further caching. Thankfully this 'VGUI preloading' is not nearly as complicated. Similar to how quickprecache creates a dependency chain for models, by loading textures in the HUD (offscreen), they will persist between map changes. I wrote a standalone script to generate the .res file structure given a set of input files. First thing I got working was [skyboxes](https://github.com/cueki/casual-pre-loader/blob/main/core/handlers/skybox_handler.py) (which still required me directly patching the VPK with skybox VMTs) but once I had that figured out, akuji came up with the idea of loading warpaints in the same way. This involved locating every single warpaint path in the game, and the result was a 50,000 line long [vguipreload.res](https://github.com/cueki/casual-pre-loader/blob/main/backup/resource/ui/vguipreload.res) file. These textures are not actively rendered, but their reference stays in memory, and that's what matters.
+
+```
+VGUI Caching Structure:
+└── HUD System (mainmenuoverride.res)
+    └── #base "vguipreload.res"
+        └── ImagePanel elements (loaded offscreen)
+            ├── Skybox Textures
+            │   ├── skybox/sky_01bk
+            │   ├── skybox/sky_01dn
+            │   ├── skybox/sky_01ft
+            │   ├── skybox/sky_01lf
+            │   ├── skybox/sky_01rt
+            │   ├── skybox/sky_01up
+            │   └── ... (all skybox paths in game)
+            │
+            └── Warpaint Textures
+                ├── models/player/items/scout/scout_xms2013_s01
+                ├── models/player/items/soldier/soldier_xms2013_s01
+                ├── models/player/items/pyro/pyro_xms2013_s01
+                └── ... (all warpaint paths in game)
+```
 
 ### Soundscripts
 This leaves sounds as the last thing to be modifiable, but at this point, the burnout was starting to get to me. I first heard of the soundscripts method via the [tf.tv](https://www.teamfortress.tv/51593/cheating-to-hear-spies-is-painfully-easy) post by pete, but the idea of adding it to the preloader felt demotivating because all the discovery had already been done. Alas, akuji came to me after some testing to verify that the bypass was as simple as putting the sound files in `misc/`, and then [updating the sound scripts](https://github.com/cueki/casual-pre-loader/blob/main/core/handlers/sound_handler.py#L119-L175) to reflect the new location.
+
+```
+Soundscripts Structure:
+└── Sound File Processing
+    ├── Original Location (from mod)
+    │   └── sound/
+    │       └── weapons/
+    │           └── some_sound.wav
+    │
+    ├── VPK Path
+    │   └── Search tf2_sound_*.vpk for canonical path
+    │       └── Found: "weapons/some_sound.wav"
+    │
+    ├── Path Relocation
+    │   ├── If path starts with: misc/, vo/, ui/
+    │   │   └── Keep original: sound/misc/...
+    │   │
+    │   └── Else (weapons/, player/, etc.)
+    │       └── Add misc/ prefix: sound/misc/weapons/...
+    │
+    └── Script Update
+        └── backup/scripts/*sound*.txt
+            ├── Identify scripts referencing sound
+            └── Update "wave" entries:
+                ├── OLD: "wave" "weapons/some_sound.wav"
+                └── NEW: "wave" "misc/weapons/some_sound.wav"
+```
 
 ### Thank You!
 I would like to thank some notable individuals in this process.
