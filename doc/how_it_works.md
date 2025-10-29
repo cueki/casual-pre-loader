@@ -68,7 +68,7 @@ In 2023, I was blindly patching bytes within random files based on string lookup
 And that was that, for a while.
 
 ### Baby Steps
-In 2025, I decided to spend more time playing TF2 again. During this time, some friends inquired about decreasing the visual clutter of the pyro's flames. With my rough understanding of VPK editing and the untapped potential of the gameinfo.txt exploit, I got to work. With all that, the best I could get was:
+In the closing months of 2024, I decided to spend more time playing TF2 again. During this time, some friends inquired about decreasing the visual clutter of the pyro's flames. With my rough understanding of VPK editing and the untapped potential of the gameinfo.txt exploit, I got to work. With all that, the best I could get was:
 
 ```vmt
 Spritecard
