@@ -442,7 +442,7 @@ class ModDropZone(QFrame):
         for index, item_path in enumerate(dropped_paths):
             path_obj = Path(item_path)
             item_name = path_obj.name
-            self.worker.progress.emit(0, f"Processing item {index + 1}/{total_items}: {item_name}")
+            self.worker.progress.emit(0, f"Processing item {index + 1}/{total_items}")
             
             try:
                 if path_obj.is_dir():
@@ -484,26 +484,26 @@ class ModDropZone(QFrame):
             extracted_addons_dir = folder_setup.addons_dir / vpk_name
             extracted_particles_dir.mkdir(parents=True, exist_ok=True)
 
-            self.worker.progress.emit(10, f"Analyzing VPK: {vpk_name}")
+            self.worker.progress.emit(10, "Analyzing VPK...")
             vpk_handler = VPKFile(str(file_path))
 
             # check for particles
             has_particles = bool(vpk_handler.find_files("*.pcf"))
 
-            self.worker.progress.emit(15, f"Extracting all files from {vpk_name}")
+            self.worker.progress.emit(15, "Extracting files...")
             extracted_count = vpk_handler.extract_all(str(extracted_particles_dir))
-            self.worker.progress.emit(45, f"Extracted {extracted_count} files from {vpk_name}")
+            self.worker.progress.emit(35, f"Extracted {extracted_count} files")
 
             # process with AdvancedParticleMerger if it has particles
             if has_particles:
-                self.worker.progress.emit(50, f"Processing particles for {vpk_name}")
+                self.worker.progress.emit(50, "Processing particles...")
                 particle_merger = AdvancedParticleMerger(
                     progress_callback=lambda p, m: self.worker.progress.emit(50 + int(p / 2), m)
                 )
                 particle_merger.preprocess_vpk(extracted_particles_dir)
             else:
                 # for non-particle mods, create addon folder
-                self.worker.progress.emit(60, f"Creating addon folder for {vpk_name}")
+                self.worker.progress.emit(60, "Creating addon folder...")
 
                 # if extracted_addons_dir already exists, remove it first
                 if extracted_addons_dir.exists():
@@ -619,7 +619,7 @@ class ModDropZone(QFrame):
         
         if has_vpk and has_zip and has_folder:
             dialog_title = "Processing Mixed Items"
-            dialog_text = "Processing files and folders..."
+            dialog_text = "Processing files..."
         elif has_vpk and (has_zip or has_folder):
             dialog_title = "Processing Items"
             dialog_text = "Processing items..."
@@ -641,7 +641,7 @@ class ModDropZone(QFrame):
         self.progress_dialog.setAutoClose(False)
         self.progress_dialog.setMinimumDuration(0)
         self.progress_dialog.setCancelButton(None)
-        self.progress_dialog.setFixedSize(600, 75)
+        self.progress_dialog.setFixedSize(275, 75)
         self.progress_dialog.show()
 
         process_thread = threading.Thread(

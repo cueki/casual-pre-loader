@@ -29,6 +29,7 @@ class Interface(QObject):
     def __init__(self):
         super().__init__()
         self.sound_handler = SoundHandler()
+        self.cancel_requested = False
 
     def update_progress(self, progress: int, message: str):
         self.progress_signal.emit(progress, message)
@@ -54,6 +55,7 @@ class Interface(QObject):
             shutil.rmtree(item)
 
     def install(self, tf_path: str, selected_addons: List[str], mod_drop_zone=None):
+        self.cancel_requested = False
         try:
             working_vpk_path = Path(tf_path) / "tf2_misc_dir.vpk"
             file_handler = FileHandler(str(working_vpk_path))
@@ -95,6 +97,9 @@ class Interface(QObject):
                             total_files += 1
                             files_to_copy.append((src_path, addon_dir))
 
+            if self.cancel_requested:
+                raise Exception("Installation cancelled by user")
+
             custom_dir = Path(tf_path) / 'custom'
             custom_dir.mkdir(exist_ok=True)
 
@@ -119,23 +124,29 @@ class Interface(QObject):
                     except json.JSONDecodeError as e:
                         print(f"Warning: Invalid JSON in {hud_mod_json}: {e}, skipping preloader_installed flag")
 
-            # ALWAYS restore skyboxes and particles, regardless of addon selection
+            if self.cancel_requested:
+                raise Exception("Installation cancelled by user")
+
+            # ALWAYS restore skyboxes and particles
             restore_skybox_files(tf_path)
             restore_particle_files(tf_path)
+
+            if self.cancel_requested:
+                raise Exception("Installation cancelled by user")
 
             if mod_drop_zone:
                 mod_drop_zone.apply_particle_selections()
 
             if files_to_copy:  # process addon files if we have them
-                # progress bar
                 progress_range = 25
                 completed_files = 0
                 self.update_progress(10, f"Installing addons... (0/{total_files} files)")
 
                 for src_path, addon_dir in files_to_copy:
-                    # relative path from addon directory
-                    rel_path = src_path.relative_to(addon_dir)
+                    if self.cancel_requested:
+                        raise Exception("Installation cancelled by user")
 
+                    rel_path = src_path.relative_to(addon_dir)
                     # route files to appropriate temp directory
                     # PCF files go to to_be_patched, everything else goes to to_be_vpk
                     if src_path.suffix.lower() == '.pcf':
@@ -146,7 +157,6 @@ class Interface(QObject):
                     dest_path.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(src_path, dest_path)
 
-                    # progress bar update
                     completed_files += 1
                     current_progress = 10 + int((completed_files / total_files) * progress_range)
                     self.update_progress(current_progress, f"Installing addons... ({completed_files}/{total_files} files)")
@@ -170,7 +180,10 @@ class Interface(QObject):
                     vpk_paths
                 )
                 if sound_result:
-                    self.update_progress(50, f"Sound processing: {sound_result['message']}")
+                    self.update_progress(50, sound_result['message'])
+
+                if self.cancel_requested:
+                    raise Exception("Installation cancelled by user")
 
                 # patch in skybox mods if present in addon files
                 handle_skybox_mods(folder_setup.temp_to_be_vpk_dir, tf_path)
@@ -210,6 +223,9 @@ class Interface(QObject):
             self.update_progress(start_progress, f"Processing particle files... (0/{total_files})")
 
             for pcf_file in particle_files:
+                if self.cancel_requested:
+                    raise Exception("Installation cancelled by user")
+
                 base_name = pcf_file.name
 
                 mod_pcf = PCFFile(pcf_file).decode()
@@ -240,6 +256,9 @@ class Interface(QObject):
                 current_progress = start_progress + int((completed_files / total_files) * progress_range)
                 self.update_progress(current_progress,f"Processing particle files... ({completed_files}/{total_files})")
 
+            if self.cancel_requested:
+                raise Exception("Installation cancelled by user")
+
             # handle custom folder
             self.update_progress(80, "Making custom VPK")
             game_type(Path(tf_path) / 'gameinfo.txt', uninstall=False)
@@ -261,7 +280,7 @@ class Interface(QObject):
 
             for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
                 split_file.unlink()
-                # also remove any cache files
+                # also remove preloader cache files
                 cache_file = custom_dir / (split_file.name + ".sound.cache")
                 if cache_file.exists():
                     cache_file.unlink()
@@ -273,6 +292,9 @@ class Interface(QObject):
 
                 if not VPKFile.create(str(custom_content_dir), str(vpk_base_path), split_size):
                     raise Exception("Failed to create custom VPK")
+
+            if self.cancel_requested:
+                raise Exception("Installation cancelled by user")
 
             # flush quick precache every install
             QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
@@ -297,6 +319,9 @@ class Interface(QObject):
                 precache.run(auto=True)
                 shutil.copy2(folder_setup.install_dir / 'quickprecache/_QuickPrecache.vpk', custom_dir)
 
+            if self.cancel_requested:
+                raise Exception("Installation cancelled by user")
+
             self.update_progress(97, "Finalizing...")
             get_from_custom_dir(custom_dir)
 
@@ -304,12 +329,22 @@ class Interface(QObject):
             self.success_signal.emit("Mods installed successfully!")
             self.update_progress(0, "Installation complete")
         except Exception as e:
-            self.error_signal.emit(f"Installation failed: {str(e)}")
+            was_cancelled = "cancelled by user" in str(e).lower()
+            if not was_cancelled:
+                self.error_signal.emit(f"Installation failed: {str(e)}")
             # attempt clean up by restoring backup
             try:
-                self.update_progress(0, "Installation failed, attempting cleanup...")
+                if was_cancelled:
+                    self.update_progress(0, "Cancelling installation, restoring files...")
+                else:
+                    self.update_progress(0, "Installation failed, attempting cleanup...")
                 self.restore_backup(tf_path)
-                self.error_signal.emit("Installation failed but cleanup was successful. Files have been restored to backup state.")
+
+                if was_cancelled:
+                    # don't show error dialog for cancellations
+                    pass
+                else:
+                    self.error_signal.emit("Installation failed. Files have been restored to default state.")
             except Exception as cleanup_error:
                 # catastrophic failure
                 self.error_signal.emit(

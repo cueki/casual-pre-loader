@@ -482,11 +482,12 @@ class ParticleManagerGUI(QMainWindow):
         selected_addons = self.get_selected_addons()
         self.set_processing_state(True)
 
-        self.progress_dialog = QProgressDialog("Installing...", None, 0, 100, self)
+        self.progress_dialog = QProgressDialog("Installing...", "Cancel", 0, 100, self)
         self.progress_dialog.setWindowTitle("Installing")
         self.progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
         self.progress_dialog.setMinimumDuration(0)
-        self.progress_dialog.setCancelButton(None)
+        self.progress_dialog.setFixedSize(275, 100)
+        self.progress_dialog.canceled.connect(self.install_manager.cancel_operation)
         self.progress_dialog.show()
 
         self.install_manager.install(selected_addons, self.mod_drop_zone)
@@ -515,8 +516,14 @@ class ParticleManagerGUI(QMainWindow):
             self.restore_button.setEnabled(False)
 
     def update_progress(self, progress, message):
-        if self.progress_dialog:
-            self.progress_dialog.setValue(progress)
+        dialog = self.progress_dialog
+        if dialog:
+            try:
+                dialog.setValue(progress)
+                dialog.setLabelText(message)
+            except (AttributeError, RuntimeError):
+                # Dialog was closed/deleted between check and call
+                pass
 
     def on_operation_finished(self):
         if self.progress_dialog:
