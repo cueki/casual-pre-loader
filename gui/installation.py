@@ -67,6 +67,10 @@ class InstallationManager(QObject):
         thread.start()
         return True
 
+    def cancel_operation(self):
+        if self.processing:
+            self.interface.cancel_requested = True
+
     def is_modified(self):
         if not self.tf_path:
             return False

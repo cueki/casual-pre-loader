@@ -55,7 +55,7 @@ class SoundHandler:
             'files_moved': len(moved_files),
             'scripts_updated': len(modified_scripts),
             'scripts_copied': len(copied_scripts),
-            'message': f'Moved {len(moved_files)} sound files using VPK paths, copied and updated {len(copied_scripts)} script files'
+            'message': f'Moved {len(moved_files)} sounds, updated {len(copied_scripts)} scripts'
         }
 
 
