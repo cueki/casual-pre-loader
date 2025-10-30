@@ -272,8 +272,7 @@ class Interface(QObject):
                 vpk_base_path = custom_dir / CUSTOM_VPK_NAME.replace('.vpk', '')
 
                 if not VPKFile.create(str(custom_content_dir), str(vpk_base_path), split_size):
-                    self.error_signal.emit("Failed to create custom VPK")
-                    return
+                    raise Exception("Failed to create custom VPK")
 
             # flush quick precache every install
             QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
@@ -306,13 +305,13 @@ class Interface(QObject):
             self.update_progress(0, "Installation complete")
         except Exception as e:
             self.error_signal.emit(f"Installation failed: {str(e)}")
-            # attempt to clean up by restoring backup
+            # attempt clean up by restoring backup
             try:
                 self.update_progress(0, "Installation failed, attempting cleanup...")
                 self.restore_backup(tf_path)
                 self.error_signal.emit("Installation failed but cleanup was successful. Files have been restored to backup state.")
             except Exception as cleanup_error:
-                # catastrophic failure, both install and cleanup failed
+                # catastrophic failure
                 self.error_signal.emit(
                     f"CATASTROPHIC FAILURE: Installation failed and cleanup also failed.\n"
                     f"Original error: {str(e)}\n"
