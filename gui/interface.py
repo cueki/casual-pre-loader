@@ -303,9 +303,23 @@ class Interface(QObject):
 
             self.update_progress(100, "Installation complete")
             self.success_signal.emit("Mods installed successfully!")
-            self.update_progress(0, "Installation complete")  # reset progress bar
+            self.update_progress(0, "Installation complete")
         except Exception as e:
-            self.error_signal.emit(f"An error occurred: {str(e)}")
+            self.error_signal.emit(f"Installation failed: {str(e)}")
+            # attempt to clean up by restoring backup
+            try:
+                self.update_progress(0, "Installation failed, attempting cleanup...")
+                self.restore_backup(tf_path)
+                self.error_signal.emit("Installation failed but cleanup was successful. Files have been restored to backup state.")
+            except Exception as cleanup_error:
+                # catastrophic failure, both install and cleanup failed
+                self.error_signal.emit(
+                    f"CATASTROPHIC FAILURE: Installation failed and cleanup also failed.\n"
+                    f"Original error: {str(e)}\n"
+                    f"Cleanup error: {str(cleanup_error)}\n\n"
+                    f"Please verify your game files through Steam:\n"
+                    f"Library > Right-click Team Fortress 2 > Properties > Installed Files > Verify integrity of game files"
+                )
         finally:
             prepare_working_copy()
             self.operation_finished.emit()
