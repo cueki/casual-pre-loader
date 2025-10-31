@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import logging
 from sys import platform
 from PyQt6.QtWidgets import QApplication, QSplashScreen
 from PyQt6.QtGui import QPixmap, QIcon
@@ -12,6 +13,7 @@ from core.auto_updater import check_for_updates_sync
 from gui.update_dialog import show_update_dialog
 from gui.settings_manager import SettingsManager
 
+log = logging.getLogger()
 
 def main():
     app = QApplication([])
@@ -73,7 +75,7 @@ def main():
     elif platform == 'linux':
         window.setWindowIcon(QIcon(str(folder_setup.install_dir / 'gui/cueki_icon.png')))
     else:
-        print(f"[Warning] We don't know how to set an icon for platform type: {platform}")
+        log.warning(f"We don't know how to set an icon for platform type: {platform}")
 
     splash.finish(window)
     window.show()
@@ -83,4 +85,15 @@ def main():
 
 
 if __name__ == "__main__":
+    verbose = False
+    log.setLevel(verbose and logging.DEBUG or logging.INFO)
+    log.addHandler(logging.FileHandler(folder_setup.project_dir / 'casual-pre-loader.log', mode='a', encoding='utf-8'))
+
+    try:
+        from rich.logging import RichHandler
+
+        log.addHandler(RichHandler())
+    except ModuleNotFoundError:
+        log.addHandler(logging.StreamHandler())
+
     main()
