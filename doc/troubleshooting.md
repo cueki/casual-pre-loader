@@ -49,7 +49,7 @@ This section contains known bugs/issues with the preloader, and fixes for them i
     If your game is crashing out of the blue, it is most likely an issue with the mods you have installed, and not the preloader. Please troubleshoot your mods FIRST before seeking further assistance in the discord.
 
 ### Linux
-1. I have personally encountered a bug with quickprecache, where with some mods, not all, TF2 will crash *every other launch*. If this is happening to you, please **contact me** in the [discord]{{ discord_url }}).
+1. I have personally encountered a bug with quickprecache, where with some mods, not all, TF2 will crash *every other launch*. If this is happening to you, please **contact me** in the [discord]({{ discord_url }}).
 2. Black weapons/models. Just reboot.
 
 ### Windows
