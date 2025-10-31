@@ -20,7 +20,7 @@ class SoundHandler:
             f for f in temp_sound_dir.rglob("*")
             if f.is_file() and f.suffix.lower() in self.sound_extensions
         ]
-        
+
         if not all_sound_files:
             return None
 
@@ -32,25 +32,25 @@ class SoundHandler:
                 'scripts_copied': 0,
                 'message': 'No sound files found in VPK for mapping'
             }
-        
+
         # collect paths for script searching
         canonical_paths = [mapping['canonical_path'] for mapping in file_mappings]
-        
+
         # identify which script files are needed
         needed_scripts = identify_needed_scripts(canonical_paths, backup_scripts_dir)
-        
+
         # copy needed script files to temp_mods_dir/scripts/ (excluding any sound script files from mods)
         temp_scripts_dir = temp_mods_dir / 'scripts'
         copied_scripts = copy_needed_scripts(needed_scripts, temp_scripts_dir)
-        
+
         # move/restructure sound files based on VPK mappings
         moved_files = move_sound_files(file_mappings)
-        
+
         # update script files with final paths
         modified_scripts = []
         if copied_scripts and file_mappings:
             modified_scripts = update_script_paths(copied_scripts, file_mappings)
-        
+
         return {
             'files_moved': len(moved_files),
             'scripts_updated': len(modified_scripts),
@@ -62,7 +62,7 @@ class SoundHandler:
 def identify_needed_scripts(canonical_paths: List[str], backup_scripts_dir: Path) -> List[str]:
     # identify script files needed based on VPK paths
     needed_scripts = set()
-    
+
     # normalize paths for matching
     paths_to_match = set()
     for path in canonical_paths:
@@ -70,11 +70,11 @@ def identify_needed_scripts(canonical_paths: List[str], backup_scripts_dir: Path
         # remove extension
         path_without_ext = str(Path(normalized_path).with_suffix('')).replace('\\', '/')
         paths_to_match.add(path_without_ext)
-    
+
     # scan all *sound*.txt files in backup directory
     script_files = list(backup_scripts_dir.glob('*sound*.txt'))
     found_sound_paths = set()
-    
+
     for script_file in script_files:
         try:
             with open(script_file, 'r', encoding='utf-8', errors='ignore') as f:
@@ -102,11 +102,11 @@ def copy_needed_scripts(needed_scripts: List[str], temp_scripts_dir: Path) -> Li
     # copy needed script files from backup/
     temp_scripts_dir.mkdir(parents=True, exist_ok=True)
     copied_scripts = []
-    
+
     for script_file in needed_scripts:
         script_path = Path(script_file)
         target_path = temp_scripts_dir / script_path.name
-        
+
         try:
             shutil.copy2(script_path, target_path)
             copied_scripts.append(str(target_path))
@@ -197,7 +197,7 @@ def create_vpk_based_mappings(sound_files: List[Path], vpk_paths: List[Path]) ->
     for sound_file in sound_files:
         filename = sound_file.name
         canonical_path = None
-        
+
         # search all VPK files for this filename
         for vpk in vpk_files:
             vpk_file_path = vpk.find_file_path(filename)
@@ -251,7 +251,7 @@ def move_sound_files(file_mappings: List[Dict]) -> List[Tuple[str, str]]:
             if parent.name == 'sound':
                 sound_dir = parent
                 break
-        
+
         if sound_dir:
             target_path = sound_dir / final_path
         else:

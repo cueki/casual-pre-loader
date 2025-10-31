@@ -23,7 +23,7 @@ def load_particle_system_map() -> Dict[str, List[str]]:
 
 def find_conflicting_elements(pcf_files: List[PCFFile], target_elements: List[str]) -> Dict[str, List[int]]:
     element_sources = defaultdict(list)
-    
+
     for i, pcf in enumerate(pcf_files):
         available_elements = set(get_pcf_element_names(pcf))
         for element in target_elements:
@@ -35,17 +35,17 @@ def find_conflicting_elements(pcf_files: List[PCFFile], target_elements: List[st
 
 def resolve_conflicts(conflicts: Dict[str, List[int]], pcf_files: List[Path]) -> Dict[str, int]:
     decisions = {}
-    
+
     if not conflicts:
         return decisions
-    
+
     print(f"\nFound {len(conflicts)} conflicting particle elements:")
-    
+
     for element_name, source_indices in conflicts.items():
         print(f"\n'{element_name}' found in:")
         for i, source_idx in enumerate(source_indices):
             print(f"  [{i+1}] {pcf_files[source_idx].name}")
-        
+
         while True:
             try:
                 choice = input(f"Choose source for '{element_name}' [1-{len(source_indices)}]: ").strip()
@@ -58,7 +58,7 @@ def resolve_conflicts(conflicts: Dict[str, List[int]], pcf_files: List[Path]) ->
             except (ValueError, KeyboardInterrupt):
                 print("\n Operation cancelled by user")
                 sys.exit(1)
-    
+
     return decisions
 
 
@@ -136,25 +136,25 @@ def main():
         description="Merge particle systems from multiple PCF files for a specific target particle file",
         epilog="Example: python particle_file_merger.py --target 'particles/taunt_fx.pcf' file1.pcf file2.pcf -o merged_taunt_fx.pcf"
     )
-    
+
     parser.add_argument(
         '--target',
         required=True,
         help='Target particle file from particle_system_map.json (e.g., "particles/taunt_fx.pcf")'
     )
-    
+
     parser.add_argument(
         'input_files',
         nargs='+',
         help='Input PCF files to merge from'
     )
-    
+
     parser.add_argument(
         '-o', '--output',
         required=True,
         help='Output PCF file'
     )
-    
+
     args = parser.parse_args()
 
     try:
@@ -171,20 +171,20 @@ def main():
             display_name = available_target.replace('particles/', '')
             print(f"  - {display_name}")
         sys.exit(1)
-    
+
     target_elements = particle_map[args.target]
     print(f"Target: {args.target}")
     print(f"Need {len(target_elements)} elements: {', '.join(target_elements)}")
 
     pcf_paths = []
     pcf_files = []
-    
+
     for file_path in args.input_files:
         path = Path(file_path)
         if not path.exists():
             print(f" Error: File '{file_path}' does not exist")
             sys.exit(1)
-        
+
         try:
             pcf = PCFFile(path).decode()
             pcf_paths.append(path)
@@ -210,18 +210,18 @@ def main():
         output_path = Path(args.output)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         merged_pcf.encode(output_path)
-        
+
         print(f"\nSuccessfully created '{output_path}'")
         print(f"Contains {len(merged_pcf.elements)-1} particle systems")
 
         final_elements = get_pcf_element_names(merged_pcf)
         missing_elements = set(target_elements) - set(final_elements)
-        
+
         if missing_elements:
             print(f"Missing elements (not found in input files): {', '.join(missing_elements)}")
         else:
             print(f"All target elements included!")
-            
+
     except Exception as e:
         print(f" Error creating merged PCF: {e}")
         sys.exit(1)

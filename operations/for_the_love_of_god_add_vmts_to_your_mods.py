@@ -56,7 +56,7 @@ def generate_vmt_content(texture_path: str, game_vpk: Optional[VPKFile] = None) 
                 return vmt_content.decode('utf-8', errors='ignore')
         except Exception as e:
                 print(f"Error reading VMT from game VPK: {e}")
-    
+
     # fallback to generic VMT
     return f'"LightmappedGeneric"\n{{\n\t"$basetexture" "{texture_path}"\n}}\n'
 

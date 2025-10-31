@@ -278,24 +278,24 @@ class ModDropZone(QFrame):
         if not validation_result.is_valid:
             error_msg = f"Cannot process '{item_name}':\n\n"
             error_msg += "\n".join(f"• {error}" for error in validation_result.errors)
-            
+
             if validation_result.warnings:
                 error_msg += f"\n\nWarnings:\n"
                 error_msg += "\n".join(f"• {warning}" for warning in validation_result.warnings)
-            
+
             QMessageBox.critical(self, "Invalid Structure", error_msg)
             return False
-        
+
         # show warnings but allow processing
         if validation_result.warnings:
             warning_msg = f"Warnings found for '{item_name}':\n\n"
             warning_msg += "\n".join(f"• {warning}" for warning in validation_result.warnings)
             warning_msg += "\n\nDo you want to continue anyway?"
-            
-            reply = QMessageBox.question(self, "Validation Warnings", warning_msg, 
+
+            reply = QMessageBox.question(self, "Validation Warnings", warning_msg,
                                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             return reply == QMessageBox.StandardButton.Yes
-        
+
         return True
 
     def process_folder(self, folder_path: Path, override_name: str = None) -> bool:
@@ -304,17 +304,17 @@ class ModDropZone(QFrame):
 
         # re-validate to get the type information for processing
         validation_result = self.validator.validate_folder(folder_path)
-        
+
         try:
             # determine if it has particles
             has_particles = any((folder_path / "particles").glob("*.pcf"))
-            
+
             if has_particles:
                 destination = folder_setup.particles_dir / folder_name
                 if destination.exists():
                     shutil.rmtree(destination)
                 shutil.copytree(folder_path, destination)
-                
+
                 # process with AdvancedParticleMerger
                 particle_merger = AdvancedParticleMerger(
                     progress_callback=lambda p, m: self.worker.progress.emit(50 + int(p / 2), m)
@@ -326,7 +326,7 @@ class ModDropZone(QFrame):
                 if destination.exists():
                     shutil.rmtree(destination)
                 shutil.copytree(folder_path, destination)
-                
+
                 # create mod.json if it doesn't exist
                 mod_json_path = destination / "mod.json"
                 if not mod_json_path.exists():
@@ -338,27 +338,27 @@ class ModDropZone(QFrame):
                     }
                     with open(mod_json_path, 'w') as f:
                         json.dump(default_mod_info, f, indent=2)
-            
+
             return True
-            
+
         except Exception as e:
             self.worker.error.emit(f"Error processing folder {folder_name}: {str(e)}")
             return False
 
     def process_zip_file(self, zip_path: Path) -> bool:
         zip_name = zip_path.stem
-        
+
         try:
             # extract to temporary directory
             with tempfile.TemporaryDirectory() as temp_dir:
                 temp_path = Path(temp_dir)
-                
+
                 with zipfile.ZipFile(zip_path, 'r') as zip_file:
                     zip_file.extractall(temp_path)
-                
+
                 # analyze extracted structure to find mod folders
                 extracted_items = list(temp_path.iterdir())
-                
+
                 if len(extracted_items) == 1 and extracted_items[0].is_dir():
                     # check if this folder contains valid mod structure
                     single_folder = extracted_items[0]
@@ -377,7 +377,7 @@ class ModDropZone(QFrame):
                                     if self.process_folder(sub_item):
                                         success_count += 1
                         return success_count > 0
-                
+
                 else:
                     # check if the temp_path itself is a valid mod (has mod folders at root)
                     root_validation = self.validator.validate_folder(temp_path)
@@ -394,7 +394,7 @@ class ModDropZone(QFrame):
                                 if self.process_folder(item):
                                     success_count += 1
                     return success_count > 0
-                
+
         except zipfile.BadZipFile:
             self.worker.error.emit(f"Invalid ZIP file: {zip_name}")
             return False
@@ -438,12 +438,12 @@ class ModDropZone(QFrame):
         # process a list of dropped items (VPKs, folders, or ZIP files)
         total_items = len(dropped_paths)
         successful_items = []
-        
+
         for index, item_path in enumerate(dropped_paths):
             path_obj = Path(item_path)
             item_name = path_obj.name
             self.worker.progress.emit(0, f"Processing item {index + 1}/{total_items}")
-            
+
             try:
                 if path_obj.is_dir():
                     # folder
@@ -459,7 +459,7 @@ class ModDropZone(QFrame):
                         successful_items.append(item_name)
                 else:
                     self.worker.error.emit(f"Unsupported file type: {item_name}")
-                    
+
             except Exception as e:
                 self.worker.error.emit(f"Error processing {item_name}: {str(e)}")
 
@@ -470,7 +470,7 @@ class ModDropZone(QFrame):
             else:
                 items_text = ",\n".join(successful_items)
                 self.worker.success.emit(f"Successfully processed {len(successful_items)} items:\n{items_text}")
-        
+
         self.worker.finished.emit()
 
     def process_single_vpk(self, file_path) -> bool:
@@ -523,9 +523,9 @@ class ModDropZone(QFrame):
                     }
                     with open(mod_json_path, 'w') as f:
                         json.dump(default_mod_info, f, indent=2)
-            
+
             return True
-            
+
         except Exception as e:
             self.worker.error.emit(f"Error processing VPK {Path(file_path).name}: {str(e)}")
             return False
@@ -536,10 +536,10 @@ class ModDropZone(QFrame):
             for url in event.mimeData().urls():
                 file_path = url.toLocalFile()
                 path_obj = Path(file_path)
-                
+
                 # accept VPK files, directories, and ZIP files
-                if (file_path.lower().endswith('.vpk') or 
-                    path_obj.is_dir() or 
+                if (file_path.lower().endswith('.vpk') or
+                    path_obj.is_dir() or
                     file_path.lower().endswith('.zip')):
                     event.accept()
                     self.setProperty('dragOver', True)
@@ -567,7 +567,7 @@ class ModDropZone(QFrame):
         for url in event.mimeData().urls():
             item_path = url.toLocalFile()
             path_obj = Path(item_path)
-            
+
             # handle different file types
             if path_obj.is_dir():
                 # validate folder structure
@@ -594,7 +594,7 @@ class ModDropZone(QFrame):
                                         f"File '{path_obj.name}' contains multiple periods.\n\n"
                                         f"Please rename the file and try again.")
                     continue
-                
+
                 vpk_name = path_obj.stem
                 if vpk_name[-3:].isdigit() and vpk_name[-4] == '_' or vpk_name[-4:] == "_dir":
                     base_name = vpk_name[:-4]
@@ -606,7 +606,7 @@ class ModDropZone(QFrame):
                                     f"File type not supported: {path_obj.name}\n\n"
                                     f"Supported types: VPK files, folders, ZIP files")
                 continue
-        
+
         # add normalized VPK files to dropped items
         dropped_items.extend(normalized_vpks.values())
 
@@ -616,7 +616,7 @@ class ModDropZone(QFrame):
         has_vpk = any(item.lower().endswith('.vpk') for item in dropped_items)
         has_zip = any(item.lower().endswith('.zip') for item in dropped_items)
         has_folder = any(Path(item).is_dir() for item in dropped_items)
-        
+
         if has_vpk and has_zip and has_folder:
             dialog_title = "Processing Mixed Items"
             dialog_text = "Processing files..."

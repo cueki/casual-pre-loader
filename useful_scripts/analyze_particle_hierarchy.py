@@ -19,7 +19,7 @@ def analyze_particle_hierarchy(pcf_file: PCFFile, verbose: bool = False) -> Dict
 
     particle_systems = {}
     system_name_to_index = {}
-    
+
     # first pass: collect all particle systems
     for i, element in enumerate(pcf_file.elements):
         element_type = pcf_file.string_dictionary[element.type_name_index].decode('ascii', errors='replace')
@@ -36,17 +36,17 @@ def analyze_particle_hierarchy(pcf_file: PCFFile, verbose: bool = False) -> Dict
                 'emitters': []
             }
             system_name_to_index[system_name] = i
-    
+
     if verbose:
         print(f"Found {len(particle_systems)} particle systems")
-    
+
     # second pass: analyze relationships
     for system_name, system_info in particle_systems.items():
         element = system_info['element']
-        
+
         if verbose:
             print(f"\nAnalyzing: {system_name}")
-        
+
         # look through attributes for references
         for attr_name, (attr_type, attr_value) in element.attributes.items():
             attr_name_str = attr_name.decode('ascii', errors='replace')
@@ -127,7 +127,7 @@ def analyze_particle_hierarchy(pcf_file: PCFFile, verbose: bool = False) -> Dict
                         system_info['emitters'].append(ref_name)
                         if verbose:
                             print(f"  -> Emitter: {ref_name} (via {attr_name_str})")
-    
+
     return particle_systems
 
 
@@ -144,19 +144,19 @@ def build_hierarchy_tree(particle_systems: Dict[str, Dict], root_system: str, vi
     # le recursion XD
     if visited is None:
         visited = set()
-    
+
     if root_system in visited:
         return {"name": root_system, "children": [], "circular": True}
-    
+
     visited.add(root_system)
-    
+
     system_info = particle_systems.get(root_system, {})
     children = []
-    
+
     for child_name in system_info.get('children', []):
         child_tree = build_hierarchy_tree(particle_systems, child_name, visited.copy())
         children.append(child_tree)
-    
+
     return {
         "name": root_system,
         "children": children,
@@ -171,13 +171,13 @@ def print_hierarchy_tree(tree: Dict, indent: int = 0, show_components: bool = Fa
     prefix = "  " * indent
     circular_marker = " (CIRCULAR)" if tree.get('circular') else ""
     print(f"{prefix}{tree['name']}{circular_marker}")
-    
+
     if show_components:
         for comp_type in ['operators', 'renderers', 'initializers', 'emitters']:
             components = tree.get(comp_type, [])
             if components:
                 print(f"{prefix}  {comp_type.title()}: {', '.join(components)}")
-    
+
     for child in tree.get('children', []):
         print_hierarchy_tree(child, indent + 1, show_components)
 
@@ -201,10 +201,10 @@ def compare_with_element0(pcf_file: PCFFile, particle_systems: Dict[str, Dict]) 
     root_systems = find_root_systems(particle_systems)
     set_element0 = set(element0_systems)
     set_roots = set(root_systems)
-    
+
     only_in_element0 = sorted(set_element0 - set_roots)
     only_in_roots = sorted(set_roots - set_element0)
-    
+
     return sorted(element0_systems), root_systems, {
         'only_in_element0': only_in_element0,
         'only_in_roots': only_in_roots,
@@ -215,39 +215,39 @@ def compare_with_element0(pcf_file: PCFFile, particle_systems: Dict[str, Dict]) 
 def generate_particle_system_map_with_parents(pcf_directory: Path, output_file: str = "particle_system_map.json"):
     # generate a particle system map showing only the parent (root) systems for each PCF file.
     particle_map = {}
-    
+
     pcf_files = list(pcf_directory.glob("*.pcf"))
     if not pcf_files:
         print(f"No PCF files found in {pcf_directory}")
         return
-    
+
     print(f"Analyzing {len(pcf_files)} PCF files...")
-    
+
     for pcf_path in sorted(pcf_files):
         relative_path = f"particles/{pcf_path.name}"
-        
+
         try:
             pcf = PCFFile(pcf_path).decode()
             particle_systems = analyze_particle_hierarchy(pcf, verbose=False)
-            
+
             if not particle_systems:
                 continue
 
             root_systems = find_root_systems(particle_systems)
             particle_map[relative_path] = sorted(root_systems)
-            
+
         except Exception as e:
             print(f"Error processing {pcf_path}: {e}")
             continue
 
     with open(output_file, 'w') as f:
         json.dump(particle_map, f, indent=2, sort_keys=True)
-    
+
     print(f"Generated particle system map with parent elements: {output_file}")
 
     total_files = len(particle_map)
     total_parent_systems = sum(len(systems) for systems in particle_map.values())
-    
+
     print(f"Summary:")
     print(f"  PCF files processed: {total_files}")
     print(f"  Total parent systems: {total_parent_systems}")
@@ -275,7 +275,7 @@ def main():
                        help='Generate particle_system_map.json with parent elements')
     parser.add_argument('--output', default='particle_system_map.json',
                        help='Output file for generated particle map (default: particle_system_map.json)')
-    
+
     args = parser.parse_args()
 
     if args.generate_map:
@@ -285,35 +285,35 @@ def main():
             sys.exit(1)
         generate_particle_system_map_with_parents(pcf_directory, args.output)
         return
-    
+
     def analyze_single_file(pcf_path: Path):
         print(f"Analyzing: {pcf_path}")
         print("=" * 60)
-        
+
         try:
             pcf = PCFFile(pcf_path).decode()
             particle_systems = analyze_particle_hierarchy(pcf, args.verbose)
-            
+
             if not particle_systems:
                 print("No particle systems found.")
                 return
-            
+
             print(f"\nSummary:")
             print(f"  Total particle systems: {len(particle_systems)}")
 
             root_systems = find_root_systems(particle_systems)
             print(f"  Root systems (not referenced by others): {len(root_systems)}")
-            
+
             if args.compare:
                 element0_systems, roots, differences = compare_with_element0(pcf, particle_systems)
                 print(f"  Element 0 systems: {len(element0_systems)}")
                 print(f"  Common systems: {len(differences['common'])}")
-                
+
                 if differences['only_in_element0']:
                     print(f"  Only in Element 0: {differences['only_in_element0']}")
                 if differences['only_in_roots']:
                     print(f"  Only in root analysis: {differences['only_in_roots']}")
-            
+
             if args.tree:
                 print(f"\nHierarchy Trees:")
                 print("-" * 40)
@@ -330,44 +330,44 @@ def main():
                     print(f"  {system_name} -> {children}")
             else:
                 print(f"\nNo parent-child relationships found between particle systems.")
-        
+
         except Exception as e:
             print(f"Error processing {pcf_path}: {e}")
-    
+
     if args.pcf_file:
         pcf_path = Path(args.pcf_file)
         if not pcf_path.exists():
             print(f"Error: PCF file '{args.pcf_file}' does not exist.")
             sys.exit(1)
         analyze_single_file(pcf_path)
-    
+
     elif args.all:
         pcf_directory = Path(args.directory)
         if not pcf_directory.exists():
             print(f"Error: Directory '{args.directory}' does not exist.")
             sys.exit(1)
-        
+
         pcf_files = list(pcf_directory.glob("*.pcf"))
         if not pcf_files:
             print(f"No PCF files found in {pcf_directory}")
             sys.exit(1)
-        
+
         for pcf_path in sorted(pcf_files):
             analyze_single_file(pcf_path)
             print("\n" + "="*80 + "\n")
-    
+
     else:
         # default: analyze first file
         pcf_directory = Path(args.directory)
         if not pcf_directory.exists():
             print(f"Error: Directory '{args.directory}' does not exist.")
             sys.exit(1)
-        
+
         pcf_files = list(pcf_directory.glob("*.pcf"))
         if not pcf_files:
             print(f"No PCF files found in {pcf_directory}")
             sys.exit(1)
-        
+
         pcf_path = sorted(pcf_files)[0]
         analyze_single_file(pcf_path)
 
