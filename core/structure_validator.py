@@ -190,7 +190,7 @@ def validate_zip_structure(zip_file: zipfile.ZipFile) -> ValidationResult:
                     warnings=warnings,
                     type_detected="unknown"
                 )
-            
+
         type_detected = "unknown"
         if len(found_mod_folders) > 1:
             warnings.append(f"ZIP contains multiple mods: {', '.join([mod['name'] for mod in found_mod_folders])}")
@@ -220,11 +220,11 @@ class StructureValidator:
     # valid mod root folders from constants
     MOD_INDICATORS = VALID_MOD_ROOT_FOLDERS
     HUD_INDICATORS = {'info.vdf', 'resource/ui', 'scripts/hudlayout.res'}
-    
+
     def __init__(self, max_depth: int = 10):
         # this is not a magic number guys... right?
         self.max_depth = max_depth
-    
+
     def validate_folder(self, folder_path: Path) -> ValidationResult:
         # validates folder against expected structure
         if not folder_path.exists() or not folder_path.is_dir():
@@ -234,12 +234,12 @@ class StructureValidator:
                 warnings=[],
                 type_detected="unknown"
             )
-        
+
         # check if this folder contains valid mod root folders
         mod_structure_result = validate_mod_structure(folder_path)
         if not mod_structure_result.is_valid:
             return mod_structure_result
-        
+
         # scan for other issues (VPK files, etc.)
         scan_result = self._scan_directory(folder_path)
 
@@ -249,7 +249,7 @@ class StructureValidator:
             warnings=mod_structure_result.warnings + scan_result.warnings,
             type_detected=mod_structure_result.type_detected if mod_structure_result.type_detected != "unknown" else scan_result.type_detected
         )
-    
+
     def validate_zip(self, zip_path: Path) -> ValidationResult:
         # validate a zip file structure without extracting
         if not zip_path.exists() or not zip_path.is_file():
@@ -259,7 +259,7 @@ class StructureValidator:
                 warnings=[],
                 type_detected="unknown"
             )
-        
+
         if not zip_path.suffix.lower() == '.zip':
             return ValidationResult(
                 is_valid=False,
@@ -267,14 +267,14 @@ class StructureValidator:
                 warnings=[],
                 type_detected="unknown"
             )
-        
+
         try:
             with zipfile.ZipFile(zip_path, 'r') as zip_file:
                 # check for valid mod structure in ZIP
                 structure_result = validate_zip_structure(zip_file)
                 if not structure_result.is_valid:
                     return structure_result
-                
+
                 # scan for other issues
                 scan_result = self._scan_zip_contents(zip_file)
 
@@ -305,7 +305,7 @@ class StructureValidator:
         warnings = []
         found_files = set()
         found_dirs = set()
-        
+
         if current_depth > self.max_depth:
             warnings.append(f"Maximum directory depth ({self.max_depth}) exceeded")
             return ValidationResult(
@@ -314,23 +314,23 @@ class StructureValidator:
                 warnings=warnings,
                 type_detected="unknown"
             )
-        
+
         try:
             for item in folder_path.iterdir():
                 if item.is_file():
                     # invalid file extensions
                     if item.suffix.lower() in self.INVALID_EXTENSIONS:
                         errors.append(f"Found nested VPK file: {item.relative_to(folder_path)}")
-                    
+
                     found_files.add(item.name.lower())
-                
+
                 elif item.is_dir():
                     found_dirs.add(item.name.lower())
                     # recursively check subdirectories
                     sub_result = self._scan_directory(item, current_depth + 1)
                     errors.extend(sub_result.errors)
                     warnings.extend(sub_result.warnings)
-        
+
         except PermissionError:
             errors.append(f"Permission denied accessing: {folder_path}")
         except Exception as e:
@@ -344,50 +344,50 @@ class StructureValidator:
             warnings=warnings,
             type_detected=type_detected
         )
-    
+
     def _scan_zip_contents(self, zip_file: zipfile.ZipFile) -> ValidationResult:
         # scan zip file contents for invalid patterns
         errors = []
         warnings = []
         found_files = set()
         found_dirs = set()
-        
+
         try:
             file_list = zip_file.namelist()
 
             for file_path in file_list:
                 path_obj = Path(file_path)
-                
+
                 # check depth
                 if len(path_obj.parts) > self.max_depth:
                     warnings.append(f"Deep directory structure found: {file_path}")
-                
+
                 # invalid extensions
                 if path_obj.suffix.lower() in self.INVALID_EXTENSIONS:
                     errors.append(f"Found nested VPK file in zip: {file_path}")
-                
+
                 # track file and directory names
                 found_files.add(path_obj.name.lower())
                 for part in path_obj.parts[:-1]:  # all parts except filename
                     found_dirs.add(part.lower())
-        
+
         except Exception as e:
             errors.append(f"Error reading zip contents: {str(e)}")
 
         type_detected = self._detect_type(found_files, found_dirs)
-        
+
         return ValidationResult(
             is_valid=len(errors) == 0,
             errors=errors,
             warnings=warnings,
             type_detected=type_detected
         )
-    
+
     def _detect_type(self, files: Set[str], dirs: Set[str]) -> str:
         # detect the type of mod based on files and directories found
         if any(indicator in files for indicator in self.HUD_INDICATORS):
             return "hud"
-        
+
         if any(indicator in dirs for indicator in self.HUD_INDICATORS):
             return "hud"
 

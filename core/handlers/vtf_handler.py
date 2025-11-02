@@ -9,7 +9,7 @@ class VTFHandler:
         self.working_dir = Path(working_dir)
         self.working_dir.mkdir(parents=True, exist_ok=True)
         self.vtf_cmd_path = Path("vtfedit/VTFCmd.exe").absolute()
-        
+
         self.vtf_available = self.vtf_cmd_path.exists()
         if not self.vtf_available:
             print("Warning: VTFCmd.exe not found at vtfedit/VTFCmd.exe. VTF operations will be disabled.")

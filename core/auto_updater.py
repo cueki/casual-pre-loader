@@ -23,7 +23,7 @@ class AutoUpdater:
 
             response = requests.get(self.GITHUB_API_URL, timeout=10)
             response.raise_for_status()
-            
+
             release_data = response.json()
             latest_version = release_data["tag_name"].lstrip("v")
 
@@ -35,7 +35,7 @@ class AutoUpdater:
                     "assets": release_data["assets"]
                 }
             return None
-        
+
         except Exception as e:
             print(f"Error checking for updates: {e}")
             return None
@@ -46,7 +46,7 @@ class AutoUpdater:
             name = asset["name"].lower()
             if "casual-preloader" in name and name.endswith(".zip"):
                 return asset["browser_download_url"]
-        
+
         return None
 
     @staticmethod
@@ -98,14 +98,14 @@ class AutoUpdater:
                 temp_extract_dir = self.install_dir / "temp_update"
                 temp_extract_dir.mkdir(exist_ok=True)
                 zip_ref.extractall(temp_extract_dir)
-                
+
                 # nested app folder (casual-preloader-light/casual-preloader)
                 app_folder = None
                 for item in temp_extract_dir.rglob("*"):
                     if item.is_dir() and item.name == "casual-preloader":
                         app_folder = item
                         break
-                
+
                 if app_folder and app_folder.exists():
                     for item in app_folder.iterdir():
                         dest = self.install_dir / item.name
@@ -119,28 +119,28 @@ class AutoUpdater:
                     raise FileNotFoundError
 
                 shutil.rmtree(temp_extract_dir, ignore_errors=True)
-            
+
             return True
-        
+
         except Exception as e:
             print(f"Error extracting update: {e}")
             return False
-    
+
     def update_application(self, update_url: str) -> bool:
         with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_file:
             tmp_path = Path(tmp_file.name)
-        
+
         try:
             print("Downloading application update...")
             if not AutoUpdater.download_file(update_url, tmp_path):
                 return False
-            
+
             print("Extracting update...")
             success = self.extract_update_zip(tmp_path)
-            
+
             tmp_path.unlink()
             return success
-        
+
         except Exception as e:
             print(f"Error updating application: {e}")
             if tmp_path.exists():
@@ -154,22 +154,22 @@ class AutoUpdater:
             "version": None,
             "error": None
         }
-        
+
         try:
             update_info = self.check_for_updates()
             if not update_info:
                 return result
-            
+
             result["update_available"] = True
             result["version"] = update_info["version"]
 
             app_update_url = AutoUpdater.find_update_asset(update_info["assets"])
             if app_update_url:
                 result["app_updated"] = self.update_application(app_update_url)
-            
+
         except Exception as e:
             result["error"] = str(e)
-        
+
         return result
 
 

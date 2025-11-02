@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools mkdocs
-          mkdocs get-deps >>build_requirements.txt 
+          mkdocs get-deps >>build_requirements.txt
           python -m pip install -r build_requirements.txt
 
       - name: Build documentation

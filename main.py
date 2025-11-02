@@ -44,7 +44,7 @@ def main():
     prepare_working_copy()
 
     window = ParticleManagerGUI(tf_directory)
-    
+
     # check for updates after first-time setup is complete (only for portable)
     update_info = None
     if not check_first_time_setup() and folder_setup.portable:
@@ -59,7 +59,7 @@ def main():
             splash.hide()
             show_update_dialog(update_info)
             splash.show()
-    
+
     # pass update info to window for display
     if update_info:
         window.update_info = update_info

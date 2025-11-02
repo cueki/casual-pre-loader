@@ -27,57 +27,57 @@ class SettingsDialog(QDialog):
         self.browse_button = None
         self.tf_path_edit = None
         self.tf_directory = ""
-        
+
         self.setWindowTitle("Settings")
         self.setMinimumSize(500, 375)
         self.setModal(True)
-        
+
         # get current tf/ directory from parent's install manager
         if hasattr(parent, 'install_manager') and parent.install_manager.tf_path:
             self.tf_directory = parent.install_manager.tf_path
-        
+
         self.setup_ui()
-    
+
     def setup_ui(self):
         layout = QVBoxLayout(self)
-        
+
         # tf/ Directory Group
         tf_group = QGroupBox("TF2 Directory")
         tf_layout = QVBoxLayout()
-        
+
         # directory display
         current_label = QLabel("Current TF2 directory:")
         tf_layout.addWidget(current_label)
-        
+
         # directory selection
         dir_layout = QHBoxLayout()
         self.tf_path_edit = QLineEdit()
         self.tf_path_edit.setReadOnly(True)
         self.tf_path_edit.setText(self.tf_directory)
         self.tf_path_edit.setPlaceholderText("No TF2 directory selected...")
-        
+
         self.browse_button = QPushButton("Browse...")
         self.browse_button.clicked.connect(self.browse_tf_dir)
-        
+
         dir_layout.addWidget(self.tf_path_edit)
         dir_layout.addWidget(self.browse_button)
         tf_layout.addLayout(dir_layout)
-        
+
         # validation
         self.validation_label = QLabel("")
         self.validation_label.setWordWrap(True)
         tf_layout.addWidget(self.validation_label)
-        
+
         tf_group.setLayout(tf_layout)
         layout.addWidget(tf_group)
-        
+
         # validate initial directory
         if self.tf_directory:
             validate_tf_directory(self.tf_directory, self.validation_label)
 
         # mods download group
         layout.addWidget(mods_download_group(self))
-        
+
         # version group
         version_group = QGroupBox("About")
         version_layout = QVBoxLayout()
@@ -88,27 +88,27 @@ class SettingsDialog(QDialog):
         version_group.setLayout(version_layout)
         layout.addWidget(version_group)
         layout.addStretch()
-        
+
         # buttons
         button_layout = QHBoxLayout()
         button_layout.addStretch()
         cancel_button = QPushButton("Cancel")
         cancel_button.clicked.connect(self.reject)
         button_layout.addWidget(cancel_button)
-        
+
         self.ok_button = QPushButton("OK")
         self.ok_button.clicked.connect(self.save_and_accept)
         button_layout.addWidget(self.ok_button)
         layout.addLayout(button_layout)
-    
+
     def browse_tf_dir(self):
         directory = QFileDialog.getExistingDirectory(self, "Select tf/ Directory")
         if directory:
             self.tf_directory = directory
             self.tf_path_edit.setText(directory)
             validate_tf_directory(directory, self.validation_label)
-    
-    
+
+
     def get_tf_directory(self):
         return self.tf_directory
 
@@ -124,7 +124,7 @@ class ParticleManagerGUI(QMainWindow):
         self.addon_panel = None
         self.initial_tf_directory = tf_directory
         self.update_info = update_info
-        
+
         # managers
         self.settings_manager = SettingsManager()
         self.addon_manager = AddonManager(self.settings_manager)
@@ -154,7 +154,7 @@ class ParticleManagerGUI(QMainWindow):
             self.settings_manager.set_tf_directory(self.initial_tf_directory)
         else:
             self.load_tf_directory()
-        
+
         # migrate old particle files to new split format
         migrate_old_particle_files()
 

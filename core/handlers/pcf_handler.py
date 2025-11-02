@@ -38,7 +38,7 @@ def get_parent_elements(pcf: PCFFile) -> set[str]:
     # get all system definitions
     system_defs = pcf.get_elements_by_type('DmeParticleSystemDefinition')
     system_definitions = {elem.element_name.decode('ascii') for elem in system_defs}
-    
+
     # get all child elements
     child_elems = pcf.get_elements_by_type('DmeParticleChild')
     child_elements = {elem.element_name.decode('ascii') for elem in child_elems}
