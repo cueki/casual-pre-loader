@@ -107,6 +107,11 @@ strong, b {
   box-shadow: none;
 }
 
+/* Spacing between logo and title */
+.md-header__title {
+  margin-left: 0.5rem !important;
+}
+
 /* Adjust header text and icon colors for visibility - Light mode */
 [data-md-color-scheme="default"] .md-header__title,
 [data-md-color-scheme="default"] .md-header__button,
@@ -362,4 +367,15 @@ strong, b {
 [data-md-color-scheme="slate"] .md-typeset iframe {
   border-radius: 0.5rem;
   border: 0.15rem solid oklch(25% 0.04 280);
+}
+
+/* Logo switching for light/dark mode */
+[data-md-color-scheme="default"] .md-header__button.md-logo img,
+[data-md-color-scheme="default"] .md-logo img {
+  content: url('../images/cueki_light.svg');
+}
+
+[data-md-color-scheme="slate"] .md-header__button.md-logo img,
+[data-md-color-scheme="slate"] .md-logo img {
+  content: url('../images/cueki_dark.svg');
 }

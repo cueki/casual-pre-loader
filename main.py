@@ -28,7 +28,7 @@ def main():
             return
 
     # splash screen
-    splash_pixmap = QPixmap('gui/cueki_icon.png')
+    splash_pixmap = QPixmap('gui/icons/cueki_icon.png')
     splash = QSplashScreen(splash_pixmap)
     splash.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint |
                           Qt.WindowType.FramelessWindowHint)
@@ -69,9 +69,9 @@ def main():
         import ctypes
         my_app_id = 'cool.app.id.yes'
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(my_app_id)
-        window.setWindowIcon(QIcon(str(folder_setup.install_dir / 'gui/cueki_icon.ico')))
+        window.setWindowIcon(QIcon(str(folder_setup.install_dir / 'gui/icons/cueki_icon.svg')))
     elif platform == 'linux':
-        window.setWindowIcon(QIcon(str(folder_setup.install_dir / 'gui/cueki_icon.png')))
+        window.setWindowIcon(QIcon(str(folder_setup.install_dir / 'gui/icons/cueki_icon.svg')))
     else:
         print(f"[Warning] We don't know how to set an icon for platform type: {platform}")
 

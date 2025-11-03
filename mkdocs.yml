@@ -34,8 +34,8 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
 
-  favicon: images/cueki_icon.png
-  logo: images/cueki_icon.png
+  favicon: images/cueki_icon.svg
+  logo: images/cueki_light.svg
 
 markdown_extensions:
   - admonition
