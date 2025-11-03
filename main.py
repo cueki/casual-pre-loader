@@ -28,8 +28,14 @@ def main():
             return
 
     # splash screen
-    splash_pixmap = QPixmap('gui/icons/cueki_icon.png')
-    splash = QSplashScreen(splash_pixmap)
+    splash_pixmap = QPixmap('gui/icons/cueki_splash.png')
+    scaled_pixmap = splash_pixmap.scaled(
+        int(splash_pixmap.width() * 0.75),
+        int(splash_pixmap.height() * 0.75),
+        Qt.AspectRatioMode.KeepAspectRatio,
+        Qt.TransformationMode.SmoothTransformation
+    )
+    splash = QSplashScreen(scaled_pixmap)
     splash.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint |
                           Qt.WindowType.FramelessWindowHint)
     splash.show()
@@ -38,9 +44,6 @@ def main():
     folder_setup.cleanup_old_updater()
     folder_setup.cleanup_temp_folders()
     folder_setup.create_required_folders()
-    splash.showMessage("Preparing working copy...",
-                       Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
-                       Qt.GlobalColor.white)
     prepare_working_copy()
 
     window = ParticleManagerGUI(tf_directory)
@@ -50,9 +53,6 @@ def main():
     if not check_first_time_setup() and folder_setup.portable:
         settings_manager = SettingsManager()
 
-        splash.showMessage("Checking for updates...",
-                           Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter,
-                           Qt.GlobalColor.white)
         update_info = check_for_updates_sync()
 
         if update_info and settings_manager.should_show_update_dialog(update_info["version"]):
