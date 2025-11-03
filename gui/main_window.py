@@ -480,6 +480,19 @@ class ParticleManagerGUI(QMainWindow):
 
     def start_install(self):
         selected_addons = self.get_selected_addons()
+
+        # warn if no addons selected
+        if not selected_addons:
+            result = QMessageBox.question(
+                self,
+                "No Addons Selected",
+                "No addons selected. Continue?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            )
+
+            if result != QMessageBox.StandardButton.Yes:
+                return
+
         self.set_processing_state(True)
 
         self.progress_dialog = QProgressDialog("Installing...", "Cancel", 0, 100, self)
