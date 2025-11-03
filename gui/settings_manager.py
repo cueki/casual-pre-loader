@@ -64,7 +64,8 @@ class SettingsManager:
             "simple_particle_mode": True,
             "skip_launch_options_popup": False,
             "suppress_update_notifications": False,
-            "skipped_update_version": None
+            "skipped_update_version": None,
+            "show_console_on_startup": True
         }
 
         if self.settings_file.exists():
@@ -176,3 +177,10 @@ class SettingsManager:
         if self.get_suppress_update_notifications():
             return False
         return version != self.get_skipped_update_version()
+
+    def get_show_console_on_startup(self):
+        return self.settings.get("show_console_on_startup", True)
+
+    def set_show_console_on_startup(self, show_console):
+        self.settings["show_console_on_startup"] = show_console
+        self.save_settings()

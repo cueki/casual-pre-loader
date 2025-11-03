@@ -6,7 +6,7 @@ from valve_parsers import VPKFile, PCFFile
 from PyQt6.QtCore import QObject, pyqtSignal
 from core.constants import CUSTOM_VPK_NAMES, DX8_LIST, CUSTOM_VPK_NAME, CUSTOM_VPK_SPLIT_PATTERN
 from core.folder_setup import folder_setup
-from core.handlers.file_handler import FileHandler, copy_config_files
+from core.handlers.file_handler import FileHandler, copy_config_files, generate_config
 from core.handlers.pcf_handler import check_parents, update_materials, restore_particle_files
 from core.handlers.skybox_handler import handle_skybox_mods, restore_skybox_files
 from core.handlers.sound_handler import SoundHandler
@@ -26,10 +26,11 @@ class Interface(QObject):
     success_signal = pyqtSignal(str)
     operation_finished = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, settings_manager=None):
         super().__init__()
         self.sound_handler = SoundHandler()
         self.cancel_requested = False
+        self.settings_manager = settings_manager
 
     def update_progress(self, progress: int, message: str):
         self.progress_signal.emit(progress, message)
@@ -321,6 +322,33 @@ class Interface(QObject):
 
             if self.cancel_requested:
                 raise Exception("Installation cancelled by user")
+
+            # patch config.cfg based on what's actually in custom/
+            self.update_progress(95, "Configuring...")
+
+            # check for mastercomfig
+            has_mastercomfig = False
+            for item in custom_dir.iterdir():
+                if item.is_file() and item.suffix == '.vpk' and item.name.startswith('mastercomfig'):
+                    has_mastercomfig = True
+                    break
+
+            # check for quickprecache
+            needs_quickprecache = (custom_dir / "_QuickPrecache.vpk").exists()
+
+            # get console setting from settings_manager
+            show_console = True  # default
+            if self.settings_manager:
+                show_console = self.settings_manager.get_show_console_on_startup()
+
+            # generate appropriate config content
+            config_content = generate_config(has_mastercomfig, needs_quickprecache, show_console)
+
+            # patch generated config
+            custom_vpk_path = custom_dir / CUSTOM_VPK_NAME.replace('.vpk', '_dir.vpk')
+            if custom_vpk_path.exists():
+                vpk_handler = FileHandler(str(custom_vpk_path))
+                vpk_handler.process_file('cfg/w/config.cfg', config_content.encode('utf-8'))
 
             self.update_progress(97, "Finalizing...")
             get_from_custom_dir(custom_dir)
