@@ -26,10 +26,13 @@ class SettingsDialog(QDialog):
         self.validation_label = None
         self.browse_button = None
         self.tf_path_edit = None
+        self.console_checkbox = None
+        self.suppress_updates_checkbox = None
+        self.skip_launch_popup_checkbox = None
         self.tf_directory = ""
 
         self.setWindowTitle("Settings")
-        self.setMinimumSize(500, 375)
+        self.setMinimumSize(500, 450)
         self.setModal(True)
 
         # get current tf/ directory from parent's install manager
@@ -78,19 +81,39 @@ class SettingsDialog(QDialog):
         # mods download group
         layout.addWidget(mods_download_group(self))
 
-        # version group
-        version_group = QGroupBox("About")
-        version_layout = QVBoxLayout()
-        version_label = QLabel(f"Version: {VERSION}")
-        version_label.setStyleSheet("font-weight: bold;")
-        version_layout.addWidget(version_label)
+        # preloader settings group
+        preloader_group = QGroupBox("Preloader Settings")
+        preloader_layout = QVBoxLayout()
 
-        version_group.setLayout(version_layout)
-        layout.addWidget(version_group)
+        self.console_checkbox = QCheckBox("Enable TF2 console on startup")
+        self.suppress_updates_checkbox = QCheckBox("Suppress update notifications")
+        self.skip_launch_popup_checkbox = QCheckBox("Suppress launch options reminder")
+
+        # load current settings from parent's settings_manager
+        parent_widget = self.parent()
+        if parent_widget and hasattr(parent_widget, 'settings_manager'):
+            self.console_checkbox.setChecked(parent_widget.settings_manager.get_show_console_on_startup())
+            self.suppress_updates_checkbox.setChecked(parent_widget.settings_manager.get_suppress_update_notifications())
+            self.skip_launch_popup_checkbox.setChecked(parent_widget.settings_manager.get_skip_launch_options_popup())
+        else:
+            # defaults
+            self.console_checkbox.setChecked(True)
+            self.suppress_updates_checkbox.setChecked(False)
+            self.skip_launch_popup_checkbox.setChecked(False)
+
+        preloader_layout.addWidget(self.console_checkbox)
+        preloader_layout.addWidget(self.suppress_updates_checkbox)
+        preloader_layout.addWidget(self.skip_launch_popup_checkbox)
+
+        preloader_group.setLayout(preloader_layout)
+        layout.addWidget(preloader_group)
         layout.addStretch()
 
-        # buttons
+        # buttons with version in bottom left
         button_layout = QHBoxLayout()
+        version_label = QLabel(f"Version: {VERSION}")
+        version_label.setStyleSheet("color: gray;")
+        button_layout.addWidget(version_label)
         button_layout.addStretch()
         cancel_button = QPushButton("Cancel")
         cancel_button.clicked.connect(self.reject)
@@ -111,6 +134,15 @@ class SettingsDialog(QDialog):
 
     def get_tf_directory(self):
         return self.tf_directory
+
+    def get_show_console_on_startup(self):
+        return self.console_checkbox.isChecked()
+
+    def get_suppress_update_notifications(self):
+        return self.suppress_updates_checkbox.isChecked()
+
+    def get_skip_launch_options_popup(self):
+        return self.skip_launch_popup_checkbox.isChecked()
 
     def save_and_accept(self):
         self.accept()
@@ -179,12 +211,12 @@ class ParticleManagerGUI(QMainWindow):
         # options menu
         options_menu = menubar.addMenu("Options")
 
-        # simple mode toggle
-        simple_mode_action = QAction("Simple Particle Mode", self)
-        simple_mode_action.setCheckable(True)
-        # load saved preference
+        # jank simple mode toggle because checkbox breaks formatting
         saved_mode = self.settings_manager.get_simple_particle_mode()
-        simple_mode_action.setChecked(saved_mode)
+        simple_mode_icon = self.style().standardIcon(
+            QStyle.StandardPixmap.SP_DialogYesButton if saved_mode else QStyle.StandardPixmap.SP_DialogNoButton
+        )
+        simple_mode_action = QAction(simple_mode_icon, "Simple Particle Mode", self)
         simple_mode_action.triggered.connect(self.toggle_particle_mode)
         options_menu.addAction(simple_mode_action)
         self.simple_mode_action = simple_mode_action
@@ -213,10 +245,21 @@ class ParticleManagerGUI(QMainWindow):
         settings_action.triggered.connect(self.open_settings_dialog)
         options_menu.addAction(settings_action)
 
-    def toggle_particle_mode(self, checked):
+    def toggle_particle_mode(self):
+        # toggle current state
+        current_state = self.settings_manager.get_simple_particle_mode()
+        new_state = not current_state
+
+        # update icon
+        new_icon = self.style().standardIcon(
+            QStyle.StandardPixmap.SP_DialogYesButton if new_state else QStyle.StandardPixmap.SP_DialogNoButton
+        )
+        self.simple_mode_action.setIcon(new_icon)
+
+        # update mode
         if self.mod_drop_zone and self.mod_drop_zone.conflict_matrix:
-            self.mod_drop_zone.conflict_matrix.set_simple_mode(checked)
-            self.settings_manager.set_simple_particle_mode(checked)
+            self.mod_drop_zone.conflict_matrix.set_simple_mode(new_state)
+        self.settings_manager.set_simple_particle_mode(new_state)
 
     def setup_ui(self):
         # main layout
@@ -596,6 +639,11 @@ class ParticleManagerGUI(QMainWindow):
                 self.settings_manager.set_tf_directory(new_tf_dir)
                 self.update_restore_button_state()
                 self.scan_for_mcp_files()
+
+            # update preloader settings
+            self.settings_manager.set_show_console_on_startup(dialog.get_show_console_on_startup())
+            self.settings_manager.set_suppress_update_notifications(dialog.get_suppress_update_notifications())
+            self.settings_manager.set_skip_launch_options_popup(dialog.get_skip_launch_options_popup())
 
     def dragEnterEvent(self, event):
         if hasattr(self, 'mod_drop_zone') and self.mod_drop_zone:

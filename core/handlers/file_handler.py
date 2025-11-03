@@ -7,7 +7,7 @@ from valve_parsers import VPKFile, PCFFile
 from core.folder_setup import folder_setup
 
 
-def generate_config(has_mastercomfig=False, needs_quickprecache=False):
+def generate_config(has_mastercomfig=False, needs_quickprecache=False, show_console=True):
     config_parts = []
     config_parts.append('sv_pure -1; sv_allow_point_servercommand always; map itemtest; wait 10; script_execute randommenumusic; disconnect; wait 1; clear')
 
@@ -17,7 +17,12 @@ def generate_config(has_mastercomfig=False, needs_quickprecache=False):
     if needs_quickprecache:
         config_parts.append('exec quickprecache.cfg')
 
-    config_parts.append('playmenumusic; showconsole; echo "casual particle preloader ACTIVE!! :DDDD"; echo ""')
+    final_part = 'playmenumusic'
+    if show_console:
+        final_part += '; showconsole'
+
+    final_part += '; echo "casual particle preloader ACTIVE!! :DDDD"; echo ""'
+    config_parts.append(final_part)
 
     return '; '.join(config_parts) + '\n'
 

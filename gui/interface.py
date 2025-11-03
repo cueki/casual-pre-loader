@@ -26,10 +26,11 @@ class Interface(QObject):
     success_signal = pyqtSignal(str)
     operation_finished = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, settings_manager=None):
         super().__init__()
         self.sound_handler = SoundHandler()
         self.cancel_requested = False
+        self.settings_manager = settings_manager
 
     def update_progress(self, progress: int, message: str):
         self.progress_signal.emit(progress, message)
@@ -335,8 +336,13 @@ class Interface(QObject):
             # check for quickprecache
             needs_quickprecache = (custom_dir / "_QuickPrecache.vpk").exists()
 
+            # get console setting from settings_manager
+            show_console = True  # default
+            if self.settings_manager:
+                show_console = self.settings_manager.get_show_console_on_startup()
+
             # generate appropriate config content
-            config_content = generate_config(has_mastercomfig, needs_quickprecache)
+            config_content = generate_config(has_mastercomfig, needs_quickprecache, show_console)
 
             # patch generated config
             custom_vpk_path = custom_dir / CUSTOM_VPK_NAME.replace('.vpk', '_dir.vpk')

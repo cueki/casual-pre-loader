@@ -15,7 +15,7 @@ class InstallationManager(QObject):
 
     def __init__(self, settings_manager=None):
         super().__init__()
-        self.interface = Interface()
+        self.interface = Interface(settings_manager)
         self.tf_path = ""
         self.processing = False
         self.settings_manager = settings_manager

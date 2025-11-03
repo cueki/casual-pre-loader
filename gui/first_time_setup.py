@@ -347,11 +347,11 @@ def mods_download_group(parent_dialog):
     mods_layout = QVBoxLayout()
 
     mods_description = QLabel(
-        "Download cueki's fixed mods pack (~77 MB)?\n"
         "This collection contains TF2 particles + addons that have been personally fixed "
-        "by me to work with this preloader."
+        "by me to work with this preloader (~77 MB)."
     )
     mods_description.setWordWrap(True)
+    mods_description.setAlignment(Qt.AlignmentFlag.AlignCenter)
     mods_layout.addWidget(mods_description)
 
     download_mods_button = QPushButton("Download cueki's Mods")
