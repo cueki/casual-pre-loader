@@ -1,6 +1,7 @@
 import shutil
 from pathlib import Path
 from core.folder_setup import folder_setup
+from core.constants import BACKUP_MAINMENU_FOLDER
 from valve_parsers import VPKFile
 
 
@@ -31,12 +32,17 @@ def patch_mainmenuoverride(tf_path: str):
                 found_mainmenuoverride = True
 
     if not found_mainmenuoverride:
-        custom_content_dir = folder_setup.temp_to_be_vpk_dir / "resource" / "ui"
-        custom_content_dir.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(folder_setup.install_dir / 'backup/resource/ui/mainmenuoverride.res', custom_content_dir / 'mainmenuoverride.res')
+        # create backup folder in custom/ with mainmenuoverride.res
+        backup_folder = custom_dir / BACKUP_MAINMENU_FOLDER
+        backup_folder_custom = backup_folder / "resource" / "ui"
+        backup_folder_custom.mkdir(parents=True, exist_ok=True)
+
+        # copy mainmenuoverride.res to backup folder
+        shutil.copy2(folder_setup.install_dir / 'backup/resource/ui/mainmenuoverride.res', backup_folder_custom/ 'mainmenuoverride.res')
+
         # info.vdf so tf2 accepts res file
-        shutil.copy2(folder_setup.install_dir / 'backup/info.vdf', folder_setup.temp_to_be_vpk_dir / 'info.vdf')
-        _add_vguipreload_string(custom_content_dir / "mainmenuoverride.res")
+        shutil.copy2(folder_setup.install_dir / 'backup/info.vdf', backup_folder / 'info.vdf')
+        _add_vguipreload_string(backup_folder_custom/ "mainmenuoverride.res")
 
 
 def _add_vguipreload_string(file_path):

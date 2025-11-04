@@ -144,6 +144,7 @@ LEGACY_VPK_NAMES = [
     "_rgl_anti_anticheat.vpk"
 ]
 CUSTOM_VPK_NAMES = [CUSTOM_VPK_NAME] + LEGACY_VPK_NAMES
+BACKUP_MAINMENU_FOLDER = "zzz_run_preloader_again_if_you_add_a_custom_hud_after_or_ELSE"
 
 
 QUICKPRECACHE_FILE_SUFFIXES = [

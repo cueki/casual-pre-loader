@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List
 from valve_parsers import VPKFile, PCFFile
 from PyQt6.QtCore import QObject, pyqtSignal
-from core.constants import CUSTOM_VPK_NAMES, DX8_LIST, CUSTOM_VPK_NAME, CUSTOM_VPK_SPLIT_PATTERN
+from core.constants import CUSTOM_VPK_NAMES, DX8_LIST, CUSTOM_VPK_NAME, CUSTOM_VPK_SPLIT_PATTERN, BACKUP_MAINMENU_FOLDER
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler, copy_config_files, generate_config
 from core.handlers.pcf_handler import check_parents, update_materials, restore_particle_files
@@ -272,6 +272,11 @@ class Interface(QObject):
                 if cache_path.exists():
                     cache_path.unlink()
 
+            # cleanup old backup mainmenu folder
+            backup_mainmenu_folder = custom_dir / BACKUP_MAINMENU_FOLDER
+            if backup_mainmenu_folder.exists():
+                shutil.rmtree(backup_mainmenu_folder)
+
             # create new VPK for custom content & config
             custom_content_dir = folder_setup.temp_to_be_vpk_dir
             copy_config_files(custom_content_dir)
@@ -430,6 +435,11 @@ class Interface(QObject):
                 cache_file = custom_dir / (split_file.name + ".sound.cache")
                 if cache_file.exists():
                     cache_file.unlink()
+
+            # cleanup backup mainmenu folder
+            backup_mainmenu_folder = custom_dir / BACKUP_MAINMENU_FOLDER
+            if backup_mainmenu_folder.exists():
+                shutil.rmtree(backup_mainmenu_folder)
 
             self.success_signal.emit("Backup restored successfully!")
 
