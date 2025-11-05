@@ -21,7 +21,7 @@ def generate_config(has_mastercomfig=False, needs_quickprecache=False, show_cons
     if show_console:
         final_part += '; showconsole'
 
-    final_part += '; echo "casual particle preloader ACTIVE!! :DDDD"; echo ""'
+    final_part += '; exec w/kitty.cfg'
     config_parts.append(final_part)
 
     return '; '.join(config_parts) + '\n'
@@ -32,6 +32,7 @@ def copy_config_files(custom_content_dir):
     config_dest_dir = custom_content_dir / "cfg" / "w"
     config_dest_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(folder_setup.install_dir / 'backup/cfg/w/config.cfg', config_dest_dir)
+    shutil.copy2(folder_setup.install_dir / 'backup/cfg/w/kitty.cfg', config_dest_dir)
 
     # vscript copy
     vscript_dest_dir = custom_content_dir / "scripts" / "vscripts"
