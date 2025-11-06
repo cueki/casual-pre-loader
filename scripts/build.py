@@ -67,12 +67,13 @@ def copy_project_files(source_dir, target_dir):
 
 def main():
     args = parse_arguments()
-    source_dir = os.path.dirname(os.path.abspath(__file__))
+    # get project root (parent of scripts/ directory)
+    source_dir = Path(__file__).resolve().parent.parent
     target_dir = Path(args.target_dir)
     target_dir.mkdir(exist_ok=True, parents=True)
     copy_project_files(source_dir, target_dir)
 
-    runme_source = Path(source_dir) / "RUNME.bat"
+    runme_source = Path(source_dir) / "scripts" / "RUNME.bat"
     if runme_source.exists():
         runme_target = target_dir.parent / "RUNME.bat"
         print(f"Copying RUNME.bat to {runme_target}")
