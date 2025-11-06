@@ -26,13 +26,12 @@ def copy_project_files(source_dir, target_dir):
         'core',
         'gui',
         'backup',
+        'data',
     ]
 
     # list of files to copy
     files_to_copy = [
         'main.py',
-        'particle_system_map.json',
-        'mod_urls.json',
         'LICENSE',
         'README.md',
         'requirements.txt'

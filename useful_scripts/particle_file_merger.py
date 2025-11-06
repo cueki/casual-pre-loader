@@ -16,7 +16,7 @@ from core.folder_setup import folder_setup
 
 
 def load_particle_system_map() -> Dict[str, List[str]]:
-    map_path = folder_setup.install_dir / "particle_system_map.json"
+    map_path = folder_setup.data_dir / "particle_system_map.json"
     with open(map_path, 'r') as f:
         return json.load(f)
 

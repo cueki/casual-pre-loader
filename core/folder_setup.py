@@ -56,6 +56,7 @@ class FolderConfig:
 
     def __post_init__(self):
         self.backup_dir = self.project_dir / self._backup_folder
+        self.data_dir = self.install_dir / "data"
 
         self.mods_dir = self.project_dir / self._mods_folder
         self.particles_dir = self.mods_dir / self._mods_particles_folder

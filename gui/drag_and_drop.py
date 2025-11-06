@@ -249,7 +249,7 @@ class ModDropZone(QFrame):
                     split_file.unlink()
 
         # fill in missing vanilla elements for reconstructed split files
-        particle_map = load_particle_system_map(folder_setup.install_dir / 'particle_system_map.json')
+        particle_map = load_particle_system_map(folder_setup.data_dir / 'particle_system_map.json')
 
         for original_file in PARTICLE_SPLITS.keys():
             merged_file = folder_setup.temp_to_be_patched_dir / original_file

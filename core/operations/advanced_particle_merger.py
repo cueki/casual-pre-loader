@@ -63,7 +63,7 @@ def save_split_files(merged_pcf: PCFFile, out_dir: Path, split_filters: dict) ->
 class AdvancedParticleMerger:
     def __init__(self, progress_callback=None):
         self.progress_callback = progress_callback
-        self.particle_map = load_particle_system_map(folder_setup.install_dir / "particle_system_map.json")
+        self.particle_map = load_particle_system_map(folder_setup.data_dir / "particle_system_map.json")
         self.vpk_groups = defaultdict(lambda: defaultdict(list))  # {vpk_name: {particle_file: [paths]}}
 
     def update_progress(self, progress, message: str):

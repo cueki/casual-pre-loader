@@ -206,7 +206,7 @@ class Interface(QObject):
                     source_path = folder_setup.temp_to_be_referenced_dir / duplicate_effect
                     if source_path.exists():
                         extract_elements(PCFFile(source_path).decode(),
-                                         load_particle_system_map(folder_setup.install_dir / 'particle_system_map.json')
+                                         load_particle_system_map(folder_setup.data_dir / 'particle_system_map.json')
                                          [f'particles/{target_path.name}']).encode(target_path)
 
             if (folder_setup.temp_to_be_patched_dir / "blood_trail.pcf").exists():
