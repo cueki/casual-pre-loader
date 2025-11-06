@@ -22,7 +22,6 @@ def copy_project_files(source_dir, target_dir):
         'backup',
         'backup/cfg',
         'backup/cfg/w',
-        'quickprecache'
     ]
 
     # list of files to copy
@@ -45,6 +44,17 @@ def copy_project_files(source_dir, target_dir):
             shutil.copytree(source_path, target_path, dirs_exist_ok=True)
         else:
             print(f"Warning: Missing {dir_name}")
+
+    # copy quickprecache but exclude studio/ folder (only needed on Linux)
+    quickprecache_source = Path(source_dir) / 'quickprecache'
+    quickprecache_target = Path(target_dir) / 'quickprecache'
+    if quickprecache_source.exists():
+        shutil.copytree(
+            quickprecache_source,
+            quickprecache_target,
+            dirs_exist_ok=True,
+            ignore=shutil.ignore_patterns('studio')
+        )
 
     # copy individual files
     for file_name in files_to_copy:
