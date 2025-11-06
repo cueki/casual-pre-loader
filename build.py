@@ -1,46 +1,12 @@
 import os
 import shutil
-import zipfile
 import argparse
-import subprocess
 from pathlib import Path
-
-
-def compile_updater(source_dir):
-    updater_c = Path(source_dir) / "core" / "updater.c"
-    updater_exe = Path(source_dir) / "core" / "updater.exe"
-
-    if not updater_c.exists():
-        print(f"Warning: {updater_c} not found, skipping updater compilation")
-        return
-
-    print("Compiling updater.exe...")
-    try:
-        # compile with mingw
-        subprocess.run([
-            "x86_64-w64-mingw32-gcc",
-            str(updater_c),
-            "-o",
-            str(updater_exe)
-        ], check=True, capture_output=True, text=True)
-
-        print(f"Successfully compiled updater.exe to {updater_exe}")
-
-    except subprocess.CalledProcessError as e:
-        print(f"Error compiling updater.exe: {e}")
-        print(f"stdout: {e.stdout}")
-        print(f"stderr: {e.stderr}")
-    except FileNotFoundError:
-        print("Error: x86_64-w64-mingw32-gcc not found. Install mingw-w64 cross-compiler.")
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Build script')
     parser.add_argument('--target_dir', help='Target directory to deploy the application')
-    parser.add_argument('--user-mods-zip', help='Path to mods.zip file', default='mods.zip')
-    parser.add_argument('--skip-mods-zip', action='store_true', help='Skip creating mods.zip file')
-    parser.add_argument('--build-variant', choices=['full', 'light', 'both'], default='full',
-                        help='Build variant: full (with mods.zip), light (without mods.zip), or both')
     return parser.parse_args()
 
 
@@ -92,68 +58,22 @@ def copy_project_files(source_dir, target_dir):
             print(f"Warning: Missing {file_name}")
 
 
-def zip_mods_directory(source_dir, target_dir):
-    mods_dir = Path(source_dir) / "mods"
-    zip_path = Path(target_dir) / "mods.zip"
-
-    if not mods_dir.exists():
-        print(f"Warning: Mods directory {mods_dir} not found")
-        return
-
-    print(f"Creating {zip_path} from {mods_dir}...")
-    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for root, _, files in os.walk(mods_dir):
-            for file in files:
-                file_path = os.path.join(root, file)
-                archive_name = os.path.relpath(file_path, mods_dir)
-                zipf.write(file_path, archive_name)
-
-    print(f"Successfully created {zip_path}")
-
-
-def build_variant(source_dir, target_dir, include_mods_zip=True, variant_name=""):
-    if variant_name:
-        variant_dir = target_dir / variant_name
-        app_dir = variant_dir / "casual-preloader"
-    else:
-        variant_dir = target_dir
-        app_dir = variant_dir
-
-    app_dir.mkdir(exist_ok=True, parents=True)
-
-    print(f"Building {variant_name or 'default'} variant...")
-    copy_project_files(source_dir, app_dir)
-
-    if include_mods_zip:
-        zip_mods_directory(source_dir, app_dir)
-        print(f"{variant_name or 'Build'} includes mods.zip")
-    else:
-        print(f"{variant_name or 'Build'} excludes mods.zip")
-
-    if variant_name:
-        shutil.copy2("RUNME.bat", variant_dir)
-        shutil.copy2("READ_THIS.txt", variant_dir)
-
-    return app_dir
-
-
 def main():
     args = parse_arguments()
     source_dir = os.path.dirname(os.path.abspath(__file__))
-    base_target_dir = Path(args.target_dir)
-    compile_updater(source_dir)
+    target_dir = Path(args.target_dir)
+    target_dir.mkdir(exist_ok=True, parents=True)
+    copy_project_files(source_dir, target_dir)
 
-    if args.build_variant == 'both':
-        full_dir = build_variant(source_dir, base_target_dir, True, "casual-preloader-full")
-        light_dir = build_variant(source_dir, base_target_dir, False, "casual-preloader-light")
-        print(f"Both variants built successfully:")
-        print(f"  Full:  {full_dir}")
-        print(f"  Light: {light_dir}")
+    runme_source = Path(source_dir) / "RUNME.bat"
+    if runme_source.exists():
+        runme_target = target_dir.parent / "RUNME.bat"
+        print(f"Copying RUNME.bat to {runme_target}")
+        shutil.copy2(runme_source, runme_target)
     else:
-        include_mods = args.build_variant == 'full' and not args.skip_mods_zip
-        build_variant(source_dir, base_target_dir, include_mods)
-        print(f"Build completed successfully to {base_target_dir}")
+        print("Warning: RUNME.bat not found")
 
+    print(f"Build completed successfully to {target_dir}")
     print('feathers wuz here')
 
 
