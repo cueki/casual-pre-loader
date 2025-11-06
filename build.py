@@ -65,6 +65,14 @@ def main():
     target_dir.mkdir(exist_ok=True, parents=True)
     copy_project_files(source_dir, target_dir)
 
+    runme_source = Path(source_dir) / "RUNME.bat"
+    if runme_source.exists():
+        runme_target = target_dir.parent / "RUNME.bat"
+        print(f"Copying RUNME.bat to {runme_target}")
+        shutil.copy2(runme_source, runme_target)
+    else:
+        print("Warning: RUNME.bat not found")
+
     print(f"Build completed successfully to {target_dir}")
     print('feathers wuz here')
 
