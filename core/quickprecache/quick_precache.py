@@ -2,9 +2,9 @@ import tempfile
 import itertools
 from pathlib import Path
 from typing import Set
-from quickprecache.precache_list import make_precache_list
-from quickprecache.r_rootlod import check_root_lod
-from quickprecache.studio_mdl import StudioMDL
+from core.quickprecache.precache_list import make_precache_list
+from core.quickprecache.r_rootlod import check_root_lod
+from core.quickprecache.studio_mdl import StudioMDL
 from core.folder_setup import folder_setup
 
 

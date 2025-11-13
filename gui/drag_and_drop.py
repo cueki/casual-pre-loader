@@ -11,9 +11,9 @@ from core.constants import PARTICLE_SPLITS
 from core.structure_validator import StructureValidator, ValidationResult
 from valve_parsers import VPKFile, PCFFile
 from gui.conflict_matrix import ConflictMatrix
-from operations.advanced_particle_merger import AdvancedParticleMerger
-from operations.pcf_merge import merge_pcf_files
-from operations.pcf_rebuild import load_particle_system_map, get_pcf_element_names, extract_elements
+from core.operations.advanced_particle_merger import AdvancedParticleMerger
+from core.operations.pcf_merge import merge_pcf_files
+from core.operations.pcf_rebuild import load_particle_system_map, get_pcf_element_names, extract_elements
 
 
 def parse_vmt_texture(vmt_path):

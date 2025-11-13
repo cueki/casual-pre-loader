@@ -10,18 +10,22 @@ def parse_arguments():
     return parser.parse_args()
 
 
+def ignore_studio_folder(directory, contents):
+    ignored = []
+    rel_dir = Path(directory).relative_to(Path(directory).anchor)
+    if 'quickprecache' in rel_dir.parts and 'studio' in contents:
+        ignored.append('studio')
+    return ignored
+
+
 def copy_project_files(source_dir, target_dir):
     print(f"Copying project files from {source_dir} to {target_dir}...")
 
     # list of directories to copy
     dirs_to_copy = [
         'core',
-        'core/handlers',
         'gui',
-        'operations',
         'backup',
-        'backup/cfg',
-        'backup/cfg/w',
     ]
 
     # list of files to copy
@@ -41,20 +45,14 @@ def copy_project_files(source_dir, target_dir):
 
         if source_path.exists():
             print(f"Copying directory: {dir_name}")
-            shutil.copytree(source_path, target_path, dirs_exist_ok=True)
+            # exclude quickprecache/studio folder (only needed on Linux, not in Windows releases)
+            if dir_name == 'core':
+                shutil.copytree(source_path, target_path, dirs_exist_ok=True,
+                               ignore=ignore_studio_folder)
+            else:
+                shutil.copytree(source_path, target_path, dirs_exist_ok=True)
         else:
             print(f"Warning: Missing {dir_name}")
-
-    # copy quickprecache but exclude studio/ folder (only needed on Linux)
-    quickprecache_source = Path(source_dir) / 'quickprecache'
-    quickprecache_target = Path(target_dir) / 'quickprecache'
-    if quickprecache_source.exists():
-        shutil.copytree(
-            quickprecache_source,
-            quickprecache_target,
-            dirs_exist_ok=True,
-            ignore=shutil.ignore_patterns('studio')
-        )
 
     # copy individual files
     for file_name in files_to_copy:

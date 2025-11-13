@@ -2,7 +2,7 @@ import threading
 from pathlib import Path
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
-from operations.file_processors import check_game_type
+from core.operations.file_processors import check_game_type
 from gui.interface import Interface
 from gui.settings_manager import validate_tf_directory
 

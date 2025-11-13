@@ -14,7 +14,7 @@ class StudioMDLVersion(Enum):
 class StudioMDL:
     def __init__(self, game_path: str):
         self.game_path = Path(game_path)
-        self.bundled_studiomdl_path = folder_setup.install_dir / "quickprecache" / "studio" / "studiomdl.exe"
+        self.bundled_studiomdl_path = folder_setup.install_dir / "core" / "quickprecache" / "studio" / "studiomdl.exe"
         self.studio_mdl_version = self._get_studio_mdl_version()
 
         if self.studio_mdl_version == StudioMDLVersion.MISSING:

@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Dict, List
 from collections import defaultdict
 from valve_parsers import PCFFile
-from operations.pcf_rebuild import get_pcf_element_names, extract_elements
+from core.operations.pcf_rebuild import get_pcf_element_names, extract_elements
 from core.folder_setup import folder_setup
 
 

@@ -2,9 +2,9 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
 from valve_parsers import PCFFile
-from operations.pcf_rebuild import (load_particle_system_map, get_pcf_element_names, extract_elements,
-                                    rebuild_particle_files)
-from operations.pcf_merge import merge_pcf_files
+from core.operations.pcf_rebuild import (load_particle_system_map, get_pcf_element_names, extract_elements,
+                                         rebuild_particle_files)
+from core.operations.pcf_merge import merge_pcf_files
 from core.folder_setup import folder_setup
 from core.constants import PARTICLE_SPLITS
 

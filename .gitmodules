@@ -1,3 +1,3 @@
 [submodule "studiomdl"]
-	path = quickprecache/studio
+	path = core/quickprecache/studio
 	url = https://github.com/cueki/studiomdl
