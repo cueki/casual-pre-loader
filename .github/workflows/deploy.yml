@@ -25,12 +25,12 @@ jobs:
 
     steps:
       - name: Chekout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.x
+          python-version: ">=3.8"
 
       - name: Install dependencies
         run: |
@@ -38,15 +38,16 @@ jobs:
           mkdocs get-deps >>build_requirements.txt
           python -m pip install -r build_requirements.txt
 
+      - name: Configure GitHub Pages
+        id: configure-pages
+        uses: actions/configure-pages@v5
+
       - name: Build documentation
         env:
           REPO_URL: https://github.com/${{ github.repository }}/
-          SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+          SITE_URL: ${{ steps.configure-pages.outputs.base_url }}
         run: |
           mkdocs build -sv
-
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v4
