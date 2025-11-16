@@ -8,7 +8,7 @@ This is an all-in-one preloading tool intended to be used in Valve casual server
 ### But, what is a preloader?
 A preloader is a tool that enables the ability to load custom content in an offline server *before* joining an official server. If done correctly, Team Fortress 2 will not unload this custom content on map change, thereby enabling the use of mods. While this preloader may accomplish this using various methods, it still relies on loading into an offline map as a mandatory step. Hence the name,*'Casual Preloader'*.
 ### Why should I use this over the other options?
-Unlike the other preloaders, this one doesn't need *'casual compatible'* mods to work *(though they still function as normal)*. It is also the only preloader that can load particles as well as models, materials, animations, vgui elements, skyboxes, decals, and lightwarps. It is also being constantly updated.
+Unlike the other preloaders, this one doesn't need *'casual compatible'* mods to work *(though they still function as normal)*. It is also the only preloader that can load particles as well as models, materials, animations, vgui elements, skyboxes, decals, and lightwarps. It is also actively maintained.
 
 ## Will this get me VAC banned?
 No. This program does not interact with VAC in any way. If you wish to know more about how the program works, please read about it **[here](how_it_works.md)**.
