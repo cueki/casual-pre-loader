@@ -11,13 +11,13 @@ from core.handlers.pcf_handler import check_parents, update_materials, restore_p
 from core.handlers.skybox_handler import handle_skybox_mods, restore_skybox_files
 from core.handlers.sound_handler import SoundHandler
 from core.backup_manager import prepare_working_copy
-from operations.for_the_love_of_god_add_vmts_to_your_mods import generate_missing_vmt_files
-from operations.pcf_rebuild import load_particle_system_map, extract_elements
-from operations.file_processors import game_type, get_from_custom_dir
-from operations.pcf_compress import remove_duplicate_elements
-from operations.vgui_preload import patch_mainmenuoverride
-from quickprecache.precache_list import make_precache_list
-from quickprecache.quick_precache import QuickPrecache
+from core.operations.for_the_love_of_god_add_vmts_to_your_mods import generate_missing_vmt_files
+from core.operations.pcf_rebuild import load_particle_system_map, extract_elements
+from core.operations.file_processors import game_type, get_from_custom_dir
+from core.operations.pcf_compress import remove_duplicate_elements
+from core.operations.vgui_preload import patch_mainmenuoverride
+from core.quickprecache.precache_list import make_precache_list
+from core.quickprecache.quick_precache import QuickPrecache
 
 
 class Interface(QObject):
@@ -206,7 +206,7 @@ class Interface(QObject):
                     source_path = folder_setup.temp_to_be_referenced_dir / duplicate_effect
                     if source_path.exists():
                         extract_elements(PCFFile(source_path).decode(),
-                                         load_particle_system_map(folder_setup.install_dir / 'particle_system_map.json')
+                                         load_particle_system_map(folder_setup.data_dir / 'particle_system_map.json')
                                          [f'particles/{target_path.name}']).encode(target_path)
 
             if (folder_setup.temp_to_be_patched_dir / "blood_trail.pcf").exists():
@@ -323,7 +323,7 @@ class Interface(QObject):
                     progress_callback=self.update_progress
                 )
                 precache.run(auto=True)
-                shutil.copy2(folder_setup.install_dir / 'quickprecache/_QuickPrecache.vpk', custom_dir)
+                shutil.copy2(folder_setup.install_dir / 'core/quickprecache/_QuickPrecache.vpk', custom_dir)
 
             if self.cancel_requested:
                 raise Exception("Installation cancelled by user")

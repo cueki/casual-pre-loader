@@ -2,37 +2,36 @@ import subprocess
 from sys import platform
 from pathlib import Path
 from enum import Enum
+from core.folder_setup import folder_setup
 
 
 class StudioMDLVersion(Enum):
     MISSING = ""
     STUDIOMDL32 = "bin/studiomdl.exe"
-    NEKOMDL = "bin/nekomdl.exe"
+    BUNDLED_SDK = "bundled"
 
 
 class StudioMDL:
     def __init__(self, game_path: str):
         self.game_path = Path(game_path)
+        self.bundled_studiomdl_path = folder_setup.install_dir / "core" / "quickprecache" / "studio" / "studiomdl.exe"
         self.studio_mdl_version = self._get_studio_mdl_version()
 
         if self.studio_mdl_version == StudioMDLVersion.MISSING:
             raise RuntimeError(
-                "StudioMDL.exe not found, you probably installed the mod wrong.\n"
-                "!!! IF YOU ARE ON LINUX, YOU NEED THE STUDOMDL EXECUTABLE FROM A WINDOWS VERSION OF THE GAME !!!"
+                "StudioMDL.exe not found in game directory or bundled SDK location.\n"
+                "Please ensure TF2 is properly installed or check the installation."
             )
 
     def _get_studio_mdl_version(self) -> StudioMDLVersion:
         # detect which version of StudioMDL is available
-        # check for StudioMDL
         if self._check_studio_mdl_version(StudioMDLVersion.STUDIOMDL32):
             return StudioMDLVersion.STUDIOMDL32
 
-        # im going to comment this out and see what happens, afaik studiomdl comes with the game so im not sure
-        # why you'd have nekomdl, + nekomdl produces errors sometimes. I don't think it's a good fallback option...
-        # cukei - 7/02/2025
-        # check for NekoMDL
-        # if self._check_studio_mdl_version(StudioMDLVersion.NEKOMDL):
-        #     return StudioMDLVersion.NEKOMDL
+        # check for bundled SDK version as fallback
+        if self.bundled_studiomdl_path.exists():
+            print(f"Using bundled SDK studiomdl.exe from {self.bundled_studiomdl_path}")
+            return StudioMDLVersion.BUNDLED_SDK
 
         return StudioMDLVersion.MISSING
 
@@ -51,7 +50,11 @@ class StudioMDL:
         if self.studio_mdl_version == StudioMDLVersion.MISSING:
             return False
 
-        exe_path = str(self.game_path / self.studio_mdl_version.value)
+        if self.studio_mdl_version == StudioMDLVersion.BUNDLED_SDK:
+            exe_path = str(self.bundled_studiomdl_path)
+        else:
+            exe_path = str(self.game_path / self.studio_mdl_version.value)
+
         tf_path = str(Path(self.game_path) / 'tf')
 
         # use wine on not windows

@@ -3,7 +3,7 @@ from core.constants import PARTICLE_SPLITS
 
 
 def migrate_old_particle_files():
-    from operations.advanced_particle_merger import AdvancedParticleMerger, save_split_files
+    from core.operations.advanced_particle_merger import AdvancedParticleMerger, save_split_files
     from valve_parsers import PCFFile
 
     mods_to_migrate = []

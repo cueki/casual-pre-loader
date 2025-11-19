@@ -44,27 +44,8 @@ If you want a video supplement, please refer to the [**Video Supplement**](#vide
   3. **Launch tf2 and boot up a casual match! You should see all of your mods working.**
 
 ## Linux Tutorial:
-1. We need studiomdl.exe from the Windows version of TF2. First, force the use of proton in game properties, make sure to click "update" after.
 
-![proton](images/proton.png)
-
-2. Once updated, navigate to your `Steam/steamapps/common/Team Fortress 2/` and rename bin/ to something other than bin/, for example, bin_/.
-
-![bin](images/bin.png)
-
-3. Disable proton in game properties, and update again.
-
-![disable proton](images/disable_proton.png)
-
-4. Back in `Steam/steamapps/common/Team Fortress 2/`, rename `bin_/` back to `bin/` to merge the directories, or copy its contents into `bin/`.
-
-![bin merge](images/bin_merge.png)
-
-5. If done right, you should now see `studiomdl.exe` inside the `bin/` folder!
-
-![studiomdl](images/studiomdl.png)
-
-6. Now you can clone the repo, or install it as an [AUR package](https://aur.archlinux.org/packages/casual-pre-loader-git)!
+You can clone the repo, or install it as an [AUR package](https://aur.archlinux.org/packages/casual-pre-loader-git).
 
    - Using [yay](https://github.com/Jguer/yay):
 ```sh
@@ -80,13 +61,17 @@ casual-pre-loader
 
    - Or with git:
 ```sh
-git clone https://github.com/cueki/casual-pre-loader
+git clone --recursive https://github.com/cueki/casual-pre-loader
 cd casual-pre-loader
-python -m venv .venv
-source .venv/bin/activate # (you will need to activate the venv each time)
-pip install -r requirements.txt
-python main.py
 ```
+
+Then run the script whenever you want to use the app:
+```sh
+./scripts/run.sh
+```
+
+!!! warning
+    Linux users should use `scripts/run.sh` to launch the application. Do **NOT** use `RUNME.bat` - that's for Windows only.
 
 If you're on Ubuntu, or an Ubuntu-based derivative (such as Mint or PopOS), you may get an error similiar to the following:
 ```

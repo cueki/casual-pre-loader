@@ -11,9 +11,9 @@ from core.constants import PARTICLE_SPLITS
 from core.structure_validator import StructureValidator, ValidationResult
 from valve_parsers import VPKFile, PCFFile
 from gui.conflict_matrix import ConflictMatrix
-from operations.advanced_particle_merger import AdvancedParticleMerger
-from operations.pcf_merge import merge_pcf_files
-from operations.pcf_rebuild import load_particle_system_map, get_pcf_element_names, extract_elements
+from core.operations.advanced_particle_merger import AdvancedParticleMerger
+from core.operations.pcf_merge import merge_pcf_files
+from core.operations.pcf_rebuild import load_particle_system_map, get_pcf_element_names, extract_elements
 
 
 def parse_vmt_texture(vmt_path):
@@ -249,7 +249,7 @@ class ModDropZone(QFrame):
                     split_file.unlink()
 
         # fill in missing vanilla elements for reconstructed split files
-        particle_map = load_particle_system_map(folder_setup.install_dir / 'particle_system_map.json')
+        particle_map = load_particle_system_map(folder_setup.data_dir / 'particle_system_map.json')
 
         for original_file in PARTICLE_SPLITS.keys():
             merged_file = folder_setup.temp_to_be_patched_dir / original_file

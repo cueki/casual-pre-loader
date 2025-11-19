@@ -2,9 +2,9 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
 from valve_parsers import PCFFile
-from operations.pcf_rebuild import (load_particle_system_map, get_pcf_element_names, extract_elements,
-                                    rebuild_particle_files)
-from operations.pcf_merge import merge_pcf_files
+from core.operations.pcf_rebuild import (load_particle_system_map, get_pcf_element_names, extract_elements,
+                                         rebuild_particle_files)
+from core.operations.pcf_merge import merge_pcf_files
 from core.folder_setup import folder_setup
 from core.constants import PARTICLE_SPLITS
 
@@ -63,7 +63,7 @@ def save_split_files(merged_pcf: PCFFile, out_dir: Path, split_filters: dict) ->
 class AdvancedParticleMerger:
     def __init__(self, progress_callback=None):
         self.progress_callback = progress_callback
-        self.particle_map = load_particle_system_map(folder_setup.install_dir / "particle_system_map.json")
+        self.particle_map = load_particle_system_map(folder_setup.data_dir / "particle_system_map.json")
         self.vpk_groups = defaultdict(lambda: defaultdict(list))  # {vpk_name: {particle_file: [paths]}}
 
     def update_progress(self, progress, message: str):

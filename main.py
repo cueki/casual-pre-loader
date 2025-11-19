@@ -40,8 +40,9 @@ def main():
                           Qt.WindowType.FramelessWindowHint)
     splash.show()
 
-    # cleanup old updater and temp folders
+    # cleanup old updater, old structure, and temp folders
     folder_setup.cleanup_old_updater()
+    folder_setup.cleanup_old_structure()
     folder_setup.cleanup_temp_folders()
     folder_setup.create_required_folders()
     prepare_working_copy()

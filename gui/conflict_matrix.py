@@ -8,7 +8,7 @@ from core.constants import PARTICLE_GROUP_MAPPING
 
 def load_mod_urls():
     # load saved URLs from a file
-    urls_file = folder_setup.install_dir / 'mod_urls.json'
+    urls_file = folder_setup.data_dir / 'mod_urls.json'
     if urls_file.exists():
         try:
             with open(urls_file, "r") as f:
