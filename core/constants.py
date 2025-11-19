@@ -256,6 +256,23 @@ MOD_TYPE_COLORS = {
 CUEKI_MODS_URL = "https://github.com/cueki/casual-pre-loader/raw/main/mods.zip"
 
 
+# directories and files to include in releases
+# used by build script and auto-updater to avoid unpacking python binaries on linux
+BUILD_DIRS = [
+    'core',
+    'gui',
+    'backup',
+    'data',
+]
+
+BUILD_FILES = [
+    'main.py',
+    'LICENSE',
+    'README.md',
+    'requirements.txt'
+]
+
+
 # particle split configuration
 PARTICLE_SPLITS = {
     "item_fx.pcf": {

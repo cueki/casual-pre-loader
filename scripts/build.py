@@ -1,7 +1,12 @@
 import os
+import sys
 import shutil
 import argparse
 from pathlib import Path
+
+# add parent directory to path to import from core
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from core.constants import BUILD_DIRS, BUILD_FILES
 
 
 def parse_arguments():
@@ -21,24 +26,8 @@ def ignore_studio_folder(directory, contents):
 def copy_project_files(source_dir, target_dir):
     print(f"Copying project files from {source_dir} to {target_dir}...")
 
-    # list of directories to copy
-    dirs_to_copy = [
-        'core',
-        'gui',
-        'backup',
-        'data',
-    ]
-
-    # list of files to copy
-    files_to_copy = [
-        'main.py',
-        'LICENSE',
-        'README.md',
-        'requirements.txt'
-    ]
-
     # copy directories
-    for dir_name in dirs_to_copy:
+    for dir_name in BUILD_DIRS:
         source_path = Path(source_dir) / dir_name
         target_path = Path(target_dir) / dir_name
 
@@ -54,7 +43,7 @@ def copy_project_files(source_dir, target_dir):
             print(f"Warning: Missing {dir_name}")
 
     # copy individual files
-    for file_name in files_to_copy:
+    for file_name in BUILD_FILES:
         source_path = Path(source_dir) / file_name
         target_path = Path(target_dir) / file_name
 

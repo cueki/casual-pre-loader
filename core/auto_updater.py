@@ -8,6 +8,7 @@ from packaging import version
 from typing import Optional, Dict, Any
 from core.folder_setup import folder_setup
 from core.version import VERSION
+from core.constants import BUILD_DIRS, BUILD_FILES
 
 
 class AutoUpdater:
@@ -107,14 +108,20 @@ class AutoUpdater:
                         break
 
                 if app_folder and app_folder.exists():
-                    for item in app_folder.iterdir():
-                        dest = self.install_dir / item.name
-                        if item.is_dir():
+                    # only copy defined structure to avoid python binaries
+                    for dir_name in BUILD_DIRS:
+                        src = app_folder / dir_name
+                        dest = self.install_dir / dir_name
+                        if src.exists():
                             if dest.exists():
                                 shutil.rmtree(dest)
-                            shutil.copytree(item, dest)
-                        else:
-                            shutil.copy2(item, dest)
+                            shutil.copytree(src, dest)
+
+                    for file_name in BUILD_FILES:
+                        src = app_folder / file_name
+                        dest = self.install_dir / file_name
+                        if src.exists():
+                            shutil.copy2(src, dest)
                 else:
                     raise FileNotFoundError
 
