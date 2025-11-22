@@ -13,7 +13,7 @@ _log() (
 	done >&2
 )
 
-_log_color() { _log "${1}" "\\033[${2}m%s\\033[0m\\t\033[${2}m%s\\033[0m\\n"; }
+_log_color() { _log "${1}" "\\033[${2}m[%s]\\033[0m\\t\033[${2}m%s\\033[0m\\n"; }
 
 debug() { _log_color DEBUG 32; }
 info() { _log_color INFO 34; }
@@ -55,8 +55,8 @@ ERR=false
 ! python3 -m pip --version >/dev/null 2>&1 && ERR=true &&
 	dep_missing pip | err
 
-! python3 -m venv --help >/dev/null 2>&1 && ERR=true &&
-	dep_missing 'python venv module' | err
+! python3 -c 'import venv, ensurepip' 2>/dev/null && ERR=true &&
+	dep_missing 'python3-venv' | err
 
 # check for wine
 ! command -v wine >/dev/null 2>&1 &&
@@ -67,7 +67,7 @@ ERR=false
 ${ERR} && exit 1 # exit if errors were previously raised
 
 if [ -f 'requirements.txt' ]; then
-	! [ -d '.venv' ] &&
+	! [ -f '.venv/bin/activate' ] &&
 		printf '%s\n' 'Creating virtual environment' | info &&
 		python3 -m venv .venv
 
