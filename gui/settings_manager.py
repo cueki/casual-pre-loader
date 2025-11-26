@@ -44,6 +44,77 @@ def validate_tf_directory(directory, validation_label=None):
     return True
 
 
+def validate_goldrush_directory(directory, validation_label=None):
+    if not directory:
+        if validation_label:
+            validation_label.setText("")
+        return False
+
+    gr_path = Path(directory)
+
+    # check if directory exists
+    if not gr_path.exists():
+        if validation_label:
+            validation_label.setText("Directory does not exist!")
+            validation_label.setStyleSheet("color: red;")
+        return False
+
+    # check if it's actually a tf_goldrush directory
+    if not (gr_path.name == "tf_goldrush" or gr_path.name.endswith("/tf_goldrush")):
+        if validation_label:
+            validation_label.setText("Selected directory should be named 'tf_goldrush'")
+            validation_label.setStyleSheet("color: orange;")
+
+    # check for gameinfo.txt
+    if not (gr_path / "gameinfo.txt").exists():
+        if validation_label:
+            validation_label.setText("gameinfo.txt not found - this doesn't appear to be a valid tf_goldrush/ directory")
+            validation_label.setStyleSheet("color: red;")
+        return False
+
+    # check for tf_goldrush_dir.vpk
+    if not (gr_path / "tf_goldrush_dir.vpk").exists():
+        if validation_label:
+            validation_label.setText("tf_goldrush_dir.vpk not found - some features may not work")
+            validation_label.setStyleSheet("color: orange;")
+    else:
+        if validation_label:
+            validation_label.setText("Valid Gold Rush directory detected!")
+            validation_label.setStyleSheet("color: green;")
+
+    return True
+
+
+def auto_detect_tf2():
+    common_paths = [
+        "C:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2/tf",
+        "D:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2/tf",
+        "~/.steam/steam/steamapps/common/Team Fortress 2/tf",
+        "~/.local/share/Steam/steamapps/common/Team Fortress 2/tf",
+    ]
+
+    for path_str in common_paths:
+        path = Path(path_str).expanduser()
+        if path.exists() and (path / "gameinfo.txt").exists():
+            return str(path)
+    return None
+
+
+def auto_detect_goldrush():
+    common_paths = [
+        "C:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2 Gold Rush/tf_goldrush",
+        "D:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2 Gold Rush/tf_goldrush",
+        "~/.steam/steam/steamapps/common/Team Fortress 2 Gold Rush/tf_goldrush",
+        "~/.local/share/Steam/steamapps/common/Team Fortress 2 Gold Rush/tf_goldrush",
+    ]
+
+    for path_str in common_paths:
+        path = Path(path_str).expanduser()
+        if path.exists() and (path / "gameinfo.txt").exists():
+            return str(path)
+    return None
+
+
 class SettingsManager:
     # listen up students, in this class we will learn how to write java getters and setters
     def __init__(self, settings_file="app_settings.json", metadata_file="addon_metadata.json"):
@@ -58,6 +129,7 @@ class SettingsManager:
     def _load_settings(self):
         default_settings = {
             "tf_directory": "",
+            "goldrush_directory": "",
             "addon_selections": [],
             "matrix_selections": {},
             "matrix_selections_simple": {},
@@ -111,6 +183,13 @@ class SettingsManager:
 
     def set_tf_directory(self, directory):
         self.settings["tf_directory"] = directory
+        self.save_settings()
+
+    def get_goldrush_directory(self):
+        return self.settings.get("goldrush_directory", "")
+
+    def set_goldrush_directory(self, directory):
+        self.settings["goldrush_directory"] = directory
         self.save_settings()
 
     def get_addon_selections(self):

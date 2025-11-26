@@ -1,5 +1,6 @@
 from pathlib import Path
 from valve_parsers import VPKFile, PCFFile, PCFElement
+from core.utils import get_vpk_name
 
 
 def restore_particle_files(tf_path: str) -> int:
@@ -8,9 +9,10 @@ def restore_particle_files(tf_path: str) -> int:
         print("Error, missing backup dir/")
         return 0
 
-    vpk_path = Path(tf_path) / "tf2_misc_dir.vpk"
+    vpk_name = get_vpk_name(tf_path)
+    vpk_path = Path(tf_path) / vpk_name
     if not vpk_path.exists():
-        print("Error, missing tf2_misc_dir.vpk, is the tf/ path correct?")
+        print(f"Error, missing {vpk_name}, is the path correct?")
         return 0
 
     vpk = VPKFile(str(vpk_path))

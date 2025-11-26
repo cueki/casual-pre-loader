@@ -32,20 +32,14 @@ def game_type(file_path, uninstall=False) -> bool:
 
     found = False
     for i, line in enumerate(lines):
-        if '\ttype multiplayer_only' in line:
-            lines[i] = line.replace('type multiplayer_only', '//type multiplayer_only')
-            found = True
-        if 'singleplayer_only' in line:
-            lines[i] = line.replace('type singleplayer_only', '//type multiplayer_only')
-            found = True
-
-    if uninstall:
-        for i, line in enumerate(lines):
-            if 'singleplayer_only' in line:
-                lines[i] = line.replace('singleplayer_only', 'multiplayer_only')
+        if 'type' in line and 'multiplayer_only' in line:
+            if uninstall and '//' in line:
+                # remove the comment
+                lines[i] = line.replace('//', '', 1)
                 found = True
-            if '\t//type multiplayer_only' in line:
-                lines[i] = line.replace('//type multiplayer_only', 'type multiplayer_only')
+            elif not uninstall and '//' not in line:
+                # add comment
+                lines[i] = line.replace('type', '//type', 1)
                 found = True
 
     if found:
@@ -59,8 +53,10 @@ def game_type(file_path, uninstall=False) -> bool:
 def check_game_type(file_path) -> bool:
     try:
         with open(file_path, 'r') as file:
-            content = file.read()
-            return '\t//type multiplayer_only' in content or '\ttype singleplayer_only' in content
+            for line in file:
+                if 'type' in line and 'multiplayer_only' in line and '//' in line:
+                    return True
+        return False
     except Exception as e:
         print(f"Error checking game type in {file_path}: {str(e)}")
         return False

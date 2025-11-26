@@ -11,7 +11,8 @@ from PyQt6.QtGui import QAction
 from core.folder_setup import folder_setup
 from core.particle_splits import migrate_old_particle_files
 from core.version import VERSION
-from gui.settings_manager import SettingsManager, validate_tf_directory
+from gui.settings_manager import (SettingsManager, validate_tf_directory, validate_goldrush_directory,
+                                   auto_detect_tf2, auto_detect_goldrush)
 from gui.drag_and_drop import ModDropZone
 from gui.addon_manager import AddonManager
 from gui.installation import InstallationManager
@@ -26,18 +27,26 @@ class SettingsDialog(QDialog):
         self.validation_label = None
         self.browse_button = None
         self.tf_path_edit = None
+        self.goldrush_validation_label = None
+        self.goldrush_browse_button = None
+        self.goldrush_path_edit = None
         self.console_checkbox = None
         self.suppress_updates_checkbox = None
         self.skip_launch_popup_checkbox = None
         self.tf_directory = ""
+        self.goldrush_directory = ""
 
         self.setWindowTitle("Settings")
-        self.setMinimumSize(500, 450)
+        self.setMinimumSize(500, 625)
         self.setModal(True)
 
         # get current tf/ directory from parent's install manager
         if hasattr(parent, 'install_manager') and parent.install_manager.tf_path:
             self.tf_directory = parent.install_manager.tf_path
+
+        # get current goldrush directory from parent's settings manager
+        if hasattr(parent, 'settings_manager'):
+            self.goldrush_directory = parent.settings_manager.get_goldrush_directory()
 
         self.setup_ui()
 
@@ -66,6 +75,11 @@ class SettingsDialog(QDialog):
         dir_layout.addWidget(self.browse_button)
         tf_layout.addLayout(dir_layout)
 
+        # auto-detect button
+        auto_detect_tf_button = QPushButton("Auto-Detect TF2")
+        auto_detect_tf_button.clicked.connect(self.auto_detect_tf2_dir)
+        tf_layout.addWidget(auto_detect_tf_button)
+
         # validation
         self.validation_label = QLabel("")
         self.validation_label.setWordWrap(True)
@@ -77,6 +91,44 @@ class SettingsDialog(QDialog):
         # validate initial directory
         if self.tf_directory:
             validate_tf_directory(self.tf_directory, self.validation_label)
+
+        # Gold Rush stuff - maybe change this
+        goldrush_group = QGroupBox("Gold Rush Directory (Optional)")
+        goldrush_layout = QVBoxLayout()
+
+        goldrush_label = QLabel("TF2 Gold Rush mod directory:")
+        goldrush_layout.addWidget(goldrush_label)
+
+        # directory selection
+        goldrush_dir_layout = QHBoxLayout()
+        self.goldrush_path_edit = QLineEdit()
+        self.goldrush_path_edit.setReadOnly(True)
+        self.goldrush_path_edit.setText(self.goldrush_directory)
+        self.goldrush_path_edit.setPlaceholderText("No Gold Rush directory selected...")
+
+        self.goldrush_browse_button = QPushButton("Browse...")
+        self.goldrush_browse_button.clicked.connect(self.browse_goldrush_dir)
+
+        goldrush_dir_layout.addWidget(self.goldrush_path_edit)
+        goldrush_dir_layout.addWidget(self.goldrush_browse_button)
+        goldrush_layout.addLayout(goldrush_dir_layout)
+
+        # auto-detect button
+        auto_detect_gr_button = QPushButton("Auto-Detect Gold Rush")
+        auto_detect_gr_button.clicked.connect(self.auto_detect_goldrush_dir)
+        goldrush_layout.addWidget(auto_detect_gr_button)
+
+        # validation
+        self.goldrush_validation_label = QLabel("")
+        self.goldrush_validation_label.setWordWrap(True)
+        goldrush_layout.addWidget(self.goldrush_validation_label)
+
+        goldrush_group.setLayout(goldrush_layout)
+        layout.addWidget(goldrush_group)
+
+        # validate initial goldrush directory
+        if self.goldrush_directory:
+            validate_goldrush_directory(self.goldrush_directory, self.goldrush_validation_label)
 
         # mods download group
         layout.addWidget(mods_download_group(self))
@@ -131,9 +183,42 @@ class SettingsDialog(QDialog):
             self.tf_path_edit.setText(directory)
             validate_tf_directory(directory, self.validation_label)
 
+    def browse_goldrush_dir(self):
+        directory = QFileDialog.getExistingDirectory(self, "Select tf_goldrush/ Directory")
+        if directory:
+            self.goldrush_directory = directory
+            self.goldrush_path_edit.setText(directory)
+            validate_goldrush_directory(directory, self.goldrush_validation_label)
+
+    def auto_detect_tf2_dir(self):
+        path = auto_detect_tf2()
+        if path:
+            self.tf_directory = path
+            self.tf_path_edit.setText(path)
+            validate_tf_directory(path, self.validation_label)
+            QMessageBox.information(self, "Auto-Detection Successful", f"Found TF2 installation at:\n{path}")
+        else:
+            QMessageBox.information(self, "Auto-Detection Failed",
+                                    "Could not automatically detect TF2 installation.\n"
+                                    "Please manually select your tf/ directory.")
+
+    def auto_detect_goldrush_dir(self):
+        path = auto_detect_goldrush()
+        if path:
+            self.goldrush_directory = path
+            self.goldrush_path_edit.setText(path)
+            validate_goldrush_directory(path, self.goldrush_validation_label)
+            QMessageBox.information(self, "Auto-Detection Successful", f"Found Gold Rush installation at:\n{path}")
+        else:
+            QMessageBox.information(self, "Auto-Detection Failed",
+                                    "Could not automatically detect Gold Rush installation.\n"
+                                    "Please manually select your tf_goldrush/ directory.")
 
     def get_tf_directory(self):
         return self.tf_directory
+
+    def get_goldrush_directory(self):
+        return self.goldrush_directory
 
     def get_show_console_on_startup(self):
         return self.console_checkbox.isChecked()
@@ -200,6 +285,9 @@ class ParticleManagerGUI(QMainWindow):
         self.load_addons()
         self.scan_for_mcp_files()
         self.rescan_addon_contents()
+
+        # update install target dropdown based on Gold Rush availability
+        self.update_install_target_dropdown()
 
         # ensure load order display is updated on startup
         self.update_load_order_display()
@@ -323,6 +411,7 @@ class ParticleManagerGUI(QMainWindow):
         self.addon_panel.addon_selection_changed.connect(self.on_addon_click)
         self.addon_panel.addon_checkbox_changed.connect(self.on_addon_checkbox_changed)
         self.addon_panel.load_order_changed.connect(self.on_load_order_changed)
+        self.addon_panel.target_changed.connect(self.update_restore_button_state)
         self.addon_description.addon_modified.connect(self.load_addons)
 
         layout.addWidget(self.addon_panel)
@@ -348,6 +437,11 @@ class ParticleManagerGUI(QMainWindow):
         if tf_dir and Path(tf_dir).exists():
             self.install_manager.set_tf_path(tf_dir)
             self.update_restore_button_state()
+
+    def update_install_target_dropdown(self):
+        goldrush_dir = self.settings_manager.get_goldrush_directory()
+        goldrush_available = bool(goldrush_dir and Path(goldrush_dir).exists())
+        self.addon_panel.update_target_options(goldrush_available)
 
     def load_addons(self):
         updates_found = self.addon_manager.scan_addon_contents()
@@ -536,9 +630,22 @@ class ParticleManagerGUI(QMainWindow):
             if result != QMessageBox.StandardButton.Yes:
                 return
 
+        # determine target path based on dropdown selection
+        selected_target = self.addon_panel.get_selected_target()
+        if selected_target == "goldrush":
+            target_path = self.settings_manager.get_goldrush_directory()
+            target_name = "Gold Rush"
+        else:
+            target_path = self.install_manager.tf_path
+            target_name = "TF2"
+
+        if not target_path:
+            self.show_error(f"No {target_name} directory configured!")
+            return
+
         self.set_processing_state(True)
 
-        self.progress_dialog = QProgressDialog("Installing...", "Cancel", 0, 100, self)
+        self.progress_dialog = QProgressDialog(f"Installing to {target_name}...", "Cancel", 0, 100, self)
         self.progress_dialog.setWindowTitle("Installing")
         self.progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
         self.progress_dialog.setMinimumDuration(0)
@@ -546,13 +653,26 @@ class ParticleManagerGUI(QMainWindow):
         self.progress_dialog.canceled.connect(self.install_manager.cancel_operation)
         self.progress_dialog.show()
 
-        self.install_manager.install(selected_addons, self.mod_drop_zone)
+        self.install_manager.install(selected_addons, self.mod_drop_zone, target_path)
 
     def start_restore(self):
-        if self.install_manager.restore():
+        # determine target path based on dropdown selection
+        selected_target = self.addon_panel.get_selected_target()
+        if selected_target == "goldrush":
+            target_path = self.settings_manager.get_goldrush_directory()
+            target_name = "Gold Rush"
+        else:
+            target_path = self.install_manager.tf_path
+            target_name = "TF2"
+
+        if not target_path:
+            self.show_error(f"No {target_name} directory configured!")
+            return
+
+        if self.install_manager.restore(target_path):
             self.set_processing_state(True)
 
-            self.progress_dialog = QProgressDialog("Restoring...", None, 0, 100, self)
+            self.progress_dialog = QProgressDialog(f"Restoring {target_name}...", None, 0, 100, self)
             self.progress_dialog.setWindowTitle("Restoring")
             self.progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
             self.progress_dialog.setMinimumDuration(0)
@@ -560,7 +680,14 @@ class ParticleManagerGUI(QMainWindow):
             self.progress_dialog.show()
 
     def update_restore_button_state(self):
-        is_modified = self.install_manager.is_modified()
+        # check based on selected target
+        selected_target = self.addon_panel.get_selected_target()
+        if selected_target == "goldrush":
+            target_path = self.settings_manager.get_goldrush_directory()
+        else:
+            target_path = self.install_manager.tf_path
+
+        is_modified = self.install_manager.is_modified(target_path)
         self.restore_button.setEnabled(is_modified)
 
     def set_processing_state(self, processing: bool):
@@ -639,6 +766,11 @@ class ParticleManagerGUI(QMainWindow):
                 self.settings_manager.set_tf_directory(new_tf_dir)
                 self.update_restore_button_state()
                 self.scan_for_mcp_files()
+
+            # update Gold Rush directory
+            new_goldrush_dir = dialog.get_goldrush_directory()
+            self.settings_manager.set_goldrush_directory(new_goldrush_dir)
+            self.update_install_target_dropdown()
 
             # update preloader settings
             self.settings_manager.set_show_console_on_startup(dialog.get_show_console_on_startup())

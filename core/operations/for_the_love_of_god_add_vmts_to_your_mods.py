@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Set, List, Optional
 from core.folder_setup import folder_setup
 from valve_parsers import VPKFile
+from core.utils import get_vpk_name
 
 
 def find_material_files(directory: Path) -> tuple[List[Path], Set[str]]:
@@ -72,7 +73,7 @@ def generate_missing_vmt_files(temp_mods_dir: Path = None, tf_path: str = None) 
     # initialize VPK
     game_vpk = None
     if tf_path:
-        game_vpk_path = Path(tf_path) / "tf2_misc_dir.vpk"
+        game_vpk_path = Path(tf_path) / get_vpk_name(tf_path)
         if game_vpk_path.exists():
             try:
                 game_vpk = VPKFile(str(game_vpk_path))

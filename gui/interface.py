@@ -18,6 +18,7 @@ from core.operations.pcf_compress import remove_duplicate_elements
 from core.operations.vgui_preload import patch_mainmenuoverride
 from core.quickprecache.precache_list import make_precache_list
 from core.quickprecache.quick_precache import QuickPrecache
+from core.utils import get_vpk_name
 
 
 class Interface(QObject):
@@ -58,7 +59,7 @@ class Interface(QObject):
     def install(self, tf_path: str, selected_addons: List[str], mod_drop_zone=None):
         self.cancel_requested = False
         try:
-            working_vpk_path = Path(tf_path) / "tf2_misc_dir.vpk"
+            working_vpk_path = Path(tf_path) / get_vpk_name(tf_path)
             file_handler = FileHandler(str(working_vpk_path))
             folder_setup.initialize_pcf()
             self.update_progress(0, "Installing addons...")
@@ -104,33 +105,37 @@ class Interface(QObject):
             custom_dir = Path(tf_path) / 'custom'
             custom_dir.mkdir(exist_ok=True)
 
-            self.cleanup_huds(custom_dir)
+            tf_path_obj = Path(tf_path)
+            is_tf2 = tf_path_obj.name == "tf"
 
-            for addon_name, addon_dir in hud_addons.items():
-                hud_dest = custom_dir / addon_name
-                if hud_dest.exists():
-                    print(f'{hud_dest} already exists, skipping as to not overwrite possible user-modified files')
-                    continue
-                shutil.copytree(addon_dir, hud_dest)
+            # HUDs are TF2-specific
+            if is_tf2:
+                self.cleanup_huds(custom_dir)
 
-                # mark the HUD as installed by preloader
-                hud_mod_json = hud_dest / 'mod.json'
-                if hud_mod_json.exists():
-                    try:
-                        with open(hud_mod_json, 'r') as f:
-                            mod_info = json.load(f)
-                        mod_info['preloader_installed'] = True
-                        with open(hud_mod_json, 'w') as f:
-                            json.dump(mod_info, f, indent=2)
-                    except json.JSONDecodeError as e:
-                        print(f"Warning: Invalid JSON in {hud_mod_json}: {e}, skipping preloader_installed flag")
+                for addon_name, addon_dir in hud_addons.items():
+                    hud_dest = custom_dir / addon_name
+                    if hud_dest.exists():
+                        print(f'{hud_dest} already exists, skipping as to not overwrite possible user-modified files')
+                        continue
+                    shutil.copytree(addon_dir, hud_dest)
+
+                    # mark the HUD as installed by preloader
+                    hud_mod_json = hud_dest / 'mod.json'
+                    if hud_mod_json.exists():
+                        try:
+                            with open(hud_mod_json, 'r') as f:
+                                mod_info = json.load(f)
+                            mod_info['preloader_installed'] = True
+                            with open(hud_mod_json, 'w') as f:
+                                json.dump(mod_info, f, indent=2)
+                        except json.JSONDecodeError as e:
+                            print(f"Warning: Invalid JSON in {hud_mod_json}: {e}, skipping preloader_installed flag")
 
             if self.cancel_requested:
                 raise Exception("Installation cancelled by user")
-
-            # ALWAYS restore skyboxes and particles
-            restore_skybox_files(tf_path)
-            restore_particle_files(tf_path)
+            if is_tf2:
+                restore_skybox_files(tf_path)
+                restore_particle_files(tf_path)
 
             if self.cancel_requested:
                 raise Exception("Installation cancelled by user")
@@ -163,106 +168,137 @@ class Interface(QObject):
                     self.update_progress(current_progress, f"Installing addons... ({completed_files}/{total_files} files)")
 
                 # process sound mods and copy needed script files from backup
-                self.update_progress(35, "Processing sound mods...")
-                backup_scripts_dir = folder_setup.backup_dir / 'scripts'
+                if is_tf2:
+                    self.update_progress(35, "Processing sound mods...")
+                    backup_scripts_dir = folder_setup.backup_dir / 'scripts'
 
-                # collect VPK paths (vo and misc) for sound processing
-                vpk_paths = []
-                tf_path_obj = Path(tf_path)
-                misc_vpk = tf_path_obj / "tf2_sound_misc_dir.vpk"
-                if misc_vpk.exists():
-                    vpk_paths.append(misc_vpk)
-                vo_vpks = list(tf_path_obj.glob("tf2_sound_vo_*_dir.vpk"))
-                vpk_paths.extend(vo_vpks)
+                    # collect VPK paths (vo and misc) for sound processing
+                    vpk_paths = []
+                    misc_vpk = tf_path_obj / "tf2_sound_misc_dir.vpk"
+                    if misc_vpk.exists():
+                        vpk_paths.append(misc_vpk)
+                    vo_vpks = list(tf_path_obj.glob("tf2_sound_vo_*_dir.vpk"))
+                    vpk_paths.extend(vo_vpks)
 
-                sound_result = self.sound_handler.process_temp_sound_mods(
-                    folder_setup.temp_to_be_vpk_dir,
-                    backup_scripts_dir,
-                    vpk_paths
-                )
-                if sound_result:
-                    self.update_progress(50, sound_result['message'])
+                    sound_result = self.sound_handler.process_temp_sound_mods(
+                        folder_setup.temp_to_be_vpk_dir,
+                        backup_scripts_dir,
+                        vpk_paths
+                    )
+                    if sound_result:
+                        self.update_progress(50, sound_result['message'])
 
                 if self.cancel_requested:
                     raise Exception("Installation cancelled by user")
 
-                # patch in skybox mods if present in addon files
-                handle_skybox_mods(folder_setup.temp_to_be_vpk_dir, tf_path)
+                # patch skybox mods into VPK
+                if is_tf2:
+                    handle_skybox_mods(folder_setup.temp_to_be_vpk_dir, tf_path)
 
-            # these 4 particle files contain duplicate elements that are found elsewhere, this is an oversight by valve.
-            # what im doing is simply fixing this oversight using context from the elements themselves
-            # they now should only appear once in the game, and in the correct file :)
-            # previous code dictates that if any custom particle effect is chosen, it is already fixed, this is to fix if they are not chosen
-            duplicate_effects = [
-                "item_fx.pcf",
-                "halloween.pcf",
-                "bigboom.pcf",
-                "dirty_explode.pcf",
-            ]
-            for duplicate_effect in duplicate_effects:
-                target_path = folder_setup.temp_to_be_patched_dir / duplicate_effect
-                if not target_path.exists():
-                    # copy from game_files if not in
-                    source_path = folder_setup.temp_to_be_referenced_dir / duplicate_effect
-                    if source_path.exists():
-                        extract_elements(PCFFile(source_path).decode(),
-                                         load_particle_system_map(folder_setup.data_dir / 'particle_system_map.json')
-                                         [f'particles/{target_path.name}']).encode(target_path)
+            if is_tf2:
+                # TF2: process and patch particles into main VPK (sv_pure enabled)
+                # these 4 particle files contain duplicate elements that are found elsewhere, this is an oversight by valve.
+                # what im doing is simply fixing this oversight using context from the elements themselves
+                # they now should only appear once in the game, and in the correct file :)
+                # previous code dictates that if any custom particle effect is chosen, it is already fixed, this is to fix if they are not chosen
+                duplicate_effects = [
+                    "item_fx.pcf",
+                    "halloween.pcf",
+                    "bigboom.pcf",
+                    "dirty_explode.pcf",
+                ]
+                for duplicate_effect in duplicate_effects:
+                    target_path = folder_setup.temp_to_be_patched_dir / duplicate_effect
+                    if not target_path.exists():
+                        # copy from game_files if not in
+                        source_path = folder_setup.temp_to_be_referenced_dir / duplicate_effect
+                        if source_path.exists():
+                            extract_elements(PCFFile(source_path).decode(),
+                                             load_particle_system_map(folder_setup.data_dir / 'particle_system_map.json')
+                                             [f'particles/{target_path.name}']).encode(target_path)
 
-            if (folder_setup.temp_to_be_patched_dir / "blood_trail.pcf").exists():
-                # hacky fix for blood_trail being so small
-                shutil.move((folder_setup.temp_to_be_patched_dir / "blood_trail.pcf"),
-                            (folder_setup.temp_to_be_patched_dir / "npc_fx.pcf"))
+                if (folder_setup.temp_to_be_patched_dir / "blood_trail.pcf").exists():
+                    # hacky fix for blood_trail being so small
+                    shutil.move((folder_setup.temp_to_be_patched_dir / "blood_trail.pcf"),
+                                (folder_setup.temp_to_be_patched_dir / "npc_fx.pcf"))
 
-            # more progress bar math yippee
-            particle_files = list(folder_setup.temp_to_be_patched_dir.glob("*.pcf"))
-            dx8_files = sum(1 for pcf_file in particle_files if pcf_file.stem in DX8_LIST)
-            total_files = len(particle_files) + dx8_files
-            start_progress = 50
-            progress_range = 30
-            completed_files = 0
-            self.update_progress(start_progress, f"Processing particle files... (0/{total_files})")
+                # more progress bar math yippee
+                particle_files = list(folder_setup.temp_to_be_patched_dir.glob("*.pcf"))
+                dx8_files = sum(1 for pcf_file in particle_files if pcf_file.stem in DX8_LIST)
+                total_files = len(particle_files) + dx8_files
+                start_progress = 50
+                progress_range = 30
+                completed_files = 0
+                self.update_progress(start_progress, f"Processing particle files... (0/{total_files})")
 
-            for pcf_file in particle_files:
-                if self.cancel_requested:
-                    raise Exception("Installation cancelled by user")
+                for pcf_file in particle_files:
+                    if self.cancel_requested:
+                        raise Exception("Installation cancelled by user")
 
-                base_name = pcf_file.name
+                    base_name = pcf_file.name
 
-                mod_pcf = PCFFile(pcf_file).decode()
+                    mod_pcf = PCFFile(pcf_file).decode()
 
-                if base_name != folder_setup.base_default_pcf.input_file.name and check_parents(mod_pcf, folder_setup.base_default_parents):
-                    continue
+                    if base_name != folder_setup.base_default_pcf.input_file.name and check_parents(mod_pcf, folder_setup.base_default_parents):
+                        continue
 
-                if base_name == folder_setup.base_default_pcf.input_file.name:
-                    mod_pcf = update_materials(folder_setup.base_default_pcf, mod_pcf)
+                    if base_name == folder_setup.base_default_pcf.input_file.name:
+                        mod_pcf = update_materials(folder_setup.base_default_pcf, mod_pcf)
 
-                # process the mod PCF
-                processed_pcf = remove_duplicate_elements(mod_pcf)
+                    # process the mod PCF
+                    processed_pcf = remove_duplicate_elements(mod_pcf)
 
-                if pcf_file.stem in DX8_LIST:  # dx80 first
-                    dx_80_name = pcf_file.stem + "_dx80.pcf"
-                    file_handler.process_file(dx_80_name, processed_pcf)
+                    if pcf_file.stem in DX8_LIST:  # dx80 first
+                        dx_80_name = pcf_file.stem + "_dx80.pcf"
+                        file_handler.process_file(dx_80_name, processed_pcf)
+
+                        # update progress bar
+                        completed_files += 1
+                        current_progress = start_progress + int((completed_files / total_files) * progress_range)
+                        self.update_progress(current_progress, f"Processing particle files... ({completed_files}/{total_files})")
+
+                    file_handler.process_file(base_name, processed_pcf)
+                    pcf_file.unlink()  # delete temp file
 
                     # update progress bar
                     completed_files += 1
                     current_progress = start_progress + int((completed_files / total_files) * progress_range)
                     self.update_progress(current_progress, f"Processing particle files... ({completed_files}/{total_files})")
+            else:
+                # other sourcemods will just copy particles to custom VPK directory
+                particle_files = list(folder_setup.temp_to_be_patched_dir.glob("*.pcf"))
+                if particle_files:
+                    particles_dir = folder_setup.temp_to_be_vpk_dir / 'particles'
+                    particles_dir.mkdir(parents=True, exist_ok=True)
 
-                file_handler.process_file(base_name, processed_pcf)
-                pcf_file.unlink()  # delete temp file
+                    total_files = len(particle_files)
+                    start_progress = 50
+                    progress_range = 30
+                    self.update_progress(start_progress, f"Copying particle files... (0/{total_files})")
 
-                # update progress bar
-                completed_files += 1
-                current_progress = start_progress + int((completed_files / total_files) * progress_range)
-                self.update_progress(current_progress,f"Processing particle files... ({completed_files}/{total_files})")
+                    for i, pcf_file in enumerate(particle_files):
+                        if self.cancel_requested:
+                            raise Exception("Installation cancelled by user")
+
+                        shutil.move(pcf_file, particles_dir / pcf_file.name)
+
+                        current_progress = start_progress + int(((i + 1) / total_files) * progress_range)
+                        self.update_progress(current_progress, f"Copying particle files... ({i + 1}/{total_files})")
 
             if self.cancel_requested:
                 raise Exception("Installation cancelled by user")
 
             # handle custom folder
             self.update_progress(80, "Making custom VPK")
+
+            # mark as installed
             game_type(Path(tf_path) / 'gameinfo.txt', uninstall=False)
+
+            if is_tf2:
+                # cleanup old backup mainmenu folder
+                backup_mainmenu_folder = custom_dir / BACKUP_MAINMENU_FOLDER
+                if backup_mainmenu_folder.exists():
+                    shutil.rmtree(backup_mainmenu_folder)
 
             for custom_vpk in CUSTOM_VPK_NAMES:
                 vpk_path = custom_dir / custom_vpk
@@ -272,17 +308,15 @@ class Interface(QObject):
                 if cache_path.exists():
                     cache_path.unlink()
 
-            # cleanup old backup mainmenu folder
-            backup_mainmenu_folder = custom_dir / BACKUP_MAINMENU_FOLDER
-            if backup_mainmenu_folder.exists():
-                shutil.rmtree(backup_mainmenu_folder)
-
             # create new VPK for custom content & config
             custom_content_dir = folder_setup.temp_to_be_vpk_dir
             copy_config_files(custom_content_dir)
-            patch_mainmenuoverride(tf_path)
-            # make vmts
-            generate_missing_vmt_files(custom_content_dir, tf_path)
+
+            if is_tf2:
+                # hud preload
+                patch_mainmenuoverride(tf_path)
+                # make vmts
+                generate_missing_vmt_files(custom_content_dir, tf_path)
 
             for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
                 split_file.unlink()
@@ -302,58 +336,59 @@ class Interface(QObject):
             if self.cancel_requested:
                 raise Exception("Installation cancelled by user")
 
-            # flush quick precache every install
-            QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
-            quick_precache_path = custom_dir / "_QuickPrecache.vpk"
-            if quick_precache_path.exists():
-                quick_precache_path.unlink()
+            if is_tf2:
+                # flush quick precache every install
+                QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
+                quick_precache_path = custom_dir / "_QuickPrecache.vpk"
+                if quick_precache_path.exists():
+                    quick_precache_path.unlink()
 
-            # legacy name
-            old_quick_precache_path = custom_dir / "QuickPrecache.vpk"
-            if old_quick_precache_path.exists():
-                old_quick_precache_path.unlink()
+                # legacy name
+                old_quick_precache_path = custom_dir / "QuickPrecache.vpk"
+                if old_quick_precache_path.exists():
+                    old_quick_precache_path.unlink()
 
-            # run quick precache if needed (by having props)
-            self.update_progress(85, "Scanning for models to precache...")
-            precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]))
-            if precache_prop_set:
-                precache = QuickPrecache(
-                    str(Path(tf_path).parents[0]),
-                    debug=False,
-                    progress_callback=self.update_progress
-                )
-                precache.run(auto=True)
-                shutil.copy2(folder_setup.install_dir / 'core/quickprecache/_QuickPrecache.vpk', custom_dir)
+                # run quick precache if needed (by having props)
+                self.update_progress(85, "Scanning for models to precache...")
+                precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]))
+                if precache_prop_set:
+                    precache = QuickPrecache(
+                        str(Path(tf_path).parents[0]),
+                        debug=False,
+                        progress_callback=self.update_progress
+                    )
+                    precache.run(auto=True)
+                    shutil.copy2(folder_setup.install_dir / 'core/quickprecache/_QuickPrecache.vpk', custom_dir)
 
-            if self.cancel_requested:
-                raise Exception("Installation cancelled by user")
+                if self.cancel_requested:
+                    raise Exception("Installation cancelled by user")
 
-            # patch config.cfg based on what's actually in custom/
-            self.update_progress(95, "Configuring...")
+                # patch config.cfg based on what's actually in custom/
+                self.update_progress(95, "Configuring...")
 
-            # check for mastercomfig
-            has_mastercomfig = False
-            for item in custom_dir.iterdir():
-                if item.is_file() and item.suffix == '.vpk' and item.name.startswith('mastercomfig'):
-                    has_mastercomfig = True
-                    break
+                # check for mastercomfig
+                has_mastercomfig = False
+                for item in custom_dir.iterdir():
+                    if item.is_file() and item.suffix == '.vpk' and item.name.startswith('mastercomfig'):
+                        has_mastercomfig = True
+                        break
 
-            # check for quickprecache
-            needs_quickprecache = (custom_dir / "_QuickPrecache.vpk").exists()
+                # check for quickprecache
+                needs_quickprecache = (custom_dir / "_QuickPrecache.vpk").exists()
 
-            # get console setting from settings_manager
-            show_console = True  # default
-            if self.settings_manager:
-                show_console = self.settings_manager.get_show_console_on_startup()
+                # get console setting from settings_manager
+                show_console = True  # default
+                if self.settings_manager:
+                    show_console = self.settings_manager.get_show_console_on_startup()
 
-            # generate appropriate config content
-            config_content = generate_config(has_mastercomfig, needs_quickprecache, show_console)
+                # generate appropriate config content
+                config_content = generate_config(has_mastercomfig, needs_quickprecache, show_console)
 
-            # patch generated config
-            custom_vpk_path = custom_dir / CUSTOM_VPK_NAME.replace('.vpk', '_dir.vpk')
-            if custom_vpk_path.exists():
-                vpk_handler = FileHandler(str(custom_vpk_path))
-                vpk_handler.process_file('cfg/w/config.cfg', config_content.encode('utf-8'))
+                # patch generated config
+                custom_vpk_path = custom_dir / CUSTOM_VPK_NAME.replace('.vpk', '_dir.vpk')
+                if custom_vpk_path.exists():
+                    vpk_handler = FileHandler(str(custom_vpk_path))
+                    vpk_handler.process_file('cfg/w/config.cfg', config_content.encode('utf-8'))
 
             self.update_progress(97, "Finalizing...")
             get_from_custom_dir(custom_dir)
@@ -394,34 +429,43 @@ class Interface(QObject):
     def restore_backup(self, tf_path: str):
         try:
             prepare_working_copy()
-            game_type(Path(tf_path) / 'gameinfo.txt', uninstall=True)
             custom_dir = Path(tf_path) / 'custom'
             custom_dir.mkdir(exist_ok=True)
 
-            # skybox unpatch
-            restore_skybox_files(tf_path)
+            tf_path_obj = Path(tf_path)
+            is_tf2 = tf_path_obj.name == "tf"
 
-            # restore particles
-            restore_particle_files(tf_path)
+            # restore gameinfo.txt (for all targets)
+            game_type(Path(tf_path) / 'gameinfo.txt', uninstall=True)
 
-            # remove preloader-installed HUDs
-            self.cleanup_huds(custom_dir)
+            if is_tf2:
+                # remove preloader-installed HUDs (TF2-specific)
+                self.cleanup_huds(custom_dir)
+                # TF2-specific: restore VPK patches, quickprecache, mainmenu
+                restore_skybox_files(tf_path)
+                restore_particle_files(tf_path)
 
-            # flush quick precache
-            QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
-            quick_precache_path = custom_dir / "_QuickPrecache.vpk"
-            if quick_precache_path.exists():
-                quick_precache_path.unlink()
+                # flush quick precache
+                QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
+                quick_precache_path = custom_dir / "_QuickPrecache.vpk"
+                if quick_precache_path.exists():
+                    quick_precache_path.unlink()
 
-            quick_precache_cache = custom_dir / "_quickprecache.vpk.sound.cache"
-            if quick_precache_cache.exists():
-                quick_precache_cache.unlink()
+                quick_precache_cache = custom_dir / "_quickprecache.vpk.sound.cache"
+                if quick_precache_cache.exists():
+                    quick_precache_cache.unlink()
 
-            # legacy name
-            old_quick_precache_path = custom_dir / "QuickPrecache.vpk"
-            if old_quick_precache_path.exists():
-                old_quick_precache_path.unlink()
+                # legacy name
+                old_quick_precache_path = custom_dir / "QuickPrecache.vpk"
+                if old_quick_precache_path.exists():
+                    old_quick_precache_path.unlink()
 
+                # cleanup backup mainmenu folder
+                backup_mainmenu_folder = custom_dir / BACKUP_MAINMENU_FOLDER
+                if backup_mainmenu_folder.exists():
+                    shutil.rmtree(backup_mainmenu_folder)
+
+            # remove custom VPKs we created (for all targets)
             for custom_vpk in CUSTOM_VPK_NAMES:
                 vpk_path = custom_dir / custom_vpk
                 cache_path = custom_dir / (custom_vpk + ".sound.cache")
@@ -435,11 +479,6 @@ class Interface(QObject):
                 cache_file = custom_dir / (split_file.name + ".sound.cache")
                 if cache_file.exists():
                     cache_file.unlink()
-
-            # cleanup backup mainmenu folder
-            backup_mainmenu_folder = custom_dir / BACKUP_MAINMENU_FOLDER
-            if backup_mainmenu_folder.exists():
-                shutil.rmtree(backup_mainmenu_folder)
 
             self.success_signal.emit("Backup restored successfully!")
 

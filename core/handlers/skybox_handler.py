@@ -3,6 +3,7 @@ from pathlib import Path
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler
 from valve_parsers import VPKFile
+from core.utils import get_vpk_name
 
 
 def is_skybox_vmt(file_path: Path) -> bool:
@@ -21,7 +22,7 @@ def handle_skybox_mods(temp_dir: Path, tf_path) -> int:
         return 0
 
     print(f"Found {len(skybox_vmts)} skybox vmts in {temp_dir.name}")
-    vpk_path = str(Path(tf_path) / "tf2_misc_dir.vpk")
+    vpk_path = str(Path(tf_path) / get_vpk_name(tf_path))
     patched_count = 0
     file_handler = FileHandler(vpk_path)
     for vmt_path in skybox_vmts:
@@ -67,7 +68,7 @@ def restore_skybox_files(tf_path: str) -> int:
     if not backup_skybox_dir.exists():
         return 0
 
-    vpk = VPKFile(tf_path + "/tf2_misc_dir.vpk")
+    vpk = VPKFile(tf_path + "/" + get_vpk_name(tf_path))
     restored_count = 0
 
     for skybox_vmt in backup_skybox_dir.glob("*.vmt"):

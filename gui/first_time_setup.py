@@ -12,7 +12,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QCursor
 from core.folder_setup import folder_setup
 from core.constants import CUEKI_MODS_URL
-from gui.settings_manager import SettingsManager, validate_tf_directory
+from gui.settings_manager import SettingsManager, validate_tf_directory, auto_detect_tf2
 
 
 class FirstTimeSetupDialog(QDialog):
@@ -110,7 +110,7 @@ class FirstTimeSetupDialog(QDialog):
 
         # auto-detect button
         auto_detect_button = QPushButton("Auto-Detect TF2 Installation")
-        auto_detect_button.clicked.connect(self.auto_detect_tf2)
+        auto_detect_button.clicked.connect(self.auto_detect_tf2_dir)
         tf_layout.addWidget(auto_detect_button)
 
         # validation
@@ -200,32 +200,17 @@ class FirstTimeSetupDialog(QDialog):
             self.update_import_status()
 
 
-    def auto_detect_tf2(self):
-        # attempt to automatically detect tf/ dir
-        common_paths = [
-            "C:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2/tf",
-            "D:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2/tf",
-            "~/.steam/steam/steamapps/common/Team Fortress 2/tf",
-            "~/.local/share/Steam/steamapps/common/Team Fortress 2/tf",
-        ]
-
-        for path_str in common_paths:
-            path = Path(path_str).expanduser()
-            if path.exists() and (path / "gameinfo.txt").exists():
-                self.tf_directory = str(path)
-                self.tf_path_edit.setText(str(path))
-                validate_tf_directory(str(path), self.validation_label)
-                QMessageBox.information(
-                    self, "Auto-Detection Successful",
-                    f"Found TF2 installation at:\n{path}"
-                )
-                return
-
-        QMessageBox.information(
-            self, "Auto-Detection Failed",
-            "Could not automatically detect TF2 installation.\n"
-            "Please manually select your tf/ directory."
-        )
+    def auto_detect_tf2_dir(self):
+        path = auto_detect_tf2()
+        if path:
+            self.tf_directory = path
+            self.tf_path_edit.setText(path)
+            validate_tf_directory(path, self.validation_label)
+            QMessageBox.information(self, "Auto-Detection Successful", f"Found TF2 installation at:\n{path}")
+        else:
+            QMessageBox.information(self, "Auto-Detection Failed",
+                                    "Could not automatically detect TF2 installation.\n"
+                                    "Please manually select your tf/ directory.")
 
 
     def clear_import_selections(self):
