@@ -7,6 +7,7 @@ from pathlib import Path
 # add parent directory to path to import from core
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from core.constants import BUILD_DIRS, BUILD_FILES
+from core.version import VERSION
 
 
 def parse_arguments():
@@ -54,8 +55,17 @@ def copy_project_files(source_dir, target_dir):
             print(f"Warning: Missing {file_name}")
 
 
+def confirm_version():
+    print(f"\n=== Building version: {VERSION} ===\n")
+    response = input("Is this the correct version? (y/n): ").strip().lower()
+    if response != 'y':
+        print("Build cancelled. Update VERSION in core/version.py and try again.")
+        sys.exit(1)
+
+
 def main():
     args = parse_arguments()
+    confirm_version()
     # get project root (parent of scripts/ directory)
     source_dir = Path(__file__).resolve().parent.parent
     target_dir = Path(args.target_dir)
