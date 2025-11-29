@@ -8,13 +8,10 @@ from packaging import version
 from typing import Optional, Dict, Any
 from core.folder_setup import folder_setup
 from core.version import VERSION
-from core.constants import BUILD_DIRS, BUILD_FILES
+from core.constants import BUILD_DIRS, BUILD_FILES, REMOTE_REPO
 
 
 class AutoUpdater:
-    GITHUB_REPO = "cueki/casual-pre-loader"
-    GITHUB_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
-
     def __init__(self):
         self.install_dir = folder_setup.install_dir
 
@@ -22,7 +19,7 @@ class AutoUpdater:
         try:
             print(f"Install dir: {self.install_dir}")
 
-            response = requests.get(self.GITHUB_API_URL, timeout=10)
+            response = requests.get(f"https://api.github.com/repos/{REMOTE_REPO}/releases/latest", timeout=10)
             response.raise_for_status()
 
             release_data = response.json()
@@ -75,7 +72,7 @@ class AutoUpdater:
         shutil.copy2(zip_path, zip_in_install)
 
         # rename updater to avoid file lock issues
-        renamed_updater = self.install_dir / "core" / f"updater_old.bat"
+        renamed_updater = self.install_dir / "core" / "updater_old.bat"
         shutil.copy2(updater_path, renamed_updater)
 
         # launch renamed updater process with our PID so it can kill us

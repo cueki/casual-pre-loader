@@ -9,6 +9,7 @@ from typing import Optional
 # `printf '%s\n' 'portable = False' >core/are_we_portable.py`
 # This will make the application use paths outside the installation location.
 from core.are_we_portable import portable
+from core.constants import PROGRAM_AUTHOR, PROGRAM_NAME
 from core.handlers.pcf_handler import get_parent_elements
 from valve_parsers import PCFFile
 
@@ -19,9 +20,6 @@ class FolderConfig:
     install_dir = Path(os.path.dirname(os.path.abspath(__file__))).parent  # INFO: I'm not too sure if this can break or not, oh well
     portable = portable  # make sure it is accessible via self.portable
 
-    program_name = 'casual-pre-loader'
-    program_author = 'cueki'
-
     # TODO: allow windows users to use non-portable installs (would allow us to remove this entire platform check)
     if portable:
         # default portable values
@@ -31,8 +29,8 @@ class FolderConfig:
         import platformdirs
 
         # default non-portable values
-        project_dir = Path(platformdirs.user_data_dir(program_name, program_author))
-        settings_dir = Path(platformdirs.user_config_dir(program_name, program_author))
+        project_dir = Path(platformdirs.user_data_dir(PROGRAM_NAME, PROGRAM_AUTHOR))
+        settings_dir = Path(platformdirs.user_config_dir(PROGRAM_NAME, PROGRAM_AUTHOR))
 
         shutil.copytree(install_dir / "backup", project_dir / "backup", dirs_exist_ok=True)
 
@@ -67,6 +65,8 @@ class FolderConfig:
         self.temp_to_be_referenced_dir = self.temp_dir / self._temp_to_be_referenced_folder
         self.temp_to_be_patched_dir = self.temp_dir / self._temp_to_be_patched_folder
         self.temp_to_be_vpk_dir = self.temp_dir / self._temp_to_be_vpk_folder
+
+        self.modsinfo_file = self.project_dir / "modsinfo.json"
 
     def create_required_folders(self) -> None:
         folders = [
