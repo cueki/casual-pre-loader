@@ -1,4 +1,5 @@
 mods/
+modsinfo.json
 blood_test/
 temp/
 test.py

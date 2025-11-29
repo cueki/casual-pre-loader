@@ -3,7 +3,6 @@ import json
 import socket
 import shutil
 import zipfile
-import urllib.request
 from pathlib import Path
 from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit,
                              QLabel, QFileDialog, QMessageBox, QGroupBox, QTabWidget,
@@ -11,7 +10,7 @@ from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLi
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QCursor
 from core.folder_setup import folder_setup
-from core.constants import CUEKI_MODS_URL
+from core.util.net import check_mods, download_file
 from gui.settings_manager import SettingsManager, validate_tf_directory, auto_detect_tf2
 
 
@@ -367,10 +366,6 @@ def download_cueki_mods(parent=None, button=None):
         progress.show()
         QApplication.processEvents()
 
-        # download to temp location
-        temp_zip = folder_setup.temp_dir / "cueki_mods.zip"
-        folder_setup.temp_dir.mkdir(parents=True, exist_ok=True)
-
         def download_progress(block_num, block_size, total_size):
             if progress.wasCanceled():
                 raise Exception("Download cancelled by user")
@@ -379,25 +374,30 @@ def download_cueki_mods(parent=None, button=None):
                 progress.setValue(min(percent, 99))
                 QApplication.processEvents()
 
-        # set timeout (10 seconds for connection/response)
-        old_timeout = socket.getdefaulttimeout()
-        socket.setdefaulttimeout(10)
+        ret = check_mods()
+        if ret is not None:
+            asset, tag = ret
 
-        try:
-            urllib.request.urlretrieve(CUEKI_MODS_URL, temp_zip, download_progress)
-        finally:
-            socket.setdefaulttimeout(old_timeout)
+            mods_file = folder_setup.temp_dir / asset.name
 
-        progress.setLabelText("Extracting mods...")
-        progress.setValue(99)
-        QApplication.processEvents()
+            download_file(asset.browser_download_url, mods_file, 10, download_progress)
 
-        # extract to mods/
-        folder_setup.mods_dir.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(temp_zip, 'r') as zip_ref:
-            zip_ref.extractall(folder_setup.mods_dir)
+            progress.setLabelText("Extracting mods...")
+            progress.setValue(99)
+            QApplication.processEvents()
 
-        temp_zip.unlink()
+            # extract mods
+            try:
+                folder_setup.mods_dir.mkdir(parents=True, exist_ok=True)
+                with zipfile.ZipFile(mods_file, 'r') as zip_ref:
+                    zip_ref.extractall(folder_setup.mods_dir)
+
+                with folder_setup.modsinfo_file.open('w') as fd:
+                    json.dump({'tag': tag, 'digest': asset.digest}, fd)
+
+            finally:
+                mods_file.unlink()
+
         progress.setValue(100)
         progress.close()
 
@@ -410,7 +410,7 @@ def download_cueki_mods(parent=None, button=None):
         QMessageBox.information(
             parent,
             "Download Complete",
-            "cueki's mods have been successfully downloaded and installed!"
+            ret and "cueki's mods have been successfully downloaded and installed!" or "cueki's mods are already installed and up to date!"
         )
 
         # re-enable button
@@ -430,7 +430,6 @@ def download_cueki_mods(parent=None, button=None):
                 parent,
                 "Download Failed",
                 f"Failed to download mods:\n{str(e)}\n\n"
-                f"You can manually download from:\n{CUEKI_MODS_URL}"
             )
 
         # re-enable button

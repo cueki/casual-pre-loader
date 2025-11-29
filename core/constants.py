@@ -252,8 +252,10 @@ MOD_TYPE_COLORS = {
 }
 
 
-# cueki's fixed mods download URL
-CUEKI_MODS_URL = "https://github.com/cueki/casual-pre-loader/raw/main/mods.zip"
+# project and remote repository info
+PROGRAM_AUTHOR = 'cueki'
+PROGRAM_NAME = 'casual-pre-loader'
+REMOTE_REPO = f'{PROGRAM_AUTHOR}/{PROGRAM_NAME}'
 
 
 # directories and files to include in releases
