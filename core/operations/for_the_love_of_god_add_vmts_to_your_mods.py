@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Set, List, Optional
 from core.folder_setup import folder_setup
 from valve_parsers import VPKFile
-from core.utils import get_vpk_name
+from core.util.vpk import get_vpk_name
 
 
 def find_material_files(directory: Path) -> tuple[List[Path], Set[str]]:

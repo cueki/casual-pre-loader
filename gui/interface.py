@@ -18,7 +18,7 @@ from core.operations.pcf_compress import remove_duplicate_elements
 from core.operations.vgui_preload import patch_mainmenuoverride
 from core.quickprecache.precache_list import make_precache_list
 from core.quickprecache.quick_precache import QuickPrecache
-from core.utils import get_vpk_name
+from core.util.vpk import get_vpk_name
 
 
 class Interface(QObject):

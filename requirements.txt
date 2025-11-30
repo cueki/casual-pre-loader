@@ -3,3 +3,4 @@ valve-parsers>=1.0.7
 requests~=2.32.5
 packaging~=25.0
 platformdirs
+PyGithub
