@@ -4,8 +4,6 @@ site_author: Feathers & djsigmann
 repo_url: !ENV [REPO_URL, "https://github.com/cueki/casual-pre-loader/"]
 site_url: !ENV [SITE_URL, "https://cueki.github.io/casual-pre-loader/"]
 
-docs_dir: doc
-
 nav:
   - Home: index.md
   - Tutorial: tutorial.md
@@ -48,7 +46,7 @@ plugins:
   - search
   - macros:
       verbose: true
-      module_name: doc/.macros
+      module_name: docs/.macros
 extra:
   discord_url: !ENV [DISCORD_URL, "https://discord.gg/64sNFhqUaB"]
 
