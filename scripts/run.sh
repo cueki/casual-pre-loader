@@ -53,6 +53,8 @@ check_python_version() {
 
 ERR=false
 
+[ "$(id -u)" -eq 0 ] && printf "This script should not be run as root\n" | err && ERR=true
+
 # try to ensure that submodules ARE in fact, properly cloned
 git submodule update --init --recursive --remote
 
