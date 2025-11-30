@@ -53,6 +53,9 @@ check_python_version() {
 
 ERR=false
 
+# try to ensure that submodules ARE in fact, properly cloned
+git submodule update --init --recursive --remote
+
 (
 	set -e
 
