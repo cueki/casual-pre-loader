@@ -47,6 +47,10 @@ prompt_yn() {
 	esac
 }
 
+check_python_version() {
+	python3 -c 'import sys; vi = sys.version_info; exit(not (vi.major == 3 and vi.minor >= 11))'
+}
+
 ERR=false
 
 (
@@ -55,7 +59,7 @@ ERR=false
 	! command -v python3 >/dev/null 2>&1 &&
 		dep_missing python3 | err && false # none of the other commands in this subshell will work without python
 
-	! python3 -c 'import sys; vi = sys.version_info; exit(not (vi.major == 3 and vi.minor >= 11))' && ERR=true &&
+	! check_python_version && ERR=true &&
 		printf 'Your version of python (%s) is out of date, the minimum required version is Python 3.11\n' \
 			"$(python3 -V)" | err
 
@@ -82,6 +86,8 @@ if [ -f 'requirements.txt' ]; then
 		python3 -m venv .venv
 
 	. .venv/bin/activate
+
+	! check_python_version && deactivate && rm -r .venv && python3 -m venv .venv && . .venv/bin/activate
 
 	printf '%s\n' 'Installing and/or updating dependencies' | info
 	pip -q install --upgrade pip
