@@ -19,6 +19,11 @@ from gui.update_dialog import show_update_dialog
 log = logging.getLogger()
 
 def main():
+    log.info(f'We{" ARE " if folder_setup.portable else " are NOT "}running a portable install')
+    log.info(f'Application files are located in {folder_setup.install_dir}')
+    log.info(f'Project files are written to {folder_setup.project_dir}')
+    log.info(f'Settings files are in {folder_setup.settings_dir}')
+
     app = QApplication([])
     font = app.font()
     font.setPointSize(10)
