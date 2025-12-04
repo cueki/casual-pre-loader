@@ -1,7 +1,9 @@
 import json
 from pathlib import Path
-from typing import Set, List, Dict
-from valve_parsers import PCFFile, PCFElement
+from typing import Dict, List, Set
+
+from valve_parsers import PCFElement, PCFFile
+
 from core.constants import AttributeType
 
 

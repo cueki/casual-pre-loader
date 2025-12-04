@@ -1,8 +1,13 @@
+import logging
 from pathlib import Path
 from typing import Dict
+
 from PIL import Image, ImageFilter
-from core.handlers.vtf_handler import VTFHandler
+
 from core.constants import DECAL_MAPPING
+from core.handlers.vtf_handler import VTFHandler
+
+log = logging.getLogger()
 
 
 def create_shadow_effect(image, shadow_color=(127, 127, 127, 255)):
@@ -86,9 +91,10 @@ class DecalMerge:
             # process each decal
             for decal_path, vtf_file in decal_vtfs.items():
                 decal_type, decal_info = get_decal_info(decal_path)
-                print(decal_path, decal_type)
+                log.info(decal_path)
+                log.info(decal_type)
                 if not decal_type or not decal_info:
-                    print(f"Warning: Could not find mapping for decal {decal_path}")
+                    log.warning(f"Could not find mapping for decal {decal_path}")
                     continue
 
                 # convert decal to PNG
@@ -117,8 +123,8 @@ class DecalMerge:
 
             return True
 
-        except Exception as e:
-            print(f"Error modifying sprite sheet: {e}")
+        except Exception:
+            log.exception("Error modifying sprite sheet")
             return False
 
     def process_mod_decals(self, mod_dir: Path, output_dir: Path):
