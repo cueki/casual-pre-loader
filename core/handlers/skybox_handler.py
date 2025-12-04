@@ -1,9 +1,14 @@
+import logging
 import shutil
 from pathlib import Path
+
+from valve_parsers import VPKFile
+
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler
-from valve_parsers import VPKFile
 from core.util.vpk import get_vpk_name
+
+log = logging.getLogger()
 
 
 def is_skybox_vmt(file_path: Path) -> bool:
@@ -21,7 +26,7 @@ def handle_skybox_mods(temp_dir: Path, tf_path) -> int:
     if not skybox_vmts:
         return 0
 
-    print(f"Found {len(skybox_vmts)} skybox vmts in {temp_dir.name}")
+    log.info(f"Found {len(skybox_vmts)} skybox vmts in {temp_dir.name}")
     vpk_path = str(Path(tf_path) / get_vpk_name(tf_path))
     patched_count = 0
     file_handler = FileHandler(vpk_path)
@@ -45,7 +50,7 @@ def handle_skybox_mods(temp_dir: Path, tf_path) -> int:
             target_path = "materials/skybox/" + vmt_filename
 
             if not target_path:
-                print(f"Error: Could not find {vmt_filename} in VPK")
+                log.error(f"Could not find {vmt_filename} in VPK", stack_info=True)
                 continue
 
             # patch vmt into vpk
@@ -55,10 +60,8 @@ def handle_skybox_mods(temp_dir: Path, tf_path) -> int:
             if success:
                 patched_count += 1
 
-        except Exception as e:
-            print(f"Error processing skybox VMT {vmt_path}: {e}")
-            import traceback
-            traceback.print_exc()
+        except Exception:
+            log.exception(f"Error processing skybox VMT {vmt_path}")
 
     return patched_count
 
@@ -83,7 +86,7 @@ def restore_skybox_files(tf_path: str) -> int:
             if vpk.patch_file(file_path, original_content, create_backup=False):
                 restored_count += 1
 
-        except Exception as e:
-            print(f"Error restoring skybox {vmt_name}: {e}")
+        except Exception:
+            log.exception(f"Error restoring skybox {vmt_name}")
 
     return restored_count

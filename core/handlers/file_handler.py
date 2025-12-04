@@ -1,11 +1,15 @@
+import logging
 import os
 import shutil
 import traceback
-from typing import List
 from pathlib import Path
-from valve_parsers import VPKFile, PCFFile
+from typing import List
+
+from valve_parsers import PCFFile, VPKFile
+
 from core.folder_setup import folder_setup
 
+log = logging.getLogger()
 
 def generate_config(has_mastercomfig=False, needs_quickprecache=False, show_console=True):
     config_parts = []
@@ -60,7 +64,7 @@ class FileHandler:
         if '/' not in file_name:
             full_path = self.vpk.find_file_path(file_name)
             if not full_path:
-                print(f"Could not find file: {file_name}")
+                log.warning(f"Could not find file: {file_name}")
                 return False
         else:
             full_path = file_name
@@ -72,7 +76,7 @@ class FileHandler:
             # get original file info
             file_info = self.vpk.get_file_info(full_path)
             if not file_info:
-                print(f"Failed to get file info for {full_path}")
+                log.warning(f"Failed to get file info for {full_path}")
                 return False
             original_size = file_info['size']
 
@@ -85,7 +89,7 @@ class FileHandler:
                 # already have bytes
                 new_data = content
             else:
-                print(f"Error: Unsupported content type '{type(content).__name__}' for file {file_name}")
+                log.error(f"Unsupported content type '{type(content).__name__}' for file {file_name}", stack_info=True)
                 return False
 
             # check if the processed file size matches the original size
@@ -93,23 +97,20 @@ class FileHandler:
                 if len(new_data) < original_size:
                     # pad to match original size
                     padding_needed = original_size - len(new_data)
-                    print(f"Adding {padding_needed} bytes of padding to {file_name}")
+                    log.info(f"Adding {padding_needed} bytes of padding to {file_name}")
                     new_data = new_data + b' ' * padding_needed
 
                 else:
-                    print(f"ERROR: {file_name} is {len(new_data) - original_size} bytes larger than original! "
-                          f"This should be ignored unless you know what you are doing")
+                    log.warning(
+                            f"{file_name} is {len(new_data) - original_size} bytes larger than original! This should be ignored unless you know what you are doing"
+                    )
                     return False
 
             # patch back into VPK
             return self.vpk.patch_file(full_path, new_data, create_backup=False)
 
-        except Exception as e:
-            print(f"Error processing file {file_name}:")
-            print(f"Exception type: {type(e).__name__}")
-            print(f"Exception message: {str(e)}")
-            print("Traceback:")
-            traceback.print_exc()
+        except Exception:
+            log.exception(f"Error processing file {file_name}")
             return False
 
         finally:
