@@ -1,4 +1,5 @@
 import json
+import logging
 import shutil
 import socket
 import urllib.request
@@ -11,6 +12,8 @@ from packaging import version
 
 from core.constants import REMOTE_REPO
 from core.folder_setup import folder_setup
+
+log = logging.getLogger()
 
 
 def check_mods() -> Optional[Tuple[GitReleaseAsset, str]]:
@@ -30,9 +33,9 @@ def check_mods() -> Optional[Tuple[GitReleaseAsset, str]]:
     # - `casual-preloader-light.zip`
     # - There was also a time where the mods were kept in a zip file checked into the VCS...yeah, ~80 MB...
 
-    print('Retrieving releases')
+    log.info('Retrieving releases')
     releases = Github().get_repo(REMOTE_REPO).get_releases()
-    print('Done retrieving releases')
+    log.info('Done retrieving releases')
 
     for release in releases:
         if not (release.draft or release.prerelease):
@@ -43,17 +46,17 @@ def check_mods() -> Optional[Tuple[GitReleaseAsset, str]]:
                             modsinfo = json.load(fd)
 
                         if asset.digest == modsinfo['digest']:
-                            print(f'We already have the latest release of mods ({modsinfo["tag"]})')
+                            log.info(f'We already have the latest release of mods ({modsinfo["tag"]})')
                             return
 
                         if version.parse(release.tag.lstrip('v')) > version.parse(modsinfo['tag'].lstrip('v')):
-                            print(f'A new release of mods {release.tag_name}, we have {modsinfo["tag"]}')
+                            log.info(f'A new release of mods {release.tag_name}, we have {modsinfo["tag"]}')
 
                         else:
-                            print(f'We already have the latest release ({release.tag}), but the remote file differs')
+                            log.info(f'We already have the latest release ({release.tag}), but the remote file differs')
 
                     except (json.JSONDecodeError, FileNotFoundError):
-                        print('No release of mods has ever been downloaded')
+                        log.info('No release of mods has ever been downloaded')
 
                     return asset, release.tag_name
 
