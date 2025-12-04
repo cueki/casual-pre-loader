@@ -388,9 +388,15 @@ def download_cueki_mods(parent=None, button=None):
 
             # extract mods
             try:
-                folder_setup.mods_dir.mkdir(parents=True, exist_ok=True)
                 with zipfile.ZipFile(mods_file, 'r') as zip_ref:
-                    zip_ref.extractall(folder_setup.mods_dir)
+                    dir = folder_setup.mods_dir
+                    for file in zip_ref.infolist():
+                        if file.is_dir() and file.filename == 'mods/':
+                            dir = folder_setup.project_dir
+                            break
+
+                    dir.mkdir(parents=True, exist_ok=True)
+                    zip_ref.extractall(dir)
 
                 with folder_setup.modsinfo_file.open('w') as fd:
                     json.dump({'tag': tag, 'digest': asset.digest}, fd)
