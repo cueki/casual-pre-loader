@@ -1,5 +1,9 @@
+import logging
 import shutil
+
 from core.folder_setup import folder_setup
+
+log = logging.getLogger()
 
 
 def prepare_working_copy() -> bool:
@@ -16,5 +20,6 @@ def prepare_working_copy() -> bool:
         return True
 
     except Exception as e:
-        print(f"Error preparing working copy: {e}")
+        # TODO: Provide a nice exception we can call log.exception() on
+        log.error(f"Error preparing working copy: {e}")
         return False

@@ -1,14 +1,19 @@
+import logging
 import platform
-import zipfile
-import requests
-import tempfile
 import shutil
+import tempfile
+import zipfile
 from pathlib import Path
+from typing import Any, Dict, Optional
+
+import requests
 from packaging import version
-from typing import Optional, Dict, Any
+
+from core.constants import BUILD_DIRS, BUILD_FILES, REMOTE_REPO
 from core.folder_setup import folder_setup
 from core.version import VERSION
-from core.constants import BUILD_DIRS, BUILD_FILES, REMOTE_REPO
+
+log = logging.getLogger()
 
 
 class AutoUpdater:
@@ -17,7 +22,7 @@ class AutoUpdater:
 
     def check_for_updates(self) -> Optional[Dict[str, Any]]:
         try:
-            print(f"Install dir: {self.install_dir}")
+            log.info(f"Install dir: {self.install_dir}")
 
             response = requests.get(f"https://api.github.com/repos/{REMOTE_REPO}/releases/latest", timeout=10)
             response.raise_for_status()
@@ -35,7 +40,8 @@ class AutoUpdater:
             return None
 
         except Exception as e:
-            print(f"Error checking for updates: {e}")
+            # TODO: Provide a nice exception we can call `log.exception()` on
+            log.error(f"Error checking for updates: {e}")
             return None
 
     @staticmethod
@@ -60,12 +66,13 @@ class AutoUpdater:
             return True
 
         except Exception as e:
-            print(f"Error downloading {url}: {e}")
+            # TODO: Provide a nice exception we can call `log.exception()` on
+            log.error(f"Error downloading {url}: {e}")
             return False
 
     def _use_windows_updater(self, zip_path: Path, updater_path: Path):
-        import subprocess
         import os
+        import subprocess
 
         # rename cuz python will delete temp files on close
         zip_in_install = self.install_dir / "update.zip"
@@ -127,7 +134,8 @@ class AutoUpdater:
             return True
 
         except Exception as e:
-            print(f"Error extracting update: {e}")
+            # TODO: Provide a nice exception we can call `log.exception()` on
+            log.error(f"Error extracting update: {e}")
             return False
 
     def update_application(self, update_url: str) -> bool:
@@ -135,18 +143,19 @@ class AutoUpdater:
             tmp_path = Path(tmp_file.name)
 
         try:
-            print("Downloading application update...")
+            log.info("Downloading application update...")
             if not AutoUpdater.download_file(update_url, tmp_path):
                 return False
 
-            print("Extracting update...")
+            log.info("Extracting update...")
             success = self.extract_update_zip(tmp_path)
 
             tmp_path.unlink()
             return success
 
         except Exception as e:
-            print(f"Error updating application: {e}")
+            # TODO: Provide a nice exception we can call `log.exception()` on
+            log.error(f"Error updating application: {e}")
             if tmp_path.exists():
                 tmp_path.unlink()
             return False
