@@ -1,6 +1,9 @@
+import logging
 import subprocess
 import sys
 from pathlib import Path
+
+log = logging.getLogger()
 
 
 def run_critical_tests():
@@ -18,18 +21,18 @@ def run_critical_tests():
         "--durations=10"
     ]
 
-    print("Running critical tests...")
-    print("These tests prevent game corruption and must always pass.")
-    print("=" * 60)
+    log.info("Running critical tests...")
+    log.info("These tests prevent game corruption and must always pass.")
+    log.info("=" * 60)
 
     result = subprocess.run(cmd, cwd=project_root)
 
     if result.returncode == 0:
-        print("All critical tests passed!")
+        log.info("All critical tests passed!")
         return True
     else:
-        print("CRITICAL TESTS FAILED!")
-        print("DO NOT COMMIT until these are fixed.")
+        log.critical("CRITICAL TESTS FAILED!")
+        log.critical("DO NOT COMMIT until these are fixed.")
         return False
 
 
