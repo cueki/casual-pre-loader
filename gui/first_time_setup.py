@@ -1,17 +1,32 @@
-import os
 import json
-import socket
+import os
 import shutil
+import socket
 import zipfile
 from pathlib import Path
-from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit,
-                             QLabel, QFileDialog, QMessageBox, QGroupBox, QTabWidget,
-                             QWidget, QFrame, QProgressDialog, QApplication)
+
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QCursor
+from PyQt6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QFileDialog,
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QProgressDialog,
+    QPushButton,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
+
 from core.folder_setup import folder_setup
 from core.util.net import check_mods, download_file
-from gui.settings_manager import SettingsManager, validate_tf_directory, auto_detect_tf2
+from gui.settings_manager import SettingsManager, auto_detect_tf2, validate_tf_directory
 
 
 class FirstTimeSetupDialog(QDialog):

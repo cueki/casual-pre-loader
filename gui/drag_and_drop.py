@@ -1,19 +1,28 @@
 import json
-import threading
+import logging
 import shutil
-import zipfile
 import tempfile
+import threading
+import zipfile
 from pathlib import Path
-from PyQt6.QtCore import Qt, pyqtSignal, QObject
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QLabel, QMessageBox, QProgressDialog
-from core.folder_setup import folder_setup
+
+from PyQt6.QtCore import QObject, Qt, pyqtSignal
+from PyQt6.QtWidgets import QFrame, QLabel, QMessageBox, QProgressDialog, QVBoxLayout
+from valve_parsers import PCFFile, VPKFile
+
 from core.constants import PARTICLE_SPLITS
-from core.structure_validator import StructureValidator, ValidationResult
-from valve_parsers import VPKFile, PCFFile
-from gui.conflict_matrix import ConflictMatrix
+from core.folder_setup import folder_setup
 from core.operations.advanced_particle_merger import AdvancedParticleMerger
 from core.operations.pcf_merge import merge_pcf_files
-from core.operations.pcf_rebuild import load_particle_system_map, get_pcf_element_names, extract_elements
+from core.operations.pcf_rebuild import (
+    extract_elements,
+    get_pcf_element_names,
+    load_particle_system_map,
+)
+from core.structure_validator import StructureValidator, ValidationResult
+from gui.conflict_matrix import ConflictMatrix
+
+log = logging.getLogger()
 
 
 def parse_vmt_texture(vmt_path):
@@ -110,9 +119,8 @@ def parse_vmt_texture(vmt_path):
 
         return texture_paths_list
 
-    except Exception as e:
-        print(f"Error parsing VMT file {vmt_path}: {e}")
-        return None
+    except Exception:
+        log.exception(f"Error parsing VMT file {vmt_path}")
 
 
 def get_mod_particle_files():
@@ -357,8 +365,9 @@ class ModDropZone(QFrame):
 
             return True
 
-        except Exception as e:
-            self.worker.error.emit(f"Error processing folder {folder_name}: {str(e)}")
+        except Exception:
+            log.exception(f"Error processing folder {folder_name}")
+            self.worker.error.emit(f"Error processing folder {folder_name}")
             return False
 
     def process_zip_file(self, zip_path: Path) -> bool:
@@ -412,10 +421,12 @@ class ModDropZone(QFrame):
                     return success_count > 0
 
         except zipfile.BadZipFile:
+            log.exception(f"Invalid ZIP file: {zip_name}")
             self.worker.error.emit(f"Invalid ZIP file: {zip_name}")
             return False
-        except Exception as e:
-            self.worker.error.emit(f"Error processing ZIP file {zip_name}: {str(e)}")
+        except Exception:
+            log.exception(f"Error processing ZIP file {zip_name}")
+            self.worker.error.emit(f"Error processing ZIP file {zip_name}")
             return False
 
     def update_matrix(self):
@@ -476,8 +487,9 @@ class ModDropZone(QFrame):
                 else:
                     self.worker.error.emit(f"Unsupported file type: {item_name}")
 
-            except Exception as e:
-                self.worker.error.emit(f"Error processing {item_name}: {str(e)}")
+            except Exception:
+                log.exception(f"Error processing {item_name}")
+                self.worker.error.emit(f"Error processing {item_name}")
 
         if successful_items:
             self.addon_updated.emit()

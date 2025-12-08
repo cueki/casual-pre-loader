@@ -1,10 +1,12 @@
 import threading
 from pathlib import Path
+
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
+
 from core.operations.file_processors import check_game_type
 from gui.interface import Interface
-from gui.settings_manager import validate_tf_directory, validate_goldrush_directory
+from gui.settings_manager import validate_goldrush_directory, validate_tf_directory
 
 
 class InstallationManager(QObject):
