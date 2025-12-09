@@ -9,8 +9,8 @@ _log() (
 	set -e
 
 	level="${1}"
-	fmt="%s ${2:-"%s\\t%s\\n"}"
-	date="$(date '+[%Y-%m-%d %H:%M:%S %Z%z]')"
+	fmt="%s ${2:-'%s %s\n'}"
+	date="$(date '+[%Y-%m-%d %H:%M:%S]')"
 
 	while read -r line; do
 		# shellcheck disable=SC2059
@@ -18,12 +18,20 @@ _log() (
 	done >&2
 )
 
-_log_color() { _log "${1}" "\\033[${2}m[%s]\\033[0m\\t\033[${2}m%s\\033[0m\\n"; }
+_log_color() { _log "${1}" "\\033[${2}m%-${max_len_level}s\\033[0m\033[${2}m%s\\033[0m\\n"; }
 
-debug() { _log_color DEBUG 32; }
-info() { _log_color INFO 34; }
-warning() { _log_color WARNING 33; }
-err() { _log_color ERROR 31; }
+max_len_level=0
+for _level in debug:32 info:34 warning:33 err:31; do
+	level="${_level%:*}"
+
+	# shellcheck disable=SC2312
+	max_len_level="$(printf '%s\n' "${max_len_level}" "${#level}" | sort -n | tail -n1)"
+
+	# shellcheck disable=SC2312
+	eval "${level}() { _log_color $(printf '%s' "${level}" | tr '[:lower:]' '[:upper:]') ${_level##*:}; }"
+done
+unset level _level
+: $((max_len_level += 2)) # apply 2 spaces of padding
 
 dep_missing() { printf '%s is not installed, please install it using your package manager\n' "${1}"; }
 
