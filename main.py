@@ -1,19 +1,29 @@
 #!/usr/bin/env python3
 
+import datetime
+import logging
 from sys import platform
-from PyQt6.QtWidgets import QApplication, QSplashScreen
-from PyQt6.QtGui import QPixmap, QIcon
-from PyQt6.QtCore import Qt
-from gui.main_window import ParticleManagerGUI
-from gui.first_time_setup import check_first_time_setup, run_first_time_setup
-from core.folder_setup import folder_setup
-from core.backup_manager import prepare_working_copy
-from core.auto_updater import check_for_updates_sync
-from gui.update_dialog import show_update_dialog
-from gui.settings_manager import SettingsManager
 
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtWidgets import QApplication, QSplashScreen
+
+from core.auto_updater import check_for_updates_sync
+from core.backup_manager import prepare_working_copy
+from core.folder_setup import folder_setup
+from gui.first_time_setup import check_first_time_setup, run_first_time_setup
+from gui.main_window import ParticleManagerGUI
+from gui.settings_manager import SettingsManager
+from gui.update_dialog import show_update_dialog
+
+log = logging.getLogger()
 
 def main():
+    log.info(f'We{" ARE " if folder_setup.portable else " are NOT "}running a portable install')
+    log.info(f'Application files are located in {folder_setup.install_dir}')
+    log.info(f'Project files are written to {folder_setup.project_dir}')
+    log.info(f'Settings files are in {folder_setup.settings_dir}')
+
     app = QApplication([])
     font = app.font()
     font.setPointSize(10)
@@ -74,7 +84,7 @@ def main():
     elif platform == 'linux':
         window.setWindowIcon(QIcon(str(folder_setup.install_dir / 'gui/icons/cueki_icon.svg')))
     else:
-        print(f"[Warning] We don't know how to set an icon for platform type: {platform}")
+        log.warning(f"We don't know how to set an icon for platform type: {platform}")
 
     splash.finish(window)
     window.show()
@@ -82,6 +92,26 @@ def main():
     app.exec()
     folder_setup.cleanup_temp_folders()
 
+def run():
+    try:
+        from rich.logging import RichHandler
+
+        stream_handler = RichHandler(rich_tracebacks=True)
+    except ModuleNotFoundError:
+        stream_handler = logging.StreamHandler()
+
+    def fmt_time(t: datetime.datetime) -> str:
+        return t.strftime('[%Y-%m-%d %H:%M:%S]')
+
+    verbose = False
+    logging.basicConfig(
+        level=(verbose and logging.DEBUG or logging.INFO),
+        format='%(message)s',
+        datefmt=fmt_time,
+        handlers=[logging.FileHandler(folder_setup.project_dir / 'casual-pre-loader.log', mode='a', encoding='utf-8'), stream_handler],
+    )
+
+    main()
 
 if __name__ == "__main__":
-    main()
+    run()

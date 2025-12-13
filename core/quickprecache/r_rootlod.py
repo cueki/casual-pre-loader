@@ -1,11 +1,14 @@
+import logging
 from pathlib import Path
+
+log = logging.getLogger()
 
 
 def check_root_lod(game_path: str) -> bool:
     config_file = Path(game_path) / "tf" / "cfg" / "config.cfg"
 
     if not config_file.exists():
-        print(f"Config file not found: {config_file}")
+        log.warning(f"Config file not found: {config_file}")
         return False
 
     # read the config file
@@ -21,13 +24,13 @@ def check_root_lod(game_path: str) -> bool:
 
         # replace with r_rootlod "0"
         config_text = config_text.replace(old_line, 'r_rootlod "0"')
-        print(f"Updated r_rootlod setting to 0 in {config_file}")
+        log.info(f"Updated r_rootlod setting to 0 in {config_file}")
     else:
         # r_rootlod not found, add it to the end of the file
         if not config_text.endswith("\n"):
             config_text += "\n"
         config_text += 'r_rootlod "0"\n'
-        print(f"Added r_rootlod setting to {config_file}")
+        log.info(f"Added r_rootlod setting to {config_file}")
 
     # write the updated config
     config_file.write_text(config_text)

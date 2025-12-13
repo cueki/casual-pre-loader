@@ -1,24 +1,41 @@
-import shutil
 import json
+import logging
+import shutil
 from pathlib import Path
 from typing import List
-from valve_parsers import VPKFile, PCFFile
+
 from PyQt6.QtCore import QObject, pyqtSignal
-from core.constants import CUSTOM_VPK_NAMES, DX8_LIST, CUSTOM_VPK_NAME, CUSTOM_VPK_SPLIT_PATTERN, BACKUP_MAINMENU_FOLDER
+from valve_parsers import PCFFile, VPKFile
+
+from core.backup_manager import prepare_working_copy
+from core.constants import (
+    BACKUP_MAINMENU_FOLDER,
+    CUSTOM_VPK_NAME,
+    CUSTOM_VPK_NAMES,
+    CUSTOM_VPK_SPLIT_PATTERN,
+    DX8_LIST,
+)
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler, copy_config_files, generate_config
-from core.handlers.pcf_handler import check_parents, update_materials, restore_particle_files
+from core.handlers.pcf_handler import (
+    check_parents,
+    restore_particle_files,
+    update_materials,
+)
 from core.handlers.skybox_handler import handle_skybox_mods, restore_skybox_files
 from core.handlers.sound_handler import SoundHandler
-from core.backup_manager import prepare_working_copy
-from core.operations.for_the_love_of_god_add_vmts_to_your_mods import generate_missing_vmt_files
-from core.operations.pcf_rebuild import load_particle_system_map, extract_elements
 from core.operations.file_processors import game_type, get_from_custom_dir
+from core.operations.for_the_love_of_god_add_vmts_to_your_mods import (
+    generate_missing_vmt_files,
+)
 from core.operations.pcf_compress import remove_duplicate_elements
+from core.operations.pcf_rebuild import extract_elements, load_particle_system_map
 from core.operations.vgui_preload import patch_mainmenuoverride
 from core.quickprecache.precache_list import make_precache_list
 from core.quickprecache.quick_precache import QuickPrecache
 from core.util.vpk import get_vpk_name
+
+log = logging.getLogger()
 
 
 class Interface(QObject):
@@ -49,8 +66,8 @@ class Interface(QObject):
                             mod_info = json.load(f)
                             if mod_info.get('type', '').lower() == 'hud' and mod_info.get('preloader_installed', False):
                                 items_to_delete.append(item)
-                    except json.JSONDecodeError as e:
-                        print(f"Warning: Invalid JSON in {mod_json}: {e}")
+                    except json.JSONDecodeError:
+                        log.warning(f"Invalid JSON in {mod_json}", exc_info=True)
 
         # delete after closing all file handles
         for item in items_to_delete:
@@ -84,8 +101,8 @@ class Interface(QObject):
                                         continue  # skip hud files for now
                                     else:
                                         raise Exception(f"There are 2 mods that have directory names which resolve to the same case-insensitive name:\n'{hud_addons[addon_path].name}'\n'{addon_dir.name}'")
-                        except json.JSONDecodeError as e:
-                            print(f"Warning: Invalid JSON in {mod_json_path}: {e}")
+                        except json.JSONDecodeError:
+                            log.warning(f"Invalid JSON in {mod_json_path}", exc_info=True)
 
                     for src_path in addon_dir.glob('**/*'):
                         if src_path.is_file() and src_path.name != 'mod.json' and src_path.name != 'sound.cache':
@@ -115,7 +132,7 @@ class Interface(QObject):
                 for addon_name, addon_dir in hud_addons.items():
                     hud_dest = custom_dir / addon_name
                     if hud_dest.exists():
-                        print(f'{hud_dest} already exists, skipping as to not overwrite possible user-modified files')
+                        log.info(f'{hud_dest} already exists, skipping as to not overwrite possible user-modified files')
                         continue
                     shutil.copytree(addon_dir, hud_dest)
 
@@ -128,8 +145,8 @@ class Interface(QObject):
                             mod_info['preloader_installed'] = True
                             with open(hud_mod_json, 'w') as f:
                                 json.dump(mod_info, f, indent=2)
-                        except json.JSONDecodeError as e:
-                            print(f"Warning: Invalid JSON in {hud_mod_json}: {e}, skipping preloader_installed flag")
+                        except json.JSONDecodeError:
+                            log.warning(f"Invalid JSON in {hud_mod_json}, skipping preloader_installed flag", exc_info=True)
 
             if self.cancel_requested:
                 raise Exception("Installation cancelled by user")

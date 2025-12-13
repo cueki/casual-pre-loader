@@ -1,8 +1,11 @@
+import logging
 import os
 import shutil
-from pathlib import Path
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Optional
+
+from valve_parsers import PCFFile
 
 # INFO: This file just allows package maintainers to set whether this application should act as if it is a portable installation.
 # They can easily modify this file and set these values, e.g.
@@ -11,7 +14,8 @@ from typing import Optional
 from core.are_we_portable import portable
 from core.constants import PROGRAM_AUTHOR, PROGRAM_NAME
 from core.handlers.pcf_handler import get_parent_elements
-from valve_parsers import PCFFile
+
+log = logging.getLogger()
 
 
 @dataclass
@@ -105,7 +109,7 @@ class FolderConfig:
             return
 
         updater_old.unlink()
-        print(f"Removed old updater: {updater_old.name}")
+        log.debug(f"Removed old updater: {updater_old.name}")
 
     def cleanup_old_structure(self) -> None:
         # cleanup old files/folders after reorganization during auto update
@@ -122,12 +126,12 @@ class FolderConfig:
         for old_file in old_files:
             if old_file.exists():
                 old_file.unlink()
-                print(f"Removed old file: {old_file.name}")
+                log.debug(f"Removed old file: {old_file.name}")
 
         for old_folder in old_folders:
             if old_folder.exists():
                 shutil.rmtree(old_folder)
-                print(f"Removed old folder: {old_folder.name}")
+                log.debug(f"Removed old folder: {old_folder.name}")
 
     def get_temp_path(self, filename: str) -> Path:
         return self.temp_dir / filename
@@ -144,12 +148,3 @@ class FolderConfig:
 
 # create a default instance for import
 folder_setup = FolderConfig()
-
-# logging
-print(
-    f'We{" ARE " if folder_setup.portable else " are NOT "}running a portable install',
-    f'Application files are located in {folder_setup.install_dir}',
-    f'Project files are written to {folder_setup.project_dir}',
-    f'Settings files are in {folder_setup.settings_dir}',
-    sep='\n'
-)

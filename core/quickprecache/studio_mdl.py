@@ -1,8 +1,12 @@
+import logging
 import subprocess
-from sys import platform
-from pathlib import Path
 from enum import Enum
+from pathlib import Path
+from sys import platform
+
 from core.folder_setup import folder_setup
+
+log = logging.getLogger()
 
 
 class StudioMDLVersion(Enum):
@@ -30,7 +34,7 @@ class StudioMDL:
 
         # check for bundled SDK version as fallback
         if self.bundled_studiomdl_path.exists():
-            print(f"Using bundled SDK studiomdl.exe from {self.bundled_studiomdl_path}")
+            log.info(f"Using bundled SDK studiomdl.exe from {self.bundled_studiomdl_path}")
             return StudioMDLVersion.BUNDLED_SDK
 
         return StudioMDLVersion.MISSING
@@ -41,7 +45,7 @@ class StudioMDL:
 
         studio_mdl_file = self.game_path / version.value
         if studio_mdl_file.exists():
-            print(f"{version.value} found.")
+            log.info(f"{version.value} found.")
             return True
         return False
 
@@ -61,7 +65,7 @@ class StudioMDL:
         if platform != "win32":
             # for wine, use shell=True and use Z:path maybe ???
             cmd_str = f'wine "{exe_path}" -game "Z:{tf_path}" -nop4 -verbose "Z:{qc_file}"'
-            print(f"Executing with wine: {cmd_str}")
+            log.info(f"Executing with wine: {cmd_str}")
             process = subprocess.Popen(
                 cmd_str,
                 shell=True,
@@ -78,7 +82,7 @@ class StudioMDL:
                 "-verbose",
                 qc_file
             ]
-            print(f"Executing: {' '.join(cmd_args)}")
+            log.info(f"Executing: {' '.join(cmd_args)}")
             process = subprocess.Popen(
                 cmd_args,
                 stdout=subprocess.PIPE,
@@ -91,7 +95,7 @@ class StudioMDL:
             if not line and process.poll() is not None:
                 break
             if line:
-                print(line.strip())
+                log.info(line.strip())
 
         return_code = process.poll()
         return return_code == 0

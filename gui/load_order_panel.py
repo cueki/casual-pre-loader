@@ -1,5 +1,15 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGroupBox, QListWidget, QListWidgetItem, QAbstractItemView
+import logging
 from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import (
+    QAbstractItemView,
+    QGroupBox,
+    QListWidget,
+    QListWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
+
+log = logging.getLogger()
 
 
 class LoadOrderPanel(QWidget):
@@ -108,10 +118,8 @@ class LoadOrderPanel(QWidget):
 
             self.load_order_list.blockSignals(False)
 
-        except Exception as e:
-            print(f"Error in update_display: {e}")
-            import traceback
-            traceback.print_exc()
+        except Exception:
+            log.exception("Error in update_display")
 
     def sync_from_checked_addons(self, checked_addon_names):
         # update load order list from checked addons

@@ -1,7 +1,12 @@
+import logging
 from pathlib import Path
 from typing import Set
-from core.constants import QUICKPRECACHE_FILE_SUFFIXES, QUICKPRECACHE_MODEL_LIST
+
 from valve_parsers import VPKFile
+
+from core.constants import QUICKPRECACHE_FILE_SUFFIXES, QUICKPRECACHE_MODEL_LIST
+
+log = logging.getLogger()
 
 
 def make_precache_list(game_path: str) -> Set[str]:
@@ -75,8 +80,8 @@ def manage_vpk(vpk_path: Path) -> Set[str]:
                     model_path = _process_file_to_model_path(relative_path).lower()
                     model_set.add(model_path)
 
-    except Exception as e:
-        print(f"Failed to process VPK {vpk_path}: {e}")
+    except Exception:
+        log.exception(f"Failed to process VPK {vpk_path}")
         failed_vpks.append(str(vpk_path))
 
     return model_set

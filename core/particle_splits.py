@@ -1,10 +1,15 @@
-from core.folder_setup import folder_setup
+import logging
+
 from core.constants import PARTICLE_SPLITS
+from core.folder_setup import folder_setup
+
+log = logging.getLogger()
 
 
 def migrate_old_particle_files():
-    from core.operations.advanced_particle_merger import AdvancedParticleMerger, save_split_files
     from valve_parsers import PCFFile
+
+    from core.operations.advanced_particle_merger import AdvancedParticleMerger, save_split_files
 
     mods_to_migrate = []
     mods_missing_source = []
@@ -41,10 +46,10 @@ def migrate_old_particle_files():
 
     # migrate mods that have their source particles/ dir
     if mods_to_migrate:
-        print(f"\nMigrating {len(mods_to_migrate)} mod(s) to new particle split format...")
+        log.info(f"\nMigrating {len(mods_to_migrate)} mod(s) to new particle split format...")
 
         for mod_dir in mods_to_migrate:
-            print(f"Processing {mod_dir.name}...")
+            log.info(f"Processing {mod_dir.name}...")
 
             try:
                 for original_file in PARTICLE_SPLITS.keys():
@@ -56,16 +61,16 @@ def migrate_old_particle_files():
                 merger = AdvancedParticleMerger()
                 merger.preprocess_vpk(mod_dir)
 
-            except Exception as e:
-                print(f"Failed to migrate {mod_dir.name}: {e}")
+            except Exception:
+                log.exception(f"Failed to migrate {mod_dir.name}")
 
-        print("Migration complete!\n")
+        log.info("Migration complete!")
 
     # migrate mods without source (fallback cringe lazy method)
     if mods_missing_source:
-        print("\nMigrating the following mods using fallback method (missing particles/ directory):")
+        log.info("Migrating the following mods using fallback method (missing particles/ directory):")
         for mod_name in mods_missing_source:
-            print(f"- {mod_name}")
+            log.info(f"{mod_name}")
 
         for mod_name in mods_missing_source:
             mod_dir = folder_setup.particles_dir / mod_name
@@ -81,5 +86,5 @@ def migrate_old_particle_files():
                         save_split_files(pcf, mod_dir, split_defs)
                         old_file.unlink()
 
-            except Exception as e:
-                print(f"Failed to migrate {mod_name}: {e}")
+            except Exception:
+                log.exception(f"Failed to migrate {mod_name}")

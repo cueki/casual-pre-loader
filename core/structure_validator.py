@@ -1,8 +1,12 @@
+import logging
 import zipfile
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Set
-from dataclasses import dataclass
+
 from core.constants import VALID_MOD_ROOT_FOLDERS
+
+log = logging.getLogger()
 
 
 @dataclass
@@ -93,9 +97,11 @@ def validate_mod_structure(folder_path: Path) -> ValidationResult:
                     type_detected = "hud"
 
     except PermissionError:
+        log.exception(f"Permission denied accessing folder: {folder_path}")
         errors.append(f"Permission denied accessing folder: {folder_path}")
     except Exception as e:
-        errors.append(f"Error validating folder structure: {str(e)}")
+        log.exception("Error validating folder structure")
+        errors.append("Error validating folder structure")
 
     return ValidationResult(
         is_valid=len(errors) == 0,

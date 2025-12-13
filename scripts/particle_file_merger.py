@@ -6,13 +6,18 @@ This needs to be moved into root, or you need to update imports for it to work.
 
 import argparse
 import json
+import logging
 import sys
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
-from collections import defaultdict
+
 from valve_parsers import PCFFile
-from core.operations.pcf_rebuild import get_pcf_element_names, extract_elements
+
 from core.folder_setup import folder_setup
+from core.operations.pcf_rebuild import extract_elements, get_pcf_element_names
+
+log = logging.getLogger()
 
 
 def load_particle_system_map() -> Dict[str, List[str]]:
@@ -39,12 +44,12 @@ def resolve_conflicts(conflicts: Dict[str, List[int]], pcf_files: List[Path]) ->
     if not conflicts:
         return decisions
 
-    print(f"\nFound {len(conflicts)} conflicting particle elements:")
+    log.info(f"Found {len(conflicts)} conflicting particle elements:")
 
     for element_name, source_indices in conflicts.items():
-        print(f"\n'{element_name}' found in:")
+        log.info(f"'{element_name}' found in:")
         for i, source_idx in enumerate(source_indices):
-            print(f"  [{i+1}] {pcf_files[source_idx].name}")
+            log.info(f"  [{i+1}] {pcf_files[source_idx].name}")
 
         while True:
             try:
@@ -54,9 +59,9 @@ def resolve_conflicts(conflicts: Dict[str, List[int]], pcf_files: List[Path]) ->
                     if 0 <= idx < len(source_indices):
                         decisions[element_name] = source_indices[idx]
                         break
-                print(f"Invalid choice. Please enter 1-{len(source_indices)}")
+                log.error(f"Invalid choice. Please enter 1-{len(source_indices)}")
             except (ValueError, KeyboardInterrupt):
-                print("\n Operation cancelled by user")
+                log.critical("Operation cancelled by user", exc_info=True)
                 sys.exit(1)
 
     return decisions
@@ -90,8 +95,9 @@ def remap_element_attributes(element, old_to_new: Dict[int, int], string_dict, A
 
 def create_merged_pcf(pcf_files: List[PCFFile], pcf_paths: List[Path],
                      target_elements: List[str], conflict_decisions: Dict[str, int]) -> PCFFile:
-    from core.constants import AttributeType
     from valve_parsers import PCFElement
+
+    from core.constants import AttributeType
 
     base_pcf = pcf_files[0]
     merged_pcf = PCFFile(pcf_paths[0], version=base_pcf.version)
@@ -104,7 +110,7 @@ def create_merged_pcf(pcf_files: List[PCFFile], pcf_paths: List[Path],
 
         source_idx = conflict_decisions[element_name]
         source_pcf = pcf_files[source_idx]
-        print(f" Replacing '{element_name}' with version from {pcf_paths[source_idx].name}")
+        log.info(f"Replacing '{element_name}' with version from {pcf_paths[source_idx].name}")
 
         extracted = extract_elements(source_pcf, [element_name])
 
@@ -158,23 +164,30 @@ def main():
     args = parser.parse_args()
 
     try:
+        from rich.logging import RichHandler
+
+        log.addHandler(RichHandler())
+    except ModuleNotFoundError:
+        log.addHandler(logging.StreamHandler())
+
+    try:
         particle_map = load_particle_system_map()
     except FileNotFoundError:
-        print("Error: particle_system_map.json not found")
+        log.critical("particle_system_map.json not found", exc_info=True)
         sys.exit(1)
 
     target = args.target
     if target not in particle_map:
-        print(f"Error: Target '{target}' not found in particle_system_map.json")
-        print("Available targets:")
+        log.critical(f"Target '{target}' not found in particle_system_map.json", stack_info=True)
+        log.critical("Available targets:")
         for available_target in sorted(particle_map.keys()):
             display_name = available_target.replace('particles/', '')
-            print(f"  - {display_name}")
+            log.critical(f"  - {display_name}")
         sys.exit(1)
 
     target_elements = particle_map[args.target]
-    print(f"Target: {args.target}")
-    print(f"Need {len(target_elements)} elements: {', '.join(target_elements)}")
+    log.info(f"Target: {args.target}")
+    log.info(f"Need {len(target_elements)} elements: {', '.join(target_elements)}")
 
     pcf_paths = []
     pcf_files = []
@@ -182,7 +195,7 @@ def main():
     for file_path in args.input_files:
         path = Path(file_path)
         if not path.exists():
-            print(f" Error: File '{file_path}' does not exist")
+            log.critical(f"File '{file_path}' does not exist", stack_info=True)
             sys.exit(1)
 
         try:
@@ -190,40 +203,40 @@ def main():
             pcf_paths.append(path)
             pcf_files.append(pcf)
             elements = get_pcf_element_names(pcf)
-            print(f" Loaded {path.name} ({len(elements)} particle systems)")
-        except Exception as e:
-            print(f" Error loading '{file_path}': {e}")
+            log.info(f" Loaded {path.name} ({len(elements)} particle systems)")
+        except Exception:
+            log.critical(f"Error loading '{file_path}'", exc_info=True)
             sys.exit(1)
 
     # resolve conflicts
-    print(f"\n Checking for conflicts among target elements...")
+    log.info("Checking for conflicts among target elements...")
     conflicts = find_conflicting_elements(pcf_files, target_elements)
     if conflicts:
         conflict_decisions = resolve_conflicts(conflicts, pcf_paths)
     else:
-        print(" No conflicts found!")
+        log.info(" No conflicts found!")
         conflict_decisions = {}
 
-    print(f"\n Creating merged PCF file...")
+    log.info("Creating merged PCF file...")
     try:
         merged_pcf = create_merged_pcf(pcf_files, pcf_paths, target_elements, conflict_decisions)
         output_path = Path(args.output)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         merged_pcf.encode(output_path)
 
-        print(f"\nSuccessfully created '{output_path}'")
-        print(f"Contains {len(merged_pcf.elements)-1} particle systems")
+        log.info(f"Successfully created '{output_path}'")
+        log.info(f"Contains {len(merged_pcf.elements)-1} particle systems")
 
         final_elements = get_pcf_element_names(merged_pcf)
         missing_elements = set(target_elements) - set(final_elements)
 
         if missing_elements:
-            print(f"Missing elements (not found in input files): {', '.join(missing_elements)}")
+            log.info(f"Missing elements (not found in input files): {', '.join(missing_elements)}")
         else:
-            print(f"All target elements included!")
+            log.info("All target elements included!")
 
-    except Exception as e:
-        print(f" Error creating merged PCF: {e}")
+    except Exception:
+        log.critical("Error creating merged PCF", exc_info=True)
         sys.exit(1)
 
 

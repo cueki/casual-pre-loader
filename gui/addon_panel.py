@@ -1,8 +1,20 @@
-from PyQt6.QtGui import QAction
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QGroupBox, QListWidget, QPushButton, QHBoxLayout, QMenu, QStyle, QComboBox, QLabel)
 from PyQt6.QtCore import Qt, pyqtSignal
-from gui.mod_descriptor import AddonDescription
+from PyQt6.QtGui import QAction
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QListWidget,
+    QMenu,
+    QPushButton,
+    QStyle,
+    QVBoxLayout,
+    QWidget,
+)
+
 from gui.load_order_panel import LoadOrderPanel
+from gui.mod_descriptor import AddonDescription
 
 
 class AddonPanel(QWidget):

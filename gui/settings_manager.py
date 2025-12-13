@@ -1,6 +1,10 @@
 import json
+import logging
 from pathlib import Path
+
 from core.folder_setup import folder_setup
+
+log = logging.getLogger()
 
 
 def validate_tf_directory(directory, validation_label=None):
@@ -144,8 +148,8 @@ class SettingsManager:
             try:
                 with open(self.settings_file, "r") as f:
                     return json.load(f)
-            except Exception as e:
-                print(f"Error loading settings: {e}")
+            except Exception:
+                log.exception("Error loading settings")
 
         return default_settings
 
@@ -159,8 +163,8 @@ class SettingsManager:
             try:
                 with open(self.metadata_file, "r") as f:
                     return json.load(f)
-            except Exception as e:
-                print(f"Error loading addon metadata: {e}")
+            except Exception:
+                log.exception("Error loading addon metadata")
 
         return default_metadata
 
@@ -168,15 +172,15 @@ class SettingsManager:
         try:
             with open(self.settings_file, "w") as f:
                 json.dump(self.settings, f, indent=2)
-        except Exception as e:
-            print(f"Error saving settings: {e}")
+        except Exception:
+            log.exception("Error saving settings")
 
     def save_metadata(self):
         try:
             with open(self.metadata_file, "w") as f:
                 json.dump(self.addon_metadata, f, indent=2)
-        except Exception as e:
-            print(f"Error saving addon metadata: {e}")
+        except Exception:
+            log.exception("Error saving addon metadata")
 
     def get_tf_directory(self):
         return self.settings.get("tf_directory", "")

@@ -1,14 +1,31 @@
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QScrollArea, QFrame, QDialog,
-                             QLineEdit, QTextEdit, QPushButton, QHBoxLayout, QComboBox,
-                             QFormLayout, QMessageBox)
-from core.constants import MOD_TYPE_COLORS
-from core.folder_setup import folder_setup
-from valve_parsers import VPKFile
-import os
 import json
+import logging
+import os
 import subprocess
 from sys import platform
+
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QFormLayout,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+from valve_parsers import VPKFile
+
+from core.constants import MOD_TYPE_COLORS
+from core.folder_setup import folder_setup
+
+log = logging.getLogger()
 
 
 class ModJsonEditor(QDialog):
@@ -107,8 +124,9 @@ class ModJsonEditor(QDialog):
                 json.dump(updated_data, f, indent=2)
             self.addon_updated.emit()
             self.accept()
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to save mod.json: {str(e)}")
+        except Exception:
+            log.exception("Failed to save mod.json")
+            QMessageBox.critical(self, "Error", "Failed to save mod.json")
 
 
 class AddonDescription(QWidget):
@@ -324,8 +342,9 @@ class AddonDescription(QWidget):
             else:
                 subprocess.run(["xdg-open", str(exports_dir)])
 
-        except Exception as e:
-            QMessageBox.critical(self, "Export Failed", f"Error exporting addon: {str(e)}")
+        except Exception:
+            log.exception("Error exporting addon")
+            QMessageBox.critical(self, "Export Failed", "Error exporting addon")
 
     def refresh_current_addon(self):
         if self.current_addon_name and self.current_addon_info:
@@ -336,6 +355,6 @@ class AddonDescription(QWidget):
                     updated_info = json.load(f)
                     updated_info['file_path'] = folder_name
                     self.update_content(updated_info.get("addon_name", self.current_addon_name), updated_info)
-            except Exception as e:
-                print(f"Error refreshing addon details: {e}")
+            except Exception:
+                log.exception("Error refreshing addon details")
                 self.clear()

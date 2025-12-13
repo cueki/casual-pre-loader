@@ -1,23 +1,47 @@
+import logging
 import os
-from sys import platform
 import subprocess
 import threading
 from pathlib import Path
+from sys import platform
+
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit,
-                             QLabel, QFileDialog, QMessageBox, QGroupBox, QTabWidget,
-                             QCheckBox,  QDialog, QProgressDialog, QStyle)
 from PyQt6.QtGui import QAction
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QDialog,
+    QFileDialog,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QMessageBox,
+    QProgressDialog,
+    QPushButton,
+    QStyle,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
+
 from core.folder_setup import folder_setup
 from core.particle_splits import migrate_old_particle_files
 from core.version import VERSION
-from gui.settings_manager import (SettingsManager, validate_tf_directory, validate_goldrush_directory,
-                                   auto_detect_tf2, auto_detect_goldrush)
-from gui.drag_and_drop import ModDropZone
 from gui.addon_manager import AddonManager
-from gui.installation import InstallationManager
 from gui.addon_panel import AddonPanel
+from gui.drag_and_drop import ModDropZone
 from gui.first_time_setup import mods_download_group
+from gui.installation import InstallationManager
+from gui.settings_manager import (
+    SettingsManager,
+    auto_detect_goldrush,
+    auto_detect_tf2,
+    validate_goldrush_directory,
+    validate_tf_directory,
+)
+
+log = logging.getLogger()
 
 
 class SettingsDialog(QDialog):
@@ -479,10 +503,8 @@ class ParticleManagerGUI(QMainWindow):
             else:
                 self.addon_description.clear()
 
-        except Exception as e:
-            print(f"Error in on_addon_click: {e}")
-            import traceback
-            traceback.print_exc()
+        except Exception:
+            log.exception("Error in on_addon_click")
 
     def on_addon_checkbox_changed(self):
         # when checkboxes change, update load order and save
@@ -494,10 +516,8 @@ class ParticleManagerGUI(QMainWindow):
             load_order = self.addon_panel.get_load_order()
             self.settings_manager.set_addon_selections(load_order)
 
-        except Exception as e:
-            print(f"Error in on_addon_checkbox_changed: {e}")
-            import traceback
-            traceback.print_exc()
+        except Exception:
+            log.exception("Error in on_addon_checkbox_changed")
 
     def on_load_order_changed(self):
         # when user drags to reorder, update display and save
@@ -509,10 +529,8 @@ class ParticleManagerGUI(QMainWindow):
             load_order = self.addon_panel.get_load_order()
             self.settings_manager.set_addon_selections(load_order)
 
-        except Exception as e:
-            print(f"Error in on_load_order_changed: {e}")
-            import traceback
-            traceback.print_exc()
+        except Exception:
+            log.exception("Error in on_load_order_changed")
 
     def update_load_order_display(self):
         # delegate to load order panel
@@ -640,6 +658,7 @@ class ParticleManagerGUI(QMainWindow):
             target_name = "TF2"
 
         if not target_path:
+            log.error(f"No {target_name} directory configured!", stack_info=True)
             self.show_error(f"No {target_name} directory configured!")
             return
 
@@ -666,6 +685,7 @@ class ParticleManagerGUI(QMainWindow):
             target_name = "TF2"
 
         if not target_path:
+            log.error(f"No {target_name} directory configured!", stack_info=True)
             self.show_error(f"No {target_name} directory configured!")
             return
 
@@ -705,8 +725,7 @@ class ParticleManagerGUI(QMainWindow):
                 dialog.setValue(progress)
                 dialog.setLabelText(message)
             except (AttributeError, RuntimeError):
-                # Dialog was closed/deleted between check and call
-                pass
+                log.exception('Dialog was closed/deleted between check and call')
 
     def on_operation_finished(self):
         if self.progress_dialog:
@@ -739,12 +758,14 @@ class ParticleManagerGUI(QMainWindow):
 
             self.load_addons()
         else:
+            log.error(message, stack_info=True)
             self.show_error(message)
 
     def open_addons_folder(self):
         addons_path = folder_setup.addons_dir
 
         if not addons_path.exists():
+            log.error("Addons folder does not exist!", stack_info=True)
             self.show_error("Addons folder does not exist!")
             return
 
@@ -753,8 +774,9 @@ class ParticleManagerGUI(QMainWindow):
                 os.startfile(str(addons_path))
             else:
                 subprocess.run(["xdg-open", str(addons_path)])
-        except Exception as e:
-            self.show_error(f"Failed to open addons folder: {str(e)}")
+        except Exception:
+            log.exception("Failed to open addons folder")
+            self.show_error("Failed to open addons folder")
 
     def open_settings_dialog(self):
         dialog = SettingsDialog(self)

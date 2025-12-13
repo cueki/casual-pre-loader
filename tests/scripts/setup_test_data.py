@@ -1,6 +1,10 @@
+import logging
 import shutil
 from pathlib import Path
+
 from gui.settings_manager import SettingsManager
+
+log = logging.getLogger()
 
 
 def setup_test_data():
@@ -10,7 +14,7 @@ def setup_test_data():
     tf2_path = test_settings_manager.get_tf_directory()
 
     if tf2_path:
-        print(f"Found TF2 installation at: {tf2_path}")
+        log.info(f"Found TF2 installation at: {tf2_path}")
 
         # Copy essential files for testing
         files_to_copy = [
@@ -26,9 +30,9 @@ def setup_test_data():
             if src.exists():
                 dst.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(src, dst)
-                print(f"Copied: {file_name}")
+                log.info(f"Copied: {file_name}")
     else:
-        print("No TF2 installation found. Tests will use mock data.")
+        log.info("No TF2 installation found. Tests will use mock data.")
 
 
 if __name__ == "__main__":

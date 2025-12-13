@@ -1,8 +1,12 @@
-import shutil
+import logging
 import re
+import shutil
 from pathlib import Path
-from typing import List, Tuple, Optional, Dict
+from typing import Dict, List, Optional, Tuple
+
 from valve_parsers import VPKFile
+
+log = logging.getLogger()
 
 
 class SoundHandler:
@@ -90,8 +94,8 @@ def identify_needed_scripts(canonical_paths: List[str], backup_scripts_dir: Path
                     if str(script_file) not in needed_scripts:
                         needed_scripts.add(str(script_file))
 
-        except Exception as e:
-            print(f"[ERROR] Error reading sound script file {script_file}: {e}")
+        except Exception:
+            log.exception(f"Error reading sound script file {script_file}")
             continue
 
 
@@ -110,8 +114,8 @@ def copy_needed_scripts(needed_scripts: List[str], temp_scripts_dir: Path) -> Li
         try:
             shutil.copy2(script_path, target_path)
             copied_scripts.append(str(target_path))
-        except Exception as e:
-            print(f"[ERROR] Error copying script file {script_file} to {target_path}: {e}")
+        except Exception:
+            log.exception(f"Error copying script file {script_file} to {target_path}")
 
     return copied_scripts
 
@@ -123,8 +127,8 @@ def update_script_files(script_files: List[str], path_mappings: List[Tuple[str, 
         try:
             with open(script_file, 'r', encoding='utf-8', errors='ignore') as f:
                 content = f.read()
-        except Exception as e:
-            print(f"Error reading {script_file}: {e}")
+        except Exception:
+            log.exception(f"Error reading {script_file}")
             continue
 
         original_content = content
@@ -169,8 +173,8 @@ def update_script_files(script_files: List[str], path_mappings: List[Tuple[str, 
                 with open(script_file, 'w', encoding='utf-8') as f:
                     f.write(content)
                 modified_files.append(script_file)
-            except Exception as e:
-                print(f"[ERROR] Error writing {script_file}: {e}")
+            except Exception:
+                log.exception(f"Error writing {script_file}")
 
     return modified_files
 
@@ -182,12 +186,12 @@ def create_vpk_based_mappings(sound_files: List[Path], vpk_paths: List[Path]) ->
         try:
             vpk = VPKFile(str(vpk_path))
             vpk_files.append(vpk)
-        except Exception as e:
-            print(f"[ERROR] Error loading {vpk_path}: {e}")
+        except Exception:
+            log.exception(f"Error loading {vpk_path}")
             continue
 
     if not vpk_files:
-        print("[ERROR] No valid VPK files could be loaded")
+        log.error("No valid VPK files could be loaded", stack_info=True)
         return []
 
     file_mappings = []
@@ -232,8 +236,8 @@ def create_vpk_based_mappings(sound_files: List[Path], vpk_paths: List[Path]) ->
         try:
             file_to_remove.unlink()
             removed_count += 1
-        except Exception as e:
-            print(f"[ERROR] Error removing {file_to_remove}: {e}")
+        except Exception:
+            log.exception(f"Error removing {file_to_remove}")
 
     return file_mappings
 
@@ -255,7 +259,7 @@ def move_sound_files(file_mappings: List[Dict]) -> List[Tuple[str, str]]:
         if sound_dir:
             target_path = sound_dir / final_path
         else:
-            print(f"[ERROR] No {sound_dir} found!")
+            log.error(f"No {sound_dir} found!", stack_info=True)
             break
 
         target_path.parent.mkdir(parents=True, exist_ok=True)
@@ -264,8 +268,8 @@ def move_sound_files(file_mappings: List[Dict]) -> List[Tuple[str, str]]:
             if source_file != target_path:  # only move if different
                 shutil.move(str(source_file), str(target_path))
                 moved_files.append((str(source_file), str(target_path)))
-        except Exception as e:
-            print(f"[ERROR] Error moving {source_file} to {target_path}: {e}")
+        except Exception:
+            log.exception(f"Error moving {source_file} to {target_path}")
 
     return moved_files
 

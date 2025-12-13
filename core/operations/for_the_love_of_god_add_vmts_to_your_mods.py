@@ -1,8 +1,13 @@
+import logging
 from pathlib import Path
-from typing import Set, List, Optional
-from core.folder_setup import folder_setup
+from typing import List, Optional, Set
+
 from valve_parsers import VPKFile
+
+from core.folder_setup import folder_setup
 from core.util.vpk import get_vpk_name
+
+log = logging.getLogger()
 
 
 def find_material_files(directory: Path) -> tuple[List[Path], Set[str]]:
@@ -26,9 +31,9 @@ def find_material_files(directory: Path) -> tuple[List[Path], Set[str]]:
                         vmt_stems.add(file_path.stem.lower())
 
             vtf_count = sum(1 for f in vtf_files if target_dir in f.parents)
-            print(f"Scanned {target_dir} - found {vtf_count} VTF files")
+            log.info(f"Scanned {target_dir} - found {vtf_count} VTF files")
         else:
-            print(f"Directory {target_dir} does not exist, skipping")
+            log.info(f"Directory {target_dir} does not exist, skipping")
 
     return vtf_files, vmt_stems
 
@@ -55,8 +60,8 @@ def generate_vmt_content(texture_path: str, game_vpk: Optional[VPKFile] = None) 
             vmt_content = game_vpk.get_file_data(vmt_path)
             if vmt_content:
                 return vmt_content.decode('utf-8', errors='ignore')
-        except Exception as e:
-                print(f"Error reading VMT from game VPK: {e}")
+        except Exception:
+            log.exception("Error reading VMT from game VPK")
 
     # fallback to generic VMT
     return f'"LightmappedGeneric"\n{{\n\t"$basetexture" "{texture_path}"\n}}\n'
@@ -67,7 +72,7 @@ def generate_missing_vmt_files(temp_mods_dir: Path = None, tf_path: str = None) 
         temp_mods_dir = folder_setup.temp_to_be_vpk_dir
 
     if not temp_mods_dir.exists():
-        print(f"Directory {temp_mods_dir} does not exist")
+        log.info(f"Directory {temp_mods_dir} does not exist")
         return 0
 
     # initialize VPK
@@ -77,21 +82,21 @@ def generate_missing_vmt_files(temp_mods_dir: Path = None, tf_path: str = None) 
         if game_vpk_path.exists():
             try:
                 game_vpk = VPKFile(str(game_vpk_path))
-                print(f"Loaded game VPK: {game_vpk_path}")
-            except Exception as e:
-                print(f"Error loading game VPK: {e}")
+                log.info(f"Loaded game VPK: {game_vpk_path}")
+            except Exception:
+                log.exception("Error loading game VPK")
                 game_vpk = None
         else:
-            print(f"Game VPK not found at: {game_vpk_path}")
+            log.info(f"Game VPK not found at: {game_vpk_path}")
 
     # find all vtf and vmt files in one scan
     vtf_files, existing_vmts = find_material_files(temp_mods_dir)
 
     if not vtf_files:
-        print("No VTF files found")
+        log.info("No VTF files found")
         return 0
 
-    print(f"Found {len(vtf_files)} VTF files and {len(existing_vmts)} existing VMT files")
+    log.info(f"Found {len(vtf_files)} VTF files and {len(existing_vmts)} existing VMT files")
 
     created_count = 0
 
@@ -111,16 +116,16 @@ def generate_missing_vmt_files(temp_mods_dir: Path = None, tf_path: str = None) 
                     f.write(vmt_content)
 
                 if game_vpk:
-                    print(f"Created VMT from game VPK: {vmt_path}")
+                    log.info(f"Created VMT from game VPK: {vmt_path}")
                 else:
-                    print(f"Created generic VMT: {vmt_path}")
+                    log.info(f"Created generic VMT: {vmt_path}")
 
-            except Exception as e:
-                print(f"Error creating VMT file {vmt_path}: {e}")
+            except Exception:
+                log.exception(f"Error creating VMT file {vmt_path}")
                 continue
 
             created_count += 1
         else:
-            print(f"VMT already exists for: {vtf_file.name}")
+            log.info(f"VMT already exists for: {vtf_file.name}")
 
     return created_count
