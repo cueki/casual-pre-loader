@@ -68,6 +68,7 @@ def main():
         if updates and settings_manager.should_show_update_dialog(updates[0].release.tag_name.lstrip('v')):
             splash.hide()
             show_update_dialog(updates) # NOTE: may eventually re-execute the interpreter
+            splash.show()
 
     # set icon for Windows
     if platform == 'win32':

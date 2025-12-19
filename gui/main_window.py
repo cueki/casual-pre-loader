@@ -32,7 +32,7 @@ from gui.addon_manager import AddonManager
 from gui.addon_panel import AddonPanel
 from gui.drag_and_drop import ModDropZone
 from gui.first_time_setup import mods_download_group
-from gui.installation import InstallationManager
+from gui.interface import Interface
 from gui.settings_manager import (
     SettingsManager,
     auto_detect_goldrush,
@@ -276,7 +276,7 @@ class ParticleManagerGUI(QMainWindow):
         # managers
         self.settings_manager = SettingsManager()
         self.addon_manager = AddonManager(self.settings_manager)
-        self.install_manager = InstallationManager(self.settings_manager)
+        self.install_manager = Interface(self.settings_manager)
 
         # UI components
         self.restore_button = None
@@ -696,7 +696,7 @@ class ParticleManagerGUI(QMainWindow):
             self.show_error(f"No {target_name} directory configured!")
             return
 
-        if self.install_manager.restore(target_path):
+        if self.install_manager.uninstall(target_path):
             self.set_processing_state(True)
 
             self.progress_dialog = QProgressDialog(f"Restoring {target_name}...", None, 0, 100, self)
