@@ -71,10 +71,6 @@ def main():
             show_update_dialog(update_info)
             splash.show()
 
-    # pass update info to window for display
-    if update_info:
-        window.update_info = update_info
-
     # set icon for Windows
     if platform == 'win32':
         import ctypes
