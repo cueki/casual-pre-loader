@@ -38,7 +38,7 @@ from core.operations.pcf_rebuild import extract_elements, load_particle_system_m
 from core.operations.vgui_preload import patch_mainmenuoverride
 from core.quickprecache.precache_list import make_precache_list
 from core.quickprecache.quick_precache import QuickPrecache
-from core.util.vpk import get_vpk_name
+from core.util.vpk import check_vpk_writable, get_vpk_name
 
 log = logging.getLogger()
 
@@ -82,6 +82,8 @@ class Interface(QObject):
         self.cancel_requested = False
         try:
             working_vpk_path = Path(tf_path) / get_vpk_name(tf_path)
+            if not check_vpk_writable(working_vpk_path):
+                raise PermissionError("Please close TF2 before installing.")
             file_handler = FileHandler(str(working_vpk_path))
             base_default_pcf, base_default_parents  = initialize_pcf(folder_setup.temp_to_be_referenced_dir)
             self.update_progress(0, "Installing addons...")
