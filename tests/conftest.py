@@ -36,7 +36,6 @@ def temp_tf_directory():
 
 @pytest.fixture(scope="function")
 def mock_folder_setup(monkeypatch):
-    from core.folder_setup import FolderConfig
 
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)

@@ -84,7 +84,7 @@ class ModDropZone(QFrame):
             error_msg += "\n".join(f"• {error}" for error in validation_result.errors)
 
             if validation_result.warnings:
-                error_msg += f"\n\nWarnings:\n"
+                error_msg += "\n\nWarnings:\n"
                 error_msg += "\n".join(f"• {warning}" for warning in validation_result.warnings)
 
             QMessageBox.critical(self, "Invalid Structure", error_msg)

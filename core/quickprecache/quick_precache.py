@@ -213,7 +213,7 @@ class QuickPrecache:
             self.update_progress(f"Compiling final precache model ({self.compiled_count + 1}/{self.total_compiles})...")
             result = self.studio_mdl.make_model(str(temp_path))
             self.compiled_count += 1
-            self.update_progress(f"QuickPrecache complete!")
+            self.update_progress("QuickPrecache complete!")
 
             return result
         except Exception:
