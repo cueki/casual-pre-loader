@@ -1,7 +1,6 @@
 import logging
 import os
 import shutil
-import traceback
 from pathlib import Path
 from typing import List
 

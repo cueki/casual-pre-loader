@@ -99,7 +99,7 @@ def validate_mod_structure(folder_path: Path) -> ValidationResult:
     except PermissionError:
         log.exception(f"Permission denied accessing folder: {folder_path}")
         errors.append(f"Permission denied accessing folder: {folder_path}")
-    except Exception as e:
+    except Exception:
         log.exception("Error validating folder structure")
         errors.append("Error validating folder structure")
 
