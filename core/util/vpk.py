@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-def get_vpk_name(tf_path):
+def get_vpk_name(tf_path: Path | str) -> str:
     path = Path(tf_path)
     if path.name == "tf_goldrush":
         return "tf_goldrush_dir.vpk"
