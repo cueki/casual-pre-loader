@@ -475,7 +475,7 @@ class ParticleManagerGUI(QMainWindow):
         self.addon_panel.update_target_options(goldrush_available)
 
     def load_addons(self):
-        updates_found = self.addon_manager.scan_addon_contents()
+        self.addon_manager.scan_addon_contents()
         self.addon_manager.load_addons(self.addons_list)
         self.apply_saved_addon_selections()
 

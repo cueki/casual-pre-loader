@@ -242,7 +242,7 @@ class AddonDescription(QWidget):
         version = addon_info.get("version", "")
         if version:
             self.version_label.setText("Version: " + version)
-            self.version_label.setStyleSheet(f"""
+            self.version_label.setStyleSheet("""
                 color: #aaaaaa;
                 """)
             self.version_label.show()
