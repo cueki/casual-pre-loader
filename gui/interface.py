@@ -7,7 +7,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
 
 from core.services.install import InstallService
-from gui.settings_manager import validate_goldrush_directory, validate_tf_directory
+from core.util.sourcemod import validate_goldrush_directory, validate_tf_directory
 
 log = logging.getLogger()
 
