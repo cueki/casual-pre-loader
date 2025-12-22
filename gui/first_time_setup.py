@@ -24,7 +24,8 @@ from PyQt6.QtWidgets import (
 
 from core.folder_setup import folder_setup
 from core.util.net import check_mods, download_file
-from gui.settings_manager import SettingsManager, auto_detect_tf2, validate_tf_directory
+from core.settings import SettingsManager
+from core.util.sourcemod import auto_detect_tf2, validate_tf_directory
 
 
 class FirstTimeSetupDialog(QDialog):

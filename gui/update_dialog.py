@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
 )
 
 from core.auto_updater import AutoUpdater
-from gui.settings_manager import SettingsManager
+from core.settings import SettingsManager
 
 log = logging.getLogger()
 

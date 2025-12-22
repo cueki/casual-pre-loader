@@ -13,7 +13,7 @@ from core.backup_manager import prepare_working_copy
 from core.folder_setup import folder_setup
 from gui.first_time_setup import check_first_time_setup, run_first_time_setup
 from gui.main_window import ParticleManagerGUI
-from gui.settings_manager import SettingsManager
+from core.settings import SettingsManager
 from gui.update_dialog import show_update_dialog
 
 log = logging.getLogger()

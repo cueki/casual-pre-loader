@@ -2,7 +2,7 @@ import logging
 import shutil
 from pathlib import Path
 
-from gui.settings_manager import SettingsManager
+from core.settings import SettingsManager
 
 log = logging.getLogger()
 
