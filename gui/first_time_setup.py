@@ -22,9 +22,10 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from core.folder_setup import folder_setup
 from core.download_mods import check_mods, download_mods
-from gui.settings_manager import SettingsManager, auto_detect_tf2, validate_tf_directory
+from core.folder_setup import folder_setup
+from core.settings import SettingsManager
+from core.util.sourcemod import auto_detect_tf2, validate_tf_directory
 
 log = logging.getLogger()
 

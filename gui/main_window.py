@@ -33,8 +33,8 @@ from gui.addon_panel import AddonPanel
 from gui.drag_and_drop import ModDropZone
 from gui.first_time_setup import mods_download_group
 from gui.interface import Interface
-from gui.settings_manager import (
-    SettingsManager,
+from core.settings import SettingsManager
+from core.util.sourcemod import (
     auto_detect_goldrush,
     auto_detect_tf2,
     validate_goldrush_directory,
