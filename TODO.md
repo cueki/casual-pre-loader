@@ -1,0 +1,12 @@
+- fix horizontal scroll bar in code blocks
+- revisit top bar
+- try to see if we can use macros in star history/if start history should even be where it is
+- decide if we should reformat/move credits
+- add caching to CD
+- decide if we want to move the HUD warning from index
+- make some locations set-able by the user
+- keep VPKs and extract them only when needed
+- download files from gamebanana?
+- add update with git instructions
+- refactor code out of `gui/` and make more generic/modular in general
+- workflow_dispatch

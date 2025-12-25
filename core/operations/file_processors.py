@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Optional
 
 from valve_parsers import PCFFile, VPKFile
 
@@ -78,6 +79,12 @@ def should_process_file(file_path: str) -> bool:
 
     path_lower = file_path.lower()
     return any(path in path_lower for path in target_paths) and path_lower.endswith('.vmt')
+
+
+def initialize_pcf(dir: Path) -> Optional[PCFFile]:
+    default_base_path = dir / 'disguise.pcf'
+    if default_base_path.exists():
+        return PCFFile(default_base_path).decode()
 
 
 get_val = [

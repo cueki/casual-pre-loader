@@ -1,187 +1,98 @@
 import logging
-import platform
-import shutil
-import tempfile
-import zipfile
-from pathlib import Path
-from typing import Any, Dict, Optional
+import os
+import sys
+from collections import defaultdict
+from operator import attrgetter
+from typing import Optional
 
-import requests
 from packaging import version
 
 from core.constants import BUILD_DIRS, BUILD_FILES, REMOTE_REPO
 from core.folder_setup import folder_setup
+from core.util.file import copy, delete
+from core.util.net import Update, download_file
+from core.util.repo.github import get_releases_with_asset
+from core.util.zip import extract
 from core.version import VERSION
 
 log = logging.getLogger()
 
+# TODO: what is needad for auto updates to be fully auto?
+# - be able to tell if we were ran with a wrapper script [scripts/run.sh] (argparse)
+# - programatically get min python version (pyproject.toml)
+# - programatically get dependency information (pyproject.toml)
+# - be able to determine if there are pending updates before running the main app (extract them to a tmpdir, check that on startup, apply them one by one, execing each time to relaod the interpreter)
 
-class AutoUpdater:
-    def __init__(self):
-        self.install_dir = folder_setup.install_dir
 
-    def check_for_updates(self) -> Optional[Dict[str, Any]]:
+def check_for_updates() -> tuple[Update]:
+    try: # get the latest version of each minor release that we are behind of
+        _updates = sorted(get_releases_with_asset(REMOTE_REPO, 'casual-preloader.zip'), key=attrgetter('version'), reverse=True)
+
+        updates = defaultdict(dict)
+        current = version.parse(VERSION)
+        for update in _updates:
+            if update.version.major > current.major or (update.version.major == current.major and update.version.minor > current.minor):
+                updates[update.version.major].setdefault(update.version.minor, update)
+
+        return tuple(update for major, _major in updates.items() for minor, update in _major.items())
+
+    except Exception:
+        log.exception('Error checking for updates')
+        return tuple()
+
+
+def perform_updates(updates: Optional[tuple[Update]] = None) -> None:
+    updates = updates or check_for_updates()
+
+    # TODO: update this once we can update multiple at a time
+    for update in updates:
+        archive_path = folder_setup.temp_dir / 'update' / f'{update.release.tag_name}.zip'
+
         try:
-            log.info(f"Install dir: {self.install_dir}")
-
-            response = requests.get(f"https://api.github.com/repos/{REMOTE_REPO}/releases/latest", timeout=10)
-            response.raise_for_status()
-
-            release_data = response.json()
-            latest_version = release_data["tag_name"].lstrip("v")
-
-            if version.parse(latest_version) > version.parse(VERSION):
-                return {
-                    "version": latest_version,
-                    "tag_name": release_data["tag_name"],
-                    "body": release_data.get("body", ""),
-                    "assets": release_data["assets"]
-                }
-            return None
-
+            log.info(f'Downloading application update ({update.release.tag_name})')
+            download_file(update.asset.browser_download_url, archive_path, 30)
         except Exception:
-            log.execption("Error checking for updates")
-            return None
+            log.exception(f'Error downloading update {update.release.tag_name}')
+            break
 
-    @staticmethod
-    def find_update_asset(assets: list) -> Optional[str]:
-        for asset in assets:
-            name = asset["name"].lower()
-            if "casual-preloader" in name and name.endswith(".zip"):
-                return asset["browser_download_url"]
+        match sys.platform:
+            case 'win32':
+                renamed_runme = folder_setup.install__dir / 'RUNME.tmp.bat'
 
-        return None
+                try:
+                    extract(archive_path, folder_setup.install_dir / '.tmp_update', 0, False, None)
+                    copy(folder_setup.install_dir / 'RUNME.bat', renamed_runme) # INFO: we need to rename RUNME to avoid file lock issues
+                except Exception:
+                    log.exception(f'Error extracting update {update.release.tag_name}')
 
-    @staticmethod
-    def download_file(url: str, dest_path: Path) -> bool:
-        try:
-            response = requests.get(url, timeout=30, stream=True)
-            response.raise_for_status()
+                    delete(folder_setup.install_dir / '.tmp_update')
+                    delete(renamed_runme)
 
-            dest_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(dest_path, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
-            return True
+                    break
+                finally:
+                    delete(archive_path)
 
-        except Exception:
-            log.exception(f"Error downloading {url}")
-            return False
+                os.execve(renamed_runme, [renamed_runme] + sys.argv, os.environ) # NOTE: quits the interpreter and executes renamed RUNME
 
-    def _use_windows_updater(self, zip_path: Path, updater_path: Path):
-        import os
-        import subprocess
+            case 'linux':
+                include = tuple((*BUILD_FILES, *BUILD_DIRS))
+                def _filter(root) -> bool:
+                    def __filter(path) -> bool:
+                        path = path.relative_to(root)
+                        return any(map(lambda x: path.startswith(x), include))
 
-        # rename cuz python will delete temp files on close
-        zip_in_install = self.install_dir / "update.zip"
-        shutil.copy2(zip_path, zip_in_install)
+                    return __filter
 
-        # rename updater to avoid file lock issues
-        renamed_updater = self.install_dir / "core" / "updater_old.bat"
-        shutil.copy2(updater_path, renamed_updater)
+                try:
+                    extract(archive_path, folder_setup.install_dir, 1, False, _filter)
+                except Exception:
+                    log.exception(f'Error extracting update {update.release.tag_name}')
 
-        # launch renamed updater process with our PID so it can kill us
-        subprocess.Popen([
-            str(renamed_updater),
-            str(zip_in_install),
-            str(self.install_dir.parent),
-            str(os.getpid())
-        ], creationflags=subprocess.CREATE_NEW_CONSOLE)
+                    break
+                finally:
+                    delete(archive_path)
 
-        return True
+                os.execve(sys.executable, [sys.executable] + sys.argv, os.environ) # NOTE: calls `exec()` and restarts the program
 
-    def extract_update_zip(self, zip_path: Path) -> bool:
-        try:
-            if platform.system() == "Windows":
-                updater_path = self.install_dir / "core" / "updater.bat"
-                if updater_path.exists():
-                    return self._use_windows_updater(zip_path, updater_path)
-
-            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                temp_extract_dir = self.install_dir / "temp_update"
-                temp_extract_dir.mkdir(exist_ok=True)
-                zip_ref.extractall(temp_extract_dir)
-
-                # nested app folder (casual-preloader-light/casual-preloader)
-                app_folder = None
-                for item in temp_extract_dir.rglob("*"):
-                    if item.is_dir() and item.name == "casual-preloader":
-                        app_folder = item
-                        break
-
-                if app_folder and app_folder.exists():
-                    # only copy defined structure to avoid python binaries
-                    for dir_name in BUILD_DIRS:
-                        src = app_folder / dir_name
-                        dest = self.install_dir / dir_name
-                        if src.exists():
-                            if dest.exists():
-                                shutil.rmtree(dest)
-                            shutil.copytree(src, dest)
-
-                    for file_name in BUILD_FILES:
-                        src = app_folder / file_name
-                        dest = self.install_dir / file_name
-                        if src.exists():
-                            shutil.copy2(src, dest)
-                else:
-                    raise FileNotFoundError
-
-                shutil.rmtree(temp_extract_dir, ignore_errors=True)
-
-            return True
-
-        except Exception:
-            log.exception("Error extracting update")
-            return False
-
-    def update_application(self, update_url: str) -> bool:
-        with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_file:
-            tmp_path = Path(tmp_file.name)
-
-        try:
-            log.info("Downloading application update...")
-            if not AutoUpdater.download_file(update_url, tmp_path):
-                return False
-
-            log.info("Extracting update...")
-            success = self.extract_update_zip(tmp_path)
-
-            tmp_path.unlink()
-            return success
-
-        except Exception:
-            log.exception("Error updating application")
-            if tmp_path.exists():
-                tmp_path.unlink()
-            return False
-
-    def perform_update(self) -> Dict[str, Any]:
-        result = {
-            "update_available": False,
-            "app_updated": False,
-            "version": None,
-            "error": None
-        }
-
-        try:
-            update_info = self.check_for_updates()
-            if not update_info:
-                return result
-
-            result["update_available"] = True
-            result["version"] = update_info["version"]
-
-            app_update_url = AutoUpdater.find_update_asset(update_info["assets"])
-            if app_update_url:
-                result["app_updated"] = self.update_application(app_update_url)
-
-        except Exception as e:
-            result["error"] = str(e)
-
-        return result
-
-
-def check_for_updates_sync() -> Optional[Dict[str, Any]]:
-    updater = AutoUpdater()
-    return updater.check_for_updates()
+            case _:
+                raise NotImplementedError

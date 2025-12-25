@@ -120,6 +120,7 @@ class ModJsonEditor(QDialog):
             updated_data["contents"] = self.addon_info["contents"]
 
         try:
+            mod_json_path.parent.mkdir(parents=True, exist_ok=True)
             with open(mod_json_path, 'w') as f:
                 json.dump(updated_data, f, indent=2)
             self.addon_updated.emit()
@@ -329,10 +330,11 @@ class AddonDescription(QWidget):
             return
 
         exports_dir = folder_setup.mods_dir / 'exports'
-        exports_dir.mkdir(exist_ok=True)
+        exports_dir.mkdir(parents=True, exist_ok=True)
         vpk_path = exports_dir / vpk_name
 
         try:
+            addon_dir.mkdir(parents=True, exist_ok=True) # INFO: technically not necessary, but VPKFile does not check if `source_dir` exists
             if not VPKFile.create(str(addon_dir), str(vpk_path)):
                 QMessageBox.critical(self, "Export Failed", "Failed to create VPK file.")
                 return
@@ -351,6 +353,7 @@ class AddonDescription(QWidget):
             folder_name = self.current_addon_info.get("file_path", self.current_addon_name)
             mod_json_path = folder_setup.addons_dir / folder_name / "mod.json"
             try:
+                mod_json_path.parent.mkdir(parents=True, exist_ok=True)
                 with open(mod_json_path, 'r') as f:
                     updated_info = json.load(f)
                     updated_info['file_path'] = folder_name

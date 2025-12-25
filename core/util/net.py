@@ -4,19 +4,28 @@ import shutil
 import socket
 import urllib.request
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
-from github import Github
-from github.GitReleaseAsset import GitReleaseAsset
 from packaging import version
 
 from core.constants import REMOTE_REPO
 from core.folder_setup import folder_setup
+from core.util.repo import Update
+from core.util.repo.github import get_releases_with_asset
 
 log = logging.getLogger()
 
 
-def check_mods() -> Optional[Tuple[GitReleaseAsset, str]]:
+def check_mods() -> Optional[Update]:
+    modsinfo = None
+    try:
+        with folder_setup.modsinfo_file.open('r') as fd:
+            modsinfo = json.load(fd)
+    except FileNotFoundError:
+        pass
+    except json.JSONDecodeError:
+        log.exception(f'Could not parse {folder_setup.modsinfo_file}')
+
     # NOTE: How files are packaged
     # The preloader itself in:
     # - `casual-preloader.zip`
@@ -33,32 +42,18 @@ def check_mods() -> Optional[Tuple[GitReleaseAsset, str]]:
     # - `casual-preloader-light.zip`
     # - There was also a time where the mods were kept in a zip file checked into the VCS...yeah, ~80 MB...
 
-    log.info('Retrieving releases')
-    releases = Github().get_repo(REMOTE_REPO).get_releases()
-    log.info('Done retrieving releases')
+    for update in get_releases_with_asset(REMOTE_REPO, 'mods.zip'):
+        if modsinfo:
+            if update.asset.digest == modsinfo["digest"]:
+                log.info(f'We already have the latest release of mods ({update.version})')
+                return
 
-    for release in releases:
-        if not (release.draft or release.prerelease):
-            for asset in release.assets:
-                if asset.name == 'mods.zip':
-                    try:
-                        with folder_setup.modsinfo_file.open('r') as fd:
-                            modsinfo = json.load(fd)
+            if not update.version > version.parse(modsinfo["tag"]):
+                log.info(f"We already have the latest release of mods ({update.version}), but the remote file differs")
+        else:
+            log.info(f'A new release of mods is available ({update.version})')
 
-                        if asset.digest == modsinfo['digest']:
-                            log.info(f'We already have the latest release of mods ({modsinfo["tag"]})')
-                            return
-
-                        if version.parse(release.tag.lstrip('v')) > version.parse(modsinfo['tag'].lstrip('v')):
-                            log.info(f'A new release of mods {release.tag_name}, we have {modsinfo["tag"]}')
-
-                        else:
-                            log.info(f'We already have the latest release ({release.tag}), but the remote file differs')
-
-                    except (json.JSONDecodeError, FileNotFoundError):
-                        log.info('No release of mods has ever been downloaded')
-
-                    return asset, release.tag_name
+        return update
 
 
 def download_file(url: str, path: Path, timeout: Optional[int] = None, reporthook=None) -> None:
@@ -67,9 +62,9 @@ def download_file(url: str, path: Path, timeout: Optional[int] = None, reporthoo
     try:
         socket.setdefaulttimeout(timeout)
 
-        tmp_path = folder_setup.temp_dir / f'{path.name}.part'
+        tmp_path = folder_setup.temp_download_dir / f"{path.name}"
 
-        folder_setup.temp_dir.mkdir(parents=True, exist_ok=True)
+        folder_setup.temp_download_dir.mkdir(parents=True, exist_ok=True)
         urllib.request.urlretrieve(url, tmp_path, reporthook)
 
         path.parent.mkdir(parents=True, exist_ok=True)
