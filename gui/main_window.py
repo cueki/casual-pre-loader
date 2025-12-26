@@ -28,7 +28,7 @@ from PyQt6.QtWidgets import (
 from core.folder_setup import folder_setup
 from core.particle_splits import migrate_old_particle_files
 from core.version import VERSION
-from gui.addon_manager import AddonManager
+from gui.addons_manager import AddonsManager
 from gui.addon_panel import AddonPanel
 from gui.drag_and_drop import ModDropZone
 from gui.first_time_setup import mods_download_group
@@ -275,7 +275,7 @@ class ParticleManagerGUI(QMainWindow):
 
         # managers
         self.settings_manager = SettingsManager()
-        self.addon_manager = AddonManager(self.settings_manager)
+        self.addon_manager = AddonsManager(self.settings_manager)
         self.install_manager = Interface(self.settings_manager)
 
         # UI components
