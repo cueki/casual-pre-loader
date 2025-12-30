@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Set
 
+from valve_parsers import VPKFile
+
 from core.constants import VALID_MOD_ROOT_FOLDERS
 
 log = logging.getLogger()
@@ -219,6 +221,57 @@ def validate_zip_structure(zip_file: zipfile.ZipFile) -> ValidationResult:
     )
 
 
+def validate_vpk_structure(vpk_path: Path) -> ValidationResult:
+    # validate VPK structure without extracting
+    errors = []
+    warnings = []
+    type_detected = "unknown"
+
+    try:
+        vpk_file = VPKFile(str(vpk_path))
+        file_list = vpk_file.list_files()
+
+        # analyze structure to determine type
+        found_folders = set()
+
+        for file_path in file_list:
+            # get the first directory component
+            parts = file_path.split('/')
+            if len(parts) >= 2:
+                root_folder = parts[0]
+                found_folders.add(root_folder.lower())
+
+        # check for valid mod root folders
+        valid_folders = []
+        for valid_folder in VALID_MOD_ROOT_FOLDERS:
+            if valid_folder.lower() in found_folders:
+                valid_folders.append(valid_folder)
+
+        if not valid_folders:
+            errors.append(
+                f"VPK does not contain any valid mod folders.\n"
+                f"Expected at least one of: {', '.join(VALID_MOD_ROOT_FOLDERS)}\n"
+                f"Found folders: {', '.join(sorted(found_folders)) if found_folders else 'none'}"
+            )
+
+        # detect HUD mods
+        if 'resource' in found_folders:
+            has_info_vdf = any('info.vdf' in f for f in file_list)
+            has_resource_ui = any('resource/ui' in f for f in file_list)
+            if has_info_vdf and has_resource_ui:
+                type_detected = "hud"
+
+    except Exception as e:
+        errors.append(f"Error validating VPK structure: {str(e)}")
+
+    return ValidationResult(
+        is_valid=len(errors) == 0,
+        errors=errors,
+        warnings=warnings,
+        type_detected=type_detected
+    )
+
+
 class StructureValidator:
      # empty set that can be used to filter problematic files in the future
     INVALID_EXTENSIONS = set()
@@ -301,6 +354,35 @@ class StructureValidator:
             return ValidationResult(
                 is_valid=False,
                 errors=[f"Error reading zip file {zip_path}: {str(e)}"],
+                warnings=[],
+                type_detected="unknown"
+            )
+
+    @staticmethod
+    def validate_vpk(vpk_path: Path) -> ValidationResult:
+        if not vpk_path.exists() or not vpk_path.is_file():
+            return ValidationResult(
+                is_valid=False,
+                errors=[f"Path does not exist or is not a file: {vpk_path}"],
+                warnings=[],
+                type_detected="unknown"
+            )
+
+        if not vpk_path.suffix.lower() == '.vpk':
+            return ValidationResult(
+                is_valid=False,
+                errors=[f"File is not a VPK file: {vpk_path}"],
+                warnings=[],
+                type_detected="unknown"
+            )
+
+        try:
+            structure_result = validate_vpk_structure(vpk_path)
+            return structure_result
+        except Exception as e:
+            return ValidationResult(
+                is_valid=False,
+                errors=[f"Error reading VPK file {vpk_path}: {str(e)}"],
                 warnings=[],
                 type_detected="unknown"
             )
