@@ -1,7 +1,6 @@
 import logging
 import threading
 from pathlib import Path
-from typing import List
 
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
@@ -21,20 +20,20 @@ class Interface(QObject):
     def __init__(self, settings_manager=None):
         super().__init__()
         self.settings_manager = settings_manager
-        self._service = InstallService()
+        self.service = InstallService()
         self.tf_path = ""
         self.processing = False
 
     @property
     def cancel_requested(self):
-        return self._service.cancel_requested
+        return self.service.cancel_requested
 
     @cancel_requested.setter
     def cancel_requested(self, value):
         if value:
-            self._service.request_cancel()
+            self.service.request_cancel()
         else:
-            self._service.cancel_requested = False
+            self.service.cancel_requested = False
 
     def set_tf_path(self, path):
         self.tf_path = path
@@ -54,7 +53,7 @@ class Interface(QObject):
             if mod_drop_zone:
                 apply_particles = mod_drop_zone.apply_particle_selections
 
-            self._service.install(
+            self.service.install(
                 tf_path=install_path,
                 selected_addons=selected_addons,
                 on_progress=self._on_progress,
@@ -73,7 +72,7 @@ class Interface(QObject):
                 self._on_progress(0, "Installation failed, attempting cleanup...")
 
             try:
-                self._service.uninstall(tf_path=install_path)
+                self.service.uninstall(tf_path=install_path)
                 if not was_cancelled:
                     self.operation_error.emit(f"Installation failed: {str(e)}\n\nFiles have been restored to default state.")
             except Exception as cleanup_error:
@@ -88,7 +87,7 @@ class Interface(QObject):
             self.processing = False
             self.operation_finished.emit()
 
-    def install(self, selected_addons: List[str], mod_drop_zone=None, target_path=None):
+    def install(self, selected_addons: list[str], mod_drop_zone=None, target_path=None):
         install_path = target_path if target_path else self.tf_path
 
         if Path(install_path).name == "tf_goldrush":
@@ -111,7 +110,7 @@ class Interface(QObject):
 
     def _run_uninstall(self, restore_path):
         try:
-            self._service.uninstall(
+            self.service.uninstall(
                 tf_path=restore_path,
                 on_progress=self._on_progress,
             )
@@ -156,4 +155,4 @@ class Interface(QObject):
 
     def is_modified(self, target_path=None):
         check_path = target_path if target_path else self.tf_path
-        return self._service.is_modified(check_path)
+        return self.service.is_modified(check_path)

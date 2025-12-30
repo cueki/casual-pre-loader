@@ -1,17 +1,12 @@
-import json
 import logging
-import shutil
-import tempfile
 import threading
-import zipfile
 from pathlib import Path
 
 from PyQt6.QtCore import QObject, Qt, pyqtSignal
 from PyQt6.QtWidgets import QFrame, QLabel, QMessageBox, QProgressDialog, QVBoxLayout
-from valve_parsers import VPKFile
 
 from core.folder_setup import folder_setup
-from core.operations.advanced_particle_merger import AdvancedParticleMerger
+from core.services.importer import ImportService
 from core.structure_validator import StructureValidator, ValidationResult
 from core.util.pcf_path_walk import apply_particle_selections, get_mod_particles
 from gui.conflict_matrix import ConflictMatrix
@@ -46,6 +41,7 @@ class ModDropZone(QFrame):
         self.worker.success.connect(self.show_success)
         self.rescan_callback = rescan_callback
         self.validator = StructureValidator()
+        self.service = ImportService(settings_manager)
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
@@ -102,113 +98,6 @@ class ModDropZone(QFrame):
 
         return True
 
-    def process_folder(self, folder_path: Path, override_name: str = None) -> bool:
-        # process a folder by copying it to the appropriate location
-        folder_name = override_name if override_name else folder_path.name
-
-        # re-validate to get the type information for processing
-        validation_result = self.validator.validate_folder(folder_path)
-
-        try:
-            # determine if it has particles
-            has_particles = any((folder_path / "particles").glob("*.pcf"))
-
-            if has_particles:
-                destination = folder_setup.particles_dir / folder_name
-                if destination.exists():
-                    shutil.rmtree(destination)
-                shutil.copytree(folder_path, destination)
-
-                # process with AdvancedParticleMerger
-                particle_merger = AdvancedParticleMerger(
-                    progress_callback=lambda p, m: self.worker.progress.emit(50 + int(p / 2), m)
-                )
-                particle_merger.preprocess_vpk(destination)
-            else:
-                # it is an addon
-                destination = folder_setup.addons_dir / folder_name
-                if destination.exists():
-                    shutil.rmtree(destination)
-                shutil.copytree(folder_path, destination)
-
-                # create mod.json if it doesn't exist
-                mod_json_path = destination / "mod.json"
-                if not mod_json_path.exists():
-                    default_mod_info = {
-                        "addon_name": folder_name,
-                        "type": validation_result.type_detected.title(),
-                        "description": f"Content from folder: {folder_name}",
-                        "contents": ["Custom content"]
-                    }
-                    with open(mod_json_path, 'w') as f:
-                        json.dump(default_mod_info, f, indent=2)
-
-            return True
-
-        except Exception:
-            log.exception(f"Error processing folder {folder_name}")
-            self.worker.error.emit(f"Error processing folder {folder_name}")
-            return False
-
-    def process_zip_file(self, zip_path: Path) -> bool:
-        zip_name = zip_path.stem
-
-        try:
-            # extract to temporary directory
-            with tempfile.TemporaryDirectory() as temp_dir:
-                temp_path = Path(temp_dir)
-
-                with zipfile.ZipFile(zip_path, 'r') as zip_file:
-                    zip_file.extractall(temp_path)
-
-                # analyze extracted structure to find mod folders
-                extracted_items = list(temp_path.iterdir())
-
-                if len(extracted_items) == 1 and extracted_items[0].is_dir():
-                    # check if this folder contains valid mod structure
-                    single_folder = extracted_items[0]
-                    validation_result = self.validator.validate_folder(single_folder)
-                    if validation_result.is_valid:
-                        # process as single mod
-                        return self.process_folder(single_folder)
-                    else:
-                        # zip might contain multiple mod subdirectories
-                        # TODO: test this better
-                        success_count = 0
-                        for sub_item in single_folder.iterdir():
-                            if sub_item.is_dir():
-                                sub_validation = self.validator.validate_folder(sub_item)
-                                if sub_validation.is_valid:
-                                    if self.process_folder(sub_item):
-                                        success_count += 1
-                        return success_count > 0
-
-                else:
-                    # check if the temp_path itself is a valid mod (has mod folders at root)
-                    root_validation = self.validator.validate_folder(temp_path)
-                    if root_validation.is_valid:
-                        # use zip filename as the mod name
-                        return self.process_folder(temp_path, override_name=zip_name)
-
-                    # otherwise, process each valid mod folder
-                    success_count = 0
-                    for item in extracted_items:
-                        if item.is_dir():
-                            validation_result = self.validator.validate_folder(item)
-                            if validation_result.is_valid:
-                                if self.process_folder(item):
-                                    success_count += 1
-                    return success_count > 0
-
-        except zipfile.BadZipFile:
-            log.exception(f"Invalid ZIP file: {zip_name}")
-            self.worker.error.emit(f"Invalid ZIP file: {zip_name}")
-            return False
-        except Exception:
-            log.exception(f"Error processing ZIP file {zip_name}")
-            self.worker.error.emit(f"Error processing ZIP file {zip_name}")
-            return False
-
     def update_matrix(self):
         # get mod information and all unique particle files
         mod_particles, all_particles = get_mod_particles()
@@ -242,35 +131,17 @@ class ModDropZone(QFrame):
         self.processing = False
 
     def process_dropped_items(self, dropped_paths):
-        # process a list of dropped items (VPKs, folders, or ZIP files)
-        total_items = len(dropped_paths)
-        successful_items = []
+        # just a wrapper for the services
+        successful_items, failed_items = self.service.process_dropped_items(
+            dropped_paths,
+            progress_callback=self.worker.progress.emit
+        )
 
-        for index, item_path in enumerate(dropped_paths):
-            path_obj = Path(item_path)
-            item_name = path_obj.name
-            self.worker.progress.emit(0, f"Processing item {index + 1}/{total_items}")
+        # emit errors for failed items
+        for item_name, error_msg in failed_items:
+            self.worker.error.emit(error_msg)
 
-            try:
-                if path_obj.is_dir():
-                    # folder
-                    if self.process_folder(path_obj):
-                        successful_items.append(item_name)
-                elif item_path.lower().endswith('.zip'):
-                    # ZIP file
-                    if self.process_zip_file(path_obj):
-                        successful_items.append(item_name)
-                elif item_path.lower().endswith('.vpk'):
-                    # VPK file
-                    if self.process_single_vpk(item_path):
-                        successful_items.append(item_name)
-                else:
-                    self.worker.error.emit(f"Unsupported file type: {item_name}")
-
-            except Exception:
-                log.exception(f"Error processing {item_name}")
-                self.worker.error.emit(f"Error processing {item_name}")
-
+        # emit success message and update addon list
         if successful_items:
             self.addon_updated.emit()
             if len(successful_items) == 1:
@@ -280,64 +151,6 @@ class ModDropZone(QFrame):
                 self.worker.success.emit(f"Successfully processed {len(successful_items)} items:\n{items_text}")
 
         self.worker.finished.emit()
-
-    def process_single_vpk(self, file_path) -> bool:
-        # process a single VPK file
-        try:
-            vpk_name = Path(file_path).stem
-            if vpk_name[-3:].isdigit() and vpk_name[-4] == '_' or vpk_name[-4:] == '_dir':
-                vpk_name = vpk_name[:-4]
-
-            extracted_particles_dir = folder_setup.particles_dir / vpk_name
-            extracted_addons_dir = folder_setup.addons_dir / vpk_name
-            extracted_particles_dir.mkdir(parents=True, exist_ok=True)
-
-            self.worker.progress.emit(10, "Analyzing VPK...")
-            vpk_handler = VPKFile(str(file_path))
-
-            # check for particles
-            has_particles = bool(vpk_handler.find_files("*.pcf"))
-
-            self.worker.progress.emit(15, "Extracting files...")
-            extracted_count = vpk_handler.extract_all(str(extracted_particles_dir))
-            self.worker.progress.emit(35, f"Extracted {extracted_count} files")
-
-            # process with AdvancedParticleMerger if it has particles
-            if has_particles:
-                self.worker.progress.emit(50, "Processing particles...")
-                particle_merger = AdvancedParticleMerger(
-                    progress_callback=lambda p, m: self.worker.progress.emit(50 + int(p / 2), m)
-                )
-                particle_merger.preprocess_vpk(extracted_particles_dir)
-            else:
-                # for non-particle mods, create addon folder
-                self.worker.progress.emit(60, "Creating addon folder...")
-
-                # if extracted_addons_dir already exists, remove it first
-                if extracted_addons_dir.exists():
-                    shutil.rmtree(extracted_addons_dir)
-
-                # move the extracted files to the addons directory
-                shutil.move(extracted_particles_dir, extracted_addons_dir)
-
-                # create mod.json if it doesn't exist
-                mod_json_path = extracted_addons_dir / "mod.json"
-                if not mod_json_path.exists():
-                    default_mod_info = {
-                        "addon_name": vpk_name,
-                        "type": "Unknown",
-                        "description": f"Content extracted from {Path(file_path).name}",
-                        "contents": ["Custom content"]
-                    }
-                    with open(mod_json_path, 'w') as f:
-                        json.dump(default_mod_info, f, indent=2)
-
-            return True
-
-        except Exception as e:
-            self.worker.error.emit(f"Error processing VPK {Path(file_path).name}: {str(e)}")
-            return False
-
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():

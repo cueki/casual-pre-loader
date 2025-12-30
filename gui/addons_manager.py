@@ -10,16 +10,16 @@ class AddonsManager(QObject):
     def __init__(self, settings_manager):
         super().__init__()
         self.settings_manager = settings_manager
-        self._service = AddonService(settings_manager)
+        self.service = AddonService(settings_manager)
 
     @property
     def addons_file_paths(self) -> dict:
         # compatibility for main_window
-        return self._service.addons_cache
+        return self.service.addons_cache
 
     def load_addons(self, addons_list):
         # populate QListWidget with grouped addons
-        addon_groups = self._service.get_addons_grouped()
+        addon_groups = self.service.get_addons_grouped()
 
         addons_list.blockSignals(True)
         addons_list.clear()
@@ -51,10 +51,6 @@ class AddonsManager(QObject):
                 item.setCheckState(Qt.CheckState.Unchecked)
                 addons_list.addItem(item)
 
-    def scan_addon_contents(self):
-        # delegated to service
-        return self._service.scan_addon_contents()
-
     def delete_selected_addons(self, addons_list):
         selected_items = addons_list.selectedItems()
         if not selected_items:
@@ -84,5 +80,5 @@ class AddonsManager(QObject):
             return None, None
 
         # delegated to service
-        success, message = self._service.delete_addons(selected_folder_names)
+        success, message = self.service.delete_addons(selected_folder_names)
         return success, message

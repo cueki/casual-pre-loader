@@ -475,7 +475,7 @@ class ParticleManagerGUI(QMainWindow):
         self.addon_panel.update_target_options(goldrush_available)
 
     def load_addons(self):
-        self.addon_manager.scan_addon_contents()
+        self.addon_manager.service.scan_addon_contents()
         self.addon_manager.load_addons(self.addons_list)
         self.apply_saved_addon_selections()
 
@@ -635,7 +635,7 @@ class ParticleManagerGUI(QMainWindow):
 
     def rescan_addon_contents(self):
         thread = threading.Thread(
-            target=self.addon_manager.scan_addon_contents,
+            target=self.addon_manager.service.scan_addon_contents,
             daemon=True
         )
         thread.start()
