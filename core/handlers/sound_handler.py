@@ -19,7 +19,6 @@ class SoundHandler:
         if not temp_sound_dir.exists():
             return None
 
-        # Single scan - filter by extension in memory
         all_sound_files = [
             f for f in temp_sound_dir.rglob("*")
             if f.is_file() and f.suffix.lower() in self.sound_extensions
