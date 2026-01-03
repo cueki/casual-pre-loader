@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """
 Script for merging particle files manually.
 This needs to be moved into root, or you need to update imports for it to work.

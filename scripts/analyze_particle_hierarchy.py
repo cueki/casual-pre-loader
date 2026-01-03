@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """
 Script to analyze particle system hierarchy by examining parent-child relationships.
 This will show which systems reference other systems as children.

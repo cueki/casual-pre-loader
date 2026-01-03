@@ -3,6 +3,8 @@ from pathlib import Path
 
 from valve_parsers import PCFFile, VPKFile
 
+from core.handlers.pcf_handler import get_parent_elements
+
 log = logging.getLogger()
 
 
@@ -78,6 +80,16 @@ def should_process_file(file_path: str) -> bool:
 
     path_lower = file_path.lower()
     return any(path in path_lower for path in target_paths) and path_lower.endswith('.vmt')
+
+
+def initialize_pcf(dir: Path) -> tuple[PCFFile, set[str]]:
+    default_base_path = dir / 'disguise.pcf'
+
+    if not default_base_path.exists():
+        raise FileNotFoundError(f"[Errno 2] No such file or directory: {default_base_path}")
+
+    default_base_pcf = PCFFile(default_base_path).decode()
+    return default_base_pcf, get_parent_elements(default_base_pcf)
 
 
 get_val = [

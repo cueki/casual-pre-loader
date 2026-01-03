@@ -14,6 +14,8 @@ def migrate_old_particle_files():
     mods_to_migrate = []
     mods_missing_source = []
 
+    folder_setup.particles_dir.mkdir(parents=True, exist_ok=True)
+
     # check each mod for old format files
     for mod_dir in folder_setup.particles_dir.iterdir():
         if not mod_dir.is_dir():

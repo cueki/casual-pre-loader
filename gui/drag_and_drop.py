@@ -128,6 +128,7 @@ def get_mod_particle_files():
     all_particles = set()
 
     # scan directories
+    folder_setup.particles_dir.mkdir(parents=True, exist_ok=True)
     for vpk_dir in folder_setup.particles_dir.iterdir():
         if vpk_dir.is_dir():
             particle_dir = vpk_dir / "actual_particles"
@@ -210,6 +211,7 @@ class ModDropZone(QFrame):
                         source_file = source_particles_dir / (particle_file + ".pcf")
                         if source_file.exists():
                             # copy particle file to to_be_patched
+                            folder_setup.temp_to_be_patched_dir.mkdir(parents=True, exist_ok=True)
                             shutil.copy2(source_file, folder_setup.temp_to_be_patched_dir / (particle_file + ".pcf"))
                             # get particle file mats from attrib
                             pcf = PCFFile(source_file).decode()
@@ -267,6 +269,7 @@ class ModDropZone(QFrame):
                     merged = pcf_parts[0]
 
                 output_path = folder_setup.temp_to_be_patched_dir / original_file
+                output_path.parent.mkdir(parents=True, exist_ok=True)
                 merged.encode(output_path)
 
                 for split_file in split_files_in_temp:
@@ -586,7 +589,6 @@ class ModDropZone(QFrame):
 
         self.setProperty('dragOver', False)
         self.style().polish(self)
-        folder_setup.create_required_folders()
 
         # collect all dropped items
         dropped_items = []

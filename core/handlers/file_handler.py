@@ -1,7 +1,6 @@
 import logging
 import os
 import shutil
-import traceback
 from pathlib import Path
 from typing import List
 
@@ -70,7 +69,8 @@ class FileHandler:
             full_path = file_name
 
         # create temp file for processing in working directory
-        temp_path = folder_setup.get_temp_path(f"temp_{Path(file_name).name}")
+        temp_path = folder_setup.temp_dir / f"temp_{Path(file_name).name}"
+        temp_path.parent.mkdir(parents=True, exist_ok=True)
 
         try:
             # get original file info
