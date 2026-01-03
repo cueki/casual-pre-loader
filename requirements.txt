@@ -8,4 +8,4 @@ platformdirs~=4.5
 PyGithub~=2.8
 requests~=2.32
 rich~=14.2
-valve-parsers>=1.0.7
+valve-parsers>=1.0.8
