@@ -25,6 +25,11 @@ from PyQt6.QtWidgets import (
 from core.download_mods import check_mods, download_mods
 from core.folder_setup import folder_setup
 from core.settings import SettingsManager
+from core.services.setup import (
+    find_mods_folder_for_settings,
+    import_mods_folder,
+    save_initial_settings,
+)
 from core.util.sourcemod import auto_detect_tf2, validate_tf_directory
 
 log = logging.getLogger()
@@ -204,14 +209,7 @@ class FirstTimeSetupDialog(QDialog):
         if file_path:
             self.import_settings_path = file_path
             self.settings_import_edit.setText(file_path)
-
-            settings_path = Path(file_path)
-            mods_path = settings_path.parent / "mods"
-            if mods_path.exists() and mods_path.is_dir():
-                self.import_mods_path = str(mods_path)
-            else:
-                self.import_mods_path = ""
-
+            self.import_mods_path = find_mods_folder_for_settings(file_path) or ""
             self.update_import_status()
 
 
@@ -280,54 +278,24 @@ class FirstTimeSetupDialog(QDialog):
 
         # import mods folder if provided
         if self.import_mods_path:
-            try:
-                mods_src = Path(self.import_mods_path)
-                mods_dst = folder_setup.mods_dir
-
-                if mods_dst.exists():
-                    shutil.rmtree(mods_dst)
-
-                shutil.copytree(mods_src, mods_dst)
-            except Exception as e:
+            success, error = import_mods_folder(self.import_mods_path)
+            if not success:
                 QMessageBox.warning(
                     self, "Import Error",
-                    f"Failed to import mods folder:\n{e}\n\nSetup will continue without importing mods."
+                    f"Failed to import mods folder:\n{error}\n\nSetup will continue without importing mods."
                 )
 
         # create or update app_settings.json
-        try:
-            # start with imported settings if available
-            settings_data = {}
-            if self.import_settings_path:
-                try:
-                    settings_src = Path(self.import_settings_path)
-                    with open(settings_src, 'r') as f:
-                        settings_data = json.load(f)
-                except Exception as e:
-                    QMessageBox.warning(
-                        self, "Import Error",
-                        f"Failed to import settings file:\n{e}\n\nWill create new settings."
-                    )
-
-            # update with current setup values
-            settings_data["tf_directory"] = self.tf_directory
-
-            folder_setup.app_settings_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(folder_setup.app_settings_file, 'w') as f:
-                json.dump(settings_data, f, indent=2)
-        except Exception as e:
+        success, error = save_initial_settings(self.tf_directory, self.import_settings_path)
+        if not success:
             QMessageBox.warning(
                 self, "Settings Error",
-                f"Failed to save settings:\n{e}\n\nSetup completed but settings may not persist."
+                f"Failed to save settings:\n{error}\n\nSetup completed but settings may not persist."
             )
 
         # emit the setup completion signal with tf/ directory
         self.setup_completed.emit(self.tf_directory)
         self.accept()
-
-
-def check_first_time_setup():
-    return not folder_setup.app_settings_file.exists()
 
 
 def run_first_time_setup(parent=None):
@@ -369,6 +337,7 @@ def download_cueki_mods(parent=None, button=None):
         button.setCursor(QCursor(Qt.CursorShape.WaitCursor))
         QApplication.processEvents()
 
+    progress = None
     try:
         # create progress dialog
         progress = QProgressDialog("Downloading cueki's mods (~77 MB)...", "Cancel", 0, 100, parent)
@@ -395,8 +364,6 @@ def download_cueki_mods(parent=None, button=None):
             'Download Complete',
             update and "cueki's mods have been successfully downloaded and installed!" or "cueki's mods are already installed and up to date!"
         )
-
-        return True
     except Exception as e:
         log.exception(e)
 
@@ -407,7 +374,7 @@ def download_cueki_mods(parent=None, button=None):
             QMessageBox.critical(
                 parent,
                 'Download Failed',
-                f"Failed to download cueki's mods:\n{str(e)}\n\n"
+
             )
 
         return False
