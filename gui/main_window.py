@@ -27,6 +27,7 @@ from PyQt6.QtWidgets import (
 
 from core.folder_setup import folder_setup
 from core.particle_splits import migrate_old_particle_files
+from core.services.conflicts import scan_for_legacy_conflicts
 from core.version import VERSION
 from gui.addons_manager import AddonsManager
 from gui.addon_panel import AddonPanel
@@ -583,29 +584,9 @@ class ParticleManagerGUI(QMainWindow):
             return
 
         custom_dir = Path(tf_path) / 'custom'
-        if not custom_dir.exists():
-            return
 
-        conflicting_items = {
-            "folders": ["_modern casual preloader"],
-            "files": [
-                "_mcp hellfire hale fix.vpk",
-                "_mcp mvm victory screen fix.vpk",
-                "_mcp saxton hale fix.vpk"
-            ]
-        }
-
-        found_conflicts = []
-
-        for folder_name in conflicting_items["folders"]:
-            folder_path = custom_dir / folder_name
-            if folder_path.exists() and folder_path.is_dir():
-                found_conflicts.append(f"Folder: {folder_name}")
-
-        for file_name in conflicting_items["files"]:
-            file_path = custom_dir / file_name
-            if file_path.exists() and file_path.is_file():
-                found_conflicts.append(f"File: {file_name}")
+        # use conflicts service to scan for legacy MCP files
+        found_conflicts = scan_for_legacy_conflicts(custom_dir)
 
         if found_conflicts:
             conflict_list = "\n• ".join(found_conflicts)

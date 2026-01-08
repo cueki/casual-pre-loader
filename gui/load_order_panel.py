@@ -9,6 +9,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from core.services.conflicts import detect_addon_overwrites
+
 log = logging.getLogger()
 
 
@@ -71,48 +73,33 @@ class LoadOrderPanel(QWidget):
             # rebuild with numbering and conflicts
             self.load_order_list.clear()
             total_items = len(load_order_items)
+
+            # detect all conflicts at once using the conflicts service
+            all_overwrites = detect_addon_overwrites(
+                load_order_items,
+                addon_contents if addon_contents else {},
+                addon_name_mapping
+            )
+
             for pos, addon_name in enumerate(load_order_items):
                 priority_number = total_items - pos
                 display_text = f"[#{priority_number}] {addon_name}"
 
-                # resolve display name to folder name for conflict detection
-                folder_name = addon_name
-                if addon_name_mapping and addon_name in addon_name_mapping:
-                    folder_name = addon_name_mapping[addon_name].get('file_path', addon_name)
+                # check if this addon has conflicts
+                if addon_name in all_overwrites:
+                    overwrites = all_overwrites[addon_name]
+                    display_text += " ⚠️"
+                    tooltip = "Will overwrite:\n"
+                    for overwrite_addon, overwrite_files in overwrites.items():
+                        tooltip += f"• {overwrite_addon}: "
+                        if overwrite_files:
+                            tooltip += f"{len(overwrite_files)} files including {overwrite_files[0]}\n"
+                        else:
+                            tooltip += "Unknown files\n"
 
-                # check for conflicts
-                if addon_contents and folder_name in addon_contents:
-                    overwrites = {}
-                    addon_files = set(addon_contents[folder_name])
-
-                    # check against lower priority addons
-                    for other_pos, other_name in enumerate(load_order_items):
-                        if other_pos > pos:
-                            other_folder_name = other_name
-                            if addon_name_mapping and other_name in addon_name_mapping:
-                                other_folder_name = addon_name_mapping[other_name].get('file_path', other_name)
-
-                            if other_folder_name in addon_contents:
-                                other_files = set(addon_contents[other_folder_name])
-                                common_files = addon_files.intersection(other_files)
-                                if common_files:
-                                    overwrites[other_name] = list(common_files)
-
-                    if overwrites:
-                        display_text += " ⚠️"
-                        tooltip = "Will overwrite:\n"
-                        for overwrite_addon, overwrite_files in overwrites.items():
-                            tooltip += f"• {overwrite_addon}: "
-                            if overwrite_files:
-                                tooltip += f"{len(overwrite_files)} files including {overwrite_files[0]}\n"
-                            else:
-                                tooltip += "Unknown files\n"
-
-                        item = QListWidgetItem(display_text)
-                        item.setToolTip(tooltip)
-                        self.load_order_list.addItem(item)
-                    else:
-                        self.load_order_list.addItem(display_text)
+                    item = QListWidgetItem(display_text)
+                    item.setToolTip(tooltip)
+                    self.load_order_list.addItem(item)
                 else:
                     self.load_order_list.addItem(display_text)
 
