@@ -81,7 +81,7 @@ def generate_missing_vmt_files(temp_mods_dir: Path = None, tf_path: str = None) 
         game_vpk_path = Path(tf_path) / get_vpk_name(tf_path)
         if game_vpk_path.exists():
             try:
-                game_vpk = VPKFile(str(game_vpk_path))
+                game_vpk = VPKFile(game_vpk_path)
                 log.info(f"Loaded game VPK: {game_vpk_path}")
             except Exception:
                 log.exception("Error loading game VPK")

@@ -1,6 +1,5 @@
 import json
 import logging
-from pathlib import Path
 
 from core.folder_setup import folder_setup
 
@@ -159,3 +158,19 @@ class SettingsManager:
     def set_disable_paint_colors(self, disable):
         self.settings["disable_paint_colors"] = disable
         self.save_settings()
+
+    def get_mod_urls(self):
+        if folder_setup.mod_urls_file.exists():
+            try:
+                with open(folder_setup.mod_urls_file, "r") as f:
+                    return json.load(f)
+            except Exception:
+                log.exception("Error loading mod URLs")
+        return {}
+
+    def set_mod_urls(self, urls):
+        try:
+            with open(folder_setup.mod_urls_file, "w") as f:
+                json.dump(urls, f, indent=2)
+        except Exception:
+            log.exception("Error saving mod URLs")

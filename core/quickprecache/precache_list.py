@@ -63,7 +63,7 @@ def manage_vpk(vpk_path: Path) -> Set[str]:
     failed_vpks = []
 
     try:
-        vpk_file = VPKFile(str(vpk_path))
+        vpk_file = VPKFile(vpk_path)
 
         # find all files in the models directory in the vpk
         model_files = vpk_file.find_files("models/")
@@ -82,6 +82,6 @@ def manage_vpk(vpk_path: Path) -> Set[str]:
 
     except Exception:
         log.exception(f"Failed to process VPK {vpk_path}")
-        failed_vpks.append(str(vpk_path))
+        failed_vpks.append(vpk_path)
 
     return model_set
