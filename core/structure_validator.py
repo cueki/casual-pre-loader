@@ -2,7 +2,6 @@ import logging
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Set
 
 from valve_parsers import VPKFile
 
@@ -14,8 +13,8 @@ log = logging.getLogger()
 @dataclass
 class ValidationResult:
     is_valid: bool
-    errors: List[str]
-    warnings: List[str]
+    errors: list[str]
+    warnings: list[str]
     type_detected: str  # "hud" or "unknown" for now
 
 
@@ -228,7 +227,7 @@ def validate_vpk_structure(vpk_path: Path) -> ValidationResult:
     type_detected = "unknown"
 
     try:
-        vpk_file = VPKFile(str(vpk_path))
+        vpk_file = VPKFile(vpk_path)
         file_list = vpk_file.list_files()
 
         # analyze structure to determine type
@@ -471,7 +470,7 @@ class StructureValidator:
             type_detected=type_detected
         )
 
-    def _detect_type(self, files: Set[str], dirs: Set[str]) -> str:
+    def _detect_type(self, files: set[str], dirs: set[str]) -> str:
         # detect the type of mod based on files and directories found
         if any(indicator in files for indicator in self.HUD_INDICATORS):
             return "hud"

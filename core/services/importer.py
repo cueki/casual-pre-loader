@@ -160,7 +160,7 @@ class ImportService:
 
             if progress_callback:
                 progress_callback(10, "Analyzing VPK...")
-            vpk_handler = VPKFile(str(file_path))
+            vpk_handler = VPKFile(file_path)
 
             # check for particles
             has_particles = bool(vpk_handler.find_files("*.pcf"))

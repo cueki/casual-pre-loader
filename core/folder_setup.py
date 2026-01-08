@@ -24,6 +24,9 @@ class FolderConfig:
     install_dir = Path(__file__).resolve().parent.parent
     data_dir =   install_dir / 'data'
 
+    mod_urls_file = data_dir / 'mod_urls.json'
+    particle_system_map_file = data_dir / 'particle_system_map.json'
+
     if portable:
         # default portable values
         project_dir =  install_dir / 'userdata' / 'data'

@@ -1,4 +1,3 @@
-import json
 import logging
 import webbrowser
 
@@ -14,21 +13,12 @@ from PyQt6.QtWidgets import (
 )
 
 from core.constants import PARTICLE_GROUP_MAPPING
-from core.folder_setup import folder_setup
+from core.services.particles import (
+    calculate_particle_availability,
+    expand_group_selections,
+)
 
 log = logging.getLogger()
-
-
-def load_mod_urls():
-    # load saved URLs from a file
-    urls_file = folder_setup.data_dir / 'mod_urls.json'
-    if urls_file.exists():
-        try:
-            with open(urls_file, "r") as f:
-                return json.load(f)
-        except Exception:
-            log.exception("Error loading mod URLs")
-    return {}
 
 
 class ConflictMatrix(QTableWidget):
@@ -96,15 +86,13 @@ class ConflictMatrix(QTableWidget):
                                     log.warning(f"Missing vertical header item for row {row}")
                                     continue
                                 mod_name = v_header_item.text()
-
-                                # if in simple mode, expand group to individual particles
-                                if self.simple_mode and column_name in PARTICLE_GROUP_MAPPING:
-                                    for particle_file in PARTICLE_GROUP_MAPPING[column_name]:
-                                        if particle_file.replace('.pcf', '') in self.mod_particles_cache.get(mod_name, []):
-                                            selections[particle_file.replace('.pcf', '')] = mod_name
-                                else:
-                                    selections[column_name] = mod_name
+                                selections[column_name] = mod_name
                                 break
+
+        # expand group selections to individual particles if in simple mode
+        selections = expand_group_selections(
+            selections, self.mod_particles_cache, self.simple_mode
+        )
 
         return selections
 
@@ -148,7 +136,8 @@ class ConflictMatrix(QTableWidget):
 
     def update_matrix_simple(self, mods):
         # load mod URLs
-        self.mod_urls = load_mod_urls()
+        if self.settings_manager:
+            self.mod_urls = self.settings_manager.get_mod_urls()
         self.clearContents()
 
         # use group names as columns
@@ -167,7 +156,8 @@ class ConflictMatrix(QTableWidget):
 
     def update_matrix_advanced(self, mods, pcf_files):
         # load mod URLs
-        self.mod_urls = load_mod_urls()
+        if self.settings_manager:
+            self.mod_urls = self.settings_manager.get_mod_urls()
         self.clearContents()
 
         # add one extra column for the Select All button
@@ -225,19 +215,9 @@ class ConflictMatrix(QTableWidget):
                 checkbox = self.create_checkbox(row, col)
 
                 # determine if checkbox should be enabled/checked based on whether mod has this particle/group
-                if self.simple_mode and column_name in PARTICLE_GROUP_MAPPING:
-                    group_particles = PARTICLE_GROUP_MAPPING[column_name]
-                    should_enable = any(
-                        p.replace('.pcf', '') in mod_particles_set
-                        for p in group_particles
-                    )
-                    should_check = should_enable and any(
-                        saved_selections.get(p.replace('.pcf', '')) == mod
-                        for p in group_particles
-                    )
-                else:
-                    should_enable = column_name in mod_particles_set
-                    should_check = should_enable and column_name in saved_selections and saved_selections[column_name] == mod
+                should_enable, should_check = calculate_particle_availability(
+                    mod, column_name, self.simple_mode, mod_particles_set, saved_selections
+                )
 
                 checkbox.setEnabled(should_enable)
 

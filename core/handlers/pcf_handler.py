@@ -20,7 +20,7 @@ def restore_particle_files(tf_path: str) -> int:
         log.error(f"missing {vpk_name}, is the path correct?")
         return 0
 
-    vpk = VPKFile(str(vpk_path))
+    vpk = VPKFile(vpk_path)
     patched_count = 0
 
     for pcf_file in backup_particles_dir.glob("*.pcf"):
