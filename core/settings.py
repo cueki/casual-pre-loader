@@ -7,6 +7,11 @@ log = logging.getLogger()
 
 
 class SettingsManager:
+    @staticmethod
+    def is_first_time_setup() -> bool:
+        settings_file = folder_setup.settings_dir / "app_settings.json"
+        return not settings_file.exists()
+
     def __init__(self, settings_file="app_settings.json", metadata_file="addon_metadata.json"):
         folder_setup.settings_dir.mkdir(parents=True, exist_ok=True)
         folder_setup.data_dir.mkdir(parents=True, exist_ok=True)

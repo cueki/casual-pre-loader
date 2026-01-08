@@ -1,6 +1,3 @@
-import json
-import shutil
-import zipfile
 from pathlib import Path
 
 from PyQt6.QtCore import Qt, pyqtSignal
@@ -22,9 +19,13 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from core.folder_setup import folder_setup
-from core.util.net import check_mods, download_file
 from core.settings import SettingsManager
+from core.services.setup import (
+    find_mods_folder_for_settings,
+    import_mods_folder,
+    save_initial_settings,
+)
+from core.util.net import download_mods
 from core.util.sourcemod import auto_detect_tf2, validate_tf_directory
 
 
@@ -202,14 +203,7 @@ class FirstTimeSetupDialog(QDialog):
         if file_path:
             self.import_settings_path = file_path
             self.settings_import_edit.setText(file_path)
-
-            settings_path = Path(file_path)
-            mods_path = settings_path.parent / "mods"
-            if mods_path.exists() and mods_path.is_dir():
-                self.import_mods_path = str(mods_path)
-            else:
-                self.import_mods_path = ""
-
+            self.import_mods_path = find_mods_folder_for_settings(file_path) or ""
             self.update_import_status()
 
 
@@ -278,57 +272,24 @@ class FirstTimeSetupDialog(QDialog):
 
         # import mods folder if provided
         if self.import_mods_path:
-            try:
-                mods_src = Path(self.import_mods_path)
-                mods_dst = folder_setup.mods_dir
-
-                if mods_dst.exists():
-                    shutil.rmtree(mods_dst)
-
-                shutil.copytree(mods_src, mods_dst)
-            except Exception as e:
+            success, error = import_mods_folder(self.import_mods_path)
+            if not success:
                 QMessageBox.warning(
                     self, "Import Error",
-                    f"Failed to import mods folder:\n{e}\n\nSetup will continue without importing mods."
+                    f"Failed to import mods folder:\n{error}\n\nSetup will continue without importing mods."
                 )
 
         # create or update app_settings.json
-        try:
-            folder_setup.settings_dir.mkdir(parents=True, exist_ok=True)
-            settings_file = folder_setup.settings_dir / "app_settings.json"
-
-            # start with imported settings if available
-            settings_data = {}
-            if self.import_settings_path:
-                try:
-                    settings_src = Path(self.import_settings_path)
-                    with open(settings_src, 'r') as f:
-                        settings_data = json.load(f)
-                except Exception as e:
-                    QMessageBox.warning(
-                        self, "Import Error",
-                        f"Failed to import settings file:\n{e}\n\nWill create new settings."
-                    )
-
-            # update with current setup values
-            settings_data["tf_directory"] = self.tf_directory
-
-            with open(settings_file, 'w') as f:
-                json.dump(settings_data, f, indent=2)
-        except Exception as e:
+        success, error = save_initial_settings(self.tf_directory, self.import_settings_path)
+        if not success:
             QMessageBox.warning(
                 self, "Settings Error",
-                f"Failed to save settings:\n{e}\n\nSetup completed but settings may not persist."
+                f"Failed to save settings:\n{error}\n\nSetup completed but settings may not persist."
             )
 
         # emit the setup completion signal with tf/ directory
         self.setup_completed.emit(self.tf_directory)
         self.accept()
-
-
-def check_first_time_setup():
-    settings_file = folder_setup.settings_dir / "app_settings.json"
-    return not settings_file.exists()
 
 
 def run_first_time_setup(parent=None):
@@ -370,6 +331,7 @@ def download_cueki_mods(parent=None, button=None):
         button.setCursor(QCursor(Qt.CursorShape.WaitCursor))
         QApplication.processEvents()
 
+    progress = None
     try:
         # create progress dialog
         progress = QProgressDialog("Downloading cueki's mods (~77 MB)...", "Cancel", 0, 100, parent)
@@ -380,7 +342,7 @@ def download_cueki_mods(parent=None, button=None):
         progress.show()
         QApplication.processEvents()
 
-        def download_progress(block_num, block_size, total_size):
+        def on_progress(block_num, block_size, total_size):
             if progress.wasCanceled():
                 raise Exception("Download cancelled by user")
             if total_size > 0:
@@ -388,50 +350,23 @@ def download_cueki_mods(parent=None, button=None):
                 progress.setValue(min(percent, 99))
                 QApplication.processEvents()
 
-        ret = check_mods()
-        if ret is not None:
-            asset, tag = ret
-
-            mods_file = folder_setup.temp_dir / asset.name
-
-            download_file(asset.browser_download_url, mods_file, 10, download_progress)
-
-            progress.setLabelText("Extracting mods...")
-            progress.setValue(99)
-            QApplication.processEvents()
-
-            # extract mods
-            try:
-                with zipfile.ZipFile(mods_file, 'r') as zip_ref:
-                    dir = folder_setup.mods_dir
-                    for file in zip_ref.infolist():
-                        if file.is_dir() and file.filename == 'mods/':
-                            dir = folder_setup.project_dir
-                            break
-
-                    dir.mkdir(parents=True, exist_ok=True)
-                    zip_ref.extractall(dir)
-
-                with folder_setup.modsinfo_file.open('w') as fd:
-                    json.dump({'tag': tag, 'digest': asset.digest}, fd)
-
-            finally:
-                mods_file.unlink()
+        progress.setLabelText("Downloading...")
+        success, message = download_mods(on_progress)
 
         progress.setValue(100)
         progress.close()
 
-        # refresh main window if not called from first time setup
-        if not isinstance(parent, FirstTimeSetupDialog):
-            main_window = parent.parent()
-            if main_window and hasattr(main_window, 'refresh_all'):
-                main_window.refresh_all()
+        if success:
+            # refresh main window if not called from first time setup
+            if not isinstance(parent, FirstTimeSetupDialog):
+                main_window = parent.parent()
+                if main_window and hasattr(main_window, 'refresh_all'):
+                    main_window.refresh_all()
 
-        QMessageBox.information(
-            parent,
-            "Download Complete",
-            ret and "cueki's mods have been successfully downloaded and installed!" or "cueki's mods are already installed and up to date!"
-        )
+            QMessageBox.information(parent, "Download Complete", message)
+        else:
+            if "cancelled" not in message.lower():
+                QMessageBox.critical(parent, "Download Failed", f"Failed to download mods:\n{message}")
 
         # re-enable button
         if button:
@@ -439,7 +374,7 @@ def download_cueki_mods(parent=None, button=None):
             button.setText(original_text)
             button.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
 
-        return True
+        return success
 
     except Exception as e:
         if progress:

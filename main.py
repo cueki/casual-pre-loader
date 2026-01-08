@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import QApplication, QSplashScreen
 from core.auto_updater import check_for_updates_sync
 from core.backup_manager import prepare_working_copy
 from core.folder_setup import folder_setup
-from gui.first_time_setup import check_first_time_setup, run_first_time_setup
+from gui.first_time_setup import run_first_time_setup
 from gui.main_window import ParticleManagerGUI
 from core.settings import SettingsManager
 from gui.update_dialog import show_update_dialog
@@ -31,7 +31,7 @@ def main():
 
     # first-time setup
     tf_directory = None
-    if check_first_time_setup():
+    if SettingsManager.is_first_time_setup():
         tf_directory = run_first_time_setup()
         if tf_directory is None:
             # user cancelled setup
@@ -60,7 +60,7 @@ def main():
     window = ParticleManagerGUI(tf_directory)
 
     # check for updates after first-time setup is complete (only for portable)
-    if not check_first_time_setup() and folder_setup.portable:
+    if not SettingsManager.is_first_time_setup() and folder_setup.portable:
         settings_manager = SettingsManager()
         update_info = check_for_updates_sync()
 

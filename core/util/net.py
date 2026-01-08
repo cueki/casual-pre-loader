@@ -3,8 +3,9 @@ import logging
 import shutil
 import socket
 import urllib.request
+import zipfile
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
 
 from github import Github
 from github.GitReleaseAsset import GitReleaseAsset
@@ -78,3 +79,54 @@ def download_file(url: str, path: Path, timeout: Optional[int] = None, reporthoo
 
     finally:
         socket.setdefaulttimeout(old_timeout)
+
+
+ProgressCallback = Callable[[int, int, int], None]
+
+
+def download_mods(progress_callback: Optional[ProgressCallback] = None) -> tuple[bool, str] | None:
+    """
+    Download and extract my mod pack.
+
+    Args:
+        progress_callback: Optional callback for download progress (block_num, block_size, total_size)
+
+    Returns:
+        Tuple of (success, message) - message contains success info or error
+    """
+    try:
+        ret = check_mods()
+        if ret is None:
+            return True, "Mods are already installed and up to date."
+
+        asset, tag = ret
+        mods_file = folder_setup.temp_dir / asset.name
+
+        download_file(asset.browser_download_url, mods_file, 10, progress_callback)
+
+        # extract mods
+        try:
+            with zipfile.ZipFile(mods_file, 'r') as zip_ref:
+                target_dir = folder_setup.mods_dir
+                for file in zip_ref.infolist():
+                    if file.is_dir() and file.filename == 'mods/':
+                        target_dir = folder_setup.project_dir
+                        break
+
+                target_dir.mkdir(parents=True, exist_ok=True)
+                zip_ref.extractall(target_dir)
+
+            with folder_setup.modsinfo_file.open('w') as fd:
+                json.dump({'tag': tag, 'digest': asset.digest}, fd)
+
+        finally:
+            if mods_file.exists():
+                mods_file.unlink()
+
+        return True, "Mods have been successfully downloaded and installed."
+
+    except Exception as e:
+        if "cancelled" in str(e).lower():
+            return False, "Download cancelled by user"
+        log.exception("Failed to download mods")
+        return False, str(e)
