@@ -1,6 +1,5 @@
 import json
 import logging
-from pathlib import Path
 
 from core.folder_setup import folder_setup
 
@@ -10,9 +9,11 @@ log = logging.getLogger()
 class SettingsManager:
     def __init__(self, settings_file="app_settings.json", metadata_file="addon_metadata.json"):
         folder_setup.settings_dir.mkdir(parents=True, exist_ok=True)
+        folder_setup.data_dir.mkdir(parents=True, exist_ok=True)
 
         self.settings_file = folder_setup.settings_dir / settings_file
         self.metadata_file = folder_setup.settings_dir / metadata_file
+        self.mod_urls_file = folder_setup.data_dir / 'mod_urls.json'
 
         self.settings = self._load_settings()
         self.addon_metadata = self._load_metadata()
@@ -162,3 +163,19 @@ class SettingsManager:
     def set_disable_paint_colors(self, disable):
         self.settings["disable_paint_colors"] = disable
         self.save_settings()
+
+    def get_mod_urls(self):
+        if self.mod_urls_file.exists():
+            try:
+                with open(self.mod_urls_file, "r") as f:
+                    return json.load(f)
+            except Exception:
+                log.exception("Error loading mod URLs")
+        return {}
+
+    def set_mod_urls(self, urls):
+        try:
+            with open(self.mod_urls_file, "w") as f:
+                json.dump(urls, f, indent=2)
+        except Exception:
+            log.exception("Error saving mod URLs")

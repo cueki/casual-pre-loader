@@ -47,7 +47,7 @@ def check_mods() -> Optional[Tuple[GitReleaseAsset, str]]:
 
                         if asset.digest == modsinfo['digest']:
                             log.info(f'We already have the latest release of mods ({modsinfo["tag"]})')
-                            return
+                            return None
 
                         if version.parse(release.tag.lstrip('v')) > version.parse(modsinfo['tag'].lstrip('v')):
                             log.info(f'A new release of mods {release.tag_name}, we have {modsinfo["tag"]}')
@@ -59,6 +59,7 @@ def check_mods() -> Optional[Tuple[GitReleaseAsset, str]]:
                         log.info('No release of mods has ever been downloaded')
 
                     return asset, release.tag_name
+    return None
 
 
 def download_file(url: str, path: Path, timeout: Optional[int] = None, reporthook=None) -> None:

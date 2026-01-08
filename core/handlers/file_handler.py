@@ -11,8 +11,8 @@ from core.folder_setup import folder_setup
 log = logging.getLogger()
 
 def generate_config(has_mastercomfig=False, needs_quickprecache=False, show_console=True):
-    config_parts = []
-    config_parts.append('sv_pure -1; sv_allow_point_servercommand always; map itemtest; wait 10; script_execute randommenumusic; disconnect; wait 1; clear')
+    config_parts = [
+        'sv_pure -1; sv_allow_point_servercommand always; map itemtest; wait 10; script_execute randommenumusic; disconnect; wait 1; clear']
 
     if has_mastercomfig:
         config_parts.append('exec comfig/echo')
@@ -50,7 +50,7 @@ def copy_config_files(custom_content_dir):
 
 class FileHandler:
     def __init__(self, vpk_file_path: str):
-        self.vpk = VPKFile(str(vpk_file_path))
+        self.vpk = VPKFile(vpk_file_path)
 
     def list_pcf_files(self) -> List[str]:
         return self.vpk.find_files('*.pcf')

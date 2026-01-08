@@ -60,10 +60,8 @@ def main():
     window = ParticleManagerGUI(tf_directory)
 
     # check for updates after first-time setup is complete (only for portable)
-    update_info = None
     if not check_first_time_setup() and folder_setup.portable:
         settings_manager = SettingsManager()
-
         update_info = check_for_updates_sync()
 
         if update_info and settings_manager.should_show_update_dialog(update_info["version"]):

@@ -228,7 +228,7 @@ def validate_vpk_structure(vpk_path: Path) -> ValidationResult:
     type_detected = "unknown"
 
     try:
-        vpk_file = VPKFile(str(vpk_path))
+        vpk_file = VPKFile(vpk_path)
         file_list = vpk_file.list_files()
 
         # analyze structure to determine type

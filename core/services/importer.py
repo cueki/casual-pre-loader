@@ -10,7 +10,7 @@ from valve_parsers import VPKFile
 
 from core.folder_setup import folder_setup
 from core.operations.advanced_particle_merger import AdvancedParticleMerger
-from core.structure_validator import StructureValidator, ValidationResult
+from core.structure_validator import StructureValidator
 
 log = logging.getLogger()
 
@@ -164,7 +164,7 @@ class ImportService:
 
             if progress_callback:
                 progress_callback(10, "Analyzing VPK...")
-            vpk_handler = VPKFile(str(file_path))
+            vpk_handler = VPKFile(file_path)
 
             # check for particles
             has_particles = bool(vpk_handler.find_files("*.pcf"))

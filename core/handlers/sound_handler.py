@@ -183,7 +183,7 @@ def create_vpk_based_mappings(sound_files: List[Path], vpk_paths: List[Path]) ->
     vpk_files = []
     for vpk_path in vpk_paths:
         try:
-            vpk = VPKFile(str(vpk_path))
+            vpk = VPKFile(vpk_path)
             vpk_files.append(vpk)
         except Exception:
             log.exception(f"Error loading {vpk_path}")
