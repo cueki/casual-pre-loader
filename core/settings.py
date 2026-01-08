@@ -7,6 +7,10 @@ log = logging.getLogger()
 
 
 class SettingsManager:
+    @staticmethod
+    def is_first_time_setup() -> bool:
+        return not folder_setup.app_settings_file.exists()
+
     def __init__(self):
         self.settings = self._load_settings()
         self.addon_metadata = self._load_metadata()
