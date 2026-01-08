@@ -209,7 +209,8 @@ class FirstTimeSetupDialog(QDialog):
         if file_path:
             self.import_settings_path = file_path
             self.settings_import_edit.setText(file_path)
-            self.import_mods_path = find_mods_folder_for_settings(file_path) or ""
+            mods_path = find_mods_folder_for_settings(Path(file_path))
+            self.import_mods_path = str(mods_path) if mods_path else ""
             self.update_import_status()
 
 
@@ -278,7 +279,7 @@ class FirstTimeSetupDialog(QDialog):
 
         # import mods folder if provided
         if self.import_mods_path:
-            success, error = import_mods_folder(self.import_mods_path)
+            success, error = import_mods_folder(Path(self.import_mods_path))
             if not success:
                 QMessageBox.warning(
                     self, "Import Error",
@@ -286,7 +287,8 @@ class FirstTimeSetupDialog(QDialog):
                 )
 
         # create or update app_settings.json
-        success, error = save_initial_settings(self.tf_directory, self.import_settings_path)
+        import_path = Path(self.import_settings_path) if self.import_settings_path else None
+        success, error = save_initial_settings(Path(self.tf_directory), import_path)
         if not success:
             QMessageBox.warning(
                 self, "Settings Error",
