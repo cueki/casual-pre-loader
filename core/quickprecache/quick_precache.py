@@ -157,6 +157,7 @@ class QuickPrecache:
         # create a QC file and compile it with StudioMDL
         try:
             # create a temporary file
+            folder_setup.temp_dir.mkdir(parents=True, exist_ok=True)
             temp_file = tempfile.NamedTemporaryFile(
                 mode='w',
                 suffix='.qc',
@@ -189,6 +190,7 @@ class QuickPrecache:
         # create the main precache.qc file that includes all subfiles
         try:
             # create the main QC file
+            folder_setup.temp_dir.mkdir(parents=True, exist_ok=True)
             temp_file = tempfile.NamedTemporaryFile(
                 mode='w',
                 suffix='.qc',

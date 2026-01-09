@@ -19,6 +19,7 @@ class AddonManager(QObject):
 
     def load_addons(self, addons_list):
         addons_dir = folder_setup.addons_dir
+        addons_dir.mkdir(parents=True, exist_ok=True)
         # block the signal so the addons list doesn't clear in the app_settings.json
         addons_list.blockSignals(True)
         addons_list.clear()
@@ -95,6 +96,7 @@ class AddonManager(QObject):
     def scan_addon_contents(self):
         addon_metadata = self.settings_manager.get_addon_metadata() or {}
         addons_dir = folder_setup.addons_dir
+        addons_dir.mkdir(parents=True, exist_ok=True)
         addons = [d for d in addons_dir.iterdir() if d.is_dir()]
         processed = 0
         new_or_updated = 0

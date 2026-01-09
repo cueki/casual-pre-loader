@@ -17,15 +17,19 @@ from core.constants import (
 )
 from core.folder_setup import folder_setup
 from core.handlers.file_handler import FileHandler, copy_config_files, generate_config
+from core.handlers.paint_handler import disable_paints, enable_paints
 from core.handlers.pcf_handler import (
     check_parents,
     restore_particle_files,
     update_materials,
 )
-from core.handlers.paint_handler import disable_paints, enable_paints
 from core.handlers.skybox_handler import handle_skybox_mods, restore_skybox_files
 from core.handlers.sound_handler import SoundHandler
-from core.operations.file_processors import game_type, get_from_custom_dir
+from core.operations.file_processors import (
+    game_type,
+    get_from_custom_dir,
+    initialize_pcf,
+)
 from core.operations.for_the_love_of_god_add_vmts_to_your_mods import (
     generate_missing_vmt_files,
 )
@@ -79,7 +83,7 @@ class Interface(QObject):
         try:
             working_vpk_path = Path(tf_path) / get_vpk_name(tf_path)
             file_handler = FileHandler(str(working_vpk_path))
-            folder_setup.initialize_pcf()
+            base_default_pcf, base_default_parents  = initialize_pcf(folder_setup.temp_to_be_referenced_dir)
             self.update_progress(0, "Installing addons...")
 
             total_files = 0
@@ -236,6 +240,7 @@ class Interface(QObject):
                     if not target_path.exists():
                         # copy from game_files if not in
                         source_path = folder_setup.temp_to_be_referenced_dir / duplicate_effect
+                        target_path.parent.mkdir(parents=True, exist_ok=True)
                         if source_path.exists():
                             extract_elements(PCFFile(source_path).decode(),
                                              load_particle_system_map(folder_setup.data_dir / 'particle_system_map.json')
@@ -262,12 +267,11 @@ class Interface(QObject):
                     base_name = pcf_file.name
 
                     mod_pcf = PCFFile(pcf_file).decode()
-
-                    if base_name != folder_setup.base_default_pcf.input_file.name and check_parents(mod_pcf, folder_setup.base_default_parents):
+                    if base_name != base_default_pcf.input_file.name and check_parents(mod_pcf, base_default_parents):
                         continue
 
-                    if base_name == folder_setup.base_default_pcf.input_file.name:
-                        mod_pcf = update_materials(folder_setup.base_default_pcf, mod_pcf)
+                    if base_name == base_default_pcf.input_file.name:
+                        mod_pcf = update_materials(base_default_pcf, mod_pcf)
 
                     # process the mod PCF
                     processed_pcf = remove_duplicate_elements(mod_pcf)
@@ -354,6 +358,7 @@ class Interface(QObject):
                 split_size = 2 ** 31
                 vpk_base_path = custom_dir / CUSTOM_VPK_NAME.replace('.vpk', '')
 
+                custom_content_dir.mkdir(parents=True, exist_ok=True) # INFO: technically not necessary, but VPKFile does not check if `source_dir` exists
                 if not VPKFile.create(str(custom_content_dir), str(vpk_base_path), split_size):
                     raise Exception("Failed to create custom VPK")
 

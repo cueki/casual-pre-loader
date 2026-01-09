@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 
-from core.auto_updater import AutoUpdater
+from core.auto_updater import perform_updates
 from gui.settings_manager import SettingsManager
 
 log = logging.getLogger()
@@ -24,28 +24,23 @@ class UpdateWorker(QThread):
     progress_updated = pyqtSignal(str)
     update_completed = pyqtSignal(bool, str)
 
-    def __init__(self, updater):
+    def __init__(self, updates):
         super().__init__()
-        self.updater = updater
+        self.updates = updates
 
     def run(self):
         try:
-            self.progress_updated.emit("Starting update...")
-            result = self.updater.perform_update()
-
-            if result.get("error"):
-                self.update_completed.emit(False, f"Update failed: {result['error']}")
-            elif result.get("app_updated"):
-                self.update_completed.emit(True, "Update completed successfully! Please restart the application.")
-            else:
-                self.update_completed.emit(False, "Update failed: No update file found", result)
-
-        except Exception as e:
-            self.update_completed.emit(False, f"Update failed: {str(e)}")
+            self.progress_updated.emit('Starting update')
+            perform_updates(self.updates)
+        except Exception:
+            log.exception('Update failed')
+            self.update_completed.emit(False, 'Update failed!')
+        else:
+            self.update_completed.emit(True, 'Update completed successfully! Please restart the application.')
 
 
 class UpdateDialog(QDialog):
-    def __init__(self, update_info, parent=None):
+    def __init__(self, updates, parent=None):
         super().__init__(parent)
         self.update_button = None
         self.later_button = None
@@ -53,8 +48,7 @@ class UpdateDialog(QDialog):
         self.suppress_checkbox = None
         self.progress_label = None
         self.progress_bar = None
-        self.update_info = update_info
-        self.updater = AutoUpdater()
+        self.updates = updates
         self.update_worker = None
         self.settings_manager = SettingsManager()
 
@@ -68,7 +62,8 @@ class UpdateDialog(QDialog):
         layout = QVBoxLayout(self)
 
         # title
-        title_label = QLabel(f"Update Available: v{self.update_info['version']}")
+        # TODO: update this once we can update multiple at a time
+        title_label = QLabel(f'Update Available: {self.updates[0].release.tag_name}')
         title_font = QFont()
         title_font.setPointSize(14)
         title_font.setBold(True)
@@ -82,7 +77,8 @@ class UpdateDialog(QDialog):
         layout.addWidget(notes_label)
 
         notes_text = QTextEdit()
-        notes_text.setPlainText(self.update_info.get("body", "No release notes available"))
+        # TODO: update this once we can update multiple at a time
+        notes_text.setPlainText(self.updates[0].release.body or 'No release notes available')
         notes_text.setMaximumHeight(150)
         notes_text.setReadOnly(True)
         layout.addWidget(notes_text)
@@ -141,7 +137,7 @@ class UpdateDialog(QDialog):
         self.progress_label.setVisible(True)
 
         # start update worker
-        self.update_worker = UpdateWorker(self.updater)
+        self.update_worker = UpdateWorker(self.updates)
         self.update_worker.progress_updated.connect(self.update_progress)
         self.update_worker.update_completed.connect(self.update_finished)
         self.update_worker.start()
@@ -172,12 +168,12 @@ class UpdateDialog(QDialog):
 
     def save_skipped_version(self):
         try:
-            self.settings_manager.set_skipped_update_version(self.update_info["version"])
-            log.info(f"Skipped version {self.update_info['version']}")
+            self.settings_manager.set_skipped_update_version(self.updates[-1].release.tag_name)
+            log.info(f'Skipped version {self.updates[-1].release.tag_name}')
         except Exception:
             log.exception("Error saving skipped version")
 
 
-def show_update_dialog(update_info, parent=None):
-    dialog = UpdateDialog(update_info, parent)
+def show_update_dialog(updates, parent=None):
+    dialog = UpdateDialog(updates, parent)
     return dialog.exec()
