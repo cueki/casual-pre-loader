@@ -1,0 +1,28 @@
+#!/bin/sh
+set -e
+
+is_steamdeck() {
+  # SteamOS ID check
+  if [ -r /etc/os-release ] && grep -q '^ID=steamos' /etc/os-release; then
+    return 0
+  fi
+
+  # Hardware DMI check (commonly "Jupiter" or "Steam Deck")
+  if [ -r /sys/devices/virtual/dmi/id/product_name ]; then
+    case "$(cat /sys/devices/virtual/dmi/id/product_name 2>/dev/null)" in
+      *Jupiter*|*Steam\ Deck*) return 0 ;;
+    esac
+  fi
+
+  return 1
+}
+
+if is_steamdeck; then
+  # Prefer Flatpak Wine on Steam Deck, if available
+  if command -v flatpak >/dev/null 2>&1 && flatpak info org.winehq.Wine >/dev/null 2>&1; then
+    exec flatpak run org.winehq.Wine "$@"
+  fi
+fi
+
+# Default: host Wine
+exec wine "$@"
