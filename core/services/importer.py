@@ -15,6 +15,23 @@ from core.structure_validator import StructureValidator
 log = logging.getLogger()
 
 
+def normalize_vpk_paths(vpk_paths: list[str]) -> list[str]:
+    """
+    Normalize and deduplicate VPK paths.
+    Multi-part VPKs (mod_000.vpk, mod_001.vpk, mod_dir.vpk) all resolve to mod_dir.vpk.
+    """
+    normalized = {}
+    for vpk_path in vpk_paths:
+        path_obj = Path(vpk_path)
+        vpk_name = path_obj.stem
+        if (vpk_name[-3:].isdigit() and vpk_name[-4] == '_') or vpk_name[-4:] == "_dir":
+            base_name = vpk_name[:-4]
+            normalized[base_name] = str(path_obj.parent / f"{base_name}_dir.vpk")
+        else:
+            normalized[vpk_name] = vpk_path
+    return list(normalized.values())
+
+
 class ImportService:
     # mod extraction logic
     def __init__(self, settings_manager=None):
