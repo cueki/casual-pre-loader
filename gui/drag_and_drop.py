@@ -6,7 +6,7 @@ from PyQt6.QtCore import QObject, Qt, pyqtSignal
 from PyQt6.QtWidgets import QFrame, QLabel, QMessageBox, QProgressDialog, QVBoxLayout
 
 from core.folder_setup import folder_setup
-from core.services.importer import ImportService
+from core.services.importer import ImportService, normalize_vpk_paths
 from core.structure_validator import StructureValidator, ValidationResult
 from core.util.pcf_path_walk import apply_particle_selections, get_mod_particles
 from gui.conflict_matrix import ConflictMatrix
@@ -182,7 +182,7 @@ class ModDropZone(QFrame):
 
         # collect all dropped items
         dropped_items = []
-        normalized_vpks = {}
+        vpk_paths = []
 
         for url in event.mimeData().urls():
             item_path = url.toLocalFile()
@@ -214,21 +214,15 @@ class ModDropZone(QFrame):
                                         f"File '{path_obj.name}' contains multiple periods.\n\n"
                                         f"Please rename the file and try again.")
                     continue
-
-                vpk_name = path_obj.stem
-                if vpk_name[-3:].isdigit() and vpk_name[-4] == '_' or vpk_name[-4:] == "_dir":
-                    base_name = vpk_name[:-4]
-                    normalized_vpks[base_name] = str(path_obj.parent / f"{base_name}_dir.vpk")
-                else:
-                    normalized_vpks[vpk_name] = item_path
+                vpk_paths.append(item_path)
             else:
                 QMessageBox.warning(self, "Unsupported File Type",
                                     f"File type not supported: {path_obj.name}\n\n"
                                     f"Supported types: VPK files, folders, ZIP files")
                 continue
 
-        # add normalized VPK files to dropped items
-        dropped_items.extend(normalized_vpks.values())
+        # normalize and deduplicate VPK paths
+        dropped_items.extend(normalize_vpk_paths(vpk_paths))
 
         if not dropped_items:
             return

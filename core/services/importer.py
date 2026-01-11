@@ -1,6 +1,5 @@
 import json
 import logging
-import shutil
 import tempfile
 from pathlib import Path
 from typing import Callable, Optional
@@ -10,9 +9,27 @@ from valve_parsers import VPKFile
 from core.folder_setup import folder_setup
 from core.operations.advanced_particle_merger import AdvancedParticleMerger
 from core.structure_validator import StructureValidator
+from core.util.file import copy, delete, move
 from core.util.zip import extract
 
 log = logging.getLogger()
+
+
+def normalize_vpk_paths(vpk_paths: list[Path]) -> list[Path]:
+    """
+    Normalize and deduplicate VPK paths.
+    Multi-part VPKs (mod_000.vpk, mod_001.vpk, mod_dir.vpk) all resolve to mod_dir.vpk.
+    """
+
+    normalized = {}
+    for vpk_path in vpk_paths:
+        vpk_name = vpk_path.stem
+        if (vpk_name[-3:].isdigit() and vpk_name[-4] == '_') or vpk_name[-4:] == "_dir":
+            base_name = vpk_name[:-4]
+            normalized[base_name] = vpk_path.parent / f"{base_name}_dir.vpk"
+        else:
+            normalized[vpk_name] = vpk_path
+    return list(normalized.values())
 
 
 class ImportService:
@@ -37,9 +54,8 @@ class ImportService:
 
             if has_particles:
                 destination = folder_setup.particles_dir / folder_name
-                if destination.exists():
-                    shutil.rmtree(destination)
-                shutil.copytree(folder_path, destination)
+                delete(destination, not_exist_ok=True)
+                copy(folder_path, destination)
 
                 # process with AdvancedParticleMerger
                 particle_merger = AdvancedParticleMerger(
@@ -49,9 +65,8 @@ class ImportService:
             else:
                 # it is an addon
                 destination = folder_setup.addons_dir / folder_name
-                if destination.exists():
-                    shutil.rmtree(destination)
-                shutil.copytree(folder_path, destination)
+                delete(destination, not_exist_ok=True)
+                copy(folder_path, destination)
 
                 # create mod.json if it doesn't exist
                 mod_json_path = destination / "mod.json"
@@ -139,20 +154,19 @@ class ImportService:
 
     def process_vpk_file(
         self,
-        file_path: str,
+        file_path: Path,
         progress_callback: Optional[Callable[[int, str], None]] = None
     ) -> tuple[bool, str]:
         # mod VPK extraction
         try:
-            vpk_path = Path(file_path)
-            vpk_name = vpk_path.stem
+            vpk_name = file_path.stem
             if vpk_name[-3:].isdigit() and vpk_name[-4] == '_' or vpk_name[-4:] == '_dir':
                 vpk_name = vpk_name[:-4]
 
             # validate VPK structure to determine type
             if progress_callback:
                 progress_callback(5, "Validating VPK structure...")
-            validation_result = self.validator.validate_vpk(vpk_path)
+            validation_result = self.validator.validate_vpk(file_path)
 
             extracted_particles_dir = folder_setup.particles_dir / vpk_name
             extracted_addons_dir = folder_setup.addons_dir / vpk_name
@@ -185,11 +199,10 @@ class ImportService:
                     progress_callback(60, "Creating addon folder...")
 
                 # if extracted_addons_dir already exists, remove it first
-                if extracted_addons_dir.exists():
-                    shutil.rmtree(extracted_addons_dir)
+                delete(extracted_addons_dir, not_exist_ok=True)
 
                 # move the extracted files to the addons directory
-                shutil.move(extracted_particles_dir, extracted_addons_dir)
+                move(extracted_particles_dir, extracted_addons_dir)
 
                 # create mod.json if it doesn't exist
                 mod_json_path = extracted_addons_dir / "mod.json"
@@ -197,7 +210,7 @@ class ImportService:
                     default_mod_info = {
                         "addon_name": vpk_name,
                         "type": validation_result.type_detected.title() if validation_result.type_detected != "unknown" else "Unknown",
-                        "description": f"Content extracted from {vpk_path.name}",
+                        "description": f"Content extracted from {file_path.name}",
                         "contents": ["Custom content"]
                     }
                     with open(mod_json_path, 'w') as f:
@@ -206,13 +219,13 @@ class ImportService:
             return True, f"Successfully processed VPK {vpk_name}"
 
         except Exception as e:
-            error_msg = f"Error processing VPK {Path(file_path).name}: {str(e)}"
+            error_msg = f"Error processing VPK {file_path.name}: {str(e)}"
             log.exception(error_msg)
             return False, error_msg
 
     def process_dropped_items(
         self,
-        item_paths: list[str],
+        item_paths: list[Path],
         progress_callback: Optional[Callable[[int, str], None]] = None
     ) -> tuple[list[str], list[tuple[str, str]]]:
 
@@ -221,19 +234,18 @@ class ImportService:
         failed_items = []
 
         for index, item_path in enumerate(item_paths):
-            path_obj = Path(item_path)
-            item_name = path_obj.name
+            item_name = item_path.name
             if progress_callback:
                 progress_callback(0, f"Processing item {index + 1}/{total_items}")
 
             try:
-                if path_obj.is_dir():
+                if item_path.is_dir():
                     # folder
-                    success, message = self.process_folder(path_obj, progress_callback=progress_callback)
-                elif item_path.lower().endswith('.zip'):
+                    success, message = self.process_folder(item_path, progress_callback=progress_callback)
+                elif item_path.suffix.lower() == '.zip':
                     # ZIP file
-                    success, message = self.process_zip_file(path_obj, progress_callback=progress_callback)
-                elif item_path.lower().endswith('.vpk'):
+                    success, message = self.process_zip_file(item_path, progress_callback=progress_callback)
+                elif item_path.suffix.lower() == '.vpk':
                     # VPK file
                     success, message = self.process_vpk_file(item_path, progress_callback=progress_callback)
                 else:

@@ -1,28 +1,19 @@
+import sys
 from pathlib import Path
+from typing import Any, Optional
 
 
-def auto_detect_tf2():
-    common_paths = [
-        "C:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2/tf",
-        "D:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2/tf",
-        "~/.steam/steam/steamapps/common/Team Fortress 2/tf",
-        "~/.local/share/Steam/steamapps/common/Team Fortress 2/tf",
-    ]
-
-    for path_str in common_paths:
-        path = Path(path_str).expanduser()
-        if path.exists() and (path / "gameinfo.txt").exists():
-            return str(path)
-    return None
-
-
-def auto_detect_goldrush():
-    common_paths = [
-        "C:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2 Gold Rush/tf_goldrush",
-        "D:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2 Gold Rush/tf_goldrush",
-        "~/.steam/steam/steamapps/common/Team Fortress 2 Gold Rush/tf_goldrush",
-        "~/.local/share/Steam/steamapps/common/Team Fortress 2 Gold Rush/tf_goldrush",
-    ]
+def auto_detect_tf2() -> str | None:
+    if sys.platform == 'win32':
+        common_paths = [
+            "C:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2/tf",
+            "D:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2/tf",
+        ]
+    else:
+        common_paths = [
+            "~/.steam/steam/steamapps/common/Team Fortress 2/tf",
+            "~/.local/share/Steam/steamapps/common/Team Fortress 2/tf",
+        ]
 
     for path_str in common_paths:
         path = Path(path_str).expanduser()
@@ -31,7 +22,26 @@ def auto_detect_goldrush():
     return None
 
 
-def validate_tf_directory(directory, validation_label=None):
+def auto_detect_goldrush() -> str | None:
+    if sys.platform == 'win32':
+        common_paths = [
+            "C:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2 Gold Rush/tf_goldrush",
+            "D:/Program Files (x86)/Steam/steamapps/common/Team Fortress 2 Gold Rush/tf_goldrush",
+        ]
+    else:
+        common_paths = [
+            "~/.steam/steam/steamapps/common/Team Fortress 2 Gold Rush/tf_goldrush",
+            "~/.local/share/Steam/steamapps/common/Team Fortress 2 Gold Rush/tf_goldrush",
+        ]
+
+    for path_str in common_paths:
+        path = Path(path_str).expanduser()
+        if path.exists() and (path / "gameinfo.txt").exists():
+            return str(path)
+    return None
+
+
+def validate_tf_directory(directory: str | None, validation_label: Optional[Any] = None) -> bool:
     if not directory:
         if validation_label:
             validation_label.setText("")
@@ -72,7 +82,7 @@ def validate_tf_directory(directory, validation_label=None):
     return True
 
 
-def validate_goldrush_directory(directory, validation_label=None):
+def validate_goldrush_directory(directory: str | None, validation_label: Optional[Any] = None) -> bool:
     if not directory:
         if validation_label:
             validation_label.setText("")
