@@ -2,11 +2,9 @@
 
 import argparse
 import logging
-import os
 import shutil
 import sys
 from pathlib import Path
-from sys import stderr
 
 # add parent directory to path to import from core
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))

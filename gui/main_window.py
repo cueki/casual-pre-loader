@@ -27,14 +27,15 @@ from PyQt6.QtWidgets import (
 
 from core.folder_setup import folder_setup
 from core.particle_splits import migrate_old_particle_files
+from core.services.conflicts import scan_for_legacy_conflicts
 from core.version import VERSION
-from gui.addon_manager import AddonManager
+from gui.addons_manager import AddonsManager
 from gui.addon_panel import AddonPanel
 from gui.drag_and_drop import ModDropZone
 from gui.first_time_setup import mods_download_group
-from gui.installation import InstallationManager
-from gui.settings_manager import (
-    SettingsManager,
+from gui.interface import Interface
+from core.settings import SettingsManager
+from core.util.sourcemod import (
     auto_detect_goldrush,
     auto_detect_tf2,
     validate_goldrush_directory,
@@ -275,8 +276,8 @@ class ParticleManagerGUI(QMainWindow):
 
         # managers
         self.settings_manager = SettingsManager()
-        self.addon_manager = AddonManager(self.settings_manager)
-        self.install_manager = InstallationManager(self.settings_manager)
+        self.addon_manager = AddonsManager(self.settings_manager)
+        self.install_manager = Interface(self.settings_manager)
 
         # UI components
         self.restore_button = None
@@ -475,7 +476,7 @@ class ParticleManagerGUI(QMainWindow):
         self.addon_panel.update_target_options(goldrush_available)
 
     def load_addons(self):
-        updates_found = self.addon_manager.scan_addon_contents()
+        self.addon_manager.service.scan_addon_contents()
         self.addon_manager.load_addons(self.addons_list)
         self.apply_saved_addon_selections()
 
@@ -583,29 +584,9 @@ class ParticleManagerGUI(QMainWindow):
             return
 
         custom_dir = Path(tf_path) / 'custom'
-        if not custom_dir.exists():
-            return
 
-        conflicting_items = {
-            "folders": ["_modern casual preloader"],
-            "files": [
-                "_mcp hellfire hale fix.vpk",
-                "_mcp mvm victory screen fix.vpk",
-                "_mcp saxton hale fix.vpk"
-            ]
-        }
-
-        found_conflicts = []
-
-        for folder_name in conflicting_items["folders"]:
-            folder_path = custom_dir / folder_name
-            if folder_path.exists() and folder_path.is_dir():
-                found_conflicts.append(f"Folder: {folder_name}")
-
-        for file_name in conflicting_items["files"]:
-            file_path = custom_dir / file_name
-            if file_path.exists() and file_path.is_file():
-                found_conflicts.append(f"File: {file_name}")
+        # use conflicts service to scan for legacy MCP files
+        found_conflicts = scan_for_legacy_conflicts(custom_dir)
 
         if found_conflicts:
             conflict_list = "\n• ".join(found_conflicts)
@@ -635,7 +616,7 @@ class ParticleManagerGUI(QMainWindow):
 
     def rescan_addon_contents(self):
         thread = threading.Thread(
-            target=self.addon_manager.scan_addon_contents,
+            target=self.addon_manager.service.scan_addon_contents,
             daemon=True
         )
         thread.start()
@@ -696,7 +677,7 @@ class ParticleManagerGUI(QMainWindow):
             self.show_error(f"No {target_name} directory configured!")
             return
 
-        if self.install_manager.restore(target_path):
+        if self.install_manager.uninstall(target_path):
             self.set_processing_state(True)
 
             self.progress_dialog = QProgressDialog(f"Restoring {target_name}...", None, 0, 100, self)
