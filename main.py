@@ -27,6 +27,7 @@ def main():
     log.info(f'Project files are written to {folder_setup.project_dir}')
     log.info(f'Settings files are in {folder_setup.settings_dir}')
     log.info(f'Log is written to {folder_setup.log_file}')
+    log.debug('DEBUG OUTPUT HAS BEEN ENABLED')
 
     copy(folder_setup.install_dir / "backup", folder_setup.project_dir / "backup", noclobber=False)
 
@@ -88,6 +89,9 @@ def main():
     delete(folder_setup.temp_dir, not_exist_ok=True)
 
 def run():
+    import core.args
+    args = core.args.parse_args()
+
     try:
         from rich.logging import RichHandler
         from rich.traceback import install
@@ -102,16 +106,16 @@ def run():
 
     folder_setup.log_file.parent.mkdir(parents=True, exist_ok=True)
 
-    verbose = False
     logging.basicConfig(
-        level=(verbose and logging.DEBUG or logging.INFO),
+        level=(args.verbose and logging.DEBUG or logging.INFO),
         format='%(message)s',
         datefmt=fmt_time,
         handlers=[logging.FileHandler(folder_setup.log_file, mode='a', encoding='utf-8'), stream_handler],
     )
 
-    import core.migrations
-    core.migrations.migrate()
+    if args.migrate:
+        import core.migrations
+        core.migrations.migrate()
 
     main()
 
