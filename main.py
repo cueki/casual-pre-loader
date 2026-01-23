@@ -88,11 +88,6 @@ def main():
     delete(folder_setup.temp_dir, not_exist_ok=True)
 
 def run():
-    import core.migrations
-
-    core.migrations.migrate()
-    del core.migrations
-
     try:
         from rich.logging import RichHandler
         from rich.traceback import install
@@ -114,6 +109,9 @@ def run():
         datefmt=fmt_time,
         handlers=[logging.FileHandler(folder_setup.log_file, mode='a', encoding='utf-8'), stream_handler],
     )
+
+    import core.migrations
+    core.migrations.migrate()
 
     main()
 
