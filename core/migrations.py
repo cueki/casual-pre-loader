@@ -8,8 +8,6 @@ from more_itertools import consume
 from core.folder_setup import folder_setup
 from core.util.file import delete, modeset_add, move
 
-__all__ = ('migrate',)
-
 """
 This module has a single function, `migrate()`, that ensures that old files are cleaned up or moved into new locations.
 This is so that if we change things, users will have a (hopefully) seamless expereince.
@@ -31,79 +29,73 @@ so I'd say this is a tolerable shortcoming.
 
 To try and mitigate this potential problem, it is recommended to not remove things from this file too often, once a month at the most should be fine.
 
-`migrate()` only needs to be called once per program execution, so one should run `del core.migrations` afterwards so that the interpreter can gc the module.
+`migrate()` only needs to be called once per program execution, so even though they are effectively constants, put all migration data into its body so it can get GC'ed when it goes OOS.
 """
 
-# Files and folders to delete
-DELETE_PORTABLE: list[Path] = [
-    #
-    # old updater
-    #
-    folder_setup.install_dir / 'core' / 'updater_old.exe',
-    folder_setup.install_dir / 'RUNME.tmp.bat',
-    #
-    # old files/folders
-    #
-    folder_setup.install_dir / 'particle_system_map.json',
-    folder_setup.install_dir / 'mod_urls.json',
-    folder_setup.install_dir / 'operations',
-    folder_setup.install_dir / 'quickprecache',
-    folder_setup.install_dir / 'temp',
-]
-DELETE: list[tuple[Path, Path]] = [
-    folder_setup.project_dir / 'temp',
-]
-
-# Files and folders to relocate
-MOVE_PORTABLE: list[tuple[Path, Path]] = [
-    #
-    # userdata
-    #
-    (folder_setup.install_dir / 'mods', folder_setup.mods_dir),
-    (folder_setup.install_dir / 'app_settings.json', folder_setup.app_settings_file),
-    (folder_setup.install_dir / 'addon_metadata.json', folder_setup.addon_metadata_file),
-    (folder_setup.install_dir / 'casual-pre-loader.log', folder_setup.log_file),
-    (folder_setup.install_dir / 'modsinfo.json', folder_setup.modsinfo_file),
-]
-MOVE: list[tuple[Path, Path]] = []
-
-# Files and folders to set the mode of
-MODESET: dict[int, list[Path]] = {}
-MODESET_PORTABLE: dict[int, list[Path]] = {}
-MODESET_ADD: dict[int, list[Path]] = {}
-MODESET_ADD_PORTABLE: dict[int, list[Path]] = {
-    # set executable bit
-    stat.S_IXOTH | stat.S_IXGRP | stat.S_IXUSR: [
-        folder_setup.install_dir / 'main.py',
-        folder_setup.install_dir / 'scripts' / 'build.py',
-        folder_setup.install_dir / 'scripts' / 'analyze_particle_hierarchy.py',
-        folder_setup.install_dir / 'scripts' / 'particle_file_merger.py',
-        folder_setup.install_dir / 'scripts' / 'run.sh',
-    ]
-}
-
-
-def _map(*args, **kwargs):
-    return consume(map(*args, **kwargs))
-
-
-def _starmap(*args, **kwargs):
-    return consume(starmap(*args, **kwargs))
-
-
-def _modeset(mode: int, files: list[Path]) -> None:
-    _map(lambda file: file.exists() and file.chmod(mode), files)
-
-
-def _modeset_add(mode: int, files: list[Path]) -> None:
-    _map(lambda file: file.exists() and modeset_add(file, mode), files)
-
-
-_delete = partial(delete, not_exist_ok=True)
-_move = partial(move, not_exist_ok=True)
-
-
 def migrate():
+    # Files and folders to delete
+    DELETE_PORTABLE: list[Path] = [
+        #
+        # old updater
+        #
+        folder_setup.install_dir / 'core' / 'updater_old.exe',
+        folder_setup.install_dir / 'RUNME.tmp.bat',
+        #
+        # old files/folders
+        #
+        folder_setup.install_dir / 'particle_system_map.json',
+        folder_setup.install_dir / 'mod_urls.json',
+        folder_setup.install_dir / 'operations',
+        folder_setup.install_dir / 'quickprecache',
+        folder_setup.install_dir / 'temp',
+    ]
+    DELETE: list[tuple[Path, Path]] = [
+        folder_setup.project_dir / 'temp',
+    ]
+
+    # Files and folders to relocate
+    MOVE_PORTABLE: list[tuple[Path, Path]] = [
+        #
+        # userdata
+        #
+        (folder_setup.install_dir / 'mods', folder_setup.mods_dir),
+        (folder_setup.install_dir / 'app_settings.json', folder_setup.app_settings_file),
+        (folder_setup.install_dir / 'addon_metadata.json', folder_setup.addon_metadata_file),
+        (folder_setup.install_dir / 'casual-pre-loader.log', folder_setup.log_file),
+        (folder_setup.install_dir / 'modsinfo.json', folder_setup.modsinfo_file),
+    ]
+    MOVE: list[tuple[Path, Path]] = []
+
+    # Files and folders to set the mode of
+    MODESET: dict[int, list[Path]] = {}
+    MODESET_PORTABLE: dict[int, list[Path]] = {}
+    MODESET_ADD: dict[int, list[Path]] = {}
+    MODESET_ADD_PORTABLE: dict[int, list[Path]] = {
+        # set executable bit
+        stat.S_IXOTH | stat.S_IXGRP | stat.S_IXUSR: [
+            folder_setup.install_dir / 'main.py',
+            folder_setup.install_dir / 'scripts' / 'build.py',
+            folder_setup.install_dir / 'scripts' / 'analyze_particle_hierarchy.py',
+            folder_setup.install_dir / 'scripts' / 'particle_file_merger.py',
+            folder_setup.install_dir / 'scripts' / 'run.sh',
+        ]
+    }
+
+    def _map(*args, **kwargs):
+        return consume(map(*args, **kwargs))
+
+    def _starmap(*args, **kwargs):
+        return consume(starmap(*args, **kwargs))
+
+    def _modeset(mode: int, files: list[Path]) -> None:
+        _map(lambda file: file.exists() and file.chmod(mode), files)
+
+    def _modeset_add(mode: int, files: list[Path]) -> None:
+        _map(lambda file: file.exists() and modeset_add(file, mode), files)
+
+    _delete = partial(delete, not_exist_ok=True)
+    _move = partial(move, not_exist_ok=True)
+
     if folder_setup.portable:
         _map(_delete, DELETE_PORTABLE)
         _starmap(_move, MOVE_PORTABLE)
