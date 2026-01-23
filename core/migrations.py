@@ -2,11 +2,12 @@ import stat
 from functools import partial
 from itertools import starmap
 from pathlib import Path
+from typing import Iterable
 
 from more_itertools import consume
 
 from core.folder_setup import folder_setup
-from core.util.file import delete, modeset_add, move
+from core.util.file import delete, modeset, modeset_add, move
 
 """
 This module has a single function, `migrate()`, that ensures that old files are cleaned up or moved into new locations.
@@ -81,28 +82,31 @@ def migrate():
         ]
     }
 
-    def _map(*args, **kwargs):
-        return consume(map(*args, **kwargs))
+    def _delete(files: Iterable[Path]):
+        consume(map(partial(delete, not_exist_ok=True), files))
 
-    def _starmap(*args, **kwargs):
-        return consume(starmap(*args, **kwargs))
+    def _move(pairs: Iterable[tuple[Path, Path]]):
+        consume(starmap(partial(move, not_exist_ok=True), pairs))
 
-    def _modeset(mode: int, files: list[Path]) -> None:
-        _map(lambda file: file.exists() and file.chmod(mode), files)
+    def _modeset(groups: Iterable[tuple[int, Path]]):
+        for mode, files in groups:
+            consume(map(partial(modeset, mode=mode, not_exist_ok=True), files))
 
-    def _modeset_add(mode: int, files: list[Path]) -> None:
-        _map(lambda file: file.exists() and modeset_add(file, mode), files)
-
-    _delete = partial(delete, not_exist_ok=True)
-    _move = partial(move, not_exist_ok=True)
+    def _modeset_add(groups: Iterable[tuple[int, Path]]):
+        for mode, files in groups:
+            consume(map(partial(modeset_add, mode=mode, not_exist_ok=True), files))
 
     if folder_setup.portable:
-        _map(_delete, DELETE_PORTABLE)
-        _starmap(_move, MOVE_PORTABLE)
-        _starmap(_modeset, MODESET_PORTABLE.items())
-        _starmap(_modeset_add, MODESET_ADD_PORTABLE.items())
+        DELETE += DELETE_PORTABLE
+        MOVE += MOVE_PORTABLE
 
-    _map(_delete, DELETE)
-    _starmap(_move, MOVE)
-    _starmap(_modeset, MODESET.items())
-    _starmap(_modeset_add, MODESET_ADD.items())
+        for k,v in MODESET_PORTABLE.items():
+            MODESET[k] = MODESET.get(k, []) + v
+
+        for k,v in MODESET_ADD_PORTABLE.items():
+            MODESET_ADD[k] = MODESET_ADD.get(k, []) + v
+
+    _delete(DELETE)
+    _move(MOVE)
+    _modeset(MODESET.items())
+    _modeset_add(MODESET_ADD.items())
