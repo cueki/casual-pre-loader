@@ -161,7 +161,7 @@ def move(
         raise Exception(f'Error moving\n{src} -> {dst}') from e
 
 
-def format_mode(mode: int) -> str:
+def _format_mode(mode: int) -> str:
     """
     Format a file permission mode into a human-readable representation (e.g. rwxrwxrwx).
 
@@ -189,6 +189,44 @@ def format_mode(mode: int) -> str:
     return ret
 
 
+def _modeget(file: Path) -> int:
+    """
+    Retrieve a file's mode bits.
+
+    Args:
+        file: The file to operate on.
+    Returns:
+        The file's mode bits.
+        The file's mode bits formated into human-readable output.
+    """
+
+    mode = file.stat().st_mode
+    f_mode = _format_mode(mode)
+    log.debug(f'got mode {f_mode} for {file}')
+    return mode, f_mode
+
+
+def modeset(file: Path, mode: int, not_exist_ok: Optional[bool] = False) -> None:
+    """
+    Change a file's mode bits.
+
+    Args:
+        file: The file to operate on.
+        mode: The mode.
+        not_exist_ok: Do not throw an error if the file does not exist.
+    """
+
+    try:
+        if not_exist_ok and not file.exists():
+            log.debug(f'Cannot get/set mode for {file} because it does not exist')
+            return
+
+        file.chmod(mode)
+        log.debug(f'set mode {_format_mode(mode)} for {file}')
+    except Exception as e:
+        raise Exception(f'unable to get/set mode for {file}') from e
+
+
 def modeset_add(file: Path, mode: int, not_exist_ok: Optional[bool] = False) -> None:
     """
     Additively change a file's mode bits.
@@ -204,14 +242,11 @@ def modeset_add(file: Path, mode: int, not_exist_ok: Optional[bool] = False) -> 
             log.debug(f'Cannot get/set mode for {file} because it does not exist')
             return
 
-        _mode = file.stat().st_mode
-        _f_mode = format_mode(_mode)
-        log.debug(f'retrived mode {_f_mode} from {file}')
+        _mode, _ = _modeget(file)
 
         mode |= _mode
-        f_mode = format_mode(mode)
         file.chmod(mode)
-        log.debug(f'changed mode from {_f_mode} to {f_mode} for {file}')
+        log.debug(f'set mode {_format_mode(mode)} for {file}')
     except Exception as e:
         raise Exception(f'unable to get/set mode for {file}') from e
 
