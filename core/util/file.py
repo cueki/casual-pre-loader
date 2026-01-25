@@ -189,25 +189,6 @@ def format_mode(mode: int) -> str:
     return ret
 
 
-def check_writable(file: Path) -> bool:
-    """
-    Check if a file can be written to (not locked by another process).
-
-    Args:
-        file: The file to check.
-
-    Returns:
-        True if the file can be written to, False otherwise.
-    """
-
-    try:
-        with open(file, 'r+b'):
-            pass
-        return True
-    except PermissionError:
-        return False
-
-
 def modeset_add(file: Path, mode: int, not_exist_ok: Optional[bool] = False) -> None:
     """
     Additively change a file's mode bits.
@@ -233,3 +214,22 @@ def modeset_add(file: Path, mode: int, not_exist_ok: Optional[bool] = False) -> 
         log.debug(f'changed mode from {_f_mode} to {f_mode} for {file}')
     except Exception as e:
         raise Exception(f'unable to get/set mode for {file}') from e
+
+
+def check_writable(file: Path) -> bool:
+    """
+    Check if a file can be written to (not locked by another process).
+
+    Args:
+        file: The file to check.
+
+    Returns:
+        True if the file can be written to, False otherwise.
+    """
+
+    try:
+        with open(file, 'r+b'):
+            pass
+        return True
+    except PermissionError:
+        return False
