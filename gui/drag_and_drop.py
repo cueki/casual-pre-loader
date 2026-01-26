@@ -227,8 +227,8 @@ class ModDropZone(QFrame):
         if not dropped_items:
             return
 
-        has_vpk = any(item.lower().endswith('.vpk') for item in dropped_items)
-        has_zip = any(item.lower().endswith('.zip') for item in dropped_items)
+        has_vpk = any(str(item).lower().endswith('.vpk') for item in dropped_items)
+        has_zip = any(str(item).lower().endswith('.zip') for item in dropped_items)
         has_folder = any(Path(item).is_dir() for item in dropped_items)
 
         if has_vpk and has_zip and has_folder:
