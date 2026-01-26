@@ -22,7 +22,8 @@ def normalize_vpk_paths(vpk_paths: list[Path]) -> list[Path]:
     """
 
     normalized = {}
-    for vpk_path in vpk_paths:
+    for vpk_path_raw in vpk_paths:
+        vpk_path = Path(vpk_path_raw)  # FIXED: Convert string to Path object
         vpk_name = vpk_path.stem
         if (vpk_name[-3:].isdigit() and vpk_name[-4] == '_') or vpk_name[-4:] == "_dir":
             base_name = vpk_name[:-4]
@@ -44,6 +45,8 @@ class ImportService:
         override_name: str = None,
         progress_callback: Optional[Callable[[int, str], None]] = None
     ) -> tuple[bool, str]:
+        # ensure path is a Path object
+        folder_path = Path(folder_path)  # FIXED: Ensure input is Path
         # attempt to process a folder
         folder_name = override_name if override_name else folder_path.name
         validation_result = self.validator.validate_folder(folder_path)
@@ -91,6 +94,8 @@ class ImportService:
         zip_path: Path,
         progress_callback: Optional[Callable[[int, str], None]] = None
     ) -> tuple[bool, str]:
+        # ensure path is a Path object
+        zip_path = Path(zip_path)  # FIXED: Ensure input is Path
         # attempt to process and extract a zip file
         zip_name = zip_path.stem
 
@@ -157,6 +162,8 @@ class ImportService:
         file_path: Path,
         progress_callback: Optional[Callable[[int, str], None]] = None
     ) -> tuple[bool, str]:
+        # ensure path is a Path object
+        file_path = Path(file_path)  # FIXED: Ensure input is Path
         # mod VPK extraction
         try:
             vpk_name = file_path.stem
@@ -233,7 +240,8 @@ class ImportService:
         successful_items = []
         failed_items = []
 
-        for index, item_path in enumerate(item_paths):
+        for index, item_path_raw in enumerate(item_paths):
+            item_path = Path(item_path_raw)  # FIXED: Convert string to Path object
             item_name = item_path.name
             if progress_callback:
                 progress_callback(0, f"Processing item {index + 1}/{total_items}")
