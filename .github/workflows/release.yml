@@ -83,5 +83,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: "casual-pre-loader-${{ github.ref_name }}.zip"
-          draft: ${{ inputs.draft }}
+          draft: ${{ inputs.draft == '' && true || inputs.draft }}
           generate_release_notes: ${{ inputs.generate-release-notes }}
