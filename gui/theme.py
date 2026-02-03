@@ -33,15 +33,18 @@ DANGER = "#c9534a"
 DANGER_HOVER = "#d9635a"
 SUCCESS = "#4CAF50"
 
-# Font Sizes
+# Font
+FONT_FAMILY = '"Segoe UI", "Roboto", "Noto Sans", "Helvetica Neue", sans-serif'
 FONT_SIZE_SMALL = "11px"
-FONT_SIZE_NORMAL = "13px"
+FONT_SIZE_NORMAL = "14px"
 FONT_SIZE_HEADER = "18px"
 
 
 GLOBAL_STYLESHEET = f"""
     /* Base widget styles */
     QWidget {{
+        font-family: {FONT_FAMILY};
+        font-size: {FONT_SIZE_NORMAL};
         color: {FG_DEFAULT};
     }}
 
