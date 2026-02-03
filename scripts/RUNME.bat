@@ -13,6 +13,6 @@ if /I "%~nx0"=="RUNME.bat" (
     )
 )
 
-cd casual-preloader
+cd casual-pre-loader
 python.exe pip.pyz install --disable-pip-version-check --no-warn-script-location -r requirements.txt
 python.exe main.py

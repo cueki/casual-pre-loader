@@ -91,7 +91,9 @@ class SettingsManager:
         if folder_setup.addon_metadata_file.exists():
             try:
                 with open(folder_setup.addon_metadata_file, "r") as f:
-                    return json.load(f)
+                    content = f.read()
+                    if content:
+                        return json.loads(content)
             except Exception:
                 log.exception("Error loading addon metadata")
 
