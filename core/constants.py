@@ -206,6 +206,7 @@ MOD_TYPE_COLORS = {
 
 
 # project and remote repository info
+DESCRIPTION = 'TF2 particle modifications via some wizardry.'
 PROGRAM_AUTHOR = 'cueki'
 PROGRAM_NAME = 'casual-pre-loader'
 REMOTE_REPO = f'{PROGRAM_AUTHOR}/{PROGRAM_NAME}'
