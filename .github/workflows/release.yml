@@ -58,7 +58,7 @@ jobs:
           cp scripts/RUNME.bat build/
 
       - name: Create release archive
-        run: zip -r "casual-pre-loader-${{ github.ref_name }}.zip" build
+        run: cd build && zip -r "../casual-pre-loader-${{ github.ref_name }}.zip" .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
