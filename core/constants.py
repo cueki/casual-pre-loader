@@ -92,6 +92,7 @@ LEGACY_VPK_NAMES = [
 CUSTOM_VPK_NAMES = [CUSTOM_VPK_NAME] + LEGACY_VPK_NAMES
 BACKUP_MAINMENU_FOLDER = "zz_run_preloader_again_if_you_add_a_custom_hud_or_else_i_will_kill_you_rahhhh_anyways_just_run_the_install_again_please"
 
+MOD_EXPORT_VPK_SPLIT_SIZE = 200 * (2**20)
 
 QUICKPRECACHE_FILE_SUFFIXES = [
     ".dx80.vtx",
