@@ -391,7 +391,9 @@ class AddonDescription(QWidget):
 
         try:
             addon_dir.mkdir(parents=True, exist_ok=True) # INFO: technically not necessary, but VPKFile does not check if `source_dir` exists
-            if not VPKFile.create(str(addon_dir), str(vpk_path)):
+            total_size = sum(f.stat().st_size for f in addon_dir.rglob('*') if f.is_file())
+            split_size = 200 * 1024 * 1024 if total_size > 200 * 1024 * 1024 else None
+            if not VPKFile.create(str(addon_dir), str(vpk_path), split_size=split_size):
                 QMessageBox.critical(self, "Export Failed", "Failed to create VPK file.")
                 return
             # open exports folder for user
