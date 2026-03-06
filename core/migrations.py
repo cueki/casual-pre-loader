@@ -50,7 +50,7 @@ def migrate():
         folder_setup.install_dir / 'quickprecache',
         folder_setup.install_dir / 'temp',
     ]
-    DELETE: list[tuple[Path, Path]] = [
+    DELETE: list[Path] = [
         folder_setup.project_dir / 'temp',
     ]
 
