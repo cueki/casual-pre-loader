@@ -189,15 +189,14 @@ def _format_mode(mode: int) -> str:
     return ret
 
 
-def _modeget(file: Path) -> int:
+def _modeget(file: Path) -> tuple[int, str]:
     """
     Retrieve a file's mode bits.
 
     Args:
         file: The file to operate on.
     Returns:
-        The file's mode bits.
-        The file's mode bits formated into human-readable output.
+        A tuple of the file's mode bits and a human-readable representation.
     """
 
     mode = file.stat().st_mode
