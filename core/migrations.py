@@ -36,14 +36,10 @@ To try and mitigate this potential problem, it is recommended to not remove thin
 def migrate():
     # Files and folders to delete
     DELETE_PORTABLE: list[Path] = [
-        #
         # old updater
-        #
         folder_setup.install_dir / 'core' / 'updater_old.exe',
         folder_setup.install_dir / 'RUNME.tmp.bat',
-        #
         # old files/folders
-        #
         folder_setup.install_dir / 'particle_system_map.json',
         folder_setup.install_dir / 'mod_urls.json',
         folder_setup.install_dir / 'operations',
@@ -56,9 +52,7 @@ def migrate():
 
     # Files and folders to relocate
     MOVE_PORTABLE: list[tuple[Path, Path]] = [
-        #
         # userdata
-        #
         (folder_setup.install_dir / 'mods', folder_setup.mods_dir),
         (folder_setup.install_dir / 'app_settings.json', folder_setup.app_settings_file),
         (folder_setup.install_dir / 'addon_metadata.json', folder_setup.addon_metadata_file),
