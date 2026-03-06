@@ -12,16 +12,17 @@ from core.auto_updater import check_for_updates
 from core.backup_manager import prepare_working_copy
 from core.folder_setup import folder_setup
 from core.util.file import copy, delete
+from core.util.sourcemod import validate_game_directory
 from core.version import VERSION
+from core.settings import SettingsManager
 from gui.first_time_setup import run_first_time_setup
 from gui.main_window import ParticleManagerGUI
 from gui.theme import GLOBAL_STYLESHEET
-from core.settings import SettingsManager
 from gui.update_dialog import show_update_dialog
 
 log = logging.getLogger()
 
-def main():
+def main(args):
     log.info(f'Version {VERSION} on {platform} {"(portable)" if folder_setup.portable else ""}')
     log.info(f'Application files are located in {folder_setup.install_dir}')
     log.info(f'Project files are written to {folder_setup.project_dir}')
@@ -36,8 +37,11 @@ def main():
     app.setStyleSheet(GLOBAL_STYLESHEET)
 
     # first-time setup
-    tf_directory = None
-    if SettingsManager.is_first_time_setup():
+    tf_directory = args.tf_dir
+    if tf_directory is not None and not validate_game_directory(tf_directory):
+        log.error(f'--tf-dir is not a valid Source mod directory: {tf_directory}')
+        return
+    if tf_directory is None and SettingsManager.is_first_time_setup():
         tf_directory = run_first_time_setup()
         if tf_directory is None:
             # user cancelled setup
@@ -60,7 +64,7 @@ def main():
 
     window = ParticleManagerGUI(tf_directory)
 
-    if not SettingsManager.is_first_time_setup() and folder_setup.portable:
+    if args.update and not SettingsManager.is_first_time_setup() and folder_setup.portable:
         settings_manager = SettingsManager()
 
         updates = check_for_updates()
@@ -117,7 +121,7 @@ def run():
         import core.migrations
         core.migrations.migrate()
 
-    main()
+    main(args)
 
 if __name__ == "__main__":
     run()
