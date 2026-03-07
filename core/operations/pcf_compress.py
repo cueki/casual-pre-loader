@@ -5,16 +5,11 @@ from core.constants import ATTRIBUTE_DEFAULTS, ELEMENT_DEFAULTS
 
 
 def get_element_hash(element: PCFElement):
-    # sort by attribute names
-    sorted_names = sorted(element.attributes.keys(), key=lambda x: x.decode('ascii'))
-
-    # build hash using sorted names
-    attr_strings = []
-    for name in sorted_names:
-        type_, value = element.attributes[name]
-        attr_strings.append(f"{name.decode('ascii')}:{type_}:{value}")
-
-    return "|".join(attr_strings)
+    sorted_attrs = tuple(
+        (name, attr_type, value if not isinstance(value, list) else tuple(value))
+        for name, (attr_type, value) in sorted(element.attributes.items())
+    )
+    return hash(sorted_attrs)
 
 
 def find_duplicate_array_elements(pcf: PCFFile):
