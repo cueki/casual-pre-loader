@@ -89,6 +89,13 @@ def parse_args(args: Optional[Iterable[str]] = None, namespace: Optional[Namespa
     )
 
     parser.add_argument(
+        '-r', '--reset',
+        default=False,
+        action='store_true',
+        help='Reset settings to defaults and re-run first-time setup'
+    )
+
+    parser.add_argument(
         '--sourcemod',
         default=440,
         help='Specify which sourcemod to target (defaults to TF2). Takes either a name or a steam id.'
