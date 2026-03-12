@@ -30,6 +30,20 @@ def main(args):
     log.info(f'Log is written to {folder_setup.log_file}')
     log.debug('DEBUG OUTPUT HAS BEEN ENABLED')
 
+    if args.reset:
+        confirm = input(
+            'This will delete your saved profiles and settings.\n'
+            'Your installed mods will not be affected.\n'
+            'Are you sure? [y/N]: '
+        )
+        if confirm.lower() == 'y':
+            delete(folder_setup.app_settings_file, not_exist_ok=True)
+            delete(folder_setup.addon_metadata_file, not_exist_ok=True)
+            log.info('Settings have been reset')
+        else:
+            log.info('Reset cancelled')
+            return
+
     copy(folder_setup.install_dir / "backup", folder_setup.project_dir / "backup", noclobber=False)
 
     app = QApplication([])

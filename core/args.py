@@ -45,4 +45,10 @@ def parse_args(args: Optional[Iterable[str]] = None, namespace: Optional[Namespa
         help='Override the TF2 directory path'
     )
 
+    parser.add_argument(
+        '--reset',
+        action='store_true',
+        help='Reset settings to defaults and re-run first-time setup'
+    )
+
     return parser.parse_args(args=args, namespace=namespace)
