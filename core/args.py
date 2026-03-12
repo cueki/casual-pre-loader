@@ -13,13 +13,13 @@ def parse_args(args: Optional[Iterable[str]] = None, namespace: Optional[Namespa
     )
 
     parser.add_argument(
-        '-V', '--version',
+        '-v', '--version',
         action='version',
         version=f'%(prog)s {VERSION}'
     )
 
     parser.add_argument(
-        '-v', '--verbose',
+        '-V', '--verbose',
         action='store_true',
         help='Enable verbose output'
     )
