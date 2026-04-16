@@ -81,6 +81,28 @@ touch .noportable
 !!! warning
     Linux users should use `scripts/run.sh` to launch the application. Do **NOT** run `RUNME.bat` under wine.
 
+### Aditional steps for immutable distros (e.g. SteamOS, Bazzite, etc.)
+Since installing packages is quite a hassle on most immutable distros - and usually has some downsides - using something like [`flatpak`](https://flatpak.org/) to install `wine` is recommended.
+```sh
+flatpak install "$(flatpak remote-ls flathub --app --columns=ref | grep org.winehq.Wine | grep stable | sort -Vr | head -n1)"
+```
+
+However, the wine flatpak requires you to invoke it as `flatpak run org.winehq.Wine`, and since the preloader expects a binary named `wine` to be on the `PATH`, we need to put a small script on the `PATH` that just calls the correct invocation.
+
+User scripts that should be on the `PATH` are typically placed in `${XDG_BIN_HOME}`, which should be `~/.local/bin` by default.
+To add this directory to the `PATH` if it hasn't already:
+```sh
+echo 'PATH="${PATH+"${PATH}:"}${XDG_BIN_HOME:="${HOME}/.local/bin"}"' >>~/.bash_profile # or `~/.profile`, or wherever else you set envvars
+```
+
+Then we simply create a small wrapper script:
+```sh
+: "${XDG_BIN_HOME:="${HOME}/.local/bin"}"
+mkdir -p "${XDG_BIN_HOME}"
+printf '#!/bin/sh\n\nexec flatpak run org.winehq.Wine "${@}"' >"${XDG_BIN_HOME}/wine"
+chmod +x "${XDG_BIN_HOME}/wine"
+```
+
 ### Additional steps for Ubuntu or derivatives (e.g. Mint, PopOS, etc.)
 You may get an error similiar to the following:
 ```
