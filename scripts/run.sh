@@ -100,7 +100,10 @@ ERROR=false
 
 ${ERROR} && exit 1 # exit if errors were previously raised
 
-git submodule update --init --recursive --remote # try to ensure that submodules ARE in fact, properly cloned
+# try to ensure that submodules ARE in fact, properly cloned
+! git submodule update --init --recursive --remote &&
+	ERROR=true &&
+	printf 'No internet connection, cannot update submodules\n' | error
 
 if [ -f 'requirements.txt' ]; then
 	# shellcheck disable=SC2310,SC2312
@@ -127,10 +130,14 @@ if [ -f 'requirements.txt' ]; then
 		printf '%s\n' 'managed to recreate the virtual environment with an up-to-date version of python' | warning
 	fi
 
-	printf '%s\n' 'Installing and/or updating dependencies' | info
-	python3 -m ensurepip
-	python3 -m pip -q install --upgrade pip
-	python3 -m pip -q install --upgrade -r requirements.txt
+	if ${ERROR}; then
+		printf 'No internet connection, cannot install and/or update dependencies\n' | error
+	else
+		printf '%s\n' 'Installing and/or updating dependencies' | info
+		python3 -m ensurepip
+		python3 -m pip -q install --upgrade pip
+		python3 -m pip -q install --upgrade -r requirements.txt
+	fi
 fi
 
 printf '%s\n' 'Starting Casual Preloader' | info
