@@ -65,10 +65,10 @@ check_python_version() {
 	python3 -c 'import sys; vi = sys.version_info; exit(not (vi.major == 3 and vi.minor >= 11))'
 }
 
-ERR=false
+ERROR=false
 
 # shellcheck disable=SC2310,SC2312
-[ "$(id -u)" -eq 0 ] && printf "This script should not be run as root\n" | err && ERR=true
+[ "$(id -u)" -eq 0 ] && printf "This script should not be run as root\n" | err && ERROR=true
 
 # shellcheck disable=SC2310
 (
@@ -78,27 +78,27 @@ ERR=false
 		dep_missing python3 | err && false # none of the other commands in this subshell will work without python
 
 	# shellcheck disable=SC2312
-	! check_python_version && ERR=true &&
+	! check_python_version && ERROR=true &&
 		printf 'Your version of python (%s) is out of date, the minimum required version is Python 3.11\n' \
 			"$(python3 -V)" | err
 
-	! python3 -m ensurepip --version >/dev/null 2>&1 && ERR=true &&
+	! python3 -m ensurepip --version >/dev/null 2>&1 && ERROR=true &&
 		dep_missing ensurepip | err
 
-	! python3 -c 'import venv' 2>/dev/null && ERR=true &&
+	! python3 -c 'import venv' 2>/dev/null && ERROR=true &&
 		dep_missing 'python3-venv' | err
 
-	! ${ERR}
-) || ERR=true
+	! ${ERROR}
+) || ERROR=true
 
 # shellcheck disable=SC2310,SC2312
 # check for wine
 ! command -v wine >/dev/null 2>&1 &&
 	dep_missing wine | warning &&
 	printf '%s\n' 'Wine is required to run studiomdl.exe for model precaching' | warning &&
-	{ ${ERR} || [ "$(prompt_yn 'Continue anyway?' n)" != y ]; } && ERR=true
+	{ ${ERROR} || [ "$(prompt_yn 'Continue anyway?' n)" != y ]; } && ERROR=true
 
-${ERR} && exit 1 # exit if errors were previously raised
+${ERROR} && exit 1 # exit if errors were previously raised
 
 git submodule update --init --recursive --remote # try to ensure that submodules ARE in fact, properly cloned
 
