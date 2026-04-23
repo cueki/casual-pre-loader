@@ -21,7 +21,7 @@ _log() (
 _log_color() { _log "${1}" "\\033[${2}m%-${max_len_level}s\\033[0m\033[${2}m%s\\033[0m\\n"; }
 
 max_len_level=0
-for _level in debug:32 info:34 warning:33 err:31; do
+for _level in debug:32 info:34 warning:33 error:31; do
 	level="${_level%:*}"
 
 	# shellcheck disable=SC2312
@@ -68,25 +68,25 @@ check_python_version() {
 ERROR=false
 
 # shellcheck disable=SC2310,SC2312
-[ "$(id -u)" -eq 0 ] && printf "This script should not be run as root\n" | err && ERROR=true
+[ "$(id -u)" -eq 0 ] && printf "This script should not be run as root\n" | error && ERROR=true
 
 # shellcheck disable=SC2310
 (
 	set -e
 
 	! command -v python3 >/dev/null 2>&1 &&
-		dep_missing python3 | err && false # none of the other commands in this subshell will work without python
+		dep_missing python3 | error && false # none of the other commands in this subshell will work without python
 
 	# shellcheck disable=SC2312
 	! check_python_version && ERROR=true &&
 		printf 'Your version of python (%s) is out of date, the minimum required version is Python 3.11\n' \
-			"$(python3 -V)" | err
+			"$(python3 -V)" | error
 
 	! python3 -m ensurepip --version >/dev/null 2>&1 && ERROR=true &&
-		dep_missing ensurepip | err
+		dep_missing ensurepip | error
 
 	! python3 -c 'import venv' 2>/dev/null && ERROR=true &&
-		dep_missing 'python3-venv' | err
+		dep_missing 'python3-venv' | error
 
 	! ${ERROR}
 ) || ERROR=true
