@@ -40,6 +40,7 @@ class FolderConfig:
         settings_dir = platformdirs.user_config_path(PROGRAM_NAME, PROGRAM_AUTHOR)
         temp_dir =     platformdirs.user_cache_path(PROGRAM_NAME, PROGRAM_AUTHOR)
 
+    # WARNING: DO NOT create duplicate entries across different deps
     __deps = {
         'project_dir': {
             'backup_dir': lambda self: self.project_dir / 'backup',
