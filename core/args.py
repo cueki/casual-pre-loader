@@ -79,6 +79,14 @@ def parse_args(args: Optional[Iterable[str]] = None, namespace: Optional[Namespa
     )
 
     parser.add_argument(
+        '-p', '--portable',
+        dest='portable',
+        action=BooleanOptionalAction,
+        default=True,
+        help='Run portably, i.e. keep all userdata in `userdata/` instead of the appropriate user-specific locations depending on the OS. Has no effect if installed via package manager.'
+    )
+
+    parser.add_argument(
         '-v', '--verbose',
         default=False,
         action='store_true',
