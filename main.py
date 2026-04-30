@@ -62,7 +62,7 @@ def main(args):
 
     window = ParticleManagerGUI(tf_directory)
 
-    if not SettingsManager.is_first_time_setup() and folder_setup.portable:
+    if args.update and not SettingsManager.is_first_time_setup() and folder_setup.portable:
         settings_manager = SettingsManager()
 
         updates = check_for_updates()

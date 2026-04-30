@@ -87,6 +87,13 @@ def parse_args(args: Optional[Iterable[str]] = None, namespace: Optional[Namespa
     )
 
     parser.add_argument(
+        '-u', '--update',
+        default=True,
+        action=BooleanOptionalAction,
+        help='Automatically check for updates on startup. Has no effect if installed via package manager.'
+    )
+
+    parser.add_argument(
         '-v', '--verbose',
         default=False,
         action='store_true',
