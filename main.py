@@ -38,12 +38,12 @@ def main(args):
     app.setStyleSheet(GLOBAL_STYLESHEET)
 
     # first-time setup
-    tf_directory = None
-    if SettingsManager.is_first_time_setup():
-        tf_directory = run_first_time_setup()
-        if tf_directory is None:
-            # user cancelled setup
-            return
+    if args.tf_dir is None:
+        if SettingsManager.is_first_time_setup():
+            args.tf_dir = run_first_time_setup()
+            if args.tf_dir is None:
+                log.debug('User cancelled setup')
+                return
 
     # splash screen
     splash_pixmap = QPixmap('gui/icons/cueki_splash.png')
@@ -60,7 +60,7 @@ def main(args):
 
     prepare_working_copy()
 
-    window = ParticleManagerGUI(tf_directory)
+    window = ParticleManagerGUI(args.tf_dir)
 
     if args.update and not SettingsManager.is_first_time_setup() and folder_setup.portable:
         settings_manager = SettingsManager()

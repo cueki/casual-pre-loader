@@ -214,6 +214,13 @@ PROGRAM_NAME = 'casual-pre-loader'
 REMOTE_REPO = f'{PROGRAM_AUTHOR}/{PROGRAM_NAME}'
 
 
+# List of known sourcemods that the tool is compatible with
+# should be a mapping of steam id to either a string containering the full name of the sourcemod as it appears in 'steamapps/common',
+# or a tuple with this name as the first element with aliases given after it
+SOURCEMODS: dict[int, tuple[str, ...] | str] = {
+    440: ('Team Fortress 2', 'TF2'),
+}
+
 # directories and files to include in releases
 # used by build script and auto-updater to avoid unpacking python binaries on linux
 BUILD_DIRS = [

@@ -1,7 +1,9 @@
-from argparse import ArgumentParser, Namespace, Action
+import logging
+from argparse import Action, ArgumentParser, Namespace
 from typing import Iterable, Optional
 
 from core.constants import DESCRIPTION, PROGRAM_AUTHOR, PROGRAM_NAME
+from core.util.sourcemod import auto_detect_sourcemod, normalize_sourcemod, validate_game_directory
 from core.version import VERSION
 
 
@@ -87,6 +89,19 @@ def parse_args(args: Optional[Iterable[str]] = None, namespace: Optional[Namespa
     )
 
     parser.add_argument(
+        '--sourcemod',
+        default=440,
+        help='Specify which sourcemod to target (defaults to TF2). Takes either a name or a steam id.'
+    )
+
+    parser.add_argument(
+        '--tf-dir',
+        type=str,
+        default=None,
+        help='Override the tf directory path.'
+    )
+
+    parser.add_argument(
         '-u', '--update',
         default=True,
         action=BooleanOptionalAction,
@@ -106,4 +121,17 @@ def parse_args(args: Optional[Iterable[str]] = None, namespace: Optional[Namespa
         version=f'%(prog)s {VERSION}'
     )
 
-    return parser.parse_args(args=args, namespace=namespace)
+    args = parser.parse_args(args=args, namespace=namespace)
+
+    args.sourcemod_id, args.sourcemod = normalize_sourcemod(args.sourcemod)
+
+    if args.tf_dir:
+        if not validate_game_directory(args.tf_dir):
+            logging.critical(f'--tf-dir is not a valid Source mod directory: {args.tf_dir}')
+            return
+    # TODO: uncomment once first time setup is a bit more flexible
+    # else:
+    #     args.tf_dir = auto_detect_sourcemod(args.sourcemod)
+
+    print(args)
+    return args
