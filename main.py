@@ -115,8 +115,9 @@ def run():
         handlers=[logging.FileHandler(folder_setup.log_file, mode='a', encoding='utf-8'), stream_handler],
     )
 
-    import core.migrations
-    core.migrations.migrate()
+    if args.migrate:
+        import core.migrations
+        core.migrations.migrate()
 
     main(args)
 

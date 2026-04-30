@@ -72,6 +72,13 @@ def parse_args(args: Optional[Iterable[str]] = None, namespace: Optional[Namespa
     )
 
     parser.add_argument(
+        '-m', '--migrate',
+        default=True,
+        action=BooleanOptionalAction,
+        help='Migrate userdata from old locations to new ones.'
+    )
+
+    parser.add_argument(
         '-v', '--verbose',
         default=False,
         action='store_true',
