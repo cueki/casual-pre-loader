@@ -221,6 +221,10 @@ class AddonPanel(QWidget):
     def show_context_menu(self, position):
         item = self.addons_list.itemAt(position)
         if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
+            # retrigger selection if stale
+            self.addons_list.setCurrentItem(item)
+            self.addon_selection_changed.emit()
+
             menu = QMenu(self)
 
             edit_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogDetailedView)

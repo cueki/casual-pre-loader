@@ -233,6 +233,20 @@ class SettingsManager:
     def set_disable_paint_colors(self, disable):
         self._set_active_profile_field("disable_paint_colors", disable)
 
+    def get_fix_mdl_paths(self):
+        profile = self._get_active_profile_dict()
+        return profile.get("fix_mdl_paths", True) if profile else True
+
+    def set_fix_mdl_paths(self, enabled):
+        self._set_active_profile_field("fix_mdl_paths", enabled)
+
+    def get_skip_quickprecache(self):
+        profile = self._get_active_profile_dict()
+        return profile.get("skip_quickprecache", False) if profile else False
+
+    def set_skip_quickprecache(self, skip):
+        self._set_active_profile_field("skip_quickprecache", skip)
+
     def get_details_collapsed(self):
         return self.settings.get("details_collapsed", False)
 

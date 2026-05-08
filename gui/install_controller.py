@@ -43,9 +43,13 @@ class InstallController(QObject):
         try:
             disable_paint_colors = False
             show_console = True
+            fix_mdl_paths = True
+            skip_quickprecache = False
             if self.settings_manager:
                 disable_paint_colors = self.settings_manager.get_disable_paint_colors()
                 show_console = self.settings_manager.get_show_console_on_startup()
+                fix_mdl_paths = self.settings_manager.get_fix_mdl_paths()
+                skip_quickprecache = self.settings_manager.get_skip_quickprecache()
 
             apply_particles = None
             if mod_drop_zone:
@@ -58,6 +62,8 @@ class InstallController(QObject):
                 apply_particle_selections=apply_particles,
                 disable_paint_colors=disable_paint_colors,
                 show_console_on_startup=show_console,
+                fix_mdl_paths=fix_mdl_paths,
+                skip_quickprecache=skip_quickprecache,
                 game_target=game_target,
             )
             self.operation_success.emit("Mods installed successfully!")

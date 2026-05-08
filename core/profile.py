@@ -14,6 +14,8 @@ class Profile:
     simple_particle_mode: bool = True
     show_console_on_startup: bool = True
     disable_paint_colors: bool = False
+    fix_mdl_paths: bool = True
+    skip_quickprecache: bool = False
 
     def to_dict(self) -> dict:
         return {
@@ -27,6 +29,8 @@ class Profile:
             "simple_particle_mode": self.simple_particle_mode,
             "show_console_on_startup": self.show_console_on_startup,
             "disable_paint_colors": self.disable_paint_colors,
+            "fix_mdl_paths": self.fix_mdl_paths,
+            "skip_quickprecache": self.skip_quickprecache,
         }
 
     @classmethod
@@ -42,6 +46,8 @@ class Profile:
             simple_particle_mode=data.get("simple_particle_mode", True),
             show_console_on_startup=data.get("show_console_on_startup", True),
             disable_paint_colors=data.get("disable_paint_colors", False),
+            fix_mdl_paths=data.get("fix_mdl_paths", True),
+            skip_quickprecache=data.get("skip_quickprecache", False),
         )
 
     @classmethod
