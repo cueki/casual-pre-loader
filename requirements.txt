@@ -1,5 +1,5 @@
 # GUI
-PyQt6~=6.10
+PyQt6~=6.11
 
 # core
 more-itertools~=11.0
