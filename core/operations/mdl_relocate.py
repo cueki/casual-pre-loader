@@ -50,10 +50,7 @@ class Relocation:
 
 
 def _norm(path: str) -> str:
-    """Normalize separators to `/`.
-    TODO: maybe use this across the whole app?
-    """
-    return path.replace("\\", "/")
+    return path.replace("\\", "/").lower()
 
 
 def _is_under_safe_root(dir_str: str) -> bool:
@@ -70,11 +67,12 @@ def add_prefix(dir_str: str, prefix: str) -> str:
     text-replace rewrite of `/` -> `console/` that catastrophically corrupts
     every VMT it touches.
     """
-    if not dir_str or dir_str == "/":
-        return dir_str
-    if _is_under_safe_root(dir_str):
-        return dir_str
-    if dir_str.lower().startswith(f"{prefix}/".lower()):
+    if (
+        not dir_str
+        or dir_str == "/"
+        or _is_under_safe_root(dir_str)
+        or dir_str.lower().startswith(f"{prefix}/".lower())
+    ):
         return dir_str
     stripped = dir_str.lstrip("/")
     return f"{prefix}/{stripped}"
@@ -131,7 +129,7 @@ def _relocate_one_mdl(mdl_path: Path, working_root: Path, prefix: str) -> list[R
     relocations: list[Relocation] = []
 
     rel_mdl = mdl_path.relative_to(working_root)
-    log.debug(f"  [{rel_mdl}]")
+    log.debug(f"[{rel_mdl}]")
 
     for raw in mdl.material_dirs:
         # Some MDLs store material_dirs with a leading slash (e.g.
@@ -154,7 +152,7 @@ def _relocate_one_mdl(mdl_path: Path, working_root: Path, prefix: str) -> list[R
 
         if src is None and dst is None:
             new_dirs.append(old)
-            log.debug(f"    skip: materials/{old_rel}/ not present in mod")
+            log.debug(f"skip: materials/{old_rel}/ not present in mod")
             continue
 
         new_dirs.append(proposed)
@@ -164,10 +162,10 @@ def _relocate_one_mdl(mdl_path: Path, working_root: Path, prefix: str) -> list[R
             old_dir=old.rstrip("/") + "/",
             new_dir=proposed.rstrip("/") + "/",
         ))
-        log.debug(f"    rewrote material_dir: {old!r} -> {proposed!r}  (kept {old!r} as fallback)")
+        log.debug(f"rewrote material_dir: {old!r} -> {proposed!r}  (kept {old!r} as fallback)")
 
         if dst is not None and (src is None or src != dst):
-            log.debug(f"    on-disk: materials/{new_rel}/ already exists (moved by another MDL)")
+            log.debug(f"on-disk: materials/{new_rel}/ already exists (moved by another MDL)")
             continue
         canonical_dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(src), str(canonical_dst))
@@ -178,7 +176,7 @@ def _relocate_one_mdl(mdl_path: Path, working_root: Path, prefix: str) -> list[R
                 parent.rmdir()
             except OSError:
                 break
-        log.debug(f"    moved on-disk: materials/{old_rel}/ -> materials/{new_rel}/")
+        log.debug(f"moved on-disk: materials/{old_rel}/ -> materials/{new_rel}/")
 
     mdl.rewrite_material_dirs(new_dirs + fallback_dirs)
     return relocations
@@ -204,7 +202,8 @@ def _build_rewrite_regex(relocations: list[Relocation]):
     prefix_alt = "|".join(re.escape(old) for old, _ in pairs)
     pattern = re.compile(
         f"(?:(?<=materials/)|(?<!{_PATH_TAIL_CHARS}))"
-        f"(?P<prefix>{prefix_alt})(?P<tail>{_PATH_TAIL_CHARS}*)"
+        f"(?P<prefix>{prefix_alt})(?P<tail>{_PATH_TAIL_CHARS}*)",
+        re.IGNORECASE,
     )
     mapping = dict(pairs)
     return pattern, mapping
@@ -220,7 +219,7 @@ def _apply_path_rewrites(text: str, pattern, mapping, materials_root: Path) -> s
     def replace(m):
         prefix = m.group("prefix")
         tail = m.group("tail")
-        new_prefix = mapping[prefix]
+        new_prefix = mapping[prefix.lower()]
         if not tail:
             return new_prefix
         full_new = new_prefix + tail
@@ -236,12 +235,19 @@ def _apply_path_rewrites(text: str, pattern, mapping, materials_root: Path) -> s
     return pattern.sub(replace, text)
 
 
-def _relocate_material_names(mdl_paths: list[Path], relocations: list[Relocation]) -> None:
+def _relocate_material_names(working_root: Path, mdl_paths: list[Path], relocations: list[Relocation]) -> None:
     """Rewrite per-material name strings whose path-rooted prefix matches a
     relocation. Some MDLs reference materials by full path (e.g. material name
     'models/weapons/c_items/c_buffbanner' paired with an empty material_dir);
     the engine resolves these via 'materials/<name>.vmt'. When that on-disk
     location has been moved, the name itself must be re-prefixed.
+
+    Each rewrite is gated on the candidate VMT existing at the new location.
+    Without that check, an MDL that references both a mod-shipped material
+    *and* a vanilla material under the same prefix would have both names
+    re-prefixed; the vanilla one would then point at materials/console/...
+    where nothing was shipped, and the engine has no path back to the
+    original vanilla VMT.
     """
     if not relocations:
         return
@@ -249,13 +255,17 @@ def _relocate_material_names(mdl_paths: list[Path], relocations: list[Relocation
         {(r.old_dir, r.new_dir) for r in relocations},
         key=lambda p: -len(p[0]),
     )
+    materials_root = working_root / "materials"
 
     def rewrite_name(name: str) -> str:
         normalized = _norm(name).lstrip("/")
         if "/" not in normalized:
             return name
         for old, new in pairs:
-            if normalized.lower().startswith(old.lower()):
+            if normalized.startswith(old):
+                candidate = new + normalized[len(old):] + ".vmt"
+                if resolve_ci(materials_root, candidate) is None:
+                    return name
                 return new + normalized[len(old):]
         return name
 
@@ -267,7 +277,7 @@ def _relocate_material_names(mdl_paths: list[Path], relocations: list[Relocation
         mdl.rewrite_materials(new_names)
         for old, new in zip(mdl.materials, new_names):
             if old != new:
-                log.debug(f"  [{mdl_path.name}] rewrote material name: {old!r} -> {new!r}")
+                log.debug(f"[{mdl_path.name}] rewrote material name: {old!r} -> {new!r}")
 
 
 def _update_vmt_refs(working_root: Path, relocations: list[Relocation]) -> None:
@@ -283,11 +293,11 @@ def _update_vmt_refs(working_root: Path, relocations: list[Relocation]) -> None:
         return
     for vmt in materials_root.rglob("*.vmt"):
         original = vmt.read_text(encoding="utf-8", errors="replace")
-        text = _norm(original)
+        text = original.replace("\\", "/")
         new_text = _apply_path_rewrites(text, pattern, mapping, materials_root)
         if new_text != original:
             vmt.write_text(new_text, encoding="utf-8")
-            log.debug(f"  rewrote refs in materials/{vmt.relative_to(materials_root)}")
+            log.debug(f"rewrote refs in materials/{vmt.relative_to(materials_root)}")
 
 
 def relocate_mdl_paths(
@@ -312,7 +322,7 @@ def relocate_mdl_paths(
             log.exception(f"MDL relocation failed for {mdl_path}; leaving as-is")
 
     try:
-        _relocate_material_names(mdl_paths, all_relocations)
+        _relocate_material_names(working_root, mdl_paths, all_relocations)
     except Exception:
         log.exception("MDL material-name rewrite failed")
 
