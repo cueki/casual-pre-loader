@@ -92,16 +92,17 @@ def resolve_ci(root: Path, rel_path: str) -> Path | None:
         if not part or part == ".":
             continue
         if part == "..":
+            if current == root:
+                return None
             current = current.parent
             if not current.exists():
                 return None
             continue
+        target = part.lower()
         try:
-            entries = list(current.iterdir())
+            match = next((e for e in current.iterdir() if e.name.lower() == target), None)
         except (OSError, NotADirectoryError):
             return None
-        target = part.lower()
-        match = next((e for e in entries if e.name.lower() == target), None)
         if match is None:
             return None
         current = match
