@@ -618,8 +618,6 @@ class ParticleManagerGUI(QMainWindow):
 
     def apply_saved_addon_selections(self):
         saved_selections = self.settings_manager.get_addon_selections()
-        if not saved_selections:
-            return
 
         self.addons_list.blockSignals(True)
 
