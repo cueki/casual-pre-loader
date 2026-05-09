@@ -183,7 +183,9 @@ def _relocate_one_mdl(mdl_path: Path, working_root: Path, prefix: str) -> list[R
     return relocations
 
 
-def _build_rewrite_regex(relocations: list[Relocation]):
+def _build_rewrite_regex(
+    relocations: list[Relocation],
+) -> tuple[re.Pattern[str] | None, dict[str, str] | None]:
     """Build a single-pass regex + mapping from a list of relocations.
 
     Prefixes are sorted longest-first so a more specific rule wins. The
@@ -211,14 +213,19 @@ def _build_rewrite_regex(relocations: list[Relocation]):
     return pattern, mapping
 
 
-def _apply_path_rewrites(text: str, pattern, mapping, materials_root: Path) -> str:
+def _apply_path_rewrites(
+    text: str,
+    pattern: re.Pattern[str] | None,
+    mapping: dict[str, str] | None,
+    materials_root: Path,
+) -> str:
     """Rewrite path refs whose target file exists at the new location; leave
     refs that don't (they're relying on engine fallback to vanilla).
     """
-    if pattern is None:
+    if pattern is None or mapping is None:
         return text
 
-    def replace(m):
+    def replace(m: re.Match[str]) -> str:
         prefix = m.group("prefix")
         tail = m.group("tail")
         new_prefix = mapping[prefix.lower()]
