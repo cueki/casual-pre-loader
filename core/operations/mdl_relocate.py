@@ -22,11 +22,12 @@ from __future__ import annotations
 
 import logging
 import re
-import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
 from valve_parsers import MDLFile
+
+from core.util.file import move
 
 log = logging.getLogger()
 
@@ -168,8 +169,7 @@ def _relocate_one_mdl(mdl_path: Path, working_root: Path, prefix: str) -> list[R
         if dst is not None and (src is None or src != dst):
             log.debug(f"on-disk: materials/{new_rel}/ already exists (moved by another MDL)")
             continue
-        canonical_dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.move(str(src), str(canonical_dst))
+        move(src, canonical_dst)
         for parent in src.parents:
             if parent == materials_root:
                 break
@@ -196,7 +196,8 @@ def _build_rewrite_regex(relocations: list[Relocation]):
     """
     pairs = sorted(
         {(r.old_dir, r.new_dir) for r in relocations},
-        key=lambda p: -len(p[0]),
+        key=lambda p: len(p[0]),
+        reverse=True,
     )
     if not pairs:
         return None, None
@@ -254,7 +255,8 @@ def _relocate_material_names(working_root: Path, mdl_paths: list[Path], relocati
         return
     pairs = sorted(
         {(r.old_dir, r.new_dir) for r in relocations},
-        key=lambda p: -len(p[0]),
+        key=lambda p: len(p[0]),
+        reverse=True,
     )
     materials_root = working_root / "materials"
 
