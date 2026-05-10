@@ -141,4 +141,4 @@ if [ -f 'requirements.txt' ]; then
 fi
 
 printf '%s\n' 'Starting Casual Preloader' | info
-exec ./main.py
+exec ./main.py "${@}"

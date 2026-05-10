@@ -2,6 +2,41 @@ import sys
 from pathlib import Path
 from typing import Any, Optional
 
+from core.constants import SOURCEMODS
+
+
+def normalize_sourcemod(sourcemod: int | str) -> tuple[Optional[int], str]:
+    """
+    Normalizes sourcemods using known aliases.
+
+    Args:
+        sourcemod: The steam id of a sourcemod, its name or an alias thereof.
+
+    Returns:
+        A tuple containing the sourcemod's id if known and name.
+    """
+
+    if isinstance(sourcemod, int):
+        if sourcemod in SOURCEMODS:
+            if isinstance(SOURCEMODS[sourcemod], str):
+                return sourcemod, SOURCEMODS[sourcemod]
+            else:
+                return sourcemod, SOURCEMODS[sourcemod][0]
+        else:
+            raise ValueError(f'Unknown sourcemod with steam id {sourcemod}')
+
+    _sourcemod = sourcemod.lower()
+    for id, name in SOURCEMODS.items():
+        if isinstance(name, str):
+            if _sourcemod == name.lower():
+                return id, name
+        else:
+            for _name in name:
+                if _sourcemod == _name.lower():
+                    return id, name[0]
+
+    return None, sourcemod
+
 
 def auto_detect_sourcemod(game_target: str = "Team Fortress 2") -> str | None:
     """Auto-detect a Source mod installation by looking for a subdirectory with gameinfo.txt.

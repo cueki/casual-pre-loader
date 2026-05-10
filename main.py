@@ -10,7 +10,7 @@ from core.version import VERSION
 
 log = logging.getLogger()
 
-def main():
+def main(args):
     from PyQt6.QtCore import Qt
     from PyQt6.QtGui import QIcon, QPixmap
     from PyQt6.QtWidgets import QApplication, QSplashScreen
@@ -29,6 +29,22 @@ def main():
     log.info(f'Settings files are in {folder_setup.settings_dir}')
     log.info(f'Log is written to {folder_setup.log_file}')
 
+    log.debug('DEBUG OUTPUT HAS BEEN ENABLED')
+
+    if args.reset:
+        confirm = input(
+            'This will delete your saved profiles and settings.\n'
+            'Your installed mods will not be affected.\n'
+            'Are you sure? [y/N]: '
+        )
+        if confirm and confirm[0].lower() == 'y':
+            delete(folder_setup.app_settings_file, not_exist_ok=True)
+            delete(folder_setup.addon_metadata_file, not_exist_ok=True)
+            log.warning('Settings have been reset')
+        else:
+            log.critical('Reset cancelled')
+            return
+
     copy(folder_setup.install_dir / "backup", folder_setup.project_dir / "backup", noclobber=False)
 
     app = QApplication([])
@@ -36,12 +52,12 @@ def main():
     app.setStyleSheet(GLOBAL_STYLESHEET)
 
     # first-time setup
-    tf_directory = None
-    if SettingsManager.is_first_time_setup():
-        tf_directory = run_first_time_setup()
-        if tf_directory is None:
-            # user cancelled setup
-            return
+    if args.tf_dir is None:
+        if SettingsManager.is_first_time_setup():
+            args.tf_dir = run_first_time_setup()
+            if args.tf_dir is None:
+                log.debug('User cancelled setup')
+                return
 
     # splash screen
     splash_pixmap = QPixmap('gui/icons/cueki_splash.png')
@@ -58,9 +74,9 @@ def main():
 
     prepare_working_copy()
 
-    window = ParticleManagerGUI(tf_directory)
+    window = ParticleManagerGUI(args.tf_dir)
 
-    if not SettingsManager.is_first_time_setup() and folder_setup.portable:
+    if args.update and not SettingsManager.is_first_time_setup() and folder_setup.portable:
         settings_manager = SettingsManager()
 
         updates = check_for_updates()
@@ -89,6 +105,9 @@ def main():
     delete(folder_setup.temp_dir, not_exist_ok=True)
 
 def run():
+    import core.args
+    args = core.args.parse_args()
+
     try:
         from rich.logging import RichHandler
         from rich.traceback import install
@@ -103,18 +122,18 @@ def run():
 
     folder_setup.log_file.parent.mkdir(parents=True, exist_ok=True)
 
-    verbose = False
     logging.basicConfig(
-        level=(verbose and logging.DEBUG or logging.INFO),
+        level=(args.verbose and logging.DEBUG or logging.INFO),
         format='%(message)s',
         datefmt=fmt_time,
         handlers=[logging.FileHandler(folder_setup.log_file, mode='a', encoding='utf-8'), stream_handler],
     )
 
-    import core.migrations
-    core.migrations.migrate()
+    if args.migrate:
+        import core.migrations
+        core.migrations.migrate()
 
-    main()
+    main(args)
 
 if __name__ == "__main__":
     run()

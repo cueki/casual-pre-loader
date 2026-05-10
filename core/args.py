@@ -1,0 +1,144 @@
+import logging
+from argparse import Action, ArgumentParser, Namespace
+from typing import Iterable, Optional
+
+from core.constants import DESCRIPTION, PROGRAM_AUTHOR, PROGRAM_NAME
+from core.util.sourcemod import auto_detect_sourcemod, normalize_sourcemod, validate_game_directory
+from core.version import VERSION
+
+
+class BooleanOptionalAction(Action):
+    """
+    Based on argparse.BooleanOptionalAction
+    """
+
+    def __init__(
+        self,
+        option_strings,
+        dest,
+        default,
+        required=False,
+        help=None,
+        deprecated=False
+    ):
+        def make_inverse_opt(opt: str) -> str:
+            if opt.startswith('--'):
+                return f'--no-{opt[2:]}'
+            else:
+                return opt.swapcase()
+
+        length = len(option_strings)
+        if not (
+            length == 1
+            or (
+                length == 2
+                and option_strings[0].startswith('-')
+                and not option_strings[0].startswith('--')
+                and option_strings[1].startswith('--')
+            )
+        ):
+            raise ValueError('BooleanOptionalAction must be given one form of each format at most')
+
+        _option_strings = option_strings.copy()
+        for option_string in option_strings:
+            _option_strings.append(make_inverse_opt(option_string))
+
+        help = f'{help} ({default})'
+
+        super().__init__(
+            option_strings=_option_strings,
+            dest=dest,
+            nargs=0,
+            default=default,
+            required=required,
+            help=help,
+            deprecated=deprecated,
+        )
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if option_string in self.option_strings:
+            setattr(namespace, self.dest, not (self.option_strings.index(option_string) % 2))
+
+    def format_usage(self):
+        if len(self.option_strings) == 2:
+            return ' | '.join(self.option_strings)
+        else:
+            return ' | '.join(self.option_strings[::2])
+
+
+def parse_args(args: Optional[Iterable[str]] = None, namespace: Optional[Namespace] = None) -> Namespace:
+    parser = ArgumentParser(
+        prog=PROGRAM_NAME,
+        epilog=f'Copyright (c) 2026 {PROGRAM_AUTHOR}',
+        description=DESCRIPTION,
+    )
+
+    parser.add_argument(
+        '-m', '--migrate',
+        default=True,
+        action=BooleanOptionalAction,
+        help='Migrate userdata from old locations to new ones.'
+    )
+
+    parser.add_argument(
+        '-p', '--portable',
+        dest='portable',
+        action=BooleanOptionalAction,
+        default=True,
+        help='Run portably, i.e. keep all userdata in `userdata/` instead of the appropriate user-specific locations depending on the OS. Has no effect if installed via package manager.'
+    )
+
+    parser.add_argument(
+        '-r', '--reset',
+        default=False,
+        action='store_true',
+        help='Reset settings to defaults and re-run first-time setup'
+    )
+
+    parser.add_argument(
+        '--sourcemod',
+        default=440,
+        help='Specify which sourcemod to target (defaults to TF2). Takes either a name or a steam id.'
+    )
+
+    parser.add_argument(
+        '--tf-dir',
+        type=str,
+        default=None,
+        help='Override the tf directory path.'
+    )
+
+    parser.add_argument(
+        '-u', '--update',
+        default=True,
+        action=BooleanOptionalAction,
+        help='Automatically check for updates on startup. Has no effect if installed via package manager.'
+    )
+
+    parser.add_argument(
+        '-v', '--verbose',
+        default=False,
+        action='store_true',
+        help='Print more verbose information to output'
+    )
+
+    parser.add_argument(
+        '-V', '--version',
+        action='version',
+        version=f'%(prog)s {VERSION}'
+    )
+
+    args = parser.parse_args(args=args, namespace=namespace)
+
+    args.sourcemod_id, args.sourcemod = normalize_sourcemod(args.sourcemod)
+
+    if args.tf_dir:
+        if not validate_game_directory(args.tf_dir):
+            logging.critical(f'--tf-dir is not a valid Source mod directory: {args.tf_dir}')
+            return
+    # TODO: uncomment once first time setup is a bit more flexible
+    # else:
+    #     args.tf_dir = auto_detect_sourcemod(args.sourcemod)
+
+    print(args)
+    return args
