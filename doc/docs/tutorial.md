@@ -48,35 +48,59 @@ If you want a video supplement, please refer to the [**Video Supplement**](#vide
 
 ## Linux Tutorial:
 
-You can clone the repo, or install it as an [AUR package](https://aur.archlinux.org/packages/casual-pre-loader-git).
+### Arch Linux or similar distros
+There is an [AUR package](https://aur.archlinux.org/packages/casual-pre-loader-git). After installing, you can run the program with `casual-pre-loader` or through your launcher.
 
-   - Using [yay](https://github.com/Jguer/yay):
-```sh
-yay -S casual-pre-loader-git
-casual-pre-loader
-```
+Settings are stored under `${XDG_CONFIG_HOME}/casual-pre-loader`, defaulting to `~/.config/casual-pre-loader` if `${XDG_CONFIG_HOME}` is unset or empty.
 
-   - Using [paru](https://github.com/Morganamilo/paru):
-```sh
-paru -S casual-pre-loader-git
-casual-pre-loader
-```
+Mod data is stored under `${XDG_DATA_HOME}/casual-pre-loader`, defaulting to `~/.local/share/casual-pre-loader` if `${XDG_DATA_HOME}` is unset or empty.
 
-   - Or with git:
+### Any Linux distro
+Ensure that the following dependencies are installed:  
+`python3.11+ python-ensurepip python-venv`  
+These may be packaged differently depending on the distro.
+
+!!! note
+    There is an additional optional dependency on `wine`. If it's installed, it is used to run the windows build of `studiomdl` in order to compile MDL files.  
+    (This may be unnecessary in the future if [this PR](https://github.com/craftablescience/sourcepp/pull/85)) gets merged.
+
+You can then download and run the program by cloning the repo:
 ```sh
 git clone --recursive https://github.com/cueki/casual-pre-loader
 cd casual-pre-loader
-```
-
-Then run the script whenever you want to use the app:
-```sh
 ./scripts/run.sh
 ```
+The run script helps set up a virtualenv, if you know what you're doing, you could also just skip the run script and install any required python packages globally.
+
+The program stores settings and mod data under the `userdata/` directory that is created on program launch.  
+If you'd rather store user files in the regular locations (like the AUR package does), you can open up `core/are_we_portable.py` and change set `portable = False`.
 
 !!! warning
     Linux users should use `scripts/run.sh` to launch the application. Do **NOT** use `RUNME.bat` - that's for Windows only.
 
-If you're on Ubuntu, or an Ubuntu-based derivative (such as Mint or PopOS), you may get an error similiar to the following:
+### Aditional steps for immutable distros (e.g. steamos, bazzite, etc.)
+Since installing packages is quite a hassle on most immutable distros - and usually has some downsides - using something like [`flatpak`](https://flatpak.org/) to install `wine` is recommended.
+```sh
+flatpak install "$(flatpak remote-ls flathub --app --columns=ref | grep org.winehq.Wine | grep stable | sort -Vr | head -n1)"
+```
+
+However, the wine flatpak requires you to invoke it as `flatpak run org.winehq.Wine`, and since the preloader expects a binary named `wine` to be on the `PATH`, we need to put a small script on the `PATH` that just calls the correct invocation.
+
+It is recommended to add `~/.local/bin` to the `PATH` if it hasn't been already:
+```sh
+echo 'PATH="${PATH+"${PATH}:"}${HOME}/.local/bin"' >>~/.bash_profile
+```
+
+Then we simply create a small wrapper script:
+```sh
+mkdir -p ~/.local/bin
+echo '#!/bin/sh
+exec flatpak run org.winehq.Wine "${@}"' >~/.local/bin/wine
+chmod +x ~/.local/bin/wine
+```
+
+### Additional steps for Ubuntu or similar distros
+If you're on Ubuntu, or an Ubuntu derivative (such as Mint or PopOS), you may get an error similiar to the following:
 ```
 This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
 ```
