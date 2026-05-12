@@ -6,6 +6,6 @@ more-itertools~=11.0
 packaging~=26.0
 platformdirs~=4.9
 PyGithub~=2.9
-requests~=2.33
+requests~=2.34
 rich~=14.3
 valve-parsers>=1.2.2
