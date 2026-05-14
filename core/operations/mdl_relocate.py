@@ -108,7 +108,70 @@ def resolve_ci(root: Path, rel_path: str) -> Path | None:
     return current
 
 
-def _relocate_one_mdl(mdl_path: Path, working_root: Path, prefix: str) -> list[Relocation]:
+def _move_with_origin(src: Path, dst: Path, file_origin: dict[Path, int]) -> None:
+    """Move src tree to dst (which must not exist) and migrate file_origin
+    keys from the old paths to the new ones.
+    """
+    captured: list[tuple[Path, int]] = []
+    for f in src.rglob("*"):
+        if f.is_file():
+            idx = file_origin.pop(f, None)
+            if idx is not None:
+                captured.append((f.relative_to(src), idx))
+
+    move(src, dst)
+
+    for rel, idx in captured:
+        file_origin[dst / rel] = idx
+
+
+def _merge_into(src: Path, dst: Path, file_origin: dict[Path, int]) -> None:
+    """File-by-file merge of src tree into an existing dst tree.
+
+    Per-file collisions are resolved by load order via file_origin: the file
+    from the later-loaded addon wins. Files without an origin entry (e.g.
+    config files copied outside the addon staging loop) are treated as
+    lowest priority. This is the scenario where mod A ships content under
+    `materials/console/...` and mod B ships overlapping content under the
+    un-prefixed path; without merging here, mod B's content would be stranded
+    at the un-prefixed location.
+    """
+    for src_file in list(src.rglob("*")):
+        if not src_file.is_file():
+            continue
+        rel = src_file.relative_to(src)
+        dst_file = dst / rel
+        src_idx = file_origin.pop(src_file, -1)
+
+        if dst_file.exists():
+            dst_idx = file_origin.get(dst_file, -1)
+            if src_idx > dst_idx:
+                dst_file.unlink()
+                move(src_file, dst_file)
+                file_origin[dst_file] = src_idx
+            else:
+                src_file.unlink()
+        else:
+            move(src_file, dst_file)
+            if src_idx != -1:
+                file_origin[dst_file] = src_idx
+
+    # leaves-up empty-subdir sweep so the src-parents rmdir loop in the
+    # caller can collapse the now-empty branch
+    subdirs = [p for p in src.rglob("*") if p.is_dir()]
+    for sub in sorted(subdirs, key=lambda p: len(p.parts), reverse=True):
+        try:
+            sub.rmdir()
+        except OSError:
+            pass
+
+
+def _relocate_one_mdl(
+    mdl_path: Path,
+    working_root: Path,
+    prefix: str,
+    file_origin: dict[Path, int],
+) -> list[Relocation]:
     """Rewrite one MDL's material_dirs to use the prefix and move on-disk
     material trees to match.
 
@@ -164,10 +227,28 @@ def _relocate_one_mdl(mdl_path: Path, working_root: Path, prefix: str) -> list[R
         ))
         log.debug(f"rewrote material_dir: {old!r} -> {proposed!r}  (kept {old!r} as fallback)")
 
-        if dst is not None and (src is None or src != dst):
+        if src is None:
+            # nothing to move; another MDL in this run already relocated it
             log.debug(f"on-disk: materials/{new_rel}/ already exists (moved by another MDL)")
             continue
-        move(src, canonical_dst)
+
+        if dst is not None:
+            # dst already populated,  either by a prior MDL's relocation or
+            # by another mod that ships its content pre-prefixed under
+            # `console/`. Merge src in file-by-file; collisions resolved by
+            # addon load order via file_origin.
+            _merge_into(src, canonical_dst, file_origin)
+            log.debug(f"merged on-disk: materials/{old_rel}/ -> materials/{new_rel}/")
+        else:
+            _move_with_origin(src, canonical_dst, file_origin)
+            log.debug(f"moved on-disk: materials/{old_rel}/ -> materials/{new_rel}/")
+
+        # clean up src dir (now empty after move, or partially empty after merge)
+        # and any empty parents up to materials/
+        try:
+            src.rmdir()
+        except OSError:
+            pass  # already gone (simple move) or non-empty (merge collisions)
         for parent in src.parents:
             if parent == materials_root:
                 break
@@ -175,7 +256,6 @@ def _relocate_one_mdl(mdl_path: Path, working_root: Path, prefix: str) -> list[R
                 parent.rmdir()
             except OSError:
                 break
-        log.debug(f"moved on-disk: materials/{old_rel}/ -> materials/{new_rel}/")
 
     mdl.rewrite_material_dirs(new_dirs + fallback_dirs)
     return relocations
@@ -311,8 +391,15 @@ def _update_vmt_refs(working_root: Path, relocations: list[Relocation]) -> None:
 def relocate_mdl_paths(
     working_root: Path,
     prefix: str = DEFAULT_PREFIX,
+    *,
+    file_origin: dict[Path, int] | None = None,
 ) -> int:
     """Run the full MDL-relocation pipeline against a staged mod tree.
+
+    `file_origin` maps each staged file path to its source addon's load-order
+    index; the merge step uses it to resolve per-file collisions when two
+    mods ship overlapping content (one pre-prefixed under `console/`, the
+    other not). If omitted, collisions silently keep the dst file.
 
     Returns the number of MDLs found.
     """
@@ -320,12 +407,15 @@ def relocate_mdl_paths(
     if not mdl_paths:
         return 0
 
+    if file_origin is None:
+        file_origin = {}
+
     log.info(f"Relocating material paths for {len(mdl_paths)} MDL(s) under prefix '{prefix}'")
 
     all_relocations: list[Relocation] = []
     for mdl_path in mdl_paths:
         try:
-            all_relocations.extend(_relocate_one_mdl(mdl_path, working_root, prefix))
+            all_relocations.extend(_relocate_one_mdl(mdl_path, working_root, prefix, file_origin))
         except Exception:
             log.exception(f"MDL relocation failed for {mdl_path}; leaving as-is")
 

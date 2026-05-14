@@ -132,7 +132,7 @@ class InstallService:
             files_to_copy = []
             hud_addons = {}
 
-            for addon_path in selected_addons:
+            for addon_index, addon_path in enumerate(selected_addons):
                 addon_dir = folder_setup.addons_dir / addon_path
                 if addon_dir.exists() and addon_dir.is_dir():
                     mod_json_path = addon_dir / 'mod.json'
@@ -160,7 +160,7 @@ class InstallService:
                                 src_path.suffix == '.txt'):
                                 continue
                             total_files += 1
-                            files_to_copy.append((src_path, addon_dir))
+                            files_to_copy.append((src_path, addon_dir, addon_index))
 
             self._check_cancelled()
 
@@ -201,12 +201,17 @@ class InstallService:
             if apply_particle_selections:
                 apply_particle_selections()
 
+            # dest_path -> addon load-order index, used by mdl_relocate to
+            # resolve per-file collisions when merging un-prefixed mod content
+            # into a destination that another mod already shipped pre-prefixed.
+            file_origin: dict[Path, int] = {}
+
             if files_to_copy:
                 progress_range = 25
                 completed_files = 0
                 progress(10, f"Installing addons... (0/{total_files} files)")
 
-                for src_path, addon_dir in files_to_copy:
+                for src_path, addon_dir, addon_index in files_to_copy:
                     self._check_cancelled()
 
                     rel_path = src_path.relative_to(addon_dir)
@@ -216,6 +221,7 @@ class InstallService:
                         dest_path = folder_setup.temp_to_be_vpk_dir / rel_path
 
                     copy(src_path, dest_path)
+                    file_origin[dest_path] = addon_index
 
                     completed_files += 1
                     current_progress = 10 + int((completed_files / total_files) * progress_range)
@@ -351,7 +357,7 @@ class InstallService:
                 patch_mainmenuoverride(tf_path)
                 if fix_mdl_paths:
                     progress(78, "Relocating model material paths...")
-                    relocate_mdl_paths(custom_content_dir)
+                    relocate_mdl_paths(custom_content_dir, file_origin=file_origin)
                 generate_missing_vmt_files(custom_content_dir, tf_path)
 
             for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
