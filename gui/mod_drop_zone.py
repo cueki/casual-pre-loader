@@ -3,13 +3,14 @@ import threading
 from pathlib import Path
 
 from PyQt6.QtCore import QObject, Qt, pyqtSignal
-from PyQt6.QtWidgets import QFrame, QLabel, QMessageBox, QProgressDialog, QVBoxLayout
+from PyQt6.QtWidgets import QFrame, QLabel, QMessageBox, QProgressDialog, QPushButton, QVBoxLayout
 
 from core.folder_setup import folder_setup
 from core.services.importer import ImportService, normalize_vpk_paths
 from core.structure_validator import StructureValidator, ValidationResult
 from core.util.pcf_path_walk import apply_particle_selections, get_mod_particles
 from gui.conflict_matrix import ConflictMatrix
+from gui.theme import PRIMARY_BUTTON_STYLE
 
 log = logging.getLogger()
 
@@ -64,7 +65,7 @@ class ModDropZone(QFrame):
                 error_msg += "\n\nWarnings:\n"
                 error_msg += "\n".join(f"• {warning}" for warning in validation_result.warnings)
 
-            QMessageBox.critical(self, "Invalid Structure", error_msg)
+            self._show_message(QMessageBox.Icon.Critical, "Invalid Structure", error_msg)
             return False
 
         # show warnings but allow processing
@@ -98,16 +99,20 @@ class ModDropZone(QFrame):
             self.progress_dialog.setLabelText(message)
 
     def show_error(self, message):
-        QMessageBox.critical(self, "Error", message)
+        self._show_message(QMessageBox.Icon.Critical, "Error", message)
 
     def show_success(self, message):
+        self._show_message(QMessageBox.Icon.Information, "Success", message)
+
+    def _show_message(self, icon, title, message):
         msg_box = QMessageBox(self)
-        msg_box.setWindowTitle("Success")
+        msg_box.setIcon(icon)
+        msg_box.setWindowTitle(title)
         msg_box.setText(message)
-        msg_box.setIcon(QMessageBox.Icon.Information)
-        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
-        ok_btn = msg_box.button(QMessageBox.StandardButton.Ok)
-        ok_btn.setProperty("primary", True)
+        ok_btn = QPushButton("OK")
+        ok_btn.setStyleSheet(PRIMARY_BUTTON_STYLE)
+        msg_box.addButton(ok_btn, QMessageBox.ButtonRole.AcceptRole)
+        msg_box.setDefaultButton(ok_btn)
         msg_box.exec()
 
     def on_process_finished(self):
@@ -160,8 +165,8 @@ class ModDropZone(QFrame):
 
     def dropEvent(self, event):
         if self.processing:
-            QMessageBox.warning(self, "Processing in Progress",
-                                "Please wait for the current operation to complete.")
+            self._show_message(QMessageBox.Icon.Warning, "Processing in Progress",
+                               "Please wait for the current operation to complete.")
             return
 
         self.setProperty('dragOver', False)
@@ -185,9 +190,9 @@ class ModDropZone(QFrame):
             elif item_path.lower().endswith('.zip'):
                 # ZIP file
                 if path_obj.name.count('.') > 1:
-                    QMessageBox.warning(self, "Invalid Filename",
-                                        f"File '{path_obj.name}' contains multiple periods.\n\n"
-                                        f"Please rename the file and try again.")
+                    self._show_message(QMessageBox.Icon.Warning, "Invalid Filename",
+                                       f"File '{path_obj.name}' contains multiple periods.\n\n"
+                                       f"Please rename the file and try again.")
                     continue
                 # validate ZIP structure
                 validation_result = self.validator.validate_zip(path_obj)
@@ -197,15 +202,15 @@ class ModDropZone(QFrame):
             elif item_path.lower().endswith('.vpk'):
                 # VPK file
                 if path_obj.name.count('.') > 1:
-                    QMessageBox.warning(self, "Invalid Filename",
-                                        f"File '{path_obj.name}' contains multiple periods.\n\n"
-                                        f"Please rename the file and try again.")
+                    self._show_message(QMessageBox.Icon.Warning, "Invalid Filename",
+                                       f"File '{path_obj.name}' contains multiple periods.\n\n"
+                                       f"Please rename the file and try again.")
                     continue
                 vpk_paths.append(path_obj)
             else:
-                QMessageBox.warning(self, "Unsupported File Type",
-                                    f"File type not supported: {path_obj.name}\n\n"
-                                    f"Supported types: VPK files, folders, ZIP files")
+                self._show_message(QMessageBox.Icon.Warning, "Unsupported File Type",
+                                   f"File type not supported: {path_obj.name}\n\n"
+                                   f"Supported types: VPK files, folders, ZIP files")
                 continue
 
         # normalize and deduplicate VPK paths

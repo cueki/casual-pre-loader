@@ -80,6 +80,8 @@ class ParticleManagerGUI(QMainWindow):
         self.suppress_updates_checkbox = None
         self.skip_launch_popup_checkbox = None
         self.disable_paint_checkbox = None
+        self.fix_mdl_paths_checkbox = None
+        self.skip_quickprecache_checkbox = None
         self.restore_button = None
         self.current_profile_label = None
 
@@ -349,6 +351,18 @@ class ParticleManagerGUI(QMainWindow):
         )
         preloader_layout.addWidget(self.disable_paint_checkbox)
 
+        self.fix_mdl_paths_checkbox = QCheckBox("Attempt to automatically fix broken models")
+        self.fix_mdl_paths_checkbox.stateChanged.connect(
+            lambda: self.settings_manager.set_fix_mdl_paths(self.fix_mdl_paths_checkbox.isChecked())
+        )
+        preloader_layout.addWidget(self.fix_mdl_paths_checkbox)
+
+        self.skip_quickprecache_checkbox = QCheckBox("Skip QuickPrecache (advanced users only! May cause model unloading for map props!)")
+        self.skip_quickprecache_checkbox.stateChanged.connect(
+            lambda: self.settings_manager.set_skip_quickprecache(self.skip_quickprecache_checkbox.isChecked())
+        )
+        preloader_layout.addWidget(self.skip_quickprecache_checkbox)
+
         layout.addWidget(preloader_group)
 
         # downloads group
@@ -444,27 +458,28 @@ class ParticleManagerGUI(QMainWindow):
         # switch
         self.settings_manager.set_active_profile(profile_id)
 
+        self._sync_to_active_profile()
+
+    def _sync_to_active_profile(self):
         new_profile = self.settings_manager.get_active_profile()
-        if new_profile:
-            self.profile_btn.setText(f" {new_profile.name}")
+        if not new_profile:
+            return
 
-            # update install manager path
-            self.install_manager.set_tf_path(new_profile.game_path)
+        self.profile_btn.setText(f" {new_profile.name}")
+        self.install_manager.set_tf_path(new_profile.game_path)
 
-            # reload addons (different selections per profile)
-            self.load_addons()
+        # reload addons (different selections per profile)
+        self.load_addons()
 
-            # reload conflict matrix (simple mode may differ per profile)
-            new_simple = self.settings_manager.get_simple_particle_mode()
-            if self.mod_drop_zone and self.mod_drop_zone.conflict_matrix:
-                self.mod_drop_zone.conflict_matrix.set_simple_mode(new_simple)
-            self.update_simple_mode_button()
-            self.mod_drop_zone.update_matrix()
+        # reload conflict matrix (simple mode may differ per profile)
+        new_simple = self.settings_manager.get_simple_particle_mode()
+        if self.mod_drop_zone and self.mod_drop_zone.conflict_matrix:
+            self.mod_drop_zone.conflict_matrix.set_simple_mode(new_simple)
+        self.update_simple_mode_button()
+        self.mod_drop_zone.update_matrix()
 
-            # sync settings page
-            self.sync_settings_page()
-
-            self.update_load_order_display()
+        self.sync_settings_page()
+        self.update_load_order_display()
 
     def create_new_profile(self):
         dialog = ProfileDialog(self)
@@ -512,9 +527,7 @@ class ParticleManagerGUI(QMainWindow):
         if result == QMessageBox.StandardButton.Yes:
             self.settings_manager.delete_profile(active.id)
             self.rebuild_profile_menu()
-            new_active = self.settings_manager.get_active_profile()
-            if new_active:
-                self.switch_profile(new_active.id)
+            self._sync_to_active_profile()
 
     def sync_settings_page(self):
         active = self.settings_manager.get_active_profile()
@@ -525,16 +538,20 @@ class ParticleManagerGUI(QMainWindow):
 
         # block signals while syncing checkboxes
         for cb in [self.console_checkbox, self.suppress_updates_checkbox,
-                    self.skip_launch_popup_checkbox, self.disable_paint_checkbox]:
+                    self.skip_launch_popup_checkbox, self.disable_paint_checkbox,
+                    self.fix_mdl_paths_checkbox, self.skip_quickprecache_checkbox]:
             cb.blockSignals(True)
 
         self.console_checkbox.setChecked(self.settings_manager.get_show_console_on_startup())
         self.suppress_updates_checkbox.setChecked(self.settings_manager.get_suppress_update_notifications())
         self.skip_launch_popup_checkbox.setChecked(self.settings_manager.get_skip_launch_options_popup())
         self.disable_paint_checkbox.setChecked(self.settings_manager.get_disable_paint_colors())
+        self.fix_mdl_paths_checkbox.setChecked(self.settings_manager.get_fix_mdl_paths())
+        self.skip_quickprecache_checkbox.setChecked(self.settings_manager.get_skip_quickprecache())
 
         for cb in [self.console_checkbox, self.suppress_updates_checkbox,
-                    self.skip_launch_popup_checkbox, self.disable_paint_checkbox]:
+                    self.skip_launch_popup_checkbox, self.disable_paint_checkbox,
+                    self.fix_mdl_paths_checkbox, self.skip_quickprecache_checkbox]:
             cb.blockSignals(False)
 
         self.update_restore_button_state()
@@ -601,8 +618,6 @@ class ParticleManagerGUI(QMainWindow):
 
     def apply_saved_addon_selections(self):
         saved_selections = self.settings_manager.get_addon_selections()
-        if not saved_selections:
-            return
 
         self.addons_list.blockSignals(True)
 

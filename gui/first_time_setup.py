@@ -1,4 +1,3 @@
-import json
 import logging
 from pathlib import Path
 
@@ -22,10 +21,9 @@ from PyQt6.QtWidgets import (
 )
 
 from core.download_mods import check_mods, download_mods
-from core.folder_setup import folder_setup
 from core.services.setup import (
-    find_mods_folder_for_settings,
-    import_mods_folder,
+    import_userdata,
+    is_valid_userdata_folder,
     save_initial_settings,
 )
 from core.util.sourcemod import auto_detect_sourcemod, validate_game_directory
@@ -40,14 +38,13 @@ class FirstTimeSetupDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.import_status_label = None
-        self.settings_import_edit = None
+        self.userdata_import_edit = None
         self.validation_label = None
         self.browse_button = None
         self.tf_path_edit = None
         self.finish_button = None
         self.tf_directory = ""
-        self.import_settings_path = ""
-        self.import_mods_path = ""
+        self.import_userdata_path = ""
 
         self.setWindowTitle("First Time Setup")
         self.setFixedSize(650, 580)
@@ -147,8 +144,9 @@ class FirstTimeSetupDialog(QDialog):
         layout = QVBoxLayout(tab)
 
         instructions = QLabel(
-            "If you have previously used this preloader, you can import your settings.\n"
-            "Select your app_settings.json file and the mods folder will be imported automatically.\n"
+            "If you have previously used this preloader, you can import your data.\n"
+            "Select the previous installation's 'userdata' folder - your mods, settings, and addon\n"
+            "metadata will be copied into the new install.\n"
             "This is optional - you can skip this step if this is your first time using the preloader."
         )
         instructions.setWordWrap(True)
@@ -159,20 +157,20 @@ class FirstTimeSetupDialog(QDialog):
         import_group = QGroupBox("Import Previous Installation")
         import_layout = QVBoxLayout()
 
-        # settings file import
-        settings_layout = QHBoxLayout()
-        settings_layout.addWidget(QLabel("Settings file (app_settings.json):"))
-        self.settings_import_edit = QLineEdit()
-        self.settings_import_edit.setReadOnly(True)
-        self.settings_import_edit.setPlaceholderText("Optional: Select app_settings.json...")
+        # userdata folder import
+        userdata_layout = QHBoxLayout()
+        userdata_layout.addWidget(QLabel("Previous userdata folder:"))
+        self.userdata_import_edit = QLineEdit()
+        self.userdata_import_edit.setReadOnly(True)
+        self.userdata_import_edit.setPlaceholderText("Optional: Select previous userdata/ folder...")
 
-        settings_browse_button = QPushButton("Browse")
-        settings_browse_button.setStyleSheet(BUTTON_STYLE_ALT)
-        settings_browse_button.clicked.connect(self.browse_settings_file)
+        userdata_browse_button = QPushButton("Browse")
+        userdata_browse_button.setStyleSheet(BUTTON_STYLE_ALT)
+        userdata_browse_button.clicked.connect(self.browse_userdata_folder)
 
-        settings_layout.addWidget(self.settings_import_edit)
-        settings_layout.addWidget(settings_browse_button)
-        import_layout.addLayout(settings_layout)
+        userdata_layout.addWidget(self.userdata_import_edit)
+        userdata_layout.addWidget(userdata_browse_button)
+        import_layout.addLayout(userdata_layout)
 
         # clear imports button
         clear_imports_button = QPushButton("Clear Import Selections")
@@ -198,16 +196,11 @@ class FirstTimeSetupDialog(QDialog):
             self.tf_path_edit.setText(directory)
             self.validate_directory()
 
-    def browse_settings_file(self):
-        file_path, _ = QFileDialog.getOpenFileName(
-            self, "Select app_settings.json", "app_settings.json",
-            "App Settings (app_settings.json);;JSON files (*.json);;All files (*)"
-        )
-        if file_path:
-            self.import_settings_path = file_path
-            self.settings_import_edit.setText(file_path)
-            mods_path = find_mods_folder_for_settings(Path(file_path))
-            self.import_mods_path = str(mods_path) if mods_path else ""
+    def browse_userdata_folder(self):
+        directory = QFileDialog.getExistingDirectory(self, "Select Previous userdata/ Folder")
+        if directory:
+            self.import_userdata_path = directory
+            self.userdata_import_edit.setText(directory)
             self.update_import_status()
 
 
@@ -225,9 +218,8 @@ class FirstTimeSetupDialog(QDialog):
 
 
     def clear_import_selections(self):
-        self.import_settings_path = ""
-        self.import_mods_path = ""
-        self.settings_import_edit.clear()
+        self.import_userdata_path = ""
+        self.userdata_import_edit.clear()
         self.update_import_status()
 
     def validate_directory(self):
@@ -238,25 +230,32 @@ class FirstTimeSetupDialog(QDialog):
     def update_import_status(self):
         status_parts = []
 
-        if self.import_settings_path:
-            settings_path = Path(self.import_settings_path)
-            if settings_path.exists():
-                status_parts.append("Settings file selected")
-
-                # check for mods folder in same directory
-                if self.import_mods_path:
-                    mods_path = Path(self.import_mods_path)
-                    if mods_path.exists() and mods_path.is_dir():
-                        status_parts.append("Mods folder found and will be imported")
-                    else:
-                        status_parts.append("Mods folder not found - settings only")
-                else:
-                    status_parts.append("No mods folder found - settings only")
+        if self.import_userdata_path:
+            userdata_path = Path(self.import_userdata_path)
+            if not userdata_path.exists():
+                status_parts.append("Selected folder does not exist")
+            elif not is_valid_userdata_folder(userdata_path):
+                status_parts.append(
+                    "Selected folder is not a valid userdata/ folder (missing data/ or config/)"
+                )
             else:
-                status_parts.append("Settings file not found")
+                found = []
+                if (userdata_path / 'data' / 'mods').is_dir():
+                    found.append("mods/")
+                if (userdata_path / 'data' / 'modsinfo.json').is_file():
+                    found.append("modsinfo.json")
+                if (userdata_path / 'config' / 'app_settings.json').is_file():
+                    found.append("app_settings.json")
+                if (userdata_path / 'config' / 'addon_metadata.json').is_file():
+                    found.append("addon_metadata.json")
+
+                if found:
+                    status_parts.append("Will import: " + ", ".join(found))
+                else:
+                    status_parts.append("No importable files found in selected userdata folder")
 
         if not status_parts:
-            status_parts.append("No import files selected (this is optional)")
+            status_parts.append("No import folder selected (this is optional)")
 
         self.import_status_label.setText("\n".join(status_parts))
 
@@ -274,18 +273,20 @@ class FirstTimeSetupDialog(QDialog):
             QMessageBox.warning(self, "Invalid Directory", "The selected TF2 directory is not valid.")
             return
 
-        # import mods folder if provided
-        if self.import_mods_path:
-            success, error = import_mods_folder(Path(self.import_mods_path))
+        # import userdata if provided
+        if self.import_userdata_path:
+            success, warnings = import_userdata(Path(self.import_userdata_path))
             if not success:
                 QMessageBox.warning(
                     self, "Import Error",
-                    f"Failed to import mods folder:\n{error}\n\nSetup will continue without importing mods."
+                    "Failed to import userdata:\n" + "\n".join(warnings)
+                    + "\n\nSetup will continue without importing."
                 )
+            elif warnings:
+                log.warning("Userdata import completed with warnings: %s", warnings)
 
-        # create or update app_settings.json
-        import_path = Path(self.import_settings_path) if self.import_settings_path else None
-        success, error = save_initial_settings(Path(self.tf_directory), import_path)
+        # create or update app_settings.json (preserving any imported keys, overwriting tf_directory)
+        success, error = save_initial_settings(Path(self.tf_directory))
         if not success:
             QMessageBox.warning(
                 self, "Settings Error",
