@@ -5,7 +5,7 @@ import logging
 from sys import platform
 
 from core.folder_setup import folder_setup
-from core.util.file import copy, delete
+from core.util.file import delete
 from core.version import VERSION
 
 log = logging.getLogger()
@@ -13,10 +13,10 @@ log = logging.getLogger()
 def main():
     from PyQt6.QtCore import Qt
     from PyQt6.QtGui import QIcon, QPixmap
-    from PyQt6.QtWidgets import QApplication, QSplashScreen
+    from PyQt6.QtWidgets import QApplication, QMessageBox, QSplashScreen
 
     from core.auto_updater import check_for_updates
-    from core.backup_manager import prepare_working_copy
+    from core.backup_manager import prepare_runtime_environment
     from core.settings import SettingsManager
     from gui.first_time_setup import run_first_time_setup
     from gui.main_window import ParticleManagerGUI
@@ -29,11 +29,14 @@ def main():
     log.info(f'Settings files are in {folder_setup.settings_dir}')
     log.info(f'Log is written to {folder_setup.log_file}')
 
-    copy(folder_setup.install_dir / "backup", folder_setup.project_dir / "backup", noclobber=False)
-
     app = QApplication([])
     app.setStyle("Fusion")
     app.setStyleSheet(GLOBAL_STYLESHEET)
+
+    setup_error = prepare_runtime_environment()
+    if setup_error:
+        QMessageBox.critical(None, "Preloader Setup Failed", setup_error)
+        return
 
     # first-time setup
     tf_directory = None
@@ -55,8 +58,6 @@ def main():
     splash.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint |
                           Qt.WindowType.FramelessWindowHint)
     splash.show()
-
-    prepare_working_copy()
 
     window = ParticleManagerGUI(tf_directory)
 

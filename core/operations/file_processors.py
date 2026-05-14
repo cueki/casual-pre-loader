@@ -86,7 +86,13 @@ def initialize_pcf(dir: Path) -> tuple[PCFFile, set[str]]:
     default_base_path = dir / 'disguise.pcf'
 
     if not default_base_path.exists():
-        raise FileNotFoundError(f"[Errno 2] No such file or directory: {default_base_path}")
+        raise FileNotFoundError(
+            f"Vanilla particle staging folder is missing files:\n{dir}\n\n"
+            "The folder was populated at startup but is missing files now. "
+            "Something modified it during this session, try restarting the "
+            "preloader, and check that antivirus or sync software isn't "
+            "interfering with the temp folder."
+        )
 
     default_base_pcf = PCFFile(default_base_path).decode()
     return default_base_pcf, get_parent_elements(default_base_pcf)
