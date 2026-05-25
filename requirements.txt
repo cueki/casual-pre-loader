@@ -2,7 +2,7 @@
 PyQt6~=6.10
 
 # core
-more-itertools~=11.0
+more-itertools~=11.1
 packaging~=26.0
 platformdirs~=4.9
 PyGithub~=2.9
