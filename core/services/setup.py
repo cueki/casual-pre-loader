@@ -10,7 +10,7 @@ log = logging.getLogger()
 
 def is_valid_userdata_folder(userdata_path: Path) -> bool:
     """Return True if path looks like a userdata/ folder (has data/ and config/ subfolders)."""
-    if not userdata_path.exists() or not userdata_path.is_dir():
+    if not userdata_path.is_dir():
         return False
     return (userdata_path / 'data').is_dir() and (userdata_path / 'config').is_dir()
 
