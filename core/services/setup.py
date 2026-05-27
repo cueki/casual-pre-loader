@@ -38,10 +38,10 @@ def import_userdata(userdata_path: Path) -> tuple[bool, list[str]]:
     src_config = userdata_path / 'config'
 
     items: list[tuple[Path, Path]] = [
-        (src_data / 'mods', folder_setup.mods_dir),
-        (src_data / 'modsinfo.json', folder_setup.modsinfo_file),
-        (src_config / 'app_settings.json', folder_setup.app_settings_file),
-        (src_config / 'addon_metadata.json', folder_setup.addon_metadata_file),
+        (src_data / folder_setup.mods_dir.name, folder_setup.mods_dir),
+        (src_data / folder_setup.modsinfo_file.name, folder_setup.modsinfo_file),
+        (src_config / folder_setup.app_settings_file.name, folder_setup.app_settings_file),
+        (src_config / folder_setup.addon_metadata_file.name, folder_setup.addon_metadata_file),
     ]
 
     warnings: list[str] = []
