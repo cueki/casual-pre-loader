@@ -30,6 +30,7 @@ from core.services.conflicts import scan_for_legacy_conflicts
 from core.version import VERSION
 from gui.addons_manager import AddonsManager
 from gui.addon_panel import AddonPanel
+from gui.dialogs import confirm_action, show_error, show_success
 from gui.mod_drop_zone import ModDropZone
 from gui.first_time_setup import download_cueki_mods
 from gui.install_controller import InstallController
@@ -244,7 +245,7 @@ class ParticleManagerGUI(QMainWindow):
 
         deselect_btn = QPushButton("Deselect All")
         deselect_btn.setStyleSheet(BUTTON_STYLE)
-        deselect_btn.clicked.connect(lambda: self.mod_drop_zone.conflict_matrix.deselect_all())
+        deselect_btn.clicked.connect(self.deselect_all_particles)
         btn_layout.addWidget(deselect_btn)
 
         btn_layout.addStretch()
@@ -258,6 +259,11 @@ class ParticleManagerGUI(QMainWindow):
 
         layout.addLayout(btn_layout)
         return page
+
+    def deselect_all_particles(self):
+        if confirm_action(self, "Deselect All",
+                          "Deselect all particle effects for every mod?"):
+            self.mod_drop_zone.conflict_matrix.deselect_all()
 
     def create_addons_page(self):
         page = QWidget()
@@ -523,12 +529,8 @@ class ParticleManagerGUI(QMainWindow):
         if len(profiles) <= 1:
             QMessageBox.warning(self, "Cannot Delete", "You must have at least one profile.")
             return
-        result = QMessageBox.question(
-            self, "Delete Profile",
-            f"Delete profile '{active.name}'? This cannot be undone.",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-        )
-        if result == QMessageBox.StandardButton.Yes:
+        if confirm_action(self, "Delete Profile",
+                          f"Delete profile '{active.name}'? This cannot be undone."):
             self.settings_manager.delete_profile(active.id)
             self.rebuild_profile_menu()
             self._sync_to_active_profile()
@@ -690,11 +692,7 @@ class ParticleManagerGUI(QMainWindow):
         selected_addons = self.get_selected_addons()
 
         if not selected_addons:
-            result = QMessageBox.question(
-                self, "No Addons Selected", "No addons selected. Continue?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            )
-            if result != QMessageBox.StandardButton.Yes:
+            if not confirm_action(self, "No Addons Selected", "No addons selected. Continue?"):
                 return
 
         target_path = self.install_manager.tf_path
@@ -730,13 +728,10 @@ class ParticleManagerGUI(QMainWindow):
         target_name = active.name if active else Path(target_path).name
         game_target = active.game_target if active else "Team Fortress 2"
 
-        result = QMessageBox.question(
-            self,
-            "Confirm Restore",
+        if not confirm_action(
+            self, "Confirm Restore",
             f"This will revert all changes made to {target_name} by this app.\nAre you sure?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
-        if result != QMessageBox.StandardButton.Yes:
+        ):
             return
 
         if self.install_manager.uninstall(target_path, game_target):
@@ -777,10 +772,10 @@ class ParticleManagerGUI(QMainWindow):
         self.set_processing_state(False)
 
     def show_error(self, message):
-        QMessageBox.critical(self, "Error", message)
+        show_error(self, message)
 
     def show_success(self, message):
-        QMessageBox.information(self, "Success", message)
+        show_success(self, message)
         self.show_launch_options_popup()
 
     def delete_selected_addons(self):

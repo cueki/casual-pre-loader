@@ -17,6 +17,7 @@ from PyQt6.QtWidgets import (
 
 from gui.load_order_panel import LoadOrderPanel
 from gui.addon_details import AddonDescription
+from gui.dialogs import confirm_action
 from gui.theme import BUTTON_STYLE_ALT, FRAME_STYLE, SECTION_LABEL_STYLE
 
 
@@ -135,6 +136,7 @@ class AddonPanel(QWidget):
         self.load_order_panel = LoadOrderPanel()
         self.load_order_panel.load_order_changed.connect(self.on_load_order_changed)
         self.load_order_panel.unadd_requested.connect(self.on_unadd_requested)
+        self.load_order_panel.deselect_all_requested.connect(self.on_deselect_all_requested)
         columns.addWidget(self.load_order_panel, 1)
 
         layout.addLayout(columns)
@@ -200,6 +202,19 @@ class AddonPanel(QWidget):
                 if original_name == addon_name:
                     item.setCheckState(Qt.CheckState.Unchecked)
                     break
+
+    def on_deselect_all_requested(self):
+        # uncheck every addon, clearing the load order
+        checked = self.get_checked_items()
+        if not checked:
+            return
+        if not confirm_action(self, "Deselect All", "Remove all mods from the load order?"):
+            return
+        self.addons_list.blockSignals(True)
+        for item in checked:
+            item.setCheckState(Qt.CheckState.Unchecked)
+        self.addons_list.blockSignals(False)
+        self.on_checkbox_changed()
 
     def update_load_order_list(self):
         # sync checked addons to load order list

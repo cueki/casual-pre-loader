@@ -3,14 +3,14 @@ import threading
 from pathlib import Path
 
 from PyQt6.QtCore import QObject, Qt, pyqtSignal
-from PyQt6.QtWidgets import QFrame, QLabel, QMessageBox, QProgressDialog, QPushButton, QVBoxLayout
+from PyQt6.QtWidgets import QFrame, QLabel, QMessageBox, QProgressDialog, QVBoxLayout
 
 from core.folder_setup import folder_setup
 from core.services.importer import ImportService, normalize_vpk_paths
 from core.structure_validator import StructureValidator, ValidationResult
 from core.util.pcf_path_walk import apply_particle_selections, get_mod_particles
 from gui.conflict_matrix import ConflictMatrix
-from gui.theme import PRIMARY_BUTTON_STYLE
+from gui.dialogs import confirm_action, show_message
 
 log = logging.getLogger()
 
@@ -74,9 +74,7 @@ class ModDropZone(QFrame):
             warning_msg += "\n".join(f"• {warning}" for warning in validation_result.warnings)
             warning_msg += "\n\nDo you want to continue anyway?"
 
-            reply = QMessageBox.question(self, "Validation Warnings", warning_msg,
-                                       QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-            return reply == QMessageBox.StandardButton.Yes
+            return confirm_action(self, "Validation Warnings", warning_msg)
 
         return True
 
@@ -105,15 +103,7 @@ class ModDropZone(QFrame):
         self._show_message(QMessageBox.Icon.Information, "Success", message)
 
     def _show_message(self, icon, title, message):
-        msg_box = QMessageBox(self)
-        msg_box.setIcon(icon)
-        msg_box.setWindowTitle(title)
-        msg_box.setText(message)
-        ok_btn = QPushButton("OK")
-        ok_btn.setStyleSheet(PRIMARY_BUTTON_STYLE)
-        msg_box.addButton(ok_btn, QMessageBox.ButtonRole.AcceptRole)
-        msg_box.setDefaultButton(ok_btn)
-        msg_box.exec()
+        show_message(self, icon, title, message)
 
     def on_process_finished(self):
         if self.progress_dialog:
