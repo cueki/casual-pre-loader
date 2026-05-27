@@ -352,6 +352,10 @@ class ParticleManagerGUI(QMainWindow):
         preloader_layout.addWidget(self.disable_paint_checkbox)
 
         self.fix_mdl_paths_checkbox = QCheckBox("Attempt to automatically fix broken models")
+        self.fix_mdl_paths_checkbox.setToolTip(
+            "Detects models with broken or incorrect material paths and rewrites them during install "
+            "so the model caches correctly in-game. If things are broken, try disabling this first!."
+        )
         self.fix_mdl_paths_checkbox.stateChanged.connect(
             lambda: self.settings_manager.set_fix_mdl_paths(self.fix_mdl_paths_checkbox.isChecked())
         )
