@@ -134,6 +134,7 @@ class AddonPanel(QWidget):
         # right column: Load Order
         self.load_order_panel = LoadOrderPanel()
         self.load_order_panel.load_order_changed.connect(self.on_load_order_changed)
+        self.load_order_panel.unadd_requested.connect(self.on_unadd_requested)
         columns.addWidget(self.load_order_panel, 1)
 
         layout.addLayout(columns)
@@ -189,6 +190,16 @@ class AddonPanel(QWidget):
 
     def on_load_order_changed(self):
         self.load_order_changed.emit()
+
+    def on_unadd_requested(self, addon_name):
+        # uncheck the addon matching this load order entry; itemChanged then resyncs the list
+        for i in range(self.addons_list.count()):
+            item = self.addons_list.item(i)
+            if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
+                original_name = item.data(Qt.ItemDataRole.UserRole) or item.text().split(' [#')[0]
+                if original_name == addon_name:
+                    item.setCheckState(Qt.CheckState.Unchecked)
+                    break
 
     def update_load_order_list(self):
         # sync checked addons to load order list

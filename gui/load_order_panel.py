@@ -19,6 +19,7 @@ log = logging.getLogger()
 
 class LoadOrderPanel(QWidget):
     load_order_changed = pyqtSignal()
+    unadd_requested = pyqtSignal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -43,6 +44,7 @@ class LoadOrderPanel(QWidget):
         self.load_order_list.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
         self.load_order_list.model().rowsMoved.connect(self.on_load_order_changed)
         self.load_order_list.itemClicked.connect(lambda: self.load_order_list.clearSelection())
+        self.load_order_list.itemDoubleClicked.connect(self.on_item_double_clicked)
 
         load_order_layout.addWidget(self.load_order_list)
 
@@ -56,6 +58,12 @@ class LoadOrderPanel(QWidget):
 
     def on_load_order_changed(self):
         self.load_order_changed.emit()
+
+    def on_item_double_clicked(self, item):
+        # double-click removes the mod from the load order by unchecking its addon
+        text = item.text()
+        clean_name = text.split('] ', 1)[-1].replace(' ⚠', '').strip()
+        self.unadd_requested.emit(clean_name)
 
     def get_load_order(self):
         load_order = []
