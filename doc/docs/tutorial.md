@@ -17,10 +17,11 @@ If you want a video supplement, please refer to the [**Video Supplement**](#vide
 ### Step 1: Installation
 
 1. **Install the latest version of the preloader from [GitHub]({{ config.repo_url }}/releases) or [Gamebanana]({{ gamebanana_url }}).**
-2. **Once you have the zip file, extract it, and put the folder anywhere you'd like.**
+2. **Once you have the zip file, extract it, and put the folder anywhere you like.**
 
 !!! note
-    Ensure it is not in a Onedrive shared folder or in your game's `custom` folder.
+    Ensure it is not under a Onedrive shared folder or a folder the user does not have write permissions for (e.g. `C:\program files`).
+    Do not put the casual-pre-loader in your game's `custom` folder. It is not a mod, and does not get loaded by the game.
 
 ### Step 2: Adding your mods
 
