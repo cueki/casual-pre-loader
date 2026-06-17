@@ -7,6 +7,11 @@ If you need further assistance installing the preloader, or just want to chat, j
 
 If you want a video supplement, please refer to the [**Video Supplement**](#video-supplement) section!
 
+!!! note
+    MacOS support for Team Fortress 2 was officially dropped in 2024, and hasn't been properly playable since 2019.
+    It is possible to download older depots, or to run the windows build through `wine`/`crossover`, but this requires running an older version of the game and/or prevents users from connecting to VAC-enabled servers (e.g. casual servers).
+    As such, the casual-pre-loader does not support MacOS, and support is not planned.
+
 ## Windows Tutorial:
 
 ### Step 1: Installation
