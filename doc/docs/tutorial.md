@@ -115,6 +115,10 @@ printf '#!/bin/sh\n\nexec flatpak run org.winehq.Wine "${@}"' >"${XDG_BIN_HOME}/
 chmod +x "${XDG_BIN_HOME}/wine"
 ```
 
+!!! note
+    Packaging the preloader as a `flatpak` would render all of this unnecessary, [there is already an open issue](https://github.com/cueki/casual-pre-loader/issues/142).
+
+
 ### Additional steps for Ubuntu or derivatives (e.g. Mint, PopOS, etc.)
 You may get an error similiar to the following:
 ```
