@@ -23,6 +23,9 @@ If you want a video supplement, please refer to the [**Video Supplement**](#vide
     Ensure it is not under a Onedrive shared folder or a folder the user does not have write permissions for (e.g. `C:\program files`).
     Do not put the casual-pre-loader in your game's `custom` folder. It is not a mod, and does not get loaded by the game.
 
+!!! note
+    If you're interested in packaging the casual-pre-loader via winget, choco, scoop, or any other windows package manager, please feel free to open a PR!
+
 ### Step 2: Adding your mods
 
 1. **Prepare your mods. The preloader can handle all mods, even mods that aren't *'casual compatible',* so don't be afraid to use whatever you'd like! Once you have all the mods you want, set them aside.**
@@ -53,6 +56,9 @@ If you want a video supplement, please refer to the [**Video Supplement**](#vide
   3. **Launch tf2 and boot up a casual match! You should see all of your mods working.**
 
 ## Linux Tutorial:
+
+!!! note
+    If you're interested in packaging the casual-pre-loader for your distro, please feel free to open a PR!
 
 ### Arch Linux or similar distros
 There is an [AUR package](https://aur.archlinux.org/packages/casual-pre-loader-git). After installing, you can run the program with `casual-pre-loader` or through your launcher.  
