@@ -1,8 +1,8 @@
 import logging
 import re
 import shutil
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 from valve_parsers import VPKFile
 
@@ -14,7 +14,7 @@ class SoundHandler:
         self.sound_extensions = ['.wav', '.mp3']
         self.script_extensions = ['.txt']
 
-    def process_temp_sound_mods(self, temp_mods_dir: Path, backup_scripts_dir: Path, vpk_paths: List[Path]) -> Optional[dict]:
+    def process_temp_sound_mods(self, temp_mods_dir: Path, backup_scripts_dir: Path, vpk_paths: list[Path]) -> dict | None:
         temp_sound_dir = temp_mods_dir / 'sound'
         if not temp_sound_dir.exists():
             return None
@@ -62,7 +62,7 @@ class SoundHandler:
         }
 
 
-def identify_needed_scripts(canonical_paths: List[str], backup_scripts_dir: Path) -> List[str]:
+def identify_needed_scripts(canonical_paths: list[str], backup_scripts_dir: Path) -> list[str]:
     # identify script files needed based on VPK paths
     needed_scripts = set()
 
@@ -101,7 +101,7 @@ def identify_needed_scripts(canonical_paths: List[str], backup_scripts_dir: Path
     return list(needed_scripts)
 
 
-def copy_needed_scripts(needed_scripts: List[str], temp_scripts_dir: Path) -> List[str]:
+def copy_needed_scripts(needed_scripts: list[str], temp_scripts_dir: Path) -> list[str]:
     # copy needed script files from backup/
     temp_scripts_dir.mkdir(parents=True, exist_ok=True)
     copied_scripts = []
@@ -119,7 +119,7 @@ def copy_needed_scripts(needed_scripts: List[str], temp_scripts_dir: Path) -> Li
     return copied_scripts
 
 
-def update_script_files(script_files: List[str], path_mappings: List[Tuple[str, str]]) -> List[str]:
+def update_script_files(script_files: list[str], path_mappings: list[tuple[str, str]]) -> list[str]:
     # update script files to reference the new misc/ paths
     modified_files = []
     for script_file in script_files:
@@ -178,7 +178,7 @@ def update_script_files(script_files: List[str], path_mappings: List[Tuple[str, 
     return modified_files
 
 
-def create_vpk_based_mappings(sound_files: List[Path], vpk_paths: List[Path]) -> List[Dict]:
+def create_vpk_based_mappings(sound_files: list[Path], vpk_paths: list[Path]) -> list[dict]:
     # create mappings between mod sound files and their VPK paths
     vpk_files = []
     for vpk_path in vpk_paths:
@@ -241,7 +241,8 @@ def create_vpk_based_mappings(sound_files: List[Path], vpk_paths: List[Path]) ->
     return file_mappings
 
 
-def move_sound_files(file_mappings: List[Dict]) -> List[Tuple[str, str]]:
+# TODO: narrow types
+def move_sound_files(file_mappings: list[Mapping]) -> list[tuple[str, str]]:
     # move sound files to their VPK based locations
     moved_files = []
 
@@ -273,7 +274,8 @@ def move_sound_files(file_mappings: List[Dict]) -> List[Tuple[str, str]]:
     return moved_files
 
 
-def update_script_paths(script_files: List[str], file_mappings: List[Dict]) -> List[str]:
+# TODO: narrow types
+def update_script_paths(script_files: list[str], file_mappings: list[Mapping]) -> list[str]:
     # create mapping from canonical path to final path
     path_mappings = {}
     for mapping in file_mappings:

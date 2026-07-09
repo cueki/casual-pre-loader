@@ -1,106 +1,82 @@
-import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import ClassVar
 
 from core.constants import PROGRAM_AUTHOR, PROGRAM_NAME
-
-log = logging.getLogger()
+from core.util.dep import Dep
 
 
 @dataclass
 class FolderConfig:
-    # configuration class for managing folder paths
+    """Configuration class for managing folder paths"""
 
-    # INFO: This file just allows package maintainers to set whether this application should act as if it is a portable installation.
-    # They can easily modify this file and set these values, e.g.
-    # `printf '%s\n' 'portable = False' >core/are_we_portable.py`
-    # This will make the application use paths outside the installation location.
-    import core.are_we_portable
+    install_dir: ClassVar[Path] = Path(__file__).resolve().parent.parent
+    """The location the program is installed to"""
+    data_dir:    ClassVar[Path] = install_dir / 'data'
+    """The location where static data is housed"""
 
-    portable = core.are_we_portable.portable
-    del core.are_we_portable
+    mod_urls_file:            ClassVar[Path] = data_dir / 'mod_urls.json'
+    """Contains URLs to all 'bundled' mods"""
+    particle_system_map_file: ClassVar[Path] = data_dir / 'particle_system_map.json'
+    """Contains map of particle system"""
 
-    install_dir = Path(__file__).resolve().parent.parent
-    data_dir =   install_dir / 'data'
+    # INFO: This dummy file just allows package maintainers to set whether this application may act as a portable installation.
+    # They can easily create this file, e.g.
+    # `touch "${pkgdir}/usr/bin/lib/casual-pre-loader/.noportable"`
+    portable: ClassVar[bool] = not (install_dir / '.noportable').is_file()
+    """Is this program running portably, i.e. where do we write data to?"""
 
-    mod_urls_file = data_dir / 'mod_urls.json'
-    particle_system_map_file = data_dir / 'particle_system_map.json'
-
+    project_dir:  ClassVar[Path]
+    """Location of userdata"""
+    settings_dir: ClassVar[Path]
+    """Location of configuration"""
+    temp_dir:     ClassVar[Path]
+    """Location of remporary files"""
     if portable:
-        # default portable values
-        project_dir =  install_dir / 'userdata' / 'data'
+        project_dir  = install_dir / 'userdata' / 'data'
         settings_dir = install_dir / 'userdata' / 'config'
-        temp_dir =     install_dir / 'userdata' / 'temp'
+        temp_dir     = install_dir / 'userdata' / 'temp'
     else:
         import platformdirs
 
-        # default non-portable values
-        project_dir =  platformdirs.user_data_path(PROGRAM_NAME, PROGRAM_AUTHOR)
+        project_dir  = platformdirs.user_data_path(PROGRAM_NAME, PROGRAM_AUTHOR)
         settings_dir = platformdirs.user_config_path(PROGRAM_NAME, PROGRAM_AUTHOR)
-        temp_dir =     platformdirs.user_cache_path(PROGRAM_NAME, PROGRAM_AUTHOR)
+        temp_dir     = platformdirs.user_cache_path(PROGRAM_NAME, PROGRAM_AUTHOR)
 
-    # WARNING: DO NOT create duplicate entries across different deps
-    __deps = {
-        'project_dir': {
-            'backup_dir': lambda self: self.project_dir / 'backup',
-            'mods_dir':   lambda self: self.project_dir / 'mods',
+    backup_dir:    Path = Dep(lambda project_dir: project_dir / 'backup')                # ty: ignore error[invalid-assignment]
+    """Location where sourcemod files are backed up to"""
+    log_file:      Path = Dep(lambda project_dir: project_dir / 'casual-pre-loader.log') # ty: ignore error[invalid-assignment]
+    """File where logs are stored"""
+    mods_dir:      Path = Dep(lambda project_dir: project_dir / 'mods')                  # ty: ignore error[invalid-assignment]
+    """Location where mods are stored"""
+    modsinfo_file: Path = Dep(lambda project_dir: project_dir / 'modsinfo.json')         # ty: ignore error[invalid-assignment]
+    """File that records the last-downloaded version of 'bundled' mods"""
 
-            'log_file':      lambda self: self.project_dir / 'casual-pre-loader.log',
-            'modsinfo_file': lambda self: self.project_dir / 'modsinfo.json',
-        },
-        'mods_dir': {
-            'particles_dir': lambda self: self.mods_dir / 'particles',
-            'addons_dir':    lambda self: self.mods_dir / 'addons',
-        },
-        'settings_dir': {
-            'app_settings_file':   lambda self: self.settings_dir / 'app_settings.json',
-            'addon_metadata_file': lambda self: self.settings_dir / 'addon_metadata.json',
-        },
-        'temp_dir': {
-            'temp_to_be_processed_dir':  lambda self: self.temp_dir / 'to_be_processed',
-            'temp_to_be_referenced_dir': lambda self: self.temp_dir / 'to_be_referenced',
-            'temp_to_be_patched_dir':    lambda self: self.temp_dir / 'to_be_patched',
-            'temp_to_be_vpk_dir':        lambda self: self.temp_dir / 'to_be_vpk',
-        },
-    }
+    particles_dir: Path = Dep(lambda mods_dir: mods_dir / 'particles') # ty: ignore error[invalid-assignment]
+    """Location where PARTICLE mods are stored"""
+    addons_dir:    Path = Dep(lambda mods_dir: mods_dir / 'addons')    # ty: ignore error[invalid-assignment]
+    """Location where ADDON mods are stored"""
 
-    def __post_init__(self):
-        for dep, props in self.__deps.items():
-            for attr, setter in props.items():
-                super().__setattr__(attr, setter(self))
+    app_settings_file:   Path = Dep(lambda settings_dir: settings_dir / 'app_settings.json')   # ty: ignore error[invalid-assignment]
+    """File where main settings are kept"""
+    addon_metadata_file: Path = Dep(lambda settings_dir: settings_dir / 'addon_metadata.json') # ty: ignore error[invalid-assignment]
+    """File where addon metadata is kept"""
 
-    def update_deps(self, attr: str, deps: Optional[set] = None):
-        log.debug(f'updating all attrs dependent on {attr}')
-
-        deps = deps is None and {attr} or deps
-        if attr in self.__deps:
-            for _attr, setter in self.__deps[attr].items():
-                _value = setter(self)
-                super().__setattr__(_attr, _value)
-                log.debug(f'set dependency {_attr} of {attr} to {_value}')
-
-                if _attr not in deps:
-                    deps.add(_attr)
-                    self.update_deps(_attr, deps)
-
-    def __setattr__(self, attr, value):
-        _super = super()
-        _super.__setattr__(attr, value)
-        log_str = f'set {attr} to {value}'
-
-        # make attr independent
-        is_dep = False
-        for dep, props in tuple(self.__deps.items()):
-            if attr in props:
-                del props[attr]
-                is_dep = True
-        if is_dep:
-            log_str += ', making it no longer dependant on other attrs'
-        log.debug(log_str)
-
-        if attr in self.__deps: # update any other dependent attrs
-            self.update_deps(attr)
+    # TODO: add attr docstrings (@cueki)
+    temp_to_be_processed_dir:  Path = Dep(lambda temp_dir: temp_dir / 'to_be_processed')  # ty: ignore error[invalid-assignment]
+    temp_to_be_referenced_dir: Path = Dep(lambda temp_dir: temp_dir / 'to_be_referenced') # ty: ignore error[invalid-assignment]
+    temp_to_be_patched_dir:    Path = Dep(lambda temp_dir: temp_dir / 'to_be_patched')    # ty: ignore error[invalid-assignment]
+    temp_to_be_vpk_dir:        Path = Dep(lambda temp_dir: temp_dir / 'to_be_vpk')        # ty: ignore error[invalid-assignment]
 
 
-folder_setup = FolderConfig() # create a default instance for import
+folder_setup: FolderConfig
+
+def __getattr__(attr):
+    global folder_setup
+
+    match attr:
+        case 'folder_setup':
+            folder_setup = FolderConfig()
+            return folder_setup
+
+    raise AttributeError(f"module '{__name__}' has no attribute '{attr}'")

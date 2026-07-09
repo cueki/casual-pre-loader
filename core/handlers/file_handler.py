@@ -2,11 +2,10 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import List
 
 from valve_parsers import PCFFile, VPKFile
 
-from core.folder_setup import folder_setup
+from core.config import config
 
 log = logging.getLogger()
 
@@ -34,28 +33,28 @@ def copy_config_files(custom_content_dir):
     # config copy
     config_dest_dir = custom_content_dir / "cfg" / "w"
     config_dest_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(folder_setup.install_dir / 'backup/cfg/w/config.cfg', config_dest_dir)
-    shutil.copy2(folder_setup.install_dir / 'backup/cfg/w/kitty.cfg', config_dest_dir)
+    shutil.copy2(config.install_dir / 'backup/cfg/w/config.cfg', config_dest_dir)
+    shutil.copy2(config.install_dir / 'backup/cfg/w/kitty.cfg', config_dest_dir)
 
     # vscript copy
     vscript_dest_dir = custom_content_dir / "scripts" / "vscripts"
     vscript_dest_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(folder_setup.install_dir / 'backup/scripts/vscripts/randommenumusic.nut', vscript_dest_dir)
+    shutil.copy2(config.install_dir / 'backup/scripts/vscripts/randommenumusic.nut', vscript_dest_dir)
 
     # vgui copy
     vgui_dest_dir = custom_content_dir / "resource" / "ui"
     vgui_dest_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(folder_setup.install_dir / 'backup/resource/ui/vguipreload.res', vgui_dest_dir)
+    shutil.copy2(config.install_dir / 'backup/resource/ui/vguipreload.res', vgui_dest_dir)
 
 
 class FileHandler:
-    def __init__(self, vpk_file_path: str):
-        self.vpk = VPKFile(vpk_file_path)
+    def __init__(self, vpk_file: Path):
+        self.vpk = VPKFile(vpk_file)
 
-    def list_pcf_files(self) -> List[str]:
+    def list_pcf_files(self) -> list[str]:
         return self.vpk.find_files('*.pcf')
 
-    def list_vmt_files(self) -> List[str]:
+    def list_vmt_files(self) -> list[str]:
         return self.vpk.find_files('*.vmt')
 
     def process_file(self, file_name: str, content) -> bool | None:
@@ -69,7 +68,7 @@ class FileHandler:
             full_path = file_name
 
         # create temp file for processing in working directory
-        temp_path = folder_setup.temp_dir / f"temp_{Path(file_name).name}"
+        temp_path = config.temp_dir / f"temp_{Path(file_name).name}"
         temp_path.parent.mkdir(parents=True, exist_ok=True)
 
         try:

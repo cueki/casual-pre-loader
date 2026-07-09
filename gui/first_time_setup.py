@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import cast
 
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QCursor
@@ -7,7 +8,6 @@ from PyQt6.QtWidgets import (
     QApplication,
     QDialog,
     QFileDialog,
-    QFrame,
     QGroupBox,
     QHBoxLayout,
     QLabel,
@@ -20,20 +20,22 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from core.constants import Sourcemods
 from core.download_mods import check_mods, download_mods
-from core.services.setup import (
-    import_userdata,
-    is_valid_userdata_folder,
-    save_initial_settings,
+from core.services.setup import import_userdata, is_valid_userdata_folder
+from core.settings import settings
+from core.util.sourcemod import (
+    InvalidSourcemodInstallationPath,
+    auto_detect_sourcemod,
+    validate_game_directory,
 )
-from core.util.sourcemod import auto_detect_sourcemod, validate_game_directory
 from gui.theme import BUTTON_STYLE_ALT, FONT_SIZE_HEADER
 
 log = logging.getLogger()
 
 
 class FirstTimeSetupDialog(QDialog):
-    setup_completed = pyqtSignal(str)  # emits the selected tf/ directory path
+    setup_completed = pyqtSignal(Path)  # emits the selected tf/ directory path
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -43,8 +45,8 @@ class FirstTimeSetupDialog(QDialog):
         self.browse_button = None
         self.tf_path_edit = None
         self.finish_button = None
-        self.tf_directory = ""
-        self.import_userdata_path = ""
+        self.tf_directory: Path | None = None
+        self.import_userdata_path: Path | None = None
 
         self.setWindowTitle("First Time Setup")
         self.setFixedSize(650, 580)
@@ -191,34 +193,34 @@ class FirstTimeSetupDialog(QDialog):
 
     def browse_tf_dir(self):
         directory = QFileDialog.getExistingDirectory(self, "Select tf/ Directory")
-        if directory:
-            self.tf_directory = directory
+        if directory and self.tf_path_edit is not None:
+            self.tf_directory = Path(directory)
             self.tf_path_edit.setText(directory)
             self.validate_directory()
 
     def browse_userdata_folder(self):
         directory = QFileDialog.getExistingDirectory(self, "Select Previous userdata/ Folder")
         if directory:
-            self.import_userdata_path = directory
+            self.import_userdata_path = Path(directory)
             self.userdata_import_edit.setText(directory)
             self.update_import_status()
 
 
     def auto_detect_tf2_dir(self):
-        path = auto_detect_sourcemod()
-        if path:
-            self.tf_directory = path
-            self.tf_path_edit.setText(path)
-            validate_game_directory(path, self.validation_label)
-            QMessageBox.information(self, "Auto-Detection Successful", f"Found TF2 installation at:\n{path}")
-        else:
+        try:
+            self.tf_directory = auto_detect_sourcemod()
+            self.tf_path_edit.setText(str(self.tf_directory))
+
+            validate_game_directory(self.tf_directory, self.validation_label)
+            QMessageBox.information(self, "Auto-Detection Successful", f"Found TF2 installation at:\n{self.tf_directory}")
+        except InvalidSourcemodInstallationPath:
             QMessageBox.information(self, "Auto-Detection Failed",
                                     "Could not automatically detect TF2 installation.\n"
                                     "Please manually select your tf/ directory.")
 
 
     def clear_import_selections(self):
-        self.import_userdata_path = ""
+        self.import_userdata_path = None
         self.userdata_import_edit.clear()
         self.update_import_status()
 
@@ -260,7 +262,7 @@ class FirstTimeSetupDialog(QDialog):
         self.import_status_label.setText("\n".join(status_parts))
 
     def validate_setup(self):
-        tf_valid = bool(self.tf_directory and Path(self.tf_directory).exists())
+        tf_valid = bool(self.tf_directory and self.tf_directory.is_dir())
         self.finish_button.setEnabled(tf_valid)
 
     def finish_setup(self):
@@ -275,7 +277,7 @@ class FirstTimeSetupDialog(QDialog):
 
         # import userdata if provided
         if self.import_userdata_path:
-            success, warnings = import_userdata(Path(self.import_userdata_path))
+            success, warnings = import_userdata(self.import_userdata_path)
             if not success:
                 QMessageBox.warning(
                     self, "Import Error",
@@ -285,26 +287,37 @@ class FirstTimeSetupDialog(QDialog):
             elif warnings:
                 log.warning("Userdata import completed with warnings: %s", warnings)
 
-        # create or update app_settings.json (preserving any imported keys, overwriting tf_directory)
-        success, error = save_initial_settings(Path(self.tf_directory))
-        if not success:
+        settings._initialized = False
+        try:
+            # create or update app_settings.json (preserving any imported keys, overwriting tf_directory)
+            if self.import_userdata_path:
+                settings._load_settings(self.import_userdata_path / 'config' / 'app_settings.dir.json')
+
+            settings.create_profile(name=Sourcemods.DEFAULT.name, game_path=self.tf_directory, sourcemod=Sourcemods.DEFAULT, activate=True)
+            settings.done_initial_setup = True
+
+            settings.save_settings()
+        except Exception as e:
             QMessageBox.warning(
                 self, "Settings Error",
-                f"Failed to save settings:\n{error}\n\nSetup completed but settings may not persist."
+                f"Failed to save settings:\n{e}\n\nSetup completed but settings may not persist."
             )
+        finally:
+            settings._initialized = True
 
         # emit the setup completion signal with tf/ directory
         self.setup_completed.emit(self.tf_directory)
         self.accept()
 
 
-def run_first_time_setup(parent=None):
+def run_first_time_setup(parent=None) -> Path:
     dialog = FirstTimeSetupDialog(parent)
 
     if dialog.exec() == QDialog.DialogCode.Accepted:
-        return dialog.tf_directory
-    else:
-        return None
+        return cast(Path, dialog.tf_directory)
+
+    log.debug('User cancelled setup')
+    raise SystemExit(1)
 
 
 def mods_download_group(parent_dialog):
@@ -350,7 +363,7 @@ def download_cueki_mods(parent=None, button=None):
         QApplication.processEvents()
 
         update = check_mods()
-        if update:
+        if update is not None:
             download_mods(update, progress.setValue, progress.setLabelText, QApplication.processEvents, progress.wasCanceled)
         progress.close()
 
@@ -364,7 +377,7 @@ def download_cueki_mods(parent=None, button=None):
         QMessageBox.information(
             parent,
             'Download Complete',
-            update and "cueki's mods have been successfully downloaded and installed!" or "cueki's mods are already installed and up to date!"
+            update is not None and "cueki's mods have been successfully downloaded and installed!" or "cueki's mods are already installed and up to date!"
         )
     except Exception as e:
         log.exception(e)

@@ -5,9 +5,8 @@ import urllib.parse
 import urllib.request
 from collections.abc import Callable
 from pathlib import Path
-from typing import Optional
 
-from core.folder_setup import folder_setup
+from core.config import config
 from core.util.file import move
 
 log = logging.getLogger()
@@ -16,7 +15,7 @@ log = logging.getLogger()
 Reporthook = Callable[[int, float, float], None]
 
 
-def download_file(url: str, path: Path, timeout: Optional[int] = None, reporthook: Optional[Reporthook] = None, noclobber: Optional[bool] = False) -> None:
+def download_file(url: str, path: Path, timeout: int | None = None, reporthook: Reporthook | None = None, noclobber: bool = False) -> None:
     """
     Download a file to a temporary location, then move it into the destination.
 
@@ -28,8 +27,8 @@ def download_file(url: str, path: Path, timeout: Optional[int] = None, reporthoo
         noclobber: Throw an error if the destination exists (i.e. do not overwrite files).
     """
 
-    folder_setup.temp_dir.mkdir(parents=True, exist_ok=True)
-    tmp_file = tempfile.NamedTemporaryFile(prefix=path.name[:128], suffix='.part', dir=folder_setup.temp_dir, delete_on_close=False)
+    config.temp_dir.mkdir(parents=True, exist_ok=True)
+    tmp_file = tempfile.NamedTemporaryFile(prefix=path.name[:128], suffix='.part', dir=config.temp_dir, delete_on_close=False)
     tmp_path = Path(tmp_file.name)
 
     old_timeout = socket.getdefaulttimeout()
@@ -54,7 +53,7 @@ def download_file(url: str, path: Path, timeout: Optional[int] = None, reporthoo
             pass
 
 
-def download_file_to_dir(url: str, dir: Path, timeout: Optional[int] = None, reporthook: Optional[Reporthook] = None, noclobber: Optional[bool] = False) -> Path:
+def download_file_to_dir(url: str, dir: Path, timeout: int | None = None, reporthook: Reporthook | None = None, noclobber: bool = False) -> Path:
     """
     Download a file to a temporary location, then move it into the destination, retaining its original filename.
 
@@ -74,9 +73,9 @@ def download_file_to_dir(url: str, dir: Path, timeout: Optional[int] = None, rep
     return path
 
 def download_reporthook(
-    set_value: Optional[Callable[[int], None]] = None,
-    process: Optional[Callable[[None], None]] = None,
-    was_canceled: Optional[Callable[[None], bool]] = None
+    set_value: Callable[[int], None] | None = None,
+    process: Callable[[None], None] | None = None,
+    was_canceled: Callable[[None], bool] | None = None
 ) -> Reporthook:
     """
     Accepts multiple optional callbacks and returns a function using them that is compaticle with the `reporthook` argument of `urllib.request.urlretrieve()`.

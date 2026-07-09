@@ -4,15 +4,15 @@ from pathlib import Path
 
 from valve_parsers import VPKFile
 
+from core.config import config
 from core.constants import BACKUP_MAINMENU_FOLDER
-from core.folder_setup import folder_setup
 
 log = logging.getLogger()
 
 
-def patch_mainmenuoverride(tf_path: str):
-    custom_dir = Path(tf_path) / 'custom'
-    if not custom_dir.exists():
+def patch_mainmenuoverride(tf_path: Path):
+    custom_dir = tf_path / 'custom'
+    if not custom_dir.is_dir():
         return
 
     for item in custom_dir.iterdir():
@@ -32,7 +32,7 @@ def patch_mainmenuoverride(tf_path: str):
 
         if item.is_dir():
             mainmenuoverride_file = item / "resource" / "ui" / "mainmenuoverride.res"
-            if mainmenuoverride_file.exists():
+            if mainmenuoverride_file.is_file():
                 _add_vguipreload_string(mainmenuoverride_file)
                 found_mainmenuoverride = True
 
@@ -43,26 +43,26 @@ def patch_mainmenuoverride(tf_path: str):
         backup_folder_custom.mkdir(parents=True, exist_ok=True)
 
         # copy mainmenuoverride.res to backup folder
-        shutil.copy2(folder_setup.install_dir / 'backup/resource/ui/mainmenuoverride.res', backup_folder_custom/ 'mainmenuoverride.res')
+        shutil.copy2(config.install_dir / 'backup/resource/ui/mainmenuoverride.res', backup_folder_custom/ 'mainmenuoverride.res')
 
         # info.vdf so tf2 accepts res file
-        shutil.copy2(folder_setup.install_dir / 'backup/info.vdf', backup_folder / 'info.vdf')
-        _add_vguipreload_string(backup_folder_custom/ "mainmenuoverride.res")
+        shutil.copy2(config.install_dir / 'backup/info.vdf', backup_folder / 'info.vdf')
+        _add_vguipreload_string(backup_folder_custom / "mainmenuoverride.res")
 
 
-def _add_vguipreload_string(file_path):
+def _add_vguipreload_string(file_path: Path):
     try:
-        with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
+        with file_path.open('r', encoding='utf-8', errors='replace') as f:
             content = f.read()
         if "vguipreload.res" not in content:
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with file_path.open('w', encoding='utf-8') as f:
                 f.write('#base "vguipreload.res"\n' + content)
             return True
     except Exception:
         log.exception(f'Failed to modify {file_path}')
 
 
-def _process_vpk(vpk_path):
+def _process_vpk(vpk_path: Path):
     try:
         vpk_file = VPKFile(vpk_path)
         target_files = vpk_file.find_files("resource/ui/mainmenuoverride.res")

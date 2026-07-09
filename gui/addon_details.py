@@ -25,9 +25,9 @@ from PyQt6.QtWidgets import (
 )
 from valve_parsers import VPKFile
 
-from core.constants import MOD_TYPE_COLORS, MOD_EXPORT_VPK_SPLIT_SIZE
+from core.config import config
+from core.constants import MOD_EXPORT_VPK_SPLIT_SIZE, MOD_TYPE_COLORS
 from gui.theme import COMBOBOX_POPUP_STYLE, FG_LIGHTEST, FG_MUTED
-from core.folder_setup import folder_setup
 
 log = logging.getLogger()
 
@@ -161,7 +161,7 @@ class ModJsonEditor(QDialog):
 
     def save_changes(self):
         folder_name = self.addon_info.get("file_path", self.addon_name)
-        mod_json_path = folder_setup.addons_dir / folder_name / "mod.json"
+        mod_json_path = config.addons_dir / folder_name / "mod.json"
 
         # build updated json
         updated_data = {
@@ -347,7 +347,7 @@ class AddonDescription(QWidget):
             return
 
         folder_name = self.current_addon_info.get("file_path", self.current_addon_name)
-        addon_dir = folder_setup.addons_dir / folder_name
+        addon_dir = config.addons_dir / folder_name
         default_name = folder_name.replace(" ", "_")
 
         # custom dialog with .vpk suffix
@@ -385,7 +385,7 @@ class AddonDescription(QWidget):
         if not vpk_name:
             return
 
-        exports_dir = folder_setup.mods_dir / 'exports'
+        exports_dir = config.mods_dir / 'exports'
         exports_dir.mkdir(parents=True, exist_ok=True)
         vpk_path = exports_dir / vpk_name
 
@@ -409,7 +409,7 @@ class AddonDescription(QWidget):
     def refresh_current_addon(self):
         if self.current_addon_name and self.current_addon_info:
             folder_name = self.current_addon_info.get("file_path", self.current_addon_name)
-            mod_json_path = folder_setup.addons_dir / folder_name / "mod.json"
+            mod_json_path = config.addons_dir / folder_name / "mod.json"
             try:
                 mod_json_path.parent.mkdir(parents=True, exist_ok=True)
                 with open(mod_json_path, 'r') as f:

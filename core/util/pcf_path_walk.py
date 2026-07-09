@@ -3,8 +3,8 @@ from pathlib import Path
 
 from valve_parsers import PCFFile
 
+from core.config import config
 from core.constants import PARTICLE_SPLITS
-from core.folder_setup import folder_setup
 from core.operations.pcf_merge import merge_pcf_files
 from core.operations.pcf_rebuild import (
     extract_elements,
@@ -120,10 +120,10 @@ def get_mod_particles() -> tuple[dict[str, list[str]], list[str]]:
     mod_particles = {}
     all_particles = set()
 
-    if not folder_setup.particles_dir.exists():
+    if not config.particles_dir.exists():
         return mod_particles, []
 
-    for vpk_dir in folder_setup.particles_dir.iterdir():
+    for vpk_dir in config.particles_dir.iterdir():
         if vpk_dir.is_dir():
             particle_dir = vpk_dir / "actual_particles"
             if particle_dir.exists():
@@ -141,7 +141,7 @@ def apply_particle_selections(selections: dict) -> bool:
     # process each mod that has selected particles
     used_mods = set(selections.values())
     for mod_name in used_mods:
-        mod_dir = folder_setup.particles_dir / mod_name
+        mod_dir = config.particles_dir / mod_name
 
         # copy selected particles
         source_particles_dir = mod_dir / "actual_particles"
@@ -151,7 +151,7 @@ def apply_particle_selections(selections: dict) -> bool:
                     source_file = source_particles_dir / f"{particle_file}.pcf"
                     if source_file.exists():
                         # copy particle file to to_be_patched
-                        copy(source_file, folder_setup.temp_to_be_patched_dir / f"{particle_file}.pcf")
+                        copy(source_file, config.temp_to_be_patched_dir / f"{particle_file}.pcf")
                         # get particle file mats from attrib
                         pcf = PCFFile(source_file).decode()
                         system_defs = pcf.get_elements_by_type('DmeParticleSystemDefinition')
@@ -168,19 +168,19 @@ def apply_particle_selections(selections: dict) -> bool:
                                     required_materials.add(material_path + ".vmt")
 
     for mod_name in used_mods:
-        mod_dir = folder_setup.particles_dir / mod_name
+        mod_dir = config.particles_dir / mod_name
         # process each required material
         for material_path in required_materials:
             full_material_path = mod_dir / 'materials' / material_path.replace('\\', '/')
             if full_material_path.exists():
-                material_destination = folder_setup.temp_to_be_vpk_dir / Path(full_material_path).relative_to(mod_dir)
+                material_destination = config.temp_to_be_vpk_dir / Path(full_material_path).relative_to(mod_dir)
                 copy(full_material_path, material_destination)
                 texture_paths = get_vmt_dependencies(full_material_path)
                 if texture_paths:
                     for texture_path in texture_paths:
                         full_texture_path = mod_dir / 'materials' / str(texture_path).replace('\\', '/')
                         if full_texture_path.exists():
-                            texture_destination = folder_setup.temp_to_be_vpk_dir / Path(full_texture_path).relative_to(mod_dir)
+                            texture_destination = config.temp_to_be_vpk_dir / Path(full_texture_path).relative_to(mod_dir)
                             copy(full_texture_path, texture_destination)
 
     # merge split files back into original files
@@ -189,7 +189,7 @@ def apply_particle_selections(selections: dict) -> bool:
 
         # check which split files exist in to_be_patched
         for split_name in split_defs.keys():
-            split_path = folder_setup.temp_to_be_patched_dir / split_name
+            split_path = config.temp_to_be_patched_dir / split_name
             if split_path.exists():
                 split_files_in_temp.append(split_path)
 
@@ -204,17 +204,17 @@ def apply_particle_selections(selections: dict) -> bool:
             else:
                 merged = pcf_parts[0]
 
-            output_path = folder_setup.temp_to_be_patched_dir / original_file
+            output_path = config.temp_to_be_patched_dir / original_file
             merged.encode(output_path)
 
             for split_file in split_files_in_temp:
                 split_file.unlink()
 
     # fill in missing vanilla elements for reconstructed split files
-    particle_map = load_particle_system_map(folder_setup.particle_system_map_file)
+    particle_map = load_particle_system_map(config.particle_system_map_file)
 
     for original_file in PARTICLE_SPLITS.keys():
-        merged_file = folder_setup.temp_to_be_patched_dir / original_file
+        merged_file = config.temp_to_be_patched_dir / original_file
 
         if merged_file.exists():
             merged_pcf = PCFFile(merged_file).decode()
@@ -226,7 +226,7 @@ def apply_particle_selections(selections: dict) -> bool:
                     elements_we_still_need.add(element)
 
             if elements_we_still_need:
-                vanilla_file = folder_setup.temp_to_be_referenced_dir / original_file
+                vanilla_file = config.temp_to_be_referenced_dir / original_file
                 if vanilla_file.exists():
                     vanilla_pcf = PCFFile(vanilla_file).decode()
                     vanilla_elements = extract_elements(vanilla_pcf, elements_we_still_need)

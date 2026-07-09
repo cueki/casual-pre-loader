@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from typing import Set
 
 from valve_parsers import VPKFile
 
@@ -9,7 +8,7 @@ from core.constants import QUICKPRECACHE_FILE_SUFFIXES, QUICKPRECACHE_MODEL_LIST
 log = logging.getLogger()
 
 
-def make_precache_list(game_path: str) -> Set[str]:
+def make_precache_list(game_path: str) -> set[str]:
     # get list of files to precache from custom
     model_list = set()
     custom_folder = Path(game_path) / "tf" / "custom"
@@ -38,7 +37,7 @@ def _process_file_to_model_path(file_path: str) -> str:
     return file_path
 
 
-def manage_folder(folder_path: Path) -> Set[str]:
+def manage_folder(folder_path: Path) -> set[str]:
     model_set = set()
 
     for file_path in folder_path.glob("**/*"):
@@ -57,7 +56,7 @@ def manage_folder(folder_path: Path) -> Set[str]:
     return model_set
 
 
-def manage_vpk(vpk_path: Path) -> Set[str]:
+def manage_vpk(vpk_path: Path) -> set[str]:
     # extract model paths from a VPK file
     model_set = set()
     failed_vpks = []

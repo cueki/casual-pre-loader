@@ -10,24 +10,24 @@ import json
 import logging
 import sys
 from collections import defaultdict
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Dict, List
 
 from valve_parsers import PCFFile
 
-from core.folder_setup import folder_setup
+from core.config import config
 from core.operations.pcf_rebuild import extract_elements, get_pcf_element_names
 
 log = logging.getLogger()
 
 
-def load_particle_system_map() -> Dict[str, List[str]]:
-    map_path = folder_setup.data_dir / "particle_system_map.json"
+def load_particle_system_map() -> dict[str, list[str]]:
+    map_path = config.data_dir / "particle_system_map.json"
     with open(map_path, 'r') as f:
         return json.load(f)
 
 
-def find_conflicting_elements(pcf_files: List[PCFFile], target_elements: List[str]) -> Dict[str, List[int]]:
+def find_conflicting_elements(pcf_files: list[PCFFile], target_elements: list[str]) -> dict[str, list[int]]:
     element_sources = defaultdict(list)
 
     for i, pcf in enumerate(pcf_files):
@@ -39,7 +39,7 @@ def find_conflicting_elements(pcf_files: List[PCFFile], target_elements: List[st
     return {elem: sources for elem, sources in element_sources.items() if len(sources) > 1}
 
 
-def resolve_conflicts(conflicts: Dict[str, List[int]], pcf_files: List[Path]) -> Dict[str, int]:
+def resolve_conflicts(conflicts: Mapping[str, list[int]], pcf_files: list[Path]) -> dict[str, int]:
     decisions = {}
 
     if not conflicts:
@@ -68,7 +68,7 @@ def resolve_conflicts(conflicts: Dict[str, List[int]], pcf_files: List[Path]) ->
     return decisions
 
 
-def remap_element_attributes(element, old_to_new: Dict[int, int], string_dict, AttributeType, PCFElement):
+def remap_element_attributes(element, old_to_new: dict[int, int], string_dict, AttributeType, PCFElement):
     type_name = string_dict['extracted'][element.type_name_index]
     new_type_idx = string_dict['merged'].index(type_name)
 
@@ -94,8 +94,8 @@ def remap_element_attributes(element, old_to_new: Dict[int, int], string_dict, A
     return new_element
 
 
-def create_merged_pcf(pcf_files: List[PCFFile], pcf_paths: List[Path],
-                     target_elements: List[str], conflict_decisions: Dict[str, int]) -> PCFFile:
+def create_merged_pcf(pcf_files: list[PCFFile], pcf_paths: list[Path],
+                     target_elements: list[str], conflict_decisions: Mapping[str, int]) -> PCFFile:
     from valve_parsers import PCFElement
 
     from core.constants import AttributeType

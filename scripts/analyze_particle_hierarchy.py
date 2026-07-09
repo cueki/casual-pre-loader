@@ -10,15 +10,16 @@ import argparse
 import json
 import logging
 import sys
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Dict, List, Set
 
 from valve_parsers import AttributeType, PCFFile
 
 log = logging.getLogger()
 
 
-def analyze_particle_hierarchy(pcf_file: PCFFile) -> Dict[str, Dict]:
+# TODO: narrow types
+def analyze_particle_hierarchy(pcf_file: PCFFile) -> dict[str, dict]:
     if not pcf_file.elements:
         return {}
 
@@ -127,7 +128,8 @@ def analyze_particle_hierarchy(pcf_file: PCFFile) -> Dict[str, Dict]:
     return particle_systems
 
 
-def find_root_systems(particle_systems: Dict[str, Dict]) -> List[str]:
+# TODO: narrow types
+def find_root_systems(particle_systems: Mapping[str, Mapping]) -> list[str]:
     # find systems with no reference in children
     root_systems = []
     for system_name, system_info in particle_systems.items():
@@ -136,7 +138,8 @@ def find_root_systems(particle_systems: Dict[str, Dict]) -> List[str]:
     return sorted(root_systems)
 
 
-def build_hierarchy_tree(particle_systems: Dict[str, Dict], root_system: str, visited: Set[str] = None) -> Dict:
+# TODO: narrow types
+def build_hierarchy_tree(particle_systems: Mapping[str, Mapping], root_system: str, visited: set[str] = None) -> dict:
     # le recursion XD
     if visited is None:
         visited = set()
@@ -163,7 +166,8 @@ def build_hierarchy_tree(particle_systems: Dict[str, Dict], root_system: str, vi
     }
 
 
-def print_hierarchy_tree(tree: Dict, indent: int = 0, show_components: bool = False):
+# TODO: narrow types
+def print_hierarchy_tree(tree: Mapping, indent: int = 0, show_components: bool = False):
     prefix = "  " * indent
     circular_marker = " (CIRCULAR)" if tree.get('circular') else ""
     log.info(f"{prefix}{tree['name']}{circular_marker}")
@@ -178,7 +182,8 @@ def print_hierarchy_tree(tree: Dict, indent: int = 0, show_components: bool = Fa
         print_hierarchy_tree(child, indent + 1, show_components)
 
 
-def compare_with_element0(pcf_file: PCFFile, particle_systems: Dict[str, Dict]) -> \
+# TODO: narrow types
+def compare_with_element0(pcf_file: PCFFile, particle_systems: Mapping[str, Mapping]) -> \
         tuple[list[str], list[str], dict[str, list[str]]]:
     # element 0 from Mass Effect
     element0_systems = []

@@ -6,7 +6,7 @@ from typing import Iterable
 
 from more_itertools import consume
 
-from core.folder_setup import folder_setup
+from core.config import config
 from core.util.file import delete, modeset, modeset_add, move
 
 """
@@ -37,27 +37,27 @@ def migrate():
     # Files and folders to delete
     DELETE_PORTABLE: list[Path] = [
         # old updater
-        folder_setup.install_dir / 'core' / 'updater_old.exe',
-        folder_setup.install_dir / 'RUNME.tmp.bat',
+        config.install_dir / 'core' / 'updater_old.exe',
+        config.install_dir / 'RUNME.tmp.bat',
         # old files/folders
-        folder_setup.install_dir / 'particle_system_map.json',
-        folder_setup.install_dir / 'mod_urls.json',
-        folder_setup.install_dir / 'operations',
-        folder_setup.install_dir / 'quickprecache',
-        folder_setup.install_dir / 'temp',
+        config.install_dir / 'particle_system_map.json',
+        config.install_dir / 'mod_urls.json',
+        config.install_dir / 'operations',
+        config.install_dir / 'quickprecache',
+        config.install_dir / 'temp',
     ]
     DELETE: list[Path] = [
-        folder_setup.project_dir / 'temp',
+        config.project_dir / 'temp',
     ]
 
     # Files and folders to relocate
     MOVE_PORTABLE: list[tuple[Path, Path]] = [
         # userdata
-        (folder_setup.install_dir / 'mods', folder_setup.mods_dir),
-        (folder_setup.install_dir / 'app_settings.json', folder_setup.app_settings_file),
-        (folder_setup.install_dir / 'addon_metadata.json', folder_setup.addon_metadata_file),
-        (folder_setup.install_dir / 'casual-pre-loader.log', folder_setup.log_file),
-        (folder_setup.install_dir / 'modsinfo.json', folder_setup.modsinfo_file),
+        (config.install_dir / 'mods', config.mods_dir),
+        (config.install_dir / 'app_settings.json', config.app_settings_file),
+        (config.install_dir / 'addon_metadata.json', config.addon_metadata_file),
+        (config.install_dir / 'casual-pre-loader.log', config.log_file),
+        (config.install_dir / 'modsinfo.json', config.modsinfo_file),
     ]
     MOVE: list[tuple[Path, Path]] = []
 
@@ -68,11 +68,11 @@ def migrate():
     MODESET_ADD_PORTABLE: dict[int, list[Path]] = {
         # set executable bit
         stat.S_IXOTH | stat.S_IXGRP | stat.S_IXUSR: [
-            folder_setup.install_dir / 'main.py',
-            folder_setup.install_dir / 'scripts' / 'build.py',
-            folder_setup.install_dir / 'scripts' / 'analyze_particle_hierarchy.py',
-            folder_setup.install_dir / 'scripts' / 'particle_file_merger.py',
-            folder_setup.install_dir / 'scripts' / 'run.sh',
+            config.install_dir / 'main.py',
+            config.install_dir / 'scripts' / 'build.py',
+            config.install_dir / 'scripts' / 'analyze_particle_hierarchy.py',
+            config.install_dir / 'scripts' / 'particle_file_merger.py',
+            config.install_dir / 'scripts' / 'run.sh',
         ]
     }
 
@@ -90,7 +90,7 @@ def migrate():
         for mode, files in groups:
             consume(map(partial(modeset_add, mode=mode, not_exist_ok=True), files))
 
-    if folder_setup.portable:
+    if config.portable:
         DELETE += DELETE_PORTABLE
         MOVE += MOVE_PORTABLE
 

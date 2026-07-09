@@ -2,9 +2,8 @@ import itertools
 import logging
 import tempfile
 from pathlib import Path
-from typing import Set
 
-from core.folder_setup import folder_setup
+from core.config import config
 from core.quickprecache.precache_list import make_precache_list
 from core.quickprecache.r_rootlod import check_root_lod
 from core.quickprecache.studio_mdl import StudioMDL
@@ -32,7 +31,7 @@ def handle_string(input_str: str) -> str:
     return input_str
 
 
-def load_list_from_file(list_file: str) -> Set[str]:
+def load_list_from_file(list_file: str) -> set[str]:
     # load the model list from a file
     model_list = set()
 
@@ -120,7 +119,7 @@ class QuickPrecache:
             log.exception(f"Error saving model list to {output_file}")
             return False
 
-    def make_precache_sub_list(self, strings: Set[str]) -> None:
+    def make_precache_sub_list(self, strings: set[str]) -> None:
         # create subdivided QC files for the model list
         builder = get_precache_string_builder(self.builder_index)
         passed_strings = set()
@@ -157,12 +156,12 @@ class QuickPrecache:
         # create a QC file and compile it with StudioMDL
         try:
             # create a temporary file
-            folder_setup.temp_dir.mkdir(parents=True, exist_ok=True)
+            config.temp_dir.mkdir(parents=True, exist_ok=True)
             temp_file = tempfile.NamedTemporaryFile(
                 mode='w',
                 suffix='.qc',
                 delete=False,
-                dir=folder_setup.temp_dir
+                dir=config.temp_dir
             )
 
             # save the original filename for reference
@@ -190,12 +189,12 @@ class QuickPrecache:
         # create the main precache.qc file that includes all subfiles
         try:
             # create the main QC file
-            folder_setup.temp_dir.mkdir(parents=True, exist_ok=True)
+            config.temp_dir.mkdir(parents=True, exist_ok=True)
             temp_file = tempfile.NamedTemporaryFile(
                 mode='w',
                 suffix='.qc',
                 delete=False,
-                dir=folder_setup.temp_dir
+                dir=config.temp_dir
             )
 
             temp_path = Path(temp_file.name)

@@ -2,11 +2,11 @@ import json
 import logging
 import tempfile
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable
 
 from valve_parsers import VPKFile
 
-from core.folder_setup import folder_setup
+from core.config import config
 from core.operations.advanced_particle_merger import AdvancedParticleMerger
 from core.structure_validator import StructureValidator
 from core.util.file import copy, delete, move
@@ -34,15 +34,15 @@ def normalize_vpk_paths(vpk_paths: list[Path]) -> list[Path]:
 
 class ImportService:
     # mod extraction logic
-    def __init__(self, settings_manager=None):
-        self.settings_manager = settings_manager
+    def __init__(self, settings=None):
+        self.settings = settings
         self.validator = StructureValidator()
 
     def process_folder(
         self,
         folder_path: Path,
         override_name: str = None,
-        progress_callback: Optional[Callable[[int, str], None]] = None
+        progress_callback: Callable[[int, str], None] | None = None
     ) -> tuple[bool, str]:
         # attempt to process a folder
         folder_name = override_name if override_name else folder_path.name
@@ -53,7 +53,7 @@ class ImportService:
             has_particles = any((folder_path / "particles").glob("*.pcf"))
 
             if has_particles:
-                destination = folder_setup.particles_dir / folder_name
+                destination = config.particles_dir / folder_name
                 delete(destination, not_exist_ok=True)
                 copy(folder_path, destination)
 
@@ -64,7 +64,7 @@ class ImportService:
                 particle_merger.preprocess_vpk(destination)
             else:
                 # it is an addon
-                destination = folder_setup.addons_dir / folder_name
+                destination = config.addons_dir / folder_name
                 delete(destination, not_exist_ok=True)
                 copy(folder_path, destination)
 
@@ -89,7 +89,7 @@ class ImportService:
     def process_zip_file(
         self,
         zip_path: Path,
-        progress_callback: Optional[Callable[[int, str], None]] = None
+        progress_callback: Callable[[int, str], None] | None = None
     ) -> tuple[bool, str]:
         # attempt to process and extract a zip file
         zip_name = zip_path.stem
@@ -155,7 +155,7 @@ class ImportService:
     def process_vpk_file(
         self,
         file_path: Path,
-        progress_callback: Optional[Callable[[int, str], None]] = None
+        progress_callback: Callable[[int, str], None] | None = None
     ) -> tuple[bool, str]:
         # mod VPK extraction
         try:
@@ -168,8 +168,8 @@ class ImportService:
                 progress_callback(5, "Validating VPK structure...")
             validation_result = self.validator.validate_vpk(file_path)
 
-            extracted_particles_dir = folder_setup.particles_dir / vpk_name
-            extracted_addons_dir = folder_setup.addons_dir / vpk_name
+            extracted_particles_dir = config.particles_dir / vpk_name
+            extracted_addons_dir = config.addons_dir / vpk_name
             extracted_particles_dir.mkdir(parents=True, exist_ok=True)
 
             if progress_callback:
@@ -226,7 +226,7 @@ class ImportService:
     def process_dropped_items(
         self,
         item_paths: list[Path],
-        progress_callback: Optional[Callable[[int, str], None]] = None
+        progress_callback: Callable[[int, str], None] | None = None
     ) -> tuple[list[str], list[tuple[str, str]]]:
 
         total_items = len(item_paths)

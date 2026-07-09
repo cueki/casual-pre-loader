@@ -7,15 +7,24 @@ If you need further assistance installing the preloader, or just want to chat, j
 
 If you want a video supplement, please refer to the [**Video Supplement**](#video-supplement) section!
 
+!!! note
+    MacOS support for Team Fortress 2 was officially dropped in 2024, and hasn't been properly playable since 2019.
+    It is possible to download older depots, or to run the windows build through `wine`/`crossover`, but this requires running an older version of the game and/or prevents users from connecting to VAC-enabled servers (e.g. casual servers).
+    As such, the casual-pre-loader does not support MacOS, and support is not planned.
+
 ## Windows Tutorial:
 
 ### Step 1: Installation
 
 1. **Install the latest version of the preloader from [GitHub]({{ config.repo_url }}/releases) or [Gamebanana]({{ gamebanana_url }}).**
-2. **Once you have the zip file, extract it, and put the folder anywhere you'd like.**
+2. **Once you have the zip file, extract it, and put the folder anywhere you like.**
 
 !!! note
-    Ensure it is not in a Onedrive shared folder or in your game's `custom` folder.
+    Ensure it is not under a Onedrive shared folder or a folder the user does not have write permissions for (e.g. `C:\program files`).
+    Do not put the casual-pre-loader in your game's `custom` folder. It is not a mod, and does not get loaded by the game.
+
+!!! note
+    If you're interested in packaging the casual-pre-loader via winget, choco, scoop, or any other windows package manager, please feel free to open a PR!
 
 ### Step 2: Adding your mods
 
@@ -48,35 +57,70 @@ If you want a video supplement, please refer to the [**Video Supplement**](#vide
 
 ## Linux Tutorial:
 
-You can clone the repo, or install it as an [AUR package](https://aur.archlinux.org/packages/casual-pre-loader-git).
+!!! note
+    If you're interested in packaging the casual-pre-loader for your distro, please feel free to open a PR!
 
-   - Using [yay](https://github.com/Jguer/yay):
-```sh
-yay -S casual-pre-loader-git
-casual-pre-loader
-```
+### Arch Linux or similar distros
+There is an [AUR package](https://aur.archlinux.org/packages/casual-pre-loader-git). After installing, you can run the program with `casual-pre-loader` or through your launcher.  
 
-   - Using [paru](https://github.com/Morganamilo/paru):
-```sh
-paru -S casual-pre-loader-git
-casual-pre-loader
-```
+Settings are stored under `${XDG_CONFIG_HOME}/casual-pre-loader`, defaulting to `~/.config/casual-pre-loader` if `${XDG_CONFIG_HOME}` is unset or empty.
 
-   - Or with git:
+Mod data is stored under `${XDG_DATA_HOME}/casual-pre-loader`, defaulting to `~/.local/share/casual-pre-loader` if `${XDG_DATA_HOME}` is unset or empty.
+
+### Any Linux distro
+Ensure that the following dependencies are installed:  
+`python3.12+ python-ensurepip python-venv`  
+These may be packaged differently depending on the distro.
+
+!!! note
+    There is an additional optional dependency on `wine`. If it's installed, it is used to run the windows build of `studiomdl` in order to compile MDL files.  
+    (This may be unnecessary in the future if [this PR](https://github.com/craftablescience/sourcepp/pull/85)) gets merged.
+
+You can then download and run the program by cloning the repo:
 ```sh
 git clone --recursive https://github.com/cueki/casual-pre-loader
 cd casual-pre-loader
-```
-
-Then run the script whenever you want to use the app:
-```sh
 ./scripts/run.sh
+```
+The run script helps set up a virtualenv, if you know what you're doing, you could also just skip the run script and install any required python packages globally.
+
+The program stores settings and mod data under the `userdata/` directory that is created on program launch.  
+If you'd rather store user files in the regular per-user locations (like the AUR package does), you can create an empty `.noportable` file in the project's root folder
+```sh
+touch .noportable
 ```
 
 !!! warning
-    Linux users should use `scripts/run.sh` to launch the application. Do **NOT** use `RUNME.bat` - that's for Windows only.
+    Linux users should use `scripts/run.sh` to launch the application. Do **NOT** run `RUNME.bat` under wine.
 
-If you're on Ubuntu, or an Ubuntu-based derivative (such as Mint or PopOS), you may get an error similiar to the following:
+### Aditional steps for immutable distros (e.g. SteamOS, Bazzite, etc.)
+Since installing packages is quite a hassle on most immutable distros - and usually has some downsides - using something like [`flatpak`](https://flatpak.org/) to install `wine` is recommended.
+```sh
+flatpak install "$(flatpak remote-ls flathub --app --columns=ref | grep org.winehq.Wine | grep stable | sort -Vr | head -n1)"
+```
+
+However, the wine flatpak requires you to invoke it as `flatpak run org.winehq.Wine`, and since the preloader expects a binary named `wine` to be on the `PATH`, we need to put a small script on the `PATH` that just calls the correct invocation.
+
+User scripts that should be on the `PATH` are typically placed in `${XDG_BIN_HOME}`, which should be `~/.local/bin` by default.
+To add this directory to the `PATH` if it hasn't already:
+```sh
+echo 'PATH="${PATH+"${PATH}:"}${XDG_BIN_HOME:="${HOME}/.local/bin"}"' >>~/.bash_profile # or `~/.profile`, or wherever else you set envvars
+```
+
+Then we simply create a small wrapper script:
+```sh
+: "${XDG_BIN_HOME:="${HOME}/.local/bin"}"
+mkdir -p "${XDG_BIN_HOME}"
+printf '#!/bin/sh\n\nexec flatpak run org.winehq.Wine "${@}"' >"${XDG_BIN_HOME}/wine"
+chmod +x "${XDG_BIN_HOME}/wine"
+```
+
+!!! note
+    Packaging the preloader as a `flatpak` would render all of this unnecessary, [there is already an open issue](https://github.com/cueki/casual-pre-loader/issues/142).
+
+
+### Additional steps for Ubuntu or derivatives (e.g. Mint, PopOS, etc.)
+You may get an error similiar to the following:
 ```
 This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
 ```
@@ -86,6 +130,4 @@ sudo apt-get install -y libxcb-cursor-dev
 ```
 
 ## Video Supplement:
-<iframe width="560" height="315" src="https://www.youtube.com/embed/2L1A86x_m5A" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-*This will eventually be updated to the most recent version, and have a linux section - Feathers*
+<iframe width="560" height="315" src="https://www.youtube.com/embed/hwQ5XwYG-vE" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>

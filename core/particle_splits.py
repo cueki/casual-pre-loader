@@ -1,7 +1,7 @@
 import logging
 
 from core.constants import PARTICLE_SPLITS
-from core.folder_setup import folder_setup
+from core.config import config
 
 log = logging.getLogger()
 
@@ -14,10 +14,10 @@ def migrate_old_particle_files():
     mods_to_migrate = []
     mods_missing_source = []
 
-    folder_setup.particles_dir.mkdir(parents=True, exist_ok=True)
+    config.particles_dir.mkdir(parents=True, exist_ok=True)
 
     # check each mod for old format files
-    for mod_dir in folder_setup.particles_dir.iterdir():
+    for mod_dir in config.particles_dir.iterdir():
         if not mod_dir.is_dir():
             continue
 
@@ -75,7 +75,7 @@ def migrate_old_particle_files():
             log.info(f"{mod_name}")
 
         for mod_name in mods_missing_source:
-            mod_dir = folder_setup.particles_dir / mod_name
+            mod_dir = config.particles_dir / mod_name
 
             try:
                 actual_particles = mod_dir / "actual_particles"
