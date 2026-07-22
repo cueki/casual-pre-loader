@@ -97,7 +97,7 @@ class FileHandler:
                 if len(new_data) < original_size:
                     # pad to match original size
                     padding_needed = original_size - len(new_data)
-                    log.info(f"Adding {padding_needed} bytes of padding to {file_name}")
+                    log.debug(f"Adding {padding_needed} bytes of padding to {file_name}")
                     new_data = new_data + b' ' * padding_needed
 
                 else:

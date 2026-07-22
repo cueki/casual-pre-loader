@@ -7,5 +7,5 @@ packaging~=26.0
 platformdirs~=4.9
 PyGithub~=2.9
 requests~=2.34
-rich~=14.3
+rich~=15.0
 valve-parsers>=1.2.2

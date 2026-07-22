@@ -49522,5 +49522,2597 @@
 			"visible"   "1"
 			"image" "../skybox/sky_upward_hdrrt.vmt"
 		}
+				"cobblewall001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../brick/cobblewall001.vmt"
+		}
+		"cobblewall001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../brick/cobblewall001.vtf"
+		}
+		"cobblewall001_normal"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../brick/cobblewall001_normal.vmt"
+		}
+		"cobblewall001_normal"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../brick/cobblewall001_normal.vtf"
+		}
+		"cobblewall001_snow"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../brick/cobblewall001_snow.vmt"
+		}
+		"cobblewall001_snow"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../brick/cobblewall001_snow.vtf"
+		}
+		"officedoor_04"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../cp_bloodstained/officedoor_04.vmt"
+		}
+		"officedoor_04"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../cp_bloodstained/officedoor_04.vtf"
+		}
+		"wood_shingles01"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../cp_manor/wood_shingles01.vmt"
+		}
+		"wood_shingles01"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../cp_manor/wood_shingles01.vtf"
+		}
+		"grass001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../cp_mountainlab/nature/grass001.vmt"
+		}
+		"grass001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../cp_mountainlab/nature/grass001.vtf"
+		}
+		"ground001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../cp_mountainlab/nature/ground001.vmt"
+		}
+		"ground001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../cp_mountainlab/nature/ground001.vtf"
+		}
+		"rockwall001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../cp_mountainlab/nature/rockwall001.vmt"
+		}
+		"rockwall001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../cp_mountainlab/nature/rockwall001.vtf"
+		}
+		"detailsprites_harvest"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../detail/detailsprites_harvest.vmt"
+		}
+		"detailsprites_harvest"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../detail/detailsprites_harvest.vtf"
+		}
+		"detailsprites_trainyard"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../detail/detailsprites_trainyard.vmt"
+		}
+		"detailsprites_trainyard"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../detail/detailsprites_trainyard.vtf"
+		}
+		"metal_detail_01"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../detail/metal_detail_01.vmt"
+		}
+		"metal_detail_01"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../detail/metal_detail_01.vtf"
+		}
+		"grass_07"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../egypt/grass_07.vmt"
+		}
+		"grass_07"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../egypt/grass_07.vtf"
+		}
+		"harvest_grass"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../harvest/harvest_grass.vmt"
+		}
+		"harvest_grass"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../harvest/harvest_grass.vtf"
+		}
+		"leaves_02"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../harvest/leaves_02.vmt"
+		}
+		"leaves_02"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../harvest/leaves_02.vtf"
+		}
+		"leaves_less_01"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../harvest/leaves_less_01.vmt"
+		}
+		"leaves_less_01"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../harvest/leaves_less_01.vtf"
+		}
+		"leave_solid_pile_02"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../harvest/leave_solid_pile_02.vmt"
+		}
+		"leave_solid_pile_02"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../harvest/leave_solid_pile_02.vtf"
+		}
+		"viaduct_cobblestone001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../koth_viaduct_event/viaduct_cobblestone001.vmt"
+		}
+		"viaduct_cobblestone001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../koth_viaduct_event/viaduct_cobblestone001.vtf"
+		}
+		"viaduct_grass001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../koth_viaduct_event/viaduct_grass001.vmt"
+		}
+		"viaduct_grass001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../koth_viaduct_event/viaduct_grass001.vtf"
+		}
+		"viaduct_leaves_less"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../koth_viaduct_event/viaduct_leaves_less.vmt"
+		}
+		"viaduct_leaves_less"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../koth_viaduct_event/viaduct_leaves_less.vtf"
+		}
+		"viaduct_leaves_pile"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../koth_viaduct_event/viaduct_leaves_pile.vmt"
+		}
+		"viaduct_leaves_pile"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../koth_viaduct_event/viaduct_leaves_pile.vtf"
+		}
+		"cobblestone001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/cobblestone001.vmt"
+		}
+		"cobblestone001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/cobblestone001.vtf"
+		}
+		"cobblestone001_trim"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/cobblestone001_trim.vmt"
+		}
+		"cobblestone001_trim"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/cobblestone001_trim.vtf"
+		}
+		"cobblestone002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/cobblestone002.vmt"
+		}
+		"cobblestone002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/cobblestone002.vtf"
+		}
+		"pasterwall004a"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/pasterwall004a.vmt"
+		}
+		"pasterwall004a"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/pasterwall004a.vtf"
+		}
+		"pasterwall004b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/pasterwall004b.vmt"
+		}
+		"pasterwall004b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/pasterwall004b.vtf"
+		}
+		"pasterwall004c"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/pasterwall004c.vmt"
+		}
+		"pasterwall004c"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/pasterwall004c.vtf"
+		}
+		"pasterwall004d"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/pasterwall004d.vmt"
+		}
+		"pasterwall004d"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/pasterwall004d.vtf"
+		}
+		"pasterwall004e"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/pasterwall004e.vmt"
+		}
+		"pasterwall004e"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/pasterwall004e.vtf"
+		}
+		"pasterwall004_ssbump"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/pasterwall004_ssbump.vmt"
+		}
+		"pasterwall004_ssbump"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/pasterwall004_ssbump.vtf"
+		}
+		"stonetrim001a"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/stonetrim001a.vmt"
+		}
+		"stonetrim001a"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/stonetrim001a.vtf"
+		}
+		"stonewall001a"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/stonewall001a.vmt"
+		}
+		"stonewall001a"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/stonewall001a.vtf"
+		}
+		"stonewall001a_ssbump"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/stonewall001a_ssbump.vmt"
+		}
+		"stonewall001a_ssbump"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/stonewall001a_ssbump.vtf"
+		}
+		"wood_shingles02"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/wood_shingles02.vmt"
+		}
+		"wood_shingles02"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/wood_shingles02.vtf"
+		}
+		"wood_shingles03"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/wood_shingles03.vmt"
+		}
+		"wood_shingles03"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../medieval/wood_shingles03.vtf"
+		}
+		"cattails"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_foliage/cattails.vmt"
+		}
+		"cattails"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_foliage/cattails.vtf"
+		}
+		"pine_tree_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_foliage/pine_tree_large.vmt"
+		}
+		"pine_tree_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_foliage/pine_tree_large.vtf"
+		}
+		"pine_tree_large_snow"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_foliage/pine_tree_large_snow.vmt"
+		}
+		"pine_tree_large_snow"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_foliage/pine_tree_large_snow.vtf"
+		}
+		"tree_pine01"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_foliage/tree_pine01.vmt"
+		}
+		"tree_pine01"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_foliage/tree_pine01.vtf"
+		}
+		"tree_pine01_snow"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_foliage/tree_pine01_snow.vmt"
+		}
+		"tree_pine01_snow"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_foliage/tree_pine01_snow.vtf"
+		}
+		"rock_waterfall"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_forest/rock_waterfall.vmt"
+		}
+		"rock_waterfall"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_forest/rock_waterfall.vtf"
+		}
+		"sawmill_windows"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_forest/sawmill_windows.vmt"
+		}
+		"sawmill_windows"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_forest/sawmill_windows.vtf"
+		}
+		"sawmill_windows_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_forest/sawmill_windows_large.vmt"
+		}
+		"sawmill_windows_large"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_forest/sawmill_windows_large.vtf"
+		}
+		"sawmill_wood"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_forest/sawmill_wood.vmt"
+		}
+		"sawmill_wood"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_forest/sawmill_wood.vtf"
+		}
+		"rottenburg_pit"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_medieval/rottenburg_pit.vmt"
+		}
+		"rottenburg_pit"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_medieval/rottenburg_pit.vtf"
+		}
+		"stone_base001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_medieval/stone_base001.vmt"
+		}
+		"stone_base001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_medieval/stone_base001.vtf"
+		}
+		"stone_trim_128"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_medieval/stone_trim_128.vmt"
+		}
+		"stone_trim_128"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_medieval/stone_trim_128.vtf"
+		}
+		"stone_trim_64"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_medieval/stone_trim_64.vmt"
+		}
+		"stone_trim_64"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_medieval/stone_trim_64.vtf"
+		}
+		"stone_window001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_medieval/stone_window001.vmt"
+		}
+		"stone_window001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_medieval/stone_window001.vtf"
+		}
+		"stone_window003"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_medieval/stone_window003.vmt"
+		}
+		"stone_window003"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_medieval/stone_window003.vtf"
+		}
+		"wallstone001_256"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_medieval/wallstone001_256.vmt"
+		}
+		"wallstone001_256"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_medieval/wallstone001_256.vtf"
+		}
+		"watercooler_bottle"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_spytech/watercooler_bottle.vmt"
+		}
+		"watercooler_bottle"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_spytech/watercooler_bottle.vtf"
+		}
+		"watercooler_sheet"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_spytech/watercooler_sheet.vmt"
+		}
+		"watercooler_sheet"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_spytech/watercooler_sheet.vtf"
+		}
+		"fern_01"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_swamp/fern_01.vmt"
+		}
+		"fern_01"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_swamp/fern_01.vtf"
+		}
+		"fern_01a"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_swamp/fern_01a.vmt"
+		}
+		"fern_01a"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_swamp/fern_01a.vtf"
+		}
+		"fern_01b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_swamp/fern_01b.vmt"
+		}
+		"fern_01b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_swamp/fern_01b.vtf"
+		}
+		"lightpole"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_trainyard/lightpole.vmt"
+		}
+		"lightpole"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_trainyard/lightpole.vtf"
+		}
+		"lightpole_on"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_trainyard/lightpole_on.vmt"
+		}
+		"lightpole_on"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../models/props_trainyard/lightpole_on.vtf"
+		}
+		"grass_07"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/grass_07.vmt"
+		}
+		"grass_07"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/grass_07.vtf"
+		}
+		"grass_08"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/grass_08.vmt"
+		}
+		"grass_08"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/grass_08.vtf"
+		}
+		"grass_09"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/grass_09.vmt"
+		}
+		"grass_09"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/grass_09.vtf"
+		}
+		"grass_blendmask"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/grass_blendmask.vmt"
+		}
+		"grass_blendmask"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/grass_blendmask.vtf"
+		}
+		"mudground002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/mudground002.vmt"
+		}
+		"mudground002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/mudground002.vtf"
+		}
+		"snowwall_blendmask"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/snowwall_blendmask.vmt"
+		}
+		"snowwall_blendmask"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/snowwall_blendmask.vtf"
+		}
+		"snow_grass01_normal"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/snow_grass01_normal.vmt"
+		}
+		"snow_grass01_normal"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/snow_grass01_normal.vtf"
+		}
+		"watera_normal"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/watera_normal.vmt"
+		}
+		"watera_normal"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/watera_normal.vtf"
+		}
+		"water_coast01_normal"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/water_coast01_normal.vmt"
+		}
+		"water_coast01_normal"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/water_coast01_normal.vtf"
+		}
+		"water_frame01_normal"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/water_frame01_normal.vmt"
+		}
+		"water_frame01_normal"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../nature/water_frame01_normal.vtf"
+		}
+		"dirtroad008"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../overlays/dirtroad008.vmt"
+		}
+		"dirtroad008"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../overlays/dirtroad008.vtf"
+		}
+		"dirtroad008end"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../overlays/dirtroad008end.vmt"
+		}
+		"dirtroad008end"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../overlays/dirtroad008end.vtf"
+		}
+		"snow_horizontalwood"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../overlays/snow_horizontalwood.vmt"
+		}
+		"snow_horizontalwood"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../overlays/snow_horizontalwood.vtf"
+		}
+		"blendsnowtodirt001_normal"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../pl_barnblitz/blendsnowtodirt001_normal.vmt"
+		}
+		"blendsnowtodirt001_normal"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../pl_barnblitz/blendsnowtodirt001_normal.vtf"
+		}
+		"dead_lillies"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../pl_hoodoo/dead_lillies.vmt"
+		}
+		"dead_lillies"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../pl_hoodoo/dead_lillies.vtf"
+		}
+		"clock01"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/clock01.vmt"
+		}
+		"clock01"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/clock01.vtf"
+		}
+		"computer_panel_001b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/computer_panel_001b.vmt"
+		}
+		"computer_panel_001b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/computer_panel_001b.vtf"
+		}
+		"computer_panel_002b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/computer_panel_002b.vmt"
+		}
+		"computer_panel_002b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/computer_panel_002b.vtf"
+		}
+		"computer_panel_002c"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/computer_panel_002c.vmt"
+		}
+		"computer_panel_002c"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/computer_panel_002c.vtf"
+		}
+		"computer_panel_003b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/computer_panel_003b.vmt"
+		}
+		"computer_panel_003b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/computer_panel_003b.vtf"
+		}
+		"computer_panel_004b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/computer_panel_004b.vmt"
+		}
+		"computer_panel_004b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/computer_panel_004b.vtf"
+		}
+		"computer_panel_005b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/computer_panel_005b.vmt"
+		}
+		"computer_panel_005b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/computer_panel_005b.vtf"
+		}
+		"computer_panel_006b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/computer_panel_006b.vmt"
+		}
+		"computer_panel_006b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/computer_panel_006b.vtf"
+		}
+		"map_1"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/map_1.vmt"
+		}
+		"map_1"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/map_1.vtf"
+		}
+		"map_2"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/map_2.vmt"
+		}
+		"map_2"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/map_2.vtf"
+		}
+		"mousehole001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/mousehole001.vmt"
+		}
+		"mousehole001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../props/mousehole001.vtf"
+		}
+		"billboard001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/billboard001.vmt"
+		}
+		"billboard001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/billboard001.vtf"
+		}
+		"sign001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign001.vmt"
+		}
+		"sign001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign001.vtf"
+		}
+		"sign002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign002.vmt"
+		}
+		"sign002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign002.vtf"
+		}
+		"sign003"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign003.vmt"
+		}
+		"sign003"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign003.vtf"
+		}
+		"sign004"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign004.vmt"
+		}
+		"sign004"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign004.vtf"
+		}
+		"sign005"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign005.vmt"
+		}
+		"sign005"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign005.vtf"
+		}
+		"sign006"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign006.vmt"
+		}
+		"sign006"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign006.vtf"
+		}
+		"sign036"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign036.vmt"
+		}
+		"sign036"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign036.vtf"
+		}
+		"sign037"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign037.vmt"
+		}
+		"sign037"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign037.vtf"
+		}
+		"sign037_fix"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign037_fix.vmt"
+		}
+		"sign037_fix"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../signs/sign037_fix.vtf"
+		}
+		"swampcobblewall001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/brick/swampcobblewall001.vmt"
+		}
+		"swampcobblewall001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/brick/swampcobblewall001.vtf"
+		}
+		"swampcrete001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/concrete/swampcrete001.vmt"
+		}
+		"swampcrete001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/concrete/swampcrete001.vtf"
+		}
+		"swampcrete002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/concrete/swampcrete002.vmt"
+		}
+		"swampcrete002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/concrete/swampcrete002.vtf"
+		}
+		"swampgrass001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/nature/swampgrass001.vmt"
+		}
+		"swampgrass001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/nature/swampgrass001.vtf"
+		}
+		"swampmud003"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/nature/swampmud003.vmt"
+		}
+		"swampmud003"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/nature/swampmud003.vtf"
+		}
+		"swampmud004"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/nature/swampmud004.vmt"
+		}
+		"swampmud004"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/nature/swampmud004.vtf"
+		}
+		"swampmud005"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/nature/swampmud005.vmt"
+		}
+		"swampmud005"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/nature/swampmud005.vtf"
+		}
+		"vine002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/nature/vine002.vmt"
+		}
+		"vine002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/nature/vine002.vtf"
+		}
+		"vine003"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/nature/vine003.vmt"
+		}
+		"vine003"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/nature/vine003.vtf"
+		}
+		"algae001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/algae001.vmt"
+		}
+		"algae001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/algae001.vtf"
+		}
+		"algae002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/algae002.vmt"
+		}
+		"algae002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/algae002.vtf"
+		}
+		"algae003"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/algae003.vmt"
+		}
+		"algae003"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/algae003.vtf"
+		}
+		"algae004"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/algae004.vmt"
+		}
+		"algae004"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/algae004.vtf"
+		}
+		"algae005"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/algae005.vmt"
+		}
+		"algae005"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/algae005.vtf"
+		}
+		"algae006"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/algae006.vmt"
+		}
+		"algae006"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/algae006.vtf"
+		}
+		"dirtroadswamp001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/dirtroadswamp001.vmt"
+		}
+		"dirtroadswamp001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/dirtroadswamp001.vtf"
+		}
+		"dirtroadswamp001end"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/dirtroadswamp001end.vmt"
+		}
+		"dirtroadswamp001end"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/dirtroadswamp001end.vtf"
+		}
+		"moss_top001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/moss_top001.vmt"
+		}
+		"moss_top001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/moss_top001.vtf"
+		}
+		"moss_top002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/moss_top002.vmt"
+		}
+		"moss_top002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/moss_top002.vtf"
+		}
+		"mudprints001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/mudprints001.vmt"
+		}
+		"mudprints001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/mudprints001.vtf"
+		}
+		"mudprints002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/mudprints002.vmt"
+		}
+		"mudprints002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/mudprints002.vtf"
+		}
+		"mudpuddle001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/mudpuddle001.vmt"
+		}
+		"mudpuddle001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/mudpuddle001.vtf"
+		}
+		"mudpuddle002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/mudpuddle002.vmt"
+		}
+		"mudpuddle002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/mudpuddle002.vtf"
+		}
+		"mudpuddle003"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/mudpuddle003.vmt"
+		}
+		"mudpuddle003"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/mudpuddle003.vtf"
+		}
+		"mudpuddle004"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/mudpuddle004.vmt"
+		}
+		"mudpuddle004"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/mudpuddle004.vtf"
+		}
+		"mudpuddle005"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/mudpuddle005.vmt"
+		}
+		"mudpuddle005"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/mudpuddle005.vtf"
+		}
+		"mudpuddle006"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/mudpuddle006.vmt"
+		}
+		"mudpuddle006"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/mudpuddle006.vtf"
+		}
+		"swampleafpile001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/nature/swampleafpile001.vmt"
+		}
+		"swampleafpile001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/nature/swampleafpile001.vtf"
+		}
+		"swampleaves001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/swampleaves001.vmt"
+		}
+		"swampleaves001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/swampleaves001.vtf"
+		}
+		"swampleaves002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/swampleaves002.vmt"
+		}
+		"swampleaves002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../swamp/overlays/swampleaves002.vtf"
+		}
+		"cobblewall002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../winter/cobblewall002.vmt"
+		}
+		"cobblewall002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../winter/cobblewall002.vtf"
+		}
+		"grass08"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../winter/grass_08.vmt"
+		}
+		"grass08"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../winter/grass_08.vtf"
+		}
+		"grass09"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../winter/grass_09.vmt"
+		}
+		"grass09"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../winter/grass_09.vtf"
+		}
+		"moss001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../winter/moss001.vmt"
+		}
+		"moss001"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../winter/moss001.vtf"
+		}
+		"moss002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../winter/moss002.vmt"
+		}
+		"moss002"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../winter/moss002.vtf"
+		}
+		"moss003"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../winter/moss003.vmt"
+		}
+		"moss003"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../winter/moss003.vtf"
+		}
+		"wall007"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wall007.vmt"
+		}
+		"wall007"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wall007.vtf"
+		}
+		"wall007a"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wall007a.vmt"
+		}
+		"wall007a"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wall007a.vtf"
+		}
+		"wall007b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wall007b.vmt"
+		}
+		"wall007b"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wall007b.vtf"
+		}
+		"wall007c"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wall007c.vmt"
+		}
+		"wall007c"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wall007c.vtf"
+		}
+		"wall007d"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wall007d.vmt"
+		}
+		"wall007d"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wall007d.vtf"
+		}
+		"wall019"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wall019.vmt"
+		}
+		"wall019"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wall019.vtf"
+		}
+		"wood_wall007"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wood_wall007.vmt"
+		}
+		"wood_wall007"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wood_wall007.vtf"
+		}
+		"wood_wall008"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wood_wall008.vmt"
+		}
+		"wood_wall008"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wood_wall008.vtf"
+		}
+		"wood_wall008a"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wood_wall008a.vmt"
+		}
+		"wood_wall008a"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wood_wall008a.vtf"
+		}
+		"wood_wall009"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wood_wall009.vmt"
+		}
+		"wood_wall009"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../wood/wood_wall009.vtf"
+		}
+		"3405898400_blu_stripe"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_blu_stripe.vmt"
+		}
+		"3405898400_blu_stripe"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_blu_stripe.vtf"
+		}
+		"3405898400_brass"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_brass.vmt"
+		}
+		"3405898400_brass"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_brass.vtf"
+		}
+		"3405898400_brass_2"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_brass_2.vmt"
+		}
+		"3405898400_brass_2"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_brass_2.vtf"
+		}
+		"3405898400_down_spade"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_down_spade.vmt"
+		}
+		"3405898400_down_spade"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_down_spade.vtf"
+		}
+		"3405898400_grad_blu"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_grad_blu.vmt"
+		}
+		"3405898400_grad_blu"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_grad_blu.vtf"
+		}
+		"3405898400_grad_red"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_grad_red.vmt"
+		}
+		"3405898400_grad_red"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_grad_red.vtf"
+		}
+		"3405898400_metallic"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_metallic.vmt"
+		}
+		"3405898400_metallic"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_metallic.vtf"
+		}
+		"3405898400_red_stripe"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_red_stripe.vmt"
+		}
+		"3405898400_red_stripe"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_red_stripe.vtf"
+		}
+		"3405898400_up_spade"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_up_spade.vmt"
+		}
+		"3405898400_up_spade"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3405898400/3405898400_up_spade.vtf"
+		}
+		"3467689408_black_tertiary"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_black_tertiary.vmt"
+		}
+		"3467689408_black_tertiary"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_black_tertiary.vtf"
+		}
+		"3467689408_black_tertiary_wear"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_black_tertiary_wear.vmt"
+		}
+		"3467689408_black_tertiary_wear"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_black_tertiary_wear.vtf"
+		}
+		"3467689408_caution_stripe"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_caution_stripe.vmt"
+		}
+		"3467689408_caution_stripe"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_caution_stripe.vtf"
+		}
+		"3467689408_caution_wear"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_caution_wear.vmt"
+		}
+		"3467689408_caution_wear"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_caution_wear.vtf"
+		}
+		"3467689408_crate_pattern"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_crate_pattern.vmt"
+		}
+		"3467689408_crate_pattern"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_crate_pattern.vtf"
+		}
+		"3467689408_crate_pattern_wear"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_crate_pattern_wear.vmt"
+		}
+		"3467689408_crate_pattern_wear"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_crate_pattern_wear.vtf"
+		}
+		"3467689408_noentry_sticker"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_noentry_sticker.vmt"
+		}
+		"3467689408_noentry_sticker"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_noentry_sticker.vtf"
+		}
+		"3467689408_numberedbox_sticker"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_numberedbox_sticker.vmt"
+		}
+		"3467689408_numberedbox_sticker"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_numberedbox_sticker.vtf"
+		}
+		"3467689408_oil_blood_buckets"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_oil_blood_buckets.vmt"
+		}
+		"3467689408_oil_blood_buckets"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3467689408/3467689408_oil_blood_buckets.vtf"
+		}
+		"3472043785_blankgradient"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3472043785/3472043785_blankgradient.vmt"
+		}
+		"3472043785_blankgradient"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3472043785/3472043785_blankgradient.vtf"
+		}
+		"3472043785_silver_blu3"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3472043785/3472043785_silver_blu3.vmt"
+		}
+		"3472043785_silver_blu3"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3472043785/3472043785_silver_blu3.vtf"
+		}
+		"3472043785_silver_red3"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3472043785/3472043785_silver_red3.vmt"
+		}
+		"3472043785_silver_red3"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3472043785/3472043785_silver_red3.vtf"
+		}
+		"3472043785_topo_blu1"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3472043785/3472043785_topo_blu1.vmt"
+		}
+		"3472043785_topo_blu1"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3472043785/3472043785_topo_blu1.vtf"
+		}
+		"3472043785_topo_red1"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3472043785/3472043785_topo_red1.vmt"
+		}
+		"3472043785_topo_red1"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3472043785/3472043785_topo_red1.vtf"
+		}
+		"3472043785_water_blu2"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3472043785/3472043785_water_blu2.vmt"
+		}
+		"3472043785_water_blu2"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3472043785/3472043785_water_blu2.vtf"
+		}
+		"3472043785_water_red2"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3472043785/3472043785_water_red2.vmt"
+		}
+		"3472043785_water_red2"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3472043785/3472043785_water_red2.vtf"
+		}
+		"3472043785_wear_neutral4"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3472043785/3472043785_wear_neutral4.vmt"
+		}
+		"3472043785_wear_neutral4"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3472043785/3472043785_wear_neutral4.vtf"
+		}
+		"3473432802_primary_blu"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3473432802/3473432802_primary_blu.vmt"
+		}
+		"3473432802_primary_blu"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3473432802/3473432802_primary_blu.vtf"
+		}
+		"3473432802_primary_red"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3473432802/3473432802_primary_red.vmt"
+		}
+		"3473432802_primary_red"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3473432802/3473432802_primary_red.vtf"
+		}
+		"3473432802_secondary_blu"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3473432802/3473432802_secondary_blu.vmt"
+		}
+		"3473432802_secondary_blu"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3473432802/3473432802_secondary_blu.vtf"
+		}
+		"3473432802_secondary_red"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3473432802/3473432802_secondary_red.vmt"
+		}
+		"3473432802_secondary_red"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3473432802/3473432802_secondary_red.vtf"
+		}
+		"3473432802_tertiary_blu"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3473432802/3473432802_tertiary_blu.vmt"
+		}
+		"3473432802_tertiary_blu"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3473432802/3473432802_tertiary_blu.vtf"
+		}
+		"3473432802_tertiary_red"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3473432802/3473432802_tertiary_red.vmt"
+		}
+		"3473432802_tertiary_red"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3473432802/3473432802_tertiary_red.vtf"
+		}
+		"3565229606_albedo"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3565229606/3565229606_albedo.vmt"
+		}
+		"3565229606_albedo"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3565229606/3565229606_albedo.vtf"
+		}
+		"3565229606_dark_sheet"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3565229606/3565229606_dark_sheet.vmt"
+		}
+		"3565229606_dark_sheet"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3565229606/3565229606_dark_sheet.vtf"
+		}
+		"3565229606_union"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3565229606/3565229606_union.vmt"
+		}
+		"3565229606_union"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3565229606/3565229606_union.vtf"
+		}
+		"3565229606_wood_base"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3565229606/3565229606_wood_base.vmt"
+		}
+		"3565229606_wood_base"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3565229606/3565229606_wood_base.vtf"
+		}
+		"3565229606_wood_gradient"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3565229606/3565229606_wood_gradient.vmt"
+		}
+		"3565229606_wood_gradient"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3565229606/3565229606_wood_gradient.vtf"
+		}
+		"3674640778_p"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/3674640778_p.vmt"
+		}
+		"3674640778_p"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/3674640778_p.vtf"
+		}
+		"3674640778_r"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/3674640778_r.vmt"
+		}
+		"3674640778_r"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/3674640778_r.vtf"
+		}
+		"3674640778_w01"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/3674640778_w01.vmt"
+		}
+		"3674640778_w01"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/3674640778_w01.vtf"
+		}
+		"3674640778_w01_s"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/3674640778_w01_s.vmt"
+		}
+		"3674640778_w01_s"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/3674640778_w01_s.vtf"
+		}
+		"3674640778_wp01"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/3674640778_wp01.vmt"
+		}
+		"3674640778_wp01"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/3674640778_wp01.vtf"
+		}
+		"3674640778_wp02"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/3674640778_wp02.vmt"
+		}
+		"3674640778_wp02"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/3674640778_wp02.vtf"
+		}
+		"3674640778_y"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/3674640778_y.vmt"
+		}
+		"3674640778_y"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/3674640778_y.vtf"
+		}
+		"3674640778_logo"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/stickers/3674640778_logo.vmt"
+		}
+		"3674640778_logo"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/stickers/3674640778_logo.vtf"
+		}
+		"3674640778_stripe"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/stickers/3674640778_stripe.vmt"
+		}
+		"3674640778_stripe"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/stickers/3674640778_stripe.vtf"
+		}
+		"3674640778_stripe_noclamp"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/stickers/3674640778_stripe_noclamp.vmt"
+		}
+		"3674640778_stripe_noclamp"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3674640778/stickers/3674640778_stripe_noclamp.vtf"
+		}
+		"3688608202_blank_gradient"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3688608202/3688608202_blank_gradient.vmt"
+		}
+		"3688608202_blank_gradient"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3688608202/3688608202_blank_gradient.vtf"
+		}
+		"3688608202_blue_pattern"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3688608202/3688608202_blue_pattern.vmt"
+		}
+		"3688608202_blue_pattern"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3688608202/3688608202_blue_pattern.vtf"
+		}
+		"3688608202_main_white"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3688608202/3688608202_main_white.vmt"
+		}
+		"3688608202_main_white"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3688608202/3688608202_main_white.vtf"
+		}
+		"3688608202_metal_wear"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3688608202/3688608202_metal_wear.vmt"
+		}
+		"3688608202_metal_wear"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3688608202/3688608202_metal_wear.vtf"
+		}
+		"3688608202_red_pattern"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3688608202/3688608202_red_pattern.vmt"
+		}
+		"3688608202_red_pattern"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3688608202/3688608202_red_pattern.vtf"
+		}
+		"3688608202_sticker"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3688608202/3688608202_sticker.vmt"
+		}
+		"3688608202_sticker"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3688608202/3688608202_sticker.vtf"
+		}
+		"3693252107"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107.vmt"
+		}
+		"3693252107"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107.vtf"
+		}
+		"3693252107_albedo"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107_albedo.vmt"
+		}
+		"3693252107_albedo"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107_albedo.vtf"
+		}
+		"3693252107_base"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107_base.vmt"
+		}
+		"3693252107_base"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107_base.vtf"
+		}
+		"3693252107_base_blue"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107_base_blue.vmt"
+		}
+		"3693252107_base_blue"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107_base_blue.vtf"
+		}
+		"3693252107_blue"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107_blue.vmt"
+		}
+		"3693252107_blue"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107_blue.vtf"
+		}
+		"3693252107_gradient"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107_gradient.vmt"
+		}
+		"3693252107_gradient"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107_gradient.vtf"
+		}
+		"3693252107_gradient_blue"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107_gradient_blue.vmt"
+		}
+		"3693252107_gradient_blue"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107_gradient_blue.vtf"
+		}
+		"3693252107_tan"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107_tan.vmt"
+		}
+		"3693252107_tan"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107_tan.vtf"
+		}
+		"3693252107_tan_blue"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107_tan_blue.vmt"
+		}
+		"3693252107_tan_blue"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3693252107/3693252107_tan_blue.vtf"
+		}
+		"3695463477_floor_blu"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3695463477/3695463477_floor_blu.vmt"
+		}
+		"3695463477_floor_blu"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3695463477/3695463477_floor_blu.vtf"
+		}
+		"3695463477_floor_red"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3695463477/3695463477_floor_red.vmt"
+		}
+		"3695463477_floor_red"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3695463477/3695463477_floor_red.vtf"
+		}
+		"3695463477_metal_blu"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3695463477/3695463477_metal_blu.vmt"
+		}
+		"3695463477_metal_blu"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3695463477/3695463477_metal_blu.vtf"
+		}
+		"3695463477_metal_red"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3695463477/3695463477_metal_red.vmt"
+		}
+		"3695463477_metal_red"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3695463477/3695463477_metal_red.vtf"
+		}
+		"3695463477_seat_blu"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3695463477/3695463477_seat_blu.vmt"
+		}
+		"3695463477_seat_blu"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3695463477/3695463477_seat_blu.vtf"
+		}
+		"3695463477_seat_red"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3695463477/3695463477_seat_red.vmt"
+		}
+		"3695463477_seat_red"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3695463477/3695463477_seat_red.vtf"
+		}
+		"3696227552_checkers"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_checkers.vmt"
+		}
+		"3696227552_checkers"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_checkers.vtf"
+		}
+		"3696227552_main"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_main.vmt"
+		}
+		"3696227552_main"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_main.vtf"
+		}
+		"3696227552_metal"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_metal.vmt"
+		}
+		"3696227552_metal"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_metal.vtf"
+		}
+		"3696227552_metal_wear"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_metal_wear.vmt"
+		}
+		"3696227552_metal_wear"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_metal_wear.vtf"
+		}
+		"3696227552_sticker"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_sticker.vmt"
+		}
+		"3696227552_sticker"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_sticker.vtf"
+		}
+		"3696227552_stripe_sticker"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_stripe_sticker.vmt"
+		}
+		"3696227552_stripe_sticker"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_stripe_sticker.vtf"
+		}
+		"3696227552_stripe_sticker_noclamp"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_stripe_sticker_noclamp.vmt"
+		}
+		"3696227552_stripe_sticker_noclamp"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_stripe_sticker_noclamp.vtf"
+		}
+		"3696227552_tires"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_tires.vmt"
+		}
+		"3696227552_tires"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_tires.vtf"
+		}
+		"3696227552_tires_wear"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_tires_wear.vmt"
+		}
+		"3696227552_tires_wear"
+		{
+			"ControlName"   "ImagePanel"
+			"visible"   "1"
+			"image" "../patterns/workshop/summer_2026/3696227552/3696227552_tires_wear.vtf"
+		}
 	}
 }

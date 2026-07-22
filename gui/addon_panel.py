@@ -17,6 +17,7 @@ from PyQt6.QtWidgets import (
 
 from gui.load_order_panel import LoadOrderPanel
 from gui.addon_details import AddonDescription
+from gui.dialogs import confirm_action
 from gui.theme import BUTTON_STYLE_ALT, FRAME_STYLE, SECTION_LABEL_STYLE
 
 
@@ -134,6 +135,8 @@ class AddonPanel(QWidget):
         # right column: Load Order
         self.load_order_panel = LoadOrderPanel()
         self.load_order_panel.load_order_changed.connect(self.on_load_order_changed)
+        self.load_order_panel.unadd_requested.connect(self.on_unadd_requested)
+        self.load_order_panel.deselect_all_requested.connect(self.on_deselect_all_requested)
         columns.addWidget(self.load_order_panel, 1)
 
         layout.addLayout(columns)
@@ -190,6 +193,29 @@ class AddonPanel(QWidget):
     def on_load_order_changed(self):
         self.load_order_changed.emit()
 
+    def on_unadd_requested(self, addon_name):
+        # uncheck the addon matching this load order entry; itemChanged then resyncs the list
+        for i in range(self.addons_list.count()):
+            item = self.addons_list.item(i)
+            if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
+                original_name = item.data(Qt.ItemDataRole.UserRole) or item.text().split(' [#')[0]
+                if original_name == addon_name:
+                    item.setCheckState(Qt.CheckState.Unchecked)
+                    break
+
+    def on_deselect_all_requested(self):
+        # uncheck every addon, clearing the load order
+        checked = self.get_checked_items()
+        if not checked:
+            return
+        if not confirm_action(self, "Deselect All", "Remove all mods from the load order?"):
+            return
+        self.addons_list.blockSignals(True)
+        for item in checked:
+            item.setCheckState(Qt.CheckState.Unchecked)
+        self.addons_list.blockSignals(False)
+        self.on_checkbox_changed()
+
     def update_load_order_list(self):
         # sync checked addons to load order list
         # get currently checked items (preserve their original names)
@@ -221,6 +247,10 @@ class AddonPanel(QWidget):
     def show_context_menu(self, position):
         item = self.addons_list.itemAt(position)
         if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
+            # retrigger selection if stale
+            self.addons_list.setCurrentItem(item)
+            self.addon_selection_changed.emit()
+
             menu = QMenu(self)
 
             edit_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogDetailedView)

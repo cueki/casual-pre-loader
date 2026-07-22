@@ -84,9 +84,6 @@ GLOBAL_STYLESHEET = f"""
     QPushButton:hover {{
         background-color: {KBD_BG};
     }}
-    QPushButton:pressed {{
-        background-color: {PRIMARY_DARK};
-    }}
     QPushButton:checked {{
         background-color: {PRIMARY};
         color: {FG_DEFAULT};
@@ -104,9 +101,6 @@ GLOBAL_STYLESHEET = f"""
     }}
     QPushButton[primary="true"]:hover {{
         background-color: {PRIMARY_LIGHT};
-    }}
-    QPushButton[primary="true"]:pressed {{
-        background-color: {PRIMARY_DARK};
     }}
 
     /* Danger buttons */
@@ -144,12 +138,10 @@ GLOBAL_STYLESHEET = f"""
     QListWidget::indicator:unchecked {{
         background-color: {KBD_BG};
         border: 1px solid {FG_LIGHTEST};
-        border-radius: 3px;
     }}
     QListWidget::indicator:checked {{
         background-color: {PRIMARY};
         border: 1px solid {PRIMARY};
-        border-radius: 3px;
     }}
 
     /* Group boxes */
@@ -235,12 +227,10 @@ GLOBAL_STYLESHEET = f"""
     QCheckBox::indicator:unchecked {{
         background-color: {KBD_BG};
         border: 1px solid {FG_LIGHTEST};
-        border-radius: 3px;
     }}
     QCheckBox::indicator:checked {{
         background-color: {PRIMARY};
         border: 1px solid {PRIMARY};
-        border-radius: 3px;
     }}
     QCheckBox::indicator:disabled {{
         background-color: {BG_DEFAULT};
@@ -422,6 +412,18 @@ DANGER_BUTTON_STYLE = f"""
         background-color: {FG_LIGHTEST};
         color: {FG_LIGHTER};
     }}
+"""
+
+PRIMARY_BUTTON_STYLE = f"""
+    QPushButton {{
+        background-color: {PRIMARY};
+        color: {FG_DEFAULT};
+        font-weight: 700;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+    }}
+    QPushButton:hover {{ background-color: {PRIMARY_LIGHT}; }}
 """
 
 BUTTON_STYLE_ALT = f"""

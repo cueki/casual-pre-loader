@@ -4,26 +4,31 @@ from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QFrame,
+    QHBoxLayout,
     QLabel,
     QListWidget,
     QListWidgetItem,
+    QPushButton,
     QVBoxLayout,
     QWidget,
 )
 
 from core.services.conflicts import detect_addon_overwrites
-from gui.theme import FONT_SIZE_NORMAL, FRAME_STYLE, SECTION_LABEL_STYLE, WARNING
+from gui.theme import BUTTON_STYLE_ALT, FONT_SIZE_NORMAL, FRAME_STYLE, SECTION_LABEL_STYLE, WARNING
 
 log = logging.getLogger()
 
 
 class LoadOrderPanel(QWidget):
     load_order_changed = pyqtSignal()
+    unadd_requested = pyqtSignal(str)
+    deselect_all_requested = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.load_order_list = None
         self.conflict_label = None
+        self.deselect_all_btn = None
         self.setup_ui()
 
     def setup_ui(self):
@@ -34,15 +39,25 @@ class LoadOrderPanel(QWidget):
         load_order_frame.setStyleSheet(FRAME_STYLE)
         load_order_layout = QVBoxLayout(load_order_frame)
 
+        header_row = QHBoxLayout()
         load_order_lbl = QLabel("Load Order (Drag to Reorder)")
         load_order_lbl.setStyleSheet(SECTION_LABEL_STYLE)
-        load_order_layout.addWidget(load_order_lbl)
+        header_row.addWidget(load_order_lbl)
+        header_row.addStretch()
+
+        self.deselect_all_btn = QPushButton("Deselect All")
+        self.deselect_all_btn.setStyleSheet(BUTTON_STYLE_ALT)
+        self.deselect_all_btn.clicked.connect(self.deselect_all_requested)
+        header_row.addWidget(self.deselect_all_btn)
+
+        load_order_layout.addLayout(header_row)
 
         self.load_order_list = QListWidget()
         self.load_order_list.setSelectionMode(QListWidget.SelectionMode.SingleSelection)
         self.load_order_list.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
         self.load_order_list.model().rowsMoved.connect(self.on_load_order_changed)
         self.load_order_list.itemClicked.connect(lambda: self.load_order_list.clearSelection())
+        self.load_order_list.itemDoubleClicked.connect(self.on_item_double_clicked)
 
         load_order_layout.addWidget(self.load_order_list)
 
@@ -56,6 +71,12 @@ class LoadOrderPanel(QWidget):
 
     def on_load_order_changed(self):
         self.load_order_changed.emit()
+
+    def on_item_double_clicked(self, item):
+        # double-click removes the mod from the load order by unchecking its addon
+        text = item.text()
+        clean_name = text.split('] ', 1)[-1].replace(' ⚠', '').strip()
+        self.unadd_requested.emit(clean_name)
 
     def get_load_order(self):
         load_order = []

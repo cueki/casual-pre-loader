@@ -30,6 +30,7 @@ from core.services.conflicts import scan_for_legacy_conflicts
 from core.version import VERSION
 from gui.addons_manager import AddonsManager
 from gui.addon_panel import AddonPanel
+from gui.dialogs import confirm_action, show_error, show_success
 from gui.mod_drop_zone import ModDropZone
 from gui.first_time_setup import download_cueki_mods
 from gui.install_controller import InstallController
@@ -80,6 +81,8 @@ class ParticleManagerGUI(QMainWindow):
         self.suppress_updates_checkbox = None
         self.skip_launch_popup_checkbox = None
         self.disable_paint_checkbox = None
+        self.fix_mdl_paths_checkbox = None
+        self.skip_quickprecache_checkbox = None
         self.restore_button = None
         self.current_profile_label = None
 
@@ -242,7 +245,7 @@ class ParticleManagerGUI(QMainWindow):
 
         deselect_btn = QPushButton("Deselect All")
         deselect_btn.setStyleSheet(BUTTON_STYLE)
-        deselect_btn.clicked.connect(lambda: self.mod_drop_zone.conflict_matrix.deselect_all())
+        deselect_btn.clicked.connect(self.deselect_all_particles)
         btn_layout.addWidget(deselect_btn)
 
         btn_layout.addStretch()
@@ -256,6 +259,11 @@ class ParticleManagerGUI(QMainWindow):
 
         layout.addLayout(btn_layout)
         return page
+
+    def deselect_all_particles(self):
+        if confirm_action(self, "Deselect All",
+                          "Deselect all particle effects for every mod?"):
+            self.mod_drop_zone.conflict_matrix.deselect_all()
 
     def create_addons_page(self):
         page = QWidget()
@@ -348,6 +356,22 @@ class ParticleManagerGUI(QMainWindow):
             lambda: self.settings_manager.set_disable_paint_colors(self.disable_paint_checkbox.isChecked())
         )
         preloader_layout.addWidget(self.disable_paint_checkbox)
+
+        self.fix_mdl_paths_checkbox = QCheckBox("Attempt to automatically fix broken models. Try disabling this first if something is broken!")
+        self.fix_mdl_paths_checkbox.setToolTip(
+            "Detects models with broken or incorrect material paths and rewrites them during install "
+            "so the model caches correctly in-game."
+        )
+        self.fix_mdl_paths_checkbox.stateChanged.connect(
+            lambda: self.settings_manager.set_fix_mdl_paths(self.fix_mdl_paths_checkbox.isChecked())
+        )
+        preloader_layout.addWidget(self.fix_mdl_paths_checkbox)
+
+        self.skip_quickprecache_checkbox = QCheckBox("Skip QuickPrecache (advanced users only! May cause model unloading for map props!)")
+        self.skip_quickprecache_checkbox.stateChanged.connect(
+            lambda: self.settings_manager.set_skip_quickprecache(self.skip_quickprecache_checkbox.isChecked())
+        )
+        preloader_layout.addWidget(self.skip_quickprecache_checkbox)
 
         layout.addWidget(preloader_group)
 
@@ -444,27 +468,28 @@ class ParticleManagerGUI(QMainWindow):
         # switch
         self.settings_manager.set_active_profile(profile_id)
 
+        self._sync_to_active_profile()
+
+    def _sync_to_active_profile(self):
         new_profile = self.settings_manager.get_active_profile()
-        if new_profile:
-            self.profile_btn.setText(f" {new_profile.name}")
+        if not new_profile:
+            return
 
-            # update install manager path
-            self.install_manager.set_tf_path(new_profile.game_path)
+        self.profile_btn.setText(f" {new_profile.name}")
+        self.install_manager.set_tf_path(new_profile.game_path)
 
-            # reload addons (different selections per profile)
-            self.load_addons()
+        # reload addons (different selections per profile)
+        self.load_addons()
 
-            # reload conflict matrix (simple mode may differ per profile)
-            new_simple = self.settings_manager.get_simple_particle_mode()
-            if self.mod_drop_zone and self.mod_drop_zone.conflict_matrix:
-                self.mod_drop_zone.conflict_matrix.set_simple_mode(new_simple)
-            self.update_simple_mode_button()
-            self.mod_drop_zone.update_matrix()
+        # reload conflict matrix (simple mode may differ per profile)
+        new_simple = self.settings_manager.get_simple_particle_mode()
+        if self.mod_drop_zone and self.mod_drop_zone.conflict_matrix:
+            self.mod_drop_zone.conflict_matrix.set_simple_mode(new_simple)
+        self.update_simple_mode_button()
+        self.mod_drop_zone.update_matrix()
 
-            # sync settings page
-            self.sync_settings_page()
-
-            self.update_load_order_display()
+        self.sync_settings_page()
+        self.update_load_order_display()
 
     def create_new_profile(self):
         dialog = ProfileDialog(self)
@@ -504,17 +529,11 @@ class ParticleManagerGUI(QMainWindow):
         if len(profiles) <= 1:
             QMessageBox.warning(self, "Cannot Delete", "You must have at least one profile.")
             return
-        result = QMessageBox.question(
-            self, "Delete Profile",
-            f"Delete profile '{active.name}'? This cannot be undone.",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-        )
-        if result == QMessageBox.StandardButton.Yes:
+        if confirm_action(self, "Delete Profile",
+                          f"Delete profile '{active.name}'? This cannot be undone."):
             self.settings_manager.delete_profile(active.id)
             self.rebuild_profile_menu()
-            new_active = self.settings_manager.get_active_profile()
-            if new_active:
-                self.switch_profile(new_active.id)
+            self._sync_to_active_profile()
 
     def sync_settings_page(self):
         active = self.settings_manager.get_active_profile()
@@ -525,16 +544,20 @@ class ParticleManagerGUI(QMainWindow):
 
         # block signals while syncing checkboxes
         for cb in [self.console_checkbox, self.suppress_updates_checkbox,
-                    self.skip_launch_popup_checkbox, self.disable_paint_checkbox]:
+                    self.skip_launch_popup_checkbox, self.disable_paint_checkbox,
+                    self.fix_mdl_paths_checkbox, self.skip_quickprecache_checkbox]:
             cb.blockSignals(True)
 
         self.console_checkbox.setChecked(self.settings_manager.get_show_console_on_startup())
         self.suppress_updates_checkbox.setChecked(self.settings_manager.get_suppress_update_notifications())
         self.skip_launch_popup_checkbox.setChecked(self.settings_manager.get_skip_launch_options_popup())
         self.disable_paint_checkbox.setChecked(self.settings_manager.get_disable_paint_colors())
+        self.fix_mdl_paths_checkbox.setChecked(self.settings_manager.get_fix_mdl_paths())
+        self.skip_quickprecache_checkbox.setChecked(self.settings_manager.get_skip_quickprecache())
 
         for cb in [self.console_checkbox, self.suppress_updates_checkbox,
-                    self.skip_launch_popup_checkbox, self.disable_paint_checkbox]:
+                    self.skip_launch_popup_checkbox, self.disable_paint_checkbox,
+                    self.fix_mdl_paths_checkbox, self.skip_quickprecache_checkbox]:
             cb.blockSignals(False)
 
         self.update_restore_button_state()
@@ -601,8 +624,6 @@ class ParticleManagerGUI(QMainWindow):
 
     def apply_saved_addon_selections(self):
         saved_selections = self.settings_manager.get_addon_selections()
-        if not saved_selections:
-            return
 
         self.addons_list.blockSignals(True)
 
@@ -671,11 +692,7 @@ class ParticleManagerGUI(QMainWindow):
         selected_addons = self.get_selected_addons()
 
         if not selected_addons:
-            result = QMessageBox.question(
-                self, "No Addons Selected", "No addons selected. Continue?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            )
-            if result != QMessageBox.StandardButton.Yes:
+            if not confirm_action(self, "No Addons Selected", "No addons selected. Continue?"):
                 return
 
         target_path = self.install_manager.tf_path
@@ -711,13 +728,10 @@ class ParticleManagerGUI(QMainWindow):
         target_name = active.name if active else Path(target_path).name
         game_target = active.game_target if active else "Team Fortress 2"
 
-        result = QMessageBox.question(
-            self,
-            "Confirm Restore",
+        if not confirm_action(
+            self, "Confirm Restore",
             f"This will revert all changes made to {target_name} by this app.\nAre you sure?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
-        if result != QMessageBox.StandardButton.Yes:
+        ):
             return
 
         if self.install_manager.uninstall(target_path, game_target):
@@ -758,10 +772,10 @@ class ParticleManagerGUI(QMainWindow):
         self.set_processing_state(False)
 
     def show_error(self, message):
-        QMessageBox.critical(self, "Error", message)
+        show_error(self, message)
 
     def show_success(self, message):
-        QMessageBox.information(self, "Success", message)
+        show_success(self, message)
         self.show_launch_options_popup()
 
     def delete_selected_addons(self):
