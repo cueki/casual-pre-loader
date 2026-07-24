@@ -1,8 +1,10 @@
-import pytest
 import tempfile
-import core.folder_setup
 from pathlib import Path
 from unittest.mock import Mock
+
+import pytest
+
+import core.config
 
 
 @pytest.fixture(scope="session")
@@ -35,7 +37,7 @@ def temp_tf_directory():
 
 
 @pytest.fixture(scope="function")
-def mock_folder_setup(monkeypatch):
+def mock_config(monkeypatch):
 
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
@@ -55,7 +57,7 @@ def mock_folder_setup(monkeypatch):
         # create backup structure
         (mock_config.backup_dir / "particles").mkdir()
         (mock_config.backup_dir / "materials" / "skybox").mkdir(parents=True)
-        monkeypatch.setattr(core.folder_setup, "folder_setup", mock_config)
+        monkeypatch.setattr(core.config, "config", mock_config)
         yield mock_config
 
 

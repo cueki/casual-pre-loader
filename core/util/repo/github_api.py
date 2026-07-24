@@ -1,12 +1,12 @@
 import logging
 import re
 from operator import attrgetter
-from typing import Generator, Iterable, Optional
+from typing import Generator, Iterable
 
 from github import Github
 from github.GitRelease import GitRelease
 from github.Repository import Repository
-from packaging import version
+from packaging.version import Version
 
 from core.util import all_predicates
 from core.util.repo import Update
@@ -31,9 +31,9 @@ def get_repo(repo: str) -> Repository:
 
 
 def get_releases(
-    repo: str,
-    prerelease: Optional[bool | None] = False,
-    draft: Optional[bool | None] = False,
+    repo: str | Repository,
+    prerelease: bool | None = False,
+    draft: bool | None = False,
 ) -> Iterable[GitRelease]:
     """
     Retrieve release information from a github repository.
@@ -54,7 +54,8 @@ def get_releases(
         An Iterable of `github.GitRelease.GitRelease` objects.
     """
 
-    repo = get_repo(repo)
+    if not isinstance(repo, Repository):
+        repo = get_repo(repo)
 
     _filter = []
 
@@ -80,8 +81,8 @@ def get_releases(
 def get_releases_with_asset(
     repo: str,
     asset: str | re.Pattern,
-    prerelease: Optional[bool | None] = False,
-    draft: Optional[bool | None] = False,
+    prerelease: bool | None = False,
+    draft: bool | None = False,
 ) -> Generator[Update, None, None]:
     """
     Retrieve release information from a github repository, filtering out those without a certain asset.
@@ -104,12 +105,14 @@ def get_releases_with_asset(
     """
 
     if isinstance(asset, re.Pattern):
-        test = lambda name: asset.match(name)
+        def test(name: str) -> bool:
+            return asset.match(name) is not None
     else:
-        test = lambda name: asset == name
+        def test(name: str) -> bool:
+            return asset == name
 
     for release in get_releases(repo, prerelease, draft):
         for _asset in release.assets:
             if test(_asset.name):
-                yield Update(release, _asset, version.parse(release.tag_name))
+                yield Update(_asset, release, Version(release.tag_name))
                 break

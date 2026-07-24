@@ -4,7 +4,7 @@ from enum import Enum
 from pathlib import Path
 from sys import platform
 
-from core.folder_setup import folder_setup
+from core.config import config
 
 log = logging.getLogger()
 
@@ -18,7 +18,7 @@ class StudioMDLVersion(Enum):
 class StudioMDL:
     def __init__(self, game_path: str):
         self.game_path = Path(game_path)
-        self.bundled_studiomdl_path = folder_setup.install_dir / "core" / "quickprecache" / "studio" / "studiomdl.exe"
+        self.bundled_studiomdl_path = config.install_dir / "core" / "quickprecache" / "studio" / "studiomdl.exe"
         self.studio_mdl_version = self._get_studio_mdl_version()
 
         if self.studio_mdl_version == StudioMDLVersion.MISSING:
@@ -59,7 +59,7 @@ class StudioMDL:
         else:
             exe_path = str(self.game_path / self.studio_mdl_version.value)
 
-        tf_path = str(Path(self.game_path) / 'tf')
+        tf_path = str(self.game_path / 'tf')
 
         # use wine on not windows
         if platform != "win32":

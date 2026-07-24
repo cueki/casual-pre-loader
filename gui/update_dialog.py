@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
 )
 
 from core.auto_updater import perform_updates
-from core.settings import SettingsManager
+from core.settings import settings
 from gui.theme import SUCCESS
 
 log = logging.getLogger()
@@ -51,7 +51,7 @@ class UpdateDialog(QDialog):
         self.progress_bar = None
         self.updates = updates
         self.update_worker = None
-        self.settings_manager = SettingsManager()
+        self.settings = settings
 
         self.setWindowTitle("Update Available")
         self.setMinimumSize(500, 400)
@@ -162,15 +162,16 @@ class UpdateDialog(QDialog):
 
     def save_suppress_setting(self):
         try:
-            self.settings_manager.set_suppress_update_notifications(True)
+            self.settings.suppress_update_notifications = True
             log.info("Suppressing future update notifications")
         except Exception:
             log.exception("Error saving suppress setting")
 
     def save_skipped_version(self):
         try:
-            self.settings_manager.set_skipped_update_version(self.updates[-1].release.tag_name)
-            log.info(f'Skipped version {self.updates[-1].release.tag_name}')
+            skipped_version = self.updates[-1].version
+            self.settings.skipped_update_version = skipped_version
+            log.info(f'Skipped version {skipped_version}')
         except Exception:
             log.exception("Error saving skipped version")
 

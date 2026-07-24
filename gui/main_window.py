@@ -4,8 +4,9 @@ import subprocess
 import threading
 from pathlib import Path
 from sys import platform
+from uuid import UUID
 
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtWidgets import (
     QCheckBox,
     QGroupBox,
@@ -24,24 +25,35 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from core.folder_setup import folder_setup
+from core.config import config
+from core.constants import Sourcemods
 from core.particle_splits import migrate_old_particle_files
 from core.services.conflicts import scan_for_legacy_conflicts
+from core.settings import addon_metadata, settings
 from core.version import VERSION
-from gui.addons_manager import AddonsManager
 from gui.addon_panel import AddonPanel
+from gui.addons_manager import AddonsManager
 from gui.dialogs import confirm_action, show_error, show_success
-from gui.mod_drop_zone import ModDropZone
 from gui.first_time_setup import download_cueki_mods
 from gui.install_controller import InstallController
+from gui.mod_drop_zone import ModDropZone
 from gui.profile_dialog import ProfileDialog
 from gui.theme import (
-    BG_DEFAULT, CODE_BG, FG_DEFAULT, FG_LIGHTER, FG_MUTED,
-    FONT_SIZE_HEADER, FONT_SIZE_NORMAL, FONT_SIZE_SMALL, PRIMARY,
-    BUTTON_STYLE, DANGER_BUTTON_STYLE, PROFILE_ADD_BUTTON_STYLE,
-    PROFILE_BUTTON_STYLE, SIDEBAR_NAV_STYLE,
+    BG_DEFAULT,
+    BUTTON_STYLE,
+    CODE_BG,
+    DANGER_BUTTON_STYLE,
+    FG_DEFAULT,
+    FG_LIGHTER,
+    FG_MUTED,
+    FONT_SIZE_HEADER,
+    FONT_SIZE_NORMAL,
+    FONT_SIZE_SMALL,
+    PRIMARY,
+    PROFILE_ADD_BUTTON_STYLE,
+    PROFILE_BUTTON_STYLE,
+    SIDEBAR_NAV_STYLE,
 )
-from core.settings import SettingsManager
 
 log = logging.getLogger()
 
@@ -55,14 +67,14 @@ class SidebarNav(QListWidget):
 
 
 class ParticleManagerGUI(QMainWindow):
-    def __init__(self, tf_directory=None):
+    def __init__(self, tf_directory: Path):
         super().__init__()
         self.initial_tf_directory = tf_directory
 
         # managers
-        self.settings_manager = SettingsManager()
-        self.addon_manager = AddonsManager(self.settings_manager)
-        self.install_manager = InstallController(self.settings_manager)
+        self.settings = settings
+        self.addon_manager = AddonsManager(self.settings)
+        self.install_manager = InstallController(self.settings)
 
         # UI components
         self.progress_dialog = None
@@ -102,15 +114,13 @@ class ParticleManagerGUI(QMainWindow):
         self.setup_signals()
 
         # ensure a profile exists (first-time setup creates tf_directory but not profile)
-        if self.initial_tf_directory:
-            profiles = self.settings_manager.get_profiles()
-            if not profiles:
-                self.settings_manager.create_profile("TF2", self.initial_tf_directory)
-            else:
-                # set the active profile's game_path if needed
-                active = self.settings_manager.get_active_profile()
-                if active and not active.game_path:
-                    self.settings_manager.set_tf_directory(self.initial_tf_directory)
+        if not self.settings.profiles:
+            self.settings.create_profile(Sourcemods.DEFAULT.name, self.initial_tf_directory, Sourcemods.DEFAULT)
+        else:
+            # set the active profile's game_path if needed
+            active = self.settings.active_profile
+            if active and not active.game_path:
+                self.settings.game_path = self.initial_tf_directory
 
         # load initial data
         self.load_tf_directory()
@@ -119,8 +129,7 @@ class ParticleManagerGUI(QMainWindow):
         migrate_old_particle_files()
 
         # apply saved simple mode preference
-        saved_mode = self.settings_manager.get_simple_particle_mode()
-        if saved_mode:
+        if self.settings.simple_particle_mode:
             self.mod_drop_zone.conflict_matrix.set_simple_mode(True)
         self.update_simple_mode_button()
 
@@ -131,7 +140,7 @@ class ParticleManagerGUI(QMainWindow):
         self.rescan_addon_contents()
 
         # restore addon details collapsed state
-        if self.settings_manager.get_details_collapsed():
+        if self.settings.details_collapsed:
             self.addon_panel.toggle_details_collapse()
 
         # update profile selector
@@ -237,7 +246,7 @@ class ParticleManagerGUI(QMainWindow):
         layout.addWidget(header)
 
         # mod drop zone (contains conflict matrix)
-        self.mod_drop_zone = ModDropZone(self, self.settings_manager, self.rescan_addon_contents)
+        self.mod_drop_zone = ModDropZone(self, self.settings, self.rescan_addon_contents)
         layout.addWidget(self.mod_drop_zone, 1)
 
         # bottom bar
@@ -285,7 +294,9 @@ class ParticleManagerGUI(QMainWindow):
         self.addon_panel.load_order_changed.connect(self.on_load_order_changed)
         self.addon_panel.open_folder_clicked.connect(self.open_addons_folder)
         self.addon_panel.refresh_clicked.connect(self.load_addons)
-        self.addon_panel.details_collapse_changed.connect(self.settings_manager.set_details_collapsed)
+        self.addon_panel.details_collapse_changed.connect(
+            lambda x: setattr(self.settings, 'details_collapsed', x)
+        )
         self.addon_description.addon_modified.connect(self.load_addons)
 
         layout.addWidget(self.addon_panel)
@@ -335,25 +346,25 @@ class ParticleManagerGUI(QMainWindow):
 
         self.console_checkbox = QCheckBox("Enable TF2 console on startup")
         self.console_checkbox.stateChanged.connect(
-            lambda: self.settings_manager.set_show_console_on_startup(self.console_checkbox.isChecked())
+            lambda: setattr(self.settings, 'show_console_on_startup', self.console_checkbox.isChecked())
         )
         preloader_layout.addWidget(self.console_checkbox)
 
         self.suppress_updates_checkbox = QCheckBox("Suppress update notifications")
         self.suppress_updates_checkbox.stateChanged.connect(
-            lambda: self.settings_manager.set_suppress_update_notifications(self.suppress_updates_checkbox.isChecked())
+            lambda: setattr(self.settings, 'suppress_update_notifications', self.suppress_updates_checkbox.isChecked())
         )
         preloader_layout.addWidget(self.suppress_updates_checkbox)
 
         self.skip_launch_popup_checkbox = QCheckBox("Suppress launch options reminder")
         self.skip_launch_popup_checkbox.stateChanged.connect(
-            lambda: self.settings_manager.set_skip_launch_options_popup(self.skip_launch_popup_checkbox.isChecked())
+            lambda: setattr(self.settings, 'skip_launch_options_popup', self.skip_launch_popup_checkbox.isChecked())
         )
         preloader_layout.addWidget(self.skip_launch_popup_checkbox)
 
         self.disable_paint_checkbox = QCheckBox("Disable paint colors on cosmetics")
         self.disable_paint_checkbox.stateChanged.connect(
-            lambda: self.settings_manager.set_disable_paint_colors(self.disable_paint_checkbox.isChecked())
+            lambda: setattr(self.settings, 'disable_paint_colors', self.disable_paint_checkbox.isChecked())
         )
         preloader_layout.addWidget(self.disable_paint_checkbox)
 
@@ -363,13 +374,13 @@ class ParticleManagerGUI(QMainWindow):
             "so the model caches correctly in-game."
         )
         self.fix_mdl_paths_checkbox.stateChanged.connect(
-            lambda: self.settings_manager.set_fix_mdl_paths(self.fix_mdl_paths_checkbox.isChecked())
+            lambda: self.settings.set_fix_mdl_paths(self.fix_mdl_paths_checkbox.isChecked())
         )
         preloader_layout.addWidget(self.fix_mdl_paths_checkbox)
 
         self.skip_quickprecache_checkbox = QCheckBox("Skip QuickPrecache (advanced users only! May cause model unloading for map props!)")
         self.skip_quickprecache_checkbox.stateChanged.connect(
-            lambda: self.settings_manager.set_skip_quickprecache(self.skip_quickprecache_checkbox.isChecked())
+            lambda: setattr(self.settings, 'skip_quickprecache', self.skip_quickprecache_checkbox.isChecked())
         )
         preloader_layout.addWidget(self.skip_quickprecache_checkbox)
 
@@ -429,16 +440,15 @@ class ParticleManagerGUI(QMainWindow):
         self.install_manager.operation_finished.connect(self.on_operation_finished)
 
     def toggle_particle_mode(self):
-        current_state = self.settings_manager.get_simple_particle_mode()
-        new_state = not current_state
+        new_state = not self.settings.simple_particle_mode
 
         if self.mod_drop_zone and self.mod_drop_zone.conflict_matrix:
             self.mod_drop_zone.conflict_matrix.set_simple_mode(new_state)
-        self.settings_manager.set_simple_particle_mode(new_state)
+        self.settings.simple_particle_mode = new_state
         self.update_simple_mode_button()
 
     def update_simple_mode_button(self):
-        is_simple = self.settings_manager.get_simple_particle_mode()
+        is_simple = self.settings.simple_particle_mode
         self.simple_mode_btn.blockSignals(True)
         self.simple_mode_btn.setChecked(is_simple)
         self.simple_mode_btn.setText(f"Simple Mode: {'ON' if is_simple else 'OFF'}")
@@ -446,45 +456,44 @@ class ParticleManagerGUI(QMainWindow):
 
     def rebuild_profile_menu(self):
         self.profile_menu.clear()
-        profiles = self.settings_manager.get_profiles()
-        active = self.settings_manager.get_active_profile()
 
-        for p in profiles:
-            action = self.profile_menu.addAction(p.name)
-            action.triggered.connect(lambda checked, pid=p.id: self.switch_profile(pid))
+        active = self.settings.active_profile
+        for profile in self.settings.profiles:
+            action = self.profile_menu.addAction(profile.name)
+            action.triggered.connect(lambda checked, pid=profile.id: self.switch_profile(pid))
 
         if active:
             self.profile_btn.setText(f" {active.name}")
 
-    def switch_profile(self, profile_id):
-        active = self.settings_manager.get_active_profile()
+    def switch_profile(self, profile_id: UUID):
+        active = self.settings.active_profile
         if active and active.id == profile_id:
             return
 
         # save current state
         load_order = self.addon_panel.get_load_order()
-        self.settings_manager.set_addon_selections(load_order)
+        self.settings.addon_selections = load_order
 
         # switch
-        self.settings_manager.set_active_profile(profile_id)
+        self.settings.active_profile = profile_id
 
         self._sync_to_active_profile()
 
     def _sync_to_active_profile(self):
-        new_profile = self.settings_manager.get_active_profile()
-        if not new_profile:
+        active = self.settings.active_profile
+        if not active:
             return
 
-        self.profile_btn.setText(f" {new_profile.name}")
-        self.install_manager.set_tf_path(new_profile.game_path)
+        self.profile_btn.setText(f" {active.name}")
+        # update install manager path
+        self.install_manager.set_tf_path(active.game_path)
 
         # reload addons (different selections per profile)
         self.load_addons()
 
         # reload conflict matrix (simple mode may differ per profile)
-        new_simple = self.settings_manager.get_simple_particle_mode()
         if self.mod_drop_zone and self.mod_drop_zone.conflict_matrix:
-            self.mod_drop_zone.conflict_matrix.set_simple_mode(new_simple)
+            self.mod_drop_zone.conflict_matrix.set_simple_mode(self.settings.simple_particle_mode)
         self.update_simple_mode_button()
         self.mod_drop_zone.update_matrix()
 
@@ -492,51 +501,51 @@ class ParticleManagerGUI(QMainWindow):
         self.update_load_order_display()
 
     def create_new_profile(self):
-        dialog = ProfileDialog(self)
+        dialog = ProfileDialog(parent=self)
         if dialog.exec():
-            name = dialog.get_name()
-            game_path = dialog.get_game_path()
-            game_target = dialog.get_game_target()
-            profile = self.settings_manager.create_profile(name, game_path, game_target)
+            profile = self.settings.create_profile(
+                name=dialog.name,
+                game_path=dialog.game_path,
+                sourcemod=dialog.sourcemod,
+            )
             self.rebuild_profile_menu()
             self.switch_profile(profile.id)
 
     def edit_current_profile(self):
-        active = self.settings_manager.get_active_profile()
+        active = self.settings.active_profile
         if not active:
             return
-        dialog = ProfileDialog(self, name=active.name, game_path=active.game_path, game_target=active.game_target)
+        dialog = ProfileDialog(name=active.name, game_path=active.game_path, sourcemod=active.sourcemod, parent=self)
         if dialog.exec():
-            self.settings_manager.update_profile(
+            self.settings.update_profile(
                 active.id,
-                name=dialog.get_name(),
-                game_path=dialog.get_game_path(),
-                game_target=dialog.get_game_target(),
+                name=dialog.name,
+                game_path=dialog.game_path,
+                sourcemod=dialog.sourcemod,
             )
             self.rebuild_profile_menu()
 
             # update path if changed
-            updated = self.settings_manager.get_active_profile()
+            updated = self.settings.active_profile
             if updated:
                 self.install_manager.set_tf_path(updated.game_path)
                 self.sync_settings_page()
 
     def delete_current_profile(self):
-        active = self.settings_manager.get_active_profile()
+        active = self.settings.active_profile
         if not active:
             return
-        profiles = self.settings_manager.get_profiles()
-        if len(profiles) <= 1:
+        if len(self.settings.profiles) <= 1:
             QMessageBox.warning(self, "Cannot Delete", "You must have at least one profile.")
             return
         if confirm_action(self, "Delete Profile",
                           f"Delete profile '{active.name}'? This cannot be undone."):
-            self.settings_manager.delete_profile(active.id)
+            self.settings.delete_profile(active.id)
             self.rebuild_profile_menu()
             self._sync_to_active_profile()
 
     def sync_settings_page(self):
-        active = self.settings_manager.get_active_profile()
+        active = self.settings.active_profile
         if not active:
             return
 
@@ -548,12 +557,12 @@ class ParticleManagerGUI(QMainWindow):
                     self.fix_mdl_paths_checkbox, self.skip_quickprecache_checkbox]:
             cb.blockSignals(True)
 
-        self.console_checkbox.setChecked(self.settings_manager.get_show_console_on_startup())
-        self.suppress_updates_checkbox.setChecked(self.settings_manager.get_suppress_update_notifications())
-        self.skip_launch_popup_checkbox.setChecked(self.settings_manager.get_skip_launch_options_popup())
-        self.disable_paint_checkbox.setChecked(self.settings_manager.get_disable_paint_colors())
-        self.fix_mdl_paths_checkbox.setChecked(self.settings_manager.get_fix_mdl_paths())
-        self.skip_quickprecache_checkbox.setChecked(self.settings_manager.get_skip_quickprecache())
+        self.console_checkbox.setChecked(self.settings.show_console_on_startup)
+        self.suppress_updates_checkbox.setChecked(self.settings.suppress_update_notifications)
+        self.skip_launch_popup_checkbox.setChecked(self.settings.skip_launch_options_popup)
+        self.disable_paint_checkbox.setChecked(self.settings.disable_paint_colors)
+        self.fix_mdl_paths_checkbox.setChecked(self.settings.fix_mdl_paths)
+        self.skip_quickprecache_checkbox.setChecked(self.settings.skip_quickprecache)
 
         for cb in [self.console_checkbox, self.suppress_updates_checkbox,
                     self.skip_launch_popup_checkbox, self.disable_paint_checkbox,
@@ -563,9 +572,9 @@ class ParticleManagerGUI(QMainWindow):
         self.update_restore_button_state()
 
     def load_tf_directory(self):
-        tf_dir = self.settings_manager.get_tf_directory()
-        if tf_dir and Path(tf_dir).exists():
-            self.install_manager.set_tf_path(tf_dir)
+        game_path = self.settings.game_path
+        if game_path.is_dir():
+            self.install_manager.set_tf_path(game_path)
 
     def load_addons(self):
         self.addon_manager.service.scan_addon_contents()
@@ -605,26 +614,23 @@ class ParticleManagerGUI(QMainWindow):
         try:
             self.update_load_order_display()
             load_order = self.addon_panel.get_load_order()
-            self.settings_manager.set_addon_selections(load_order)
+            self.settings.addon_selections = load_order
         except Exception:
             log.exception("Error in on_addon_checkbox_changed")
 
     def on_load_order_changed(self):
         try:
             self.update_load_order_display()
-            load_order = self.addon_panel.get_load_order()
-            self.settings_manager.set_addon_selections(load_order)
+            self.settings.addon_selections = self.addon_panel.get_load_order()
         except Exception:
             log.exception("Error in on_load_order_changed")
 
     def update_load_order_display(self):
-        addon_contents = self.settings_manager.get_addon_contents()
+        addon_contents = {name: data.get('files', []) for name, data in addon_metadata.items()}
         addon_name_mapping = self.addon_manager.addons_file_paths
         self.addon_panel.load_order_panel.update_display(addon_contents, addon_name_mapping)
 
     def apply_saved_addon_selections(self):
-        saved_selections = self.settings_manager.get_addon_selections()
-
         self.addons_list.blockSignals(True)
 
         item_map = {}
@@ -634,15 +640,15 @@ class ParticleManagerGUI(QMainWindow):
                 item_map[item.text()] = item
 
         valid_selections = []
-        for addon_name in saved_selections:
+        for addon_name in self.settings.addon_selections:
             if addon_name in item_map:
                 item_map[addon_name].setCheckState(Qt.CheckState.Checked)
                 valid_selections.append(addon_name)
 
         self.addon_panel.load_order_panel.restore_order(valid_selections)
 
-        if len(valid_selections) != len(saved_selections):
-            self.settings_manager.set_addon_selections(valid_selections)
+        if len(valid_selections) != len(self.settings.addon_selections):
+            self.settings.addon_selections = valid_selections
 
         self.addons_list.blockSignals(False)
         self.on_addon_checkbox_changed()
@@ -664,12 +670,11 @@ class ParticleManagerGUI(QMainWindow):
             )
 
     def show_launch_options_popup(self):
-        skip_launch_popup = self.settings_manager.get_skip_launch_options_popup()
-        if not skip_launch_popup:
+        if not self.settings.skip_launch_options_popup:
             msg_box = QMessageBox(self)
             msg_box.setWindowTitle("Installation Complete - Launch Options Required")
             msg_box.setText("Installation completed successfully!\n\n"
-                            "IMPORTANT: You must add the following to your TF2 launch options:\n\n"
+                            "IMPORTANT: You must add the following to your game's launch options:\n\n"
                             "+exec w/config.cfg\n\n"
                             "This ensures the preloader works correctly with your game.")
             msg_box.setIcon(QMessageBox.Icon.Information)
@@ -679,7 +684,7 @@ class ParticleManagerGUI(QMainWindow):
             msg_box.exec()
 
             if dont_show_checkbox.isChecked():
-                self.settings_manager.set_skip_launch_options_popup(True)
+                self.settings.skip_launch_options_popup = True
 
     def rescan_addon_contents(self):
         thread = threading.Thread(
@@ -703,9 +708,9 @@ class ParticleManagerGUI(QMainWindow):
 
         self.set_processing_state(True)
 
-        active = self.settings_manager.get_active_profile()
+        active = self.settings.active_profile
         target_name = active.name if active else "game"
-        game_target = active.game_target if active else "Team Fortress 2"
+        sourcemod = active.sourcemod if active else Sourcemods.DEFAULT
 
         self.progress_dialog = QProgressDialog(f"Installing to {target_name}...", "Cancel", 0, 100, self)
         self.progress_dialog.setWindowTitle("Installing")
@@ -715,7 +720,7 @@ class ParticleManagerGUI(QMainWindow):
         self.progress_dialog.canceled.connect(self.install_manager.cancel_operation)
         self.progress_dialog.show()
 
-        self.install_manager.install(selected_addons, self.mod_drop_zone, target_path, game_target)
+        self.install_manager.install(selected_addons, self.mod_drop_zone, target_path, sourcemod)
 
     def start_restore(self):
         target_path = self.install_manager.tf_path
@@ -724,9 +729,9 @@ class ParticleManagerGUI(QMainWindow):
             self.show_error("No game directory configured!")
             return
 
-        active = self.settings_manager.get_active_profile()
+        active = self.settings.active_profile
         target_name = active.name if active else Path(target_path).name
-        game_target = active.game_target if active else "Team Fortress 2"
+        sourcemod = active.sourcemod if active else Sourcemods.DEFAULT
 
         if not confirm_action(
             self, "Confirm Restore",
@@ -734,7 +739,7 @@ class ParticleManagerGUI(QMainWindow):
         ):
             return
 
-        if self.install_manager.uninstall(target_path, game_target):
+        if self.install_manager.uninstall(target_path, sourcemod):
             self.set_processing_state(True)
             self.progress_dialog = QProgressDialog(f"Restoring {target_name}...", None, 0, 100, self)
             self.progress_dialog.setWindowTitle("Restoring")
@@ -789,18 +794,17 @@ class ParticleManagerGUI(QMainWindow):
         if success is None:
             return
         elif success:
-            current_load_order = self.settings_manager.get_addon_selections()
-            updated_load_order = [name for name in current_load_order if name not in deleted_addon_names]
-            self.settings_manager.set_addon_selections(updated_load_order)
+            updated_load_order = [name for name in self.settings.addon_selections if name not in deleted_addon_names]
+            self.settings.addon_selections = updated_load_order
             self.load_addons()
         else:
             log.error(message, stack_info=True)
             self.show_error(message)
 
     def open_addons_folder(self):
-        addons_path = folder_setup.addons_dir
+        addons_path = config.addons_dir
 
-        if not addons_path.exists():
+        if not addons_path.is_dir():
             log.error("Addons folder does not exist!", stack_info=True)
             self.show_error("Addons folder does not exist!")
             return

@@ -1,6 +1,6 @@
 import logging
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Dict
 
 from PIL import Image, ImageFilter
 
@@ -85,7 +85,7 @@ class DecalMerge:
         self.debug = debug
         self.temp_files = []
 
-    def modify_mod2x_sprite_sheet(self, decal_vtfs: Dict[str, str], sprite_sheet_png):
+    def modify_mod2x_sprite_sheet(self, decal_vtfs: Mapping[str, str], sprite_sheet_png):
         try:
             sprite_sheet = Image.open(sprite_sheet_png)
             # process each decal

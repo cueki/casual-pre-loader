@@ -7,10 +7,10 @@ from core.services.addons import AddonService
 class AddonsManager(QObject):
     # Qt wrapper for AddonService
 
-    def __init__(self, settings_manager):
+    def __init__(self, settings):
         super().__init__()
-        self.settings_manager = settings_manager
-        self.service = AddonService(settings_manager)
+        self.settings = settings
+        self.service = AddonService(settings)
 
     @property
     def addons_file_paths(self) -> dict:

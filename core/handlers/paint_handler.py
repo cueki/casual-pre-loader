@@ -1,14 +1,15 @@
 import logging
 from pathlib import Path
-from typing import List, Tuple
+
 from valve_parsers import VPKFile
+
+from core.constants import COSMETIC_VMT_PATHS
 from core.handlers.file_handler import FileHandler
 from core.util.vpk import get_vpk_name
-from core.constants import COSMETIC_VMT_PATHS
 
 log = logging.getLogger()
 
-def find_cosmetics(tf_path, proxy_name: bytes) -> List[Tuple[str, bytes]]:
+def find_cosmetics(tf_path, proxy_name: bytes) -> list[tuple[str, bytes]]:
     vpk_path = str(Path(tf_path) / get_vpk_name(tf_path))
     vpk = VPKFile(vpk_path)
     file_handler = FileHandler(vpk_path)

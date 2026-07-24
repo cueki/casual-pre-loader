@@ -4,7 +4,7 @@ import shutil
 import stat
 from collections.abc import Callable
 from pathlib import Path
-from typing import Optional, Sequence
+from typing import Sequence
 
 log = logging.getLogger()
 
@@ -31,7 +31,7 @@ def _get_next_new_file(file: Path) -> Path:
             file = file.with_name(file.name + '_')
 
 
-def delete(file: Path, not_exist_ok: Optional[bool] = False) -> None:
+def delete(file: Path, not_exist_ok: bool = False) -> None:
     """
     Delete a file or directory.
 
@@ -63,9 +63,9 @@ def delete(file: Path, not_exist_ok: Optional[bool] = False) -> None:
 def copy(
     src: Path,
     dst: Path,
-    not_exist_ok: Optional[bool] = False,
-    noclobber: Optional[bool] = False,
-    ignore: Optional[Callable[[str, list[str]], Sequence]] = None,
+    not_exist_ok: bool = False,
+    noclobber: bool = False,
+    ignore: Callable[[str, list[str]], Sequence] | None = None,
 ) -> Path | None:
     """
     Copy a file or directory.
@@ -113,9 +113,9 @@ def copy(
 def move(
     src: Path,
     dst: Path,
-    not_exist_ok: Optional[bool] = False,
-    noclobber: Optional[bool] = False,
-    ignore: Optional[Callable[[str, list[str]], Sequence]] = None,
+    not_exist_ok: bool = False,
+    noclobber: bool = False,
+    ignore: Callable[[str, list[str]], Sequence] | None = None,
 ) -> Path | None:
     """
     Move a file or directory.
@@ -205,7 +205,7 @@ def _modeget(file: Path) -> tuple[int, str]:
     return mode, f_mode
 
 
-def modeset(file: Path, mode: int, not_exist_ok: Optional[bool] = False) -> None:
+def modeset(file: Path, mode: int, not_exist_ok: bool = False) -> None:
     """
     Change a file's mode bits.
 
@@ -226,7 +226,7 @@ def modeset(file: Path, mode: int, not_exist_ok: Optional[bool] = False) -> None
         raise Exception(f'unable to get/set mode for {file}') from e
 
 
-def modeset_add(file: Path, mode: int, not_exist_ok: Optional[bool] = False) -> None:
+def modeset_add(file: Path, mode: int, not_exist_ok: bool = False) -> None:
     """
     Additively change a file's mode bits.
 

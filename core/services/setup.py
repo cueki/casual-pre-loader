@@ -2,7 +2,7 @@ import json
 import logging
 from pathlib import Path
 
-from core.folder_setup import folder_setup
+from core.config import config
 from core.util.file import copy, delete
 
 log = logging.getLogger()
@@ -20,7 +20,7 @@ def import_userdata(userdata_path: Path) -> tuple[bool, list[str]]:
     Import a userdata folder from a previous installation.
 
     Copies mods/, modsinfo.json, app_settings.json, and addon_metadata.json
-    into the locations defined by folder_setup.
+    into the locations defined by FolderConfig.
 
     Args:
         userdata_path: Path to the source userdata folder (containing data/ and config/)
@@ -38,10 +38,10 @@ def import_userdata(userdata_path: Path) -> tuple[bool, list[str]]:
     src_config = userdata_path / 'config'
 
     items: list[tuple[Path, Path]] = [
-        (src_data / folder_setup.mods_dir.name, folder_setup.mods_dir),
-        (src_data / folder_setup.modsinfo_file.name, folder_setup.modsinfo_file),
-        (src_config / folder_setup.app_settings_file.name, folder_setup.app_settings_file),
-        (src_config / folder_setup.addon_metadata_file.name, folder_setup.addon_metadata_file),
+        (src_data / config.mods_dir.name, config.mods_dir),
+        (src_data / config.modsinfo_file.name, config.modsinfo_file),
+        (src_config / config.app_settings_file.name, config.app_settings_file),
+        (src_config / config.addon_metadata_file.name, config.addon_metadata_file),
     ]
 
     warnings: list[str] = []
@@ -59,40 +59,3 @@ def import_userdata(userdata_path: Path) -> tuple[bool, list[str]]:
             warnings.append(f"Failed to import {src.name}: {e}")
 
     return True, warnings
-
-
-def save_initial_settings(tf_directory: Path) -> tuple[bool, str]:
-    """
-    Create or update app_settings.json with initial setup values.
-
-    If app_settings.json already exists (e.g. from a previous userdata import),
-    its other keys are preserved and only tf_directory is overwritten.
-
-    Args:
-        tf_directory: The tf/ directory path to save
-
-    Returns:
-        Tuple of (success, error_message)
-    """
-
-    try:
-        settings_data = {}
-        if folder_setup.app_settings_file.exists():
-            try:
-                with open(folder_setup.app_settings_file, 'r') as f:
-                    settings_data = json.load(f)
-            except Exception as e:
-                log.warning(f"Failed to read existing settings file: {e}")
-                # continue with empty settings
-
-        settings_data["tf_directory"] = str(tf_directory)
-
-        folder_setup.settings_dir.mkdir(parents=True, exist_ok=True)
-        with open(folder_setup.app_settings_file, 'w') as f:
-            json.dump(settings_data, f, indent=2)
-
-        return True, ""
-
-    except Exception as e:
-        log.exception("Failed to save settings")
-        return False, str(e)

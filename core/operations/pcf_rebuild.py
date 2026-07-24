@@ -1,16 +1,15 @@
 import json
 from pathlib import Path
-from typing import Dict, List, Set
 
 from valve_parsers import PCFElement, PCFFile, AttributeType
 
 
-def load_particle_system_map(map_path: str) -> Dict[str, List[str]]:
-    with open(map_path, 'r') as f:
+def load_particle_system_map(map_path: Path) -> dict[str, list[str]]:
+    with map_path.open('r') as f:
         return json.load(f)
 
 
-def find_child_elements(pcf: PCFFile, element_idx: int, visited: Set[int]) -> Set[int]:
+def find_child_elements(pcf: PCFFile, element_idx: int, visited: set[int]) -> set[int]:
     if element_idx in visited:
         return set()
 
@@ -39,18 +38,18 @@ def find_element_by_name(pcf: PCFFile, element_name: str):
     return None
 
 
-def get_element_tree(pcf: PCFFile, element_idx: int) -> Dict[int, PCFElement]:
+def get_element_tree(pcf: PCFFile, element_idx: int) -> dict[int, PCFElement]:
     visited = set()
     indices = find_child_elements(pcf, element_idx, visited)
     return {idx: pcf.elements[idx] for idx in indices}
 
 
-def get_pcf_element_names(pcf: PCFFile) -> List[str]:
+def get_pcf_element_names(pcf: PCFFile) -> list[str]:
     system_defs = pcf.get_elements_by_type('DmeParticleSystemDefinition')
     return [elem.element_name.decode('ascii') for elem in system_defs]
 
 
-def build_reverse_element_map(particle_system_map) -> Dict[str, str]:
+def build_reverse_element_map(particle_system_map) -> dict[str, str]:
     element_to_pcf = {}
     for pcf_file, particles in particle_system_map.items():
         for particle in particles:

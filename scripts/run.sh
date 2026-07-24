@@ -62,7 +62,7 @@ prompt_yn() {
 }
 
 check_python_version() {
-	python3 -c 'import sys; vi = sys.version_info; exit(not (vi.major == 3 and vi.minor >= 11))'
+	python3 -c 'import sys; vi = sys.version_info; exit(not (vi.major == 3 and vi.minor >= 12))'
 }
 
 ERROR=false
@@ -79,7 +79,7 @@ ERROR=false
 
 	# shellcheck disable=SC2312
 	! check_python_version && ERROR=true &&
-		printf 'Your version of python (%s) is out of date, the minimum required version is Python 3.11\n' \
+		printf 'Your version of python (%s) is out of date, the minimum required version is Python 3.12\n' \
 			"$(python3 -V)" | error
 
 	! python3 -m ensurepip --version >/dev/null 2>&1 && ERROR=true &&
@@ -141,4 +141,4 @@ if [ -f 'requirements.txt' ]; then
 fi
 
 printf '%s\n' 'Starting Casual Preloader' | info
-exec ./main.py
+exec ./main.py "${@}"

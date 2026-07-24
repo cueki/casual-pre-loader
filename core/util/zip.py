@@ -1,13 +1,13 @@
 import logging
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from pathlib import Path
-from typing import Iterable, Optional, Union
 from zipfile import Path as ZipFilePath
 from zipfile import ZipFile
 
 log = logging.getLogger()
 
-_Filter = Callable[[ZipFilePath], Callable[[ZipFilePath], bool]]
+FilterPredicate = Callable[[ZipFilePath], bool]
+Filter = Callable[[ZipFilePath], FilterPredicate ]
 
 # NOTE: Fuck this shit
 
@@ -49,12 +49,12 @@ def _extract_member_to(member: ZipFilePath, path: Path, root: ZipFilePath) -> No
             fd.write(member.read_bytes())
 
 
-def _apply_filter(_filter: _Filter | None, root: ZipFilePath) -> Iterable[ZipFilePath]:
+def _apply_filter(_filter: Filter | None, root: ZipFilePath) -> Iterable[ZipFilePath]:
     """
     Applies an optional filter-function-returning function to a relative root and applies that to to all members under `root`.
 
     Args:
-        _filter: A function that returns a filter function.
+        _filter: A function that returns a filter predicate function.
         root: The relative root to use.
 
     Returns:
@@ -70,9 +70,9 @@ def _apply_filter(_filter: _Filter | None, root: ZipFilePath) -> Iterable[ZipFil
 def _extract(
     zip_ref: ZipFile,
     dst: Path,
-    strip: Optional[int] = 0,
-    noclobber: Optional[bool] = False,
-    _filter: Optional[_Filter] = None,
+    strip: int = 0,
+    noclobber: bool = False,
+    _filter: Filter | None = None,
 ) -> None:
     """
     Extract a zip file.
@@ -82,7 +82,7 @@ def _extract(
         dst: The destination path.
         strip: How many leading directories to strip when extracting.
         noclobber: Throw an error if the destination exists (i.e. do not overwrite files).
-        _filter: A function that returns a filter function.
+        _filter: An optional function that returns a filter function.
     """
 
     try:
@@ -115,11 +115,11 @@ def _extract(
 
 
 def extract(
-    zip_file: Union[Path, ZipFile],
+    zip_file: Path | ZipFile,
     dst: Path,
-    strip: Optional[int] = 0,
-    noclobber: Optional[bool] = False,
-    _filter: Optional[_Filter] = None,
+    strip: int = 0,
+    noclobber: bool = False,
+    _filter: Filter | None = None,
 ) -> None:
     """
     Extract a zip file.

@@ -5,7 +5,7 @@ from pathlib import Path
 from PyQt6.QtCore import QObject, Qt, pyqtSignal
 from PyQt6.QtWidgets import QFrame, QLabel, QMessageBox, QProgressDialog, QVBoxLayout
 
-from core.folder_setup import folder_setup
+from core.config import config
 from core.services.importer import ImportService, normalize_vpk_paths
 from core.structure_validator import StructureValidator, ValidationResult
 from core.util.pcf_path_walk import apply_particle_selections, get_mod_particles
@@ -26,10 +26,10 @@ class ModDropZone(QFrame):
     mod_dropped = pyqtSignal(str)
     addon_updated = pyqtSignal()
 
-    def __init__(self, parent=None, settings_manager=None, rescan_callback=None):
+    def __init__(self, parent=None, settings=None, rescan_callback=None):
         super().__init__(parent)
         self.conflict_matrix = None
-        self.settings_manager = settings_manager
+        self.settings = settings
         self.setAcceptDrops(True)
         self.setup_ui()
         self.processing = False
@@ -41,14 +41,14 @@ class ModDropZone(QFrame):
         self.worker.success.connect(self.show_success)
         self.rescan_callback = rescan_callback
         self.validator = StructureValidator()
-        self.service = ImportService(settings_manager)
+        self.service = ImportService(settings)
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
 
         # conflict matrix
-        self.conflict_matrix = ConflictMatrix(self.settings_manager)
+        self.conflict_matrix = ConflictMatrix(self.settings)
         layout.addWidget(self.conflict_matrix)
 
     def apply_particle_selections(self):

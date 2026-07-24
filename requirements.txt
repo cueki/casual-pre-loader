@@ -2,6 +2,7 @@
 PyQt6~=6.11
 
 # core
+cappa~=0.32.0
 more-itertools~=11.1
 packaging~=26.2
 platformdirs~=4.11

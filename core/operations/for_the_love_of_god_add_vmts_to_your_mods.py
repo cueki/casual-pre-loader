@@ -1,16 +1,15 @@
 import logging
 from pathlib import Path
-from typing import List, Optional, Set
 
 from valve_parsers import VPKFile
 
-from core.folder_setup import folder_setup
+from core.config import config
 from core.util.vpk import get_vpk_name
 
 log = logging.getLogger()
 
 
-def find_material_files(directory: Path) -> tuple[List[Path], Set[str]]:
+def find_material_files(directory: Path) -> tuple[list[Path], set[str]]:
     vtf_files = []
     vmt_stems = set()
 
@@ -52,7 +51,7 @@ def get_texture_path(vtf_path: Path, base_dir: Path) -> str:
     return texture_path
 
 
-def generate_vmt_content(texture_path: str, game_vpk: Optional[VPKFile] = None) -> str:
+def generate_vmt_content(texture_path: str, game_vpk: VPKFile | None = None) -> str:
     # try to find matching VMT in game VPK
     if game_vpk:
         vmt_path = f"materials/{texture_path}.vmt"
@@ -67,18 +66,18 @@ def generate_vmt_content(texture_path: str, game_vpk: Optional[VPKFile] = None) 
     return f'"LightmappedGeneric"\n{{\n\t"$basetexture" "{texture_path}"\n}}\n'
 
 
-def generate_missing_vmt_files(temp_mods_dir: Path = None, tf_path: str = None) -> int:
+def generate_missing_vmt_files(temp_mods_dir: Path | None = None, tf_path: Path | None = None) -> int:
     if temp_mods_dir is None:
-        temp_mods_dir = folder_setup.temp_to_be_vpk_dir
+        temp_mods_dir = config.temp_to_be_vpk_dir
 
-    if not temp_mods_dir.exists():
+    if not temp_mods_dir.is_dir():
         log.info(f"Directory {temp_mods_dir} does not exist")
         return 0
 
     # initialize VPK
     game_vpk = None
-    if tf_path:
-        game_vpk_path = Path(tf_path) / get_vpk_name(tf_path)
+    if tf_path is not None:
+        game_vpk_path = tf_path / get_vpk_name(tf_path)
         if game_vpk_path.exists():
             try:
                 game_vpk = VPKFile(game_vpk_path)
