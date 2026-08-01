@@ -169,6 +169,22 @@ def capture_managed_outputs(tf_path: Path | str) -> list[list]:
     return sorted(entries, key=lambda entry: entry[0].casefold())
 
 
+def capture_precache_outputs(tf_path: Path | str) -> list[list]:
+    tf_path = Path(tf_path)
+    custom_dir = tf_path / "custom"
+    entries = [
+        _file_entry(custom_dir / "_QuickPrecache.vpk", "custom/_QuickPrecache.vpk"),
+        _file_entry(custom_dir / "QuickPrecache.vpk", "custom/QuickPrecache.vpk"),
+    ]
+
+    models_dir = tf_path / "models"
+    model_paths = list(models_dir.glob("precache.mdl")) + list(models_dir.glob("precache_*.mdl"))
+    for path in sorted(set(model_paths), key=lambda item: item.name.casefold()):
+        entries.append(_file_entry(path, f"models/{path.name}"))
+
+    return sorted(entries, key=lambda entry: entry[0].casefold())
+
+
 class InstallStateStore:
     def __init__(self, path: Path):
         self.path = path
@@ -264,12 +280,35 @@ class InstallStateStore:
                 reusable.add(label.removeprefix("custom/"))
         return reusable
 
+    def can_reuse_precache(
+        self,
+        tf_path: Path | str,
+        request_header: dict,
+        model_list: set[str],
+    ) -> bool:
+        target = self._load()["targets"].get(self._target_key(tf_path))
+        if target is None:
+            return False
+
+        previous_request = target.get("request")
+        if not isinstance(previous_request, dict):
+            return False
+        compatibility_keys = ("recipe", "app_version", "game_target")
+        if any(previous_request.get(key) != request_header.get(key) for key in compatibility_keys):
+            return False
+
+        return (
+            target.get("precache_models") == sorted(model_list)
+            and target.get("precache_outputs") == capture_precache_outputs(tf_path)
+        )
+
     def save_current(
         self,
         tf_path: Path | str,
         request_header: dict,
         selected_addons: list[str],
         particle_selections: dict[str, str],
+        precache_models: set[str] | None = None,
     ) -> None:
         state = self._load()
         state["targets"][self._target_key(tf_path)] = {
@@ -277,6 +316,10 @@ class InstallStateStore:
             "sources": capture_source_state(selected_addons, particle_selections),
             "external_custom": capture_external_custom_state(Path(tf_path) / "custom"),
             "outputs": capture_managed_outputs(tf_path),
+            "precache_models": sorted(precache_models) if precache_models is not None else None,
+            "precache_outputs": (
+                capture_precache_outputs(tf_path) if precache_models is not None else None
+            ),
         }
         self._write(state)
 

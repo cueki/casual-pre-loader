@@ -152,3 +152,49 @@ def test_install_service_returns_before_mutating_an_up_to_date_target(tmp_path, 
     assert result is False
     progress.assert_called_once_with(100, "Mods are already up to date")
     reset_working_copy.assert_not_called()
+
+
+def test_precache_outputs_are_reused_only_when_models_and_files_match(tmp_path, monkeypatch):
+    tf_path = _setup_files(tmp_path, monkeypatch)
+    quick_vpk = tf_path / "custom" / "_QuickPrecache.vpk"
+    quick_vpk.write_bytes(b"quick vpk")
+    store = InstallStateStore(tmp_path / "install_state.json")
+    request = _request()
+    models = {"player/scout.mdl", "weapons/rocket.mdl"}
+    store.save_current(
+        tf_path,
+        request,
+        ["addon"],
+        {"particle": "particle_mod"},
+        precache_models=models,
+    )
+
+    changed_selection = {**request, "selected_addons": ["another_addon"]}
+    assert store.can_reuse_precache(tf_path, changed_selection, models)
+    assert not store.can_reuse_precache(
+        tf_path,
+        changed_selection,
+        models | {"weapons/new.mdl"},
+    )
+
+    (tf_path / "models" / "precache.mdl").write_bytes(b"changed precache")
+    assert not store.can_reuse_precache(tf_path, changed_selection, models)
+
+
+def test_precache_outputs_from_another_recipe_are_not_reused(tmp_path, monkeypatch):
+    tf_path = _setup_files(tmp_path, monkeypatch)
+    store = InstallStateStore(tmp_path / "install_state.json")
+    request = _request()
+    store.save_current(
+        tf_path,
+        request,
+        ["addon"],
+        {"particle": "particle_mod"},
+        precache_models=set(),
+    )
+
+    assert not store.can_reuse_precache(
+        tf_path,
+        {**request, "recipe": request["recipe"] + 1},
+        set(),
+    )
