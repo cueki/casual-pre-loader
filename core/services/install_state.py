@@ -229,6 +229,41 @@ class InstallStateStore:
             return False, "managed_outputs_changed"
         return True, "up_to_date"
 
+    def reusable_external_custom_paths(
+        self,
+        tf_path: Path | str,
+        request_header: dict,
+    ) -> set[str]:
+        """Return external custom files already finalized by this recipe."""
+        target = self._load()["targets"].get(self._target_key(tf_path))
+        if target is None:
+            return set()
+
+        previous_request = target.get("request")
+        if not isinstance(previous_request, dict):
+            return set()
+        compatibility_keys = ("recipe", "app_version", "game_target")
+        if any(previous_request.get(key) != request_header.get(key) for key in compatibility_keys):
+            return set()
+
+        saved_entries = {
+            tuple(entry)
+            for entry in target.get("external_custom", [])
+            if isinstance(entry, list) and len(entry) == 4
+        }
+        current_entries = {
+            tuple(entry)
+            for entry in capture_external_custom_state(Path(tf_path) / "custom")
+            if len(entry) == 4
+        }
+
+        reusable = set()
+        for entry in saved_entries & current_entries:
+            label = entry[0]
+            if isinstance(label, str) and label.startswith("custom/"):
+                reusable.add(label.removeprefix("custom/"))
+        return reusable
+
     def save_current(
         self,
         tf_path: Path | str,

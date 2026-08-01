@@ -121,6 +121,7 @@ class InstallService:
                 on_progress(pct, msg)
 
         request_header = None
+        reusable_external_custom_paths = set()
         if particle_selections is not None:
             request_header = make_request_header(
                 selected_addons,
@@ -143,6 +144,14 @@ class InstallService:
                 progress(100, "Mods are already up to date")
                 timer.finish()
                 return False
+            reusable_external_custom_paths = state_store.reusable_external_custom_paths(
+                tf_path,
+                request_header,
+            )
+            log.info(
+                "Reusing finalized external custom files count=%d",
+                len(reusable_external_custom_paths),
+            )
         else:
             state_store.clear(tf_path)
 
@@ -488,8 +497,11 @@ class InstallService:
 
             progress(97, "Finalizing...")
 
-            get_from_custom_dir(custom_dir)
-            timer.checkpoint("finalize_custom_content")
+            get_from_custom_dir(custom_dir, skip_paths=reusable_external_custom_paths)
+            timer.checkpoint(
+                "finalize_custom_content",
+                reused=len(reusable_external_custom_paths),
+            )
 
             if request_header is not None:
                 state_store.save_current(

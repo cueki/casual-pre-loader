@@ -105,6 +105,33 @@ def test_request_changes_and_clear_invalidate_state(tmp_path, monkeypatch):
     assert store.evaluate(tf_path, request, ["addon"], selections)[1] == "no_previous_state"
 
 
+def test_unchanged_external_custom_files_can_be_reused_across_selection_changes(
+    tmp_path,
+    monkeypatch,
+):
+    tf_path = _setup_files(tmp_path, monkeypatch)
+    loose_file = tf_path / "custom" / "effects" / "materials" / "effects" / "beam.vmt"
+    loose_file.parent.mkdir(parents=True)
+    loose_file.write_bytes(b"material")
+    store = InstallStateStore(tmp_path / "install_state.json")
+    request = _request()
+    store.save_current(tf_path, request, ["addon"], {"particle": "particle_mod"})
+
+    changed_selection = {**request, "selected_addons": ["another_addon"]}
+    assert store.reusable_external_custom_paths(tf_path, changed_selection) == {
+        "external.vpk",
+        "effects/materials/effects/beam.vmt",
+    }
+
+    loose_file.write_bytes(b"changed material")
+    assert store.reusable_external_custom_paths(tf_path, changed_selection) == {
+        "external.vpk",
+    }
+
+    changed_recipe = {**changed_selection, "recipe": request["recipe"] + 1}
+    assert store.reusable_external_custom_paths(tf_path, changed_recipe) == set()
+
+
 def test_install_service_returns_before_mutating_an_up_to_date_target(tmp_path, monkeypatch):
     state_store = Mock()
     state_store.evaluate.return_value = (True, "up_to_date")
