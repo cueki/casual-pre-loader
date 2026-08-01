@@ -23,6 +23,7 @@ from core.handlers.pcf_handler import (
 )
 from core.handlers.skybox_handler import handle_skybox_mods, restore_skybox_files
 from core.handlers.sound_handler import SoundHandler
+from core.services.install_state import InstallStateStore, make_request_header
 from core.operations.file_processors import (
     check_game_type,
     game_type,
@@ -40,6 +41,7 @@ from core.quickprecache.precache_list import make_precache_list
 from core.quickprecache.quick_precache import QuickPrecache
 from core.util.file import check_writable, copy, delete, move
 from core.util.perf import StageTimer
+from core.util.pcf_path_walk import apply_particle_selections as stage_particle_selections
 from core.util.vpk import get_vpk_name
 
 log = logging.getLogger()
@@ -96,7 +98,8 @@ class InstallService:
         fix_mdl_paths: bool = True,
         skip_quickprecache: bool = False,
         game_target: str = "Team Fortress 2",
-        ) -> None:
+        particle_selections: Optional[dict[str, str]] = None,
+        ) -> bool:
         """
         Install selected addons to the game directory.
 
@@ -111,10 +114,37 @@ class InstallService:
 
         self.cancel_requested = False
         timer = StageTimer(log, "install")
+        state_store = InstallStateStore(folder_setup.install_state_file)
 
         def progress(pct: int, msg: str):
             if on_progress:
                 on_progress(pct, msg)
+
+        request_header = None
+        if particle_selections is not None:
+            request_header = make_request_header(
+                selected_addons,
+                particle_selections,
+                disable_paint_colors=disable_paint_colors,
+                show_console_on_startup=show_console_on_startup,
+                fix_mdl_paths=fix_mdl_paths,
+                skip_quickprecache=skip_quickprecache,
+                game_target=game_target,
+            )
+            is_current, reason = state_store.evaluate(
+                tf_path,
+                request_header,
+                selected_addons,
+                particle_selections,
+            )
+            timer.checkpoint("check_install_state")
+            log.info("Install state result=%s", reason)
+            if is_current:
+                progress(100, "Mods are already up to date")
+                timer.finish()
+                return False
+        else:
+            state_store.clear(tf_path)
 
         try:
             is_tf2 = game_target == "Team Fortress 2"
@@ -215,7 +245,9 @@ class InstallService:
 
             self._check_cancelled()
 
-            if apply_particle_selections:
+            if particle_selections is not None:
+                stage_particle_selections(particle_selections)
+            elif apply_particle_selections:
                 apply_particle_selections()
             timer.checkpoint("apply_particle_selections")
 
@@ -459,7 +491,17 @@ class InstallService:
             get_from_custom_dir(custom_dir)
             timer.checkpoint("finalize_custom_content")
 
+            if request_header is not None:
+                state_store.save_current(
+                    tf_path,
+                    request_header,
+                    selected_addons,
+                    particle_selections,
+                )
+                timer.checkpoint("save_install_state")
+
             progress(100, "Installation complete")
+            return True
 
         finally:
             prepare_working_copy()
@@ -468,6 +510,7 @@ class InstallService:
 
     def uninstall(self, tf_path: str, on_progress: Optional[ProgressCallback] = None, game_target: str = "Team Fortress 2"):
         # resets everything
+        InstallStateStore(folder_setup.install_state_file).clear(tf_path)
         def progress(pct: int, msg: str):
             if on_progress:
                 on_progress(pct, msg)

@@ -56,6 +56,7 @@ class FolderConfig:
         'settings_dir': {
             'app_settings_file':   lambda self: self.settings_dir / 'app_settings.json',
             'addon_metadata_file': lambda self: self.settings_dir / 'addon_metadata.json',
+            'install_state_file':  lambda self: self.settings_dir / 'install_state.json',
         },
         'temp_dir': {
             'temp_to_be_processed_dir':  lambda self: self.temp_dir / 'to_be_processed',
