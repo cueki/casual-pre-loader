@@ -183,10 +183,11 @@ def create_vpk_based_mappings(sound_files: List[Path], vpk_paths: List[Path]) ->
     # sound scans the archive directory again for each file, which becomes very
     # expensive for large sound packs.
     canonical_path_by_filename = {}
+    extensions = list(dict.fromkeys(path.suffix.removeprefix('.') for path in sound_files))
     for vpk_path in vpk_paths:
         try:
             vpk = VPKFile(vpk_path)
-            for extension in ('wav', 'mp3'):
+            for extension in extensions:
                 for archive_path in vpk.list_files(extension=extension):
                     filename = PurePosixPath(archive_path.replace('\\', '/')).name
                     # Preserve the original VPK priority and the first path a

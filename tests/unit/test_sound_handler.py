@@ -83,3 +83,19 @@ def test_sound_mapping_removes_files_missing_from_the_game_vpks(tmp_path, monkey
     assert [mapping["source_file"] for mapping in mappings] == [found]
     assert found.exists()
     assert not missing.exists()
+
+
+def test_sound_mapping_preserves_extension_case_matching(tmp_path, monkeypatch):
+    vpk_path = tmp_path / "sounds.vpk"
+    vpk_path.touch()
+    FakeVPK.archives = {"sounds.vpk": ["sound/ui/alert.WAV"]}
+    FakeVPK.list_calls = []
+    monkeypatch.setattr(sound_handler, "VPKFile", FakeVPK)
+
+    alert = tmp_path / "alert.WAV"
+    alert.write_bytes(b"alert")
+
+    mappings = sound_handler.create_vpk_based_mappings([alert], [vpk_path])
+
+    assert [mapping["canonical_path"] for mapping in mappings] == ["ui/alert.WAV"]
+    assert FakeVPK.list_calls == [("sounds.vpk", "WAV")]
