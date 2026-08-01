@@ -66,6 +66,19 @@ def handle_skybox_mods(temp_dir: Path, tf_path) -> int:
     return patched_count
 
 
+def remove_staged_skybox_vmts(temp_dir: Path) -> int:
+    """Remove VMTs already represented by a reused game VPK patch."""
+    skybox_dir = temp_dir / 'materials' / 'skybox'
+    if not skybox_dir.exists():
+        return 0
+
+    removed = 0
+    for vmt_path in skybox_dir.glob('*.vmt'):
+        vmt_path.unlink()
+        removed += 1
+    return removed
+
+
 def restore_skybox_files(tf_path: str) -> int:
     backup_skybox_dir = folder_setup.install_dir / "backup/materials/skybox"
     if not backup_skybox_dir.exists():

@@ -21,7 +21,11 @@ from core.handlers.pcf_handler import (
     restore_particle_files,
     update_materials,
 )
-from core.handlers.skybox_handler import handle_skybox_mods, restore_skybox_files
+from core.handlers.skybox_handler import (
+    handle_skybox_mods,
+    remove_staged_skybox_vmts,
+    restore_skybox_files,
+)
 from core.handlers.sound_handler import SoundHandler
 from core.services.install_state import InstallStateStore, make_request_header
 from core.operations.file_processors import (
@@ -123,6 +127,7 @@ class InstallService:
         request_header = None
         reusable_external_custom_paths = set()
         precache_models_for_state = None
+        direct_game_files_reused = False
         if particle_selections is not None:
             request_header = make_request_header(
                 selected_addons,
@@ -153,6 +158,15 @@ class InstallService:
                 "Reusing finalized external custom files count=%d",
                 len(reusable_external_custom_paths),
             )
+            if game_target == "Team Fortress 2":
+                direct_game_files_reused = state_store.can_reuse_direct_game_files(
+                    tf_path,
+                    request_header,
+                    selected_addons,
+                    particle_selections,
+                    disable_paint_colors,
+                )
+                log.info("Reusing direct game VPK patches=%s", direct_game_files_reused)
         else:
             state_store.clear(tf_path)
 
@@ -166,8 +180,9 @@ class InstallService:
                 working_vpk_path = Path(tf_path) / get_vpk_name(tf_path)
                 if not check_writable(working_vpk_path):
                     raise PermissionError("Please close TF2 before installing.")
-                file_handler = FileHandler(str(working_vpk_path))
-                base_default_pcf, base_default_parents = initialize_pcf(folder_setup.temp_to_be_referenced_dir)
+                if not direct_game_files_reused:
+                    file_handler = FileHandler(str(working_vpk_path))
+                    base_default_pcf, base_default_parents = initialize_pcf(folder_setup.temp_to_be_referenced_dir)
             progress(0, "Installing addons...")
             timer.checkpoint("initialize")
 
@@ -247,11 +262,11 @@ class InstallService:
             timer.checkpoint("install_huds", huds=len(hud_addons))
 
             self._check_cancelled()
-            if is_tf2:
+            if is_tf2 and not direct_game_files_reused:
                 restore_skybox_files(tf_path)
                 restore_particle_files(tf_path)
                 enable_paints(tf_path)
-            timer.checkpoint("restore_game_files")
+            timer.checkpoint("restore_game_files", reused=direct_game_files_reused)
 
             self._check_cancelled()
 
@@ -311,14 +326,20 @@ class InstallService:
                 self._check_cancelled()
 
                 if is_tf2:
-                    handle_skybox_mods(folder_setup.temp_to_be_vpk_dir, tf_path)
+                    if direct_game_files_reused:
+                        remove_staged_skybox_vmts(folder_setup.temp_to_be_vpk_dir)
+                    else:
+                        handle_skybox_mods(folder_setup.temp_to_be_vpk_dir, tf_path)
 
-                if is_tf2 and disable_paint_colors:
+                if is_tf2 and disable_paint_colors and not direct_game_files_reused:
                     progress(52, "Disabling paint colors...")
                     disable_paints(tf_path)
-            timer.checkpoint("patch_skyboxes_and_paints")
+            timer.checkpoint(
+                "patch_skyboxes_and_paints",
+                reused=direct_game_files_reused,
+            )
 
-            if is_tf2:
+            if is_tf2 and not direct_game_files_reused:
                 duplicate_effects = [
                     "item_fx.pcf",
                     "halloween.pcf",
@@ -376,7 +397,7 @@ class InstallService:
                     completed_files += 1
                     current_progress = start_progress + int((completed_files / total_files) * progress_range)
                     progress(current_progress, f"Processing particle files... ({completed_files}/{total_files})")
-            else:
+            elif not is_tf2:
                 particle_files = list(folder_setup.temp_to_be_patched_dir.glob("*.pcf"))
                 if particle_files:
                     particles_dir = folder_setup.temp_to_be_vpk_dir / 'particles'
@@ -394,7 +415,13 @@ class InstallService:
 
                         current_progress = start_progress + int(((i + 1) / total_files) * progress_range)
                         progress(current_progress, f"Copying particle files... ({i + 1}/{total_files})")
-            timer.checkpoint("process_particles", files=len(particle_files))
+            else:
+                particle_files = list(folder_setup.temp_to_be_patched_dir.glob("*.pcf"))
+            timer.checkpoint(
+                "process_particles",
+                files=len(particle_files),
+                reused=direct_game_files_reused,
+            )
 
             self._check_cancelled()
 

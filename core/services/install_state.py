@@ -185,6 +185,88 @@ def capture_precache_outputs(tf_path: Path | str) -> list[list]:
     return sorted(entries, key=lambda entry: entry[0].casefold())
 
 
+def capture_direct_game_inputs(
+    selected_addons: list[str],
+    particle_selections: dict[str, str],
+    disable_paint_colors: bool,
+) -> list[list]:
+    entries = [
+        ["disable_paint_colors", disable_paint_colors],
+        ["particle_selections", [list(item) for item in sorted(particle_selections.items())]],
+    ]
+
+    for index, addon_name in enumerate(selected_addons):
+        addon_dir = folder_setup.addons_dir / addon_name
+
+        def include_direct_addon_file(path: Path) -> bool:
+            relative = path.relative_to(addon_dir).as_posix().casefold()
+            return path.suffix.casefold() == ".pcf" or (
+                relative.startswith("materials/skybox/")
+                and path.suffix.casefold() == ".vmt"
+            )
+
+        entries.extend(
+            _tree_entries(
+                addon_dir,
+                f"direct_addons/{index}/{addon_name}",
+                include_direct_addon_file,
+            )[1:]
+        )
+
+    for particle_name, mod_name in sorted(particle_selections.items()):
+        source_path = (
+            folder_setup.particles_dir
+            / mod_name
+            / "actual_particles"
+            / f"{particle_name}.pcf"
+        )
+        entries.append(
+            _file_entry(
+                source_path,
+                f"selected_particles/{particle_name}/{mod_name}.pcf",
+            )
+        )
+
+    entries.extend(
+        _tree_entries(
+            folder_setup.install_dir / "backup" / "particles",
+            "bundled_backup/particles",
+            lambda path: path.suffix.casefold() == ".pcf",
+        )
+    )
+    entries.extend(
+        _tree_entries(
+            folder_setup.install_dir / "backup" / "materials" / "skybox",
+            "bundled_backup/materials/skybox",
+            lambda path: path.suffix.casefold() == ".vmt",
+        )
+    )
+    entries.extend(
+        _tree_entries(
+            folder_setup.backup_dir / "particles",
+            "runtime_backup/particles",
+            lambda path: path.suffix.casefold() == ".pcf",
+        )
+    )
+    entries.append(
+        _file_entry(folder_setup.particle_system_map_file, "particle_system_map.json")
+    )
+    return entries
+
+
+def capture_direct_game_output(tf_path: Path | str) -> list[list]:
+    tf_path = Path(tf_path)
+    vpk_name = get_vpk_name(tf_path)
+    vpk_prefix = vpk_name.removesuffix("_dir.vpk")
+    vpk_paths = sorted(
+        tf_path.glob(f"{vpk_prefix}_*.vpk"),
+        key=lambda path: path.name.casefold(),
+    )
+    if not vpk_paths:
+        return [_file_entry(tf_path / vpk_name, vpk_name)]
+    return [_file_entry(path, path.name) for path in vpk_paths]
+
+
 class InstallStateStore:
     def __init__(self, path: Path):
         self.path = path
@@ -243,6 +325,15 @@ class InstallStateStore:
             return False, "external_custom_changed"
         if target.get("outputs") != capture_managed_outputs(tf_path):
             return False, "managed_outputs_changed"
+        if request_header.get("game_target") == "Team Fortress 2":
+            if target.get("direct_game_inputs") != capture_direct_game_inputs(
+                selected_addons,
+                particle_selections,
+                request_header["options"]["disable_paint_colors"],
+            ):
+                return False, "direct_game_inputs_changed"
+            if target.get("direct_game_output") != capture_direct_game_output(tf_path):
+                return False, "direct_game_output_changed"
         return True, "up_to_date"
 
     def reusable_external_custom_paths(
@@ -302,6 +393,35 @@ class InstallStateStore:
             and target.get("precache_outputs") == capture_precache_outputs(tf_path)
         )
 
+    def can_reuse_direct_game_files(
+        self,
+        tf_path: Path | str,
+        request_header: dict,
+        selected_addons: list[str],
+        particle_selections: dict[str, str],
+        disable_paint_colors: bool,
+    ) -> bool:
+        target = self._load()["targets"].get(self._target_key(tf_path))
+        if target is None:
+            return False
+
+        previous_request = target.get("request")
+        if not isinstance(previous_request, dict):
+            return False
+        compatibility_keys = ("recipe", "app_version", "game_target")
+        if any(previous_request.get(key) != request_header.get(key) for key in compatibility_keys):
+            return False
+
+        return (
+            target.get("direct_game_inputs")
+            == capture_direct_game_inputs(
+                selected_addons,
+                particle_selections,
+                disable_paint_colors,
+            )
+            and target.get("direct_game_output") == capture_direct_game_output(tf_path)
+        )
+
     def save_current(
         self,
         tf_path: Path | str,
@@ -311,6 +431,7 @@ class InstallStateStore:
         precache_models: set[str] | None = None,
     ) -> None:
         state = self._load()
+        is_tf2 = request_header.get("game_target") == "Team Fortress 2"
         state["targets"][self._target_key(tf_path)] = {
             "request": request_header,
             "sources": capture_source_state(selected_addons, particle_selections),
@@ -320,6 +441,16 @@ class InstallStateStore:
             "precache_outputs": (
                 capture_precache_outputs(tf_path) if precache_models is not None else None
             ),
+            "direct_game_inputs": (
+                capture_direct_game_inputs(
+                    selected_addons,
+                    particle_selections,
+                    request_header["options"]["disable_paint_colors"],
+                )
+                if is_tf2
+                else None
+            ),
+            "direct_game_output": capture_direct_game_output(tf_path) if is_tf2 else None,
         }
         self._write(state)
 

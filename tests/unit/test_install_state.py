@@ -26,6 +26,8 @@ def _setup_files(tmp_path: Path, monkeypatch):
     particles = project / "particles"
     tf_path = tmp_path / "tf"
     custom = tf_path / "custom"
+    bundled_backup = project / "bundled_backup"
+    runtime_backup = project / "runtime_backup"
 
     (addons / "addon" / "materials").mkdir(parents=True)
     (addons / "addon" / "materials" / "addon.vtf").write_bytes(b"addon")
@@ -38,11 +40,26 @@ def _setup_files(tmp_path: Path, monkeypatch):
     (tf_path / "models" / "precache.mdl").write_bytes(b"precache")
     (tf_path / "gameinfo.txt").write_text("gameinfo", encoding="utf-8")
     (tf_path / "tf2_misc_dir.vpk").write_bytes(b"game vpk")
+    (tf_path / "tf2_misc_000.vpk").write_bytes(b"game data")
+    (bundled_backup / "backup" / "particles").mkdir(parents=True)
+    (bundled_backup / "backup" / "particles" / "base.pcf").write_bytes(b"base")
+    (bundled_backup / "backup" / "materials" / "skybox").mkdir(parents=True)
+    (bundled_backup / "backup" / "materials" / "skybox" / "sky.vmt").write_bytes(b"sky")
+    (runtime_backup / "particles").mkdir(parents=True)
+    (runtime_backup / "particles" / "base.pcf").write_bytes(b"base")
+    particle_system_map = project / "particle_system_map.json"
+    particle_system_map.write_text("{}", encoding="utf-8")
 
     monkeypatch.setattr(
         install_state,
         "folder_setup",
-        SimpleNamespace(addons_dir=addons, particles_dir=particles),
+        SimpleNamespace(
+            addons_dir=addons,
+            particles_dir=particles,
+            install_dir=bundled_backup,
+            backup_dir=runtime_backup,
+            particle_system_map_file=particle_system_map,
+        ),
     )
     return tf_path
 
@@ -89,6 +106,10 @@ def test_source_external_and_managed_output_changes_invalidate_state(tmp_path, m
     save()
     (tf_path / "custom" / "_casual_preloader_dir.vpk").unlink()
     assert store.evaluate(tf_path, request, ["addon"], selections)[1] == "managed_outputs_changed"
+
+    save()
+    (tf_path / "tf2_misc_000.vpk").write_bytes(b"steam update")
+    assert store.evaluate(tf_path, request, ["addon"], selections)[1] == "direct_game_output_changed"
 
 
 def test_request_changes_and_clear_invalidate_state(tmp_path, monkeypatch):
@@ -197,4 +218,75 @@ def test_precache_outputs_from_another_recipe_are_not_reused(tmp_path, monkeypat
         tf_path,
         {**request, "recipe": request["recipe"] + 1},
         set(),
+    )
+
+
+def test_direct_game_vpk_patch_is_reused_for_non_direct_addon_changes(tmp_path, monkeypatch):
+    tf_path = _setup_files(tmp_path, monkeypatch)
+    store = InstallStateStore(tmp_path / "install_state.json")
+    request = _request()
+    selections = {"particle": "particle_mod"}
+    store.save_current(tf_path, request, ["addon"], selections)
+
+    texture_addon = install_state.folder_setup.addons_dir / "texture_addon" / "materials"
+    texture_addon.mkdir(parents=True)
+    (texture_addon / "texture.vtf").write_bytes(b"texture")
+    changed_request = {**request, "selected_addons": ["addon", "texture_addon"]}
+
+    assert store.can_reuse_direct_game_files(
+        tf_path,
+        changed_request,
+        ["addon", "texture_addon"],
+        selections,
+        False,
+    )
+
+    (tf_path / "tf2_misc_dir.vpk").write_bytes(b"game update")
+    assert not store.can_reuse_direct_game_files(
+        tf_path,
+        changed_request,
+        ["addon", "texture_addon"],
+        selections,
+        False,
+    )
+
+    store.save_current(tf_path, changed_request, ["addon", "texture_addon"], selections)
+    (tf_path / "tf2_misc_000.vpk").write_bytes(b"changed game data")
+    assert not store.can_reuse_direct_game_files(
+        tf_path,
+        changed_request,
+        ["addon", "texture_addon"],
+        selections,
+        False,
+    )
+
+
+def test_direct_addon_particle_skybox_and_paint_changes_disable_reuse(tmp_path, monkeypatch):
+    tf_path = _setup_files(tmp_path, monkeypatch)
+    store = InstallStateStore(tmp_path / "install_state.json")
+    request = _request()
+    selections = {"particle": "particle_mod"}
+    store.save_current(tf_path, request, ["addon"], selections)
+
+    addon_dir = install_state.folder_setup.addons_dir / "direct_addon"
+    addon_dir.mkdir()
+    (addon_dir / "effect.pcf").write_bytes(b"particle")
+    skybox = addon_dir / "materials" / "skybox" / "sky.vmt"
+    skybox.parent.mkdir(parents=True)
+    skybox.write_bytes(b"skybox")
+    changed_request = {**request, "selected_addons": ["addon", "direct_addon"]}
+
+    assert not store.can_reuse_direct_game_files(
+        tf_path,
+        changed_request,
+        ["addon", "direct_addon"],
+        selections,
+        False,
+    )
+    assert not store.can_reuse_direct_game_files(
+        tf_path,
+        request,
+        ["addon"],
+        selections,
+        True,
     )
