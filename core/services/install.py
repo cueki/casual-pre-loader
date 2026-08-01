@@ -39,6 +39,7 @@ from core.operations.vgui_preload import patch_mainmenuoverride
 from core.quickprecache.precache_list import make_precache_list
 from core.quickprecache.quick_precache import QuickPrecache
 from core.util.file import check_writable, copy, delete, move
+from core.util.perf import StageTimer
 from core.util.vpk import get_vpk_name
 
 log = logging.getLogger()
@@ -109,6 +110,7 @@ class InstallService:
         """
 
         self.cancel_requested = False
+        timer = StageTimer(log, "install")
 
         def progress(pct: int, msg: str):
             if on_progress:
@@ -127,8 +129,10 @@ class InstallService:
                 file_handler = FileHandler(str(working_vpk_path))
                 base_default_pcf, base_default_parents = initialize_pcf(folder_setup.temp_to_be_referenced_dir)
             progress(0, "Installing addons...")
+            timer.checkpoint("initialize")
 
             total_files = 0
+            total_bytes = 0
             files_to_copy = []
             hud_addons = {}
 
@@ -160,9 +164,20 @@ class InstallService:
                                 src_path.suffix == '.txt'):
                                 continue
                             total_files += 1
+                            try:
+                                total_bytes += src_path.stat().st_size
+                            except OSError:
+                                pass
                             files_to_copy.append((src_path, addon_dir, addon_index))
 
             self._check_cancelled()
+            timer.checkpoint(
+                "scan_addons",
+                addons=len(selected_addons),
+                files=total_files,
+                bytes=total_bytes,
+                huds=len(hud_addons),
+            )
 
             custom_dir = Path(tf_path) / 'custom'
             custom_dir.mkdir(exist_ok=True)
@@ -189,17 +204,20 @@ class InstallService:
                                 json.dump(mod_info, f, indent=2)
                         except json.JSONDecodeError:
                             log.warning(f"Invalid JSON in {hud_mod_json}, skipping preloader_installed flag", exc_info=True)
+            timer.checkpoint("install_huds", huds=len(hud_addons))
 
             self._check_cancelled()
             if is_tf2:
                 restore_skybox_files(tf_path)
                 restore_particle_files(tf_path)
                 enable_paints(tf_path)
+            timer.checkpoint("restore_game_files")
 
             self._check_cancelled()
 
             if apply_particle_selections:
                 apply_particle_selections()
+            timer.checkpoint("apply_particle_selections")
 
             # dest_path -> addon load-order index, used by mdl_relocate to
             # resolve per-file collisions when merging un-prefixed mod content
@@ -226,6 +244,7 @@ class InstallService:
                     completed_files += 1
                     current_progress = 10 + int((completed_files / total_files) * progress_range)
                     progress(current_progress, f"Installing addons... ({completed_files}/{total_files} files)")
+                timer.checkpoint("stage_addon_files", bytes=total_bytes, files=total_files)
 
                 if is_tf2:
                     progress(35, "Processing sound mods...")
@@ -245,6 +264,7 @@ class InstallService:
                     )
                     if sound_result:
                         progress(50, sound_result['message'])
+                timer.checkpoint("process_sounds")
 
                 self._check_cancelled()
 
@@ -254,6 +274,7 @@ class InstallService:
                 if is_tf2 and disable_paint_colors:
                     progress(52, "Disabling paint colors...")
                     disable_paints(tf_path)
+            timer.checkpoint("patch_skyboxes_and_paints")
 
             if is_tf2:
                 duplicate_effects = [
@@ -331,6 +352,7 @@ class InstallService:
 
                         current_progress = start_progress + int(((i + 1) / total_files) * progress_range)
                         progress(current_progress, f"Copying particle files... ({i + 1}/{total_files})")
+            timer.checkpoint("process_particles", files=len(particle_files))
 
             self._check_cancelled()
 
@@ -359,6 +381,7 @@ class InstallService:
                     progress(78, "Relocating model material paths...")
                     relocate_mdl_paths(custom_content_dir, file_origin=file_origin)
                 generate_missing_vmt_files(custom_content_dir, tf_path)
+            timer.checkpoint("prepare_custom_content")
 
             for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
                 split_file.unlink()
@@ -373,10 +396,12 @@ class InstallService:
                 custom_content_dir.mkdir(parents=True, exist_ok=True) # INFO: technically not necessary, but VPKFile does not check if `source_dir` exists
                 if not VPKFile.create(str(custom_content_dir), str(vpk_base_path), split_size):
                     raise Exception("Failed to create custom VPK")
+            timer.checkpoint("build_custom_vpk")
 
             self._check_cancelled()
 
             if is_tf2:
+                precache_model_count = 0
                 # Always flush prior precache state and clear stale precache VPKs,
                 # even when scan+build is skipped — otherwise the user keeps loading
                 # whatever was generated by the last install that did run it.
@@ -395,6 +420,7 @@ class InstallService:
                     progress(85, "Scanning for models to precache...")
 
                     precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]))
+                    precache_model_count = len(precache_prop_set)
                     if precache_prop_set:
                         precache = QuickPrecache(
                             str(Path(tf_path).parents[0]),
@@ -405,6 +431,7 @@ class InstallService:
                         copy(folder_setup.install_dir / 'core/quickprecache/_QuickPrecache.vpk', custom_dir / '_QuickPrecache.vpk')
 
                 self._check_cancelled()
+                timer.checkpoint("quickprecache", models=precache_model_count)
 
                 progress(95, "Configuring...")
 
@@ -422,15 +449,19 @@ class InstallService:
                 if custom_vpk_path.exists():
                     vpk_handler = FileHandler(str(custom_vpk_path))
                     vpk_handler.process_file('cfg/w/config.cfg', config_content.encode('utf-8'))
+            timer.checkpoint("configure")
 
             progress(97, "Finalizing...")
 
             get_from_custom_dir(custom_dir)
+            timer.checkpoint("finalize_custom_content")
 
             progress(100, "Installation complete")
 
         finally:
             prepare_working_copy()
+            timer.checkpoint("reset_working_copy")
+            timer.finish()
 
     def uninstall(self, tf_path: str, on_progress: Optional[ProgressCallback] = None, game_target: str = "Team Fortress 2"):
         # resets everything
