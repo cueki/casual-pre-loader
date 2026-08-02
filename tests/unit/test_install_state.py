@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -82,6 +83,48 @@ def test_saved_install_state_recognizes_an_unchanged_install(tmp_path, monkeypat
     assert store.evaluate(tf_path, request, ["addon"], {"particle": "particle_mod"}) == (
         True,
         "up_to_date",
+    )
+
+
+def test_bundled_inputs_use_content_identity_across_timestamp_changes(
+    tmp_path,
+    monkeypatch,
+):
+    tf_path = _setup_files(tmp_path, monkeypatch)
+    store = InstallStateStore(tmp_path / "state" / "install_state.json")
+    request = _request()
+    selections = {"particle": "particle_mod"}
+    bundled_particle = (
+        install_state.folder_setup.install_dir
+        / "backup"
+        / "particles"
+        / "base.pcf"
+    )
+    particle_map = install_state.folder_setup.particle_system_map_file
+
+    store.save_current(tf_path, request, ["addon"], selections)
+    saved = json.loads(store.path.read_text(encoding="utf-8"))
+    target = next(iter(saved["targets"].values()))
+    bundled_entry = next(
+        entry
+        for entry in target["direct_game_inputs"]
+        if entry[0] == "bundled_backup/particles/base.pcf"
+    )
+    assert bundled_entry[:2] == ["bundled_backup/particles/base.pcf", 4]
+    assert len(bundled_entry[2]) == 64
+
+    for path in (bundled_particle, particle_map):
+        stat = path.stat()
+        os.utime(path, ns=(stat.st_atime_ns, stat.st_mtime_ns + 1_000_000_000))
+
+    assert store.evaluate(tf_path, request, ["addon"], selections) == (
+        True,
+        "up_to_date",
+    )
+
+    bundled_particle.write_bytes(b"BASE")
+    assert store.evaluate(tf_path, request, ["addon"], selections)[1] == (
+        "direct_game_inputs_changed"
     )
 
 
