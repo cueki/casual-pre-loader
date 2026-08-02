@@ -44,7 +44,6 @@ from core.operations.vgui_preload import patch_mainmenuoverride
 from core.quickprecache.precache_list import make_precache_list
 from core.quickprecache.quick_precache import QuickPrecache
 from core.util.file import check_writable, copy, delete, move
-from core.util.perf import StageTimer
 from core.util.pcf_path_walk import apply_particle_selections as stage_particle_selections
 from core.util.vpk import get_vpk_name
 
@@ -117,7 +116,6 @@ class InstallService:
         """
 
         self.cancel_requested = False
-        timer = StageTimer(log, "install")
         state_store = InstallStateStore(folder_setup.install_state_file)
 
         def progress(pct: int, msg: str):
@@ -144,11 +142,9 @@ class InstallService:
                 selected_addons,
                 particle_selections,
             )
-            timer.checkpoint("check_install_state")
             log.info("Install state result=%s", reason)
             if is_current:
                 progress(100, "Mods are already up to date")
-                timer.finish()
                 return False
             reusable_external_custom_paths = state_store.reusable_external_custom_paths(
                 tf_path,
@@ -184,10 +180,8 @@ class InstallService:
                     file_handler = FileHandler(str(working_vpk_path))
                     base_default_pcf, base_default_parents = initialize_pcf(folder_setup.temp_to_be_referenced_dir)
             progress(0, "Installing addons...")
-            timer.checkpoint("initialize")
 
             total_files = 0
-            total_bytes = 0
             files_to_copy = []
             hud_addons = {}
 
@@ -219,20 +213,9 @@ class InstallService:
                                 src_path.suffix == '.txt'):
                                 continue
                             total_files += 1
-                            try:
-                                total_bytes += src_path.stat().st_size
-                            except OSError:
-                                pass
                             files_to_copy.append((src_path, addon_dir, addon_index))
 
             self._check_cancelled()
-            timer.checkpoint(
-                "scan_addons",
-                addons=len(selected_addons),
-                files=total_files,
-                bytes=total_bytes,
-                huds=len(hud_addons),
-            )
 
             custom_dir = Path(tf_path) / 'custom'
             custom_dir.mkdir(exist_ok=True)
@@ -259,23 +242,17 @@ class InstallService:
                                 json.dump(mod_info, f, indent=2)
                         except json.JSONDecodeError:
                             log.warning(f"Invalid JSON in {hud_mod_json}, skipping preloader_installed flag", exc_info=True)
-            timer.checkpoint("install_huds", huds=len(hud_addons))
-
             self._check_cancelled()
             if is_tf2 and not direct_game_files_reused:
                 restore_skybox_files(tf_path)
                 restore_particle_files(tf_path)
                 enable_paints(tf_path)
-            timer.checkpoint("restore_game_files", reused=direct_game_files_reused)
-
             self._check_cancelled()
 
             if particle_selections is not None:
                 stage_particle_selections(particle_selections)
             elif apply_particle_selections:
                 apply_particle_selections()
-            timer.checkpoint("apply_particle_selections")
-
             # dest_path -> addon load-order index, used by mdl_relocate to
             # resolve per-file collisions when merging un-prefixed mod content
             # into a destination that another mod already shipped pre-prefixed.
@@ -301,8 +278,6 @@ class InstallService:
                     completed_files += 1
                     current_progress = 10 + int((completed_files / total_files) * progress_range)
                     progress(current_progress, f"Installing addons... ({completed_files}/{total_files} files)")
-                timer.checkpoint("stage_addon_files", bytes=total_bytes, files=total_files)
-
                 if is_tf2:
                     progress(35, "Processing sound mods...")
                     backup_scripts_dir = folder_setup.backup_dir / 'scripts'
@@ -321,8 +296,6 @@ class InstallService:
                     )
                     if sound_result:
                         progress(50, sound_result['message'])
-                timer.checkpoint("process_sounds")
-
                 self._check_cancelled()
 
                 if is_tf2:
@@ -334,11 +307,6 @@ class InstallService:
                 if is_tf2 and disable_paint_colors and not direct_game_files_reused:
                     progress(52, "Disabling paint colors...")
                     disable_paints(tf_path)
-            timer.checkpoint(
-                "patch_skyboxes_and_paints",
-                reused=direct_game_files_reused,
-            )
-
             if is_tf2 and not direct_game_files_reused:
                 duplicate_effects = [
                     "item_fx.pcf",
@@ -415,13 +383,6 @@ class InstallService:
 
                         current_progress = start_progress + int(((i + 1) / total_files) * progress_range)
                         progress(current_progress, f"Copying particle files... ({i + 1}/{total_files})")
-            else:
-                particle_files = list(folder_setup.temp_to_be_patched_dir.glob("*.pcf"))
-            timer.checkpoint(
-                "process_particles",
-                files=len(particle_files),
-                reused=direct_game_files_reused,
-            )
 
             self._check_cancelled()
 
@@ -450,8 +411,6 @@ class InstallService:
                     progress(78, "Relocating model material paths...")
                     relocate_mdl_paths(custom_content_dir, file_origin=file_origin)
                 generate_missing_vmt_files(custom_content_dir, tf_path)
-            timer.checkpoint("prepare_custom_content")
-
             for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
                 split_file.unlink()
                 cache_file = custom_dir / (split_file.name + ".sound.cache")
@@ -465,8 +424,6 @@ class InstallService:
                 custom_content_dir.mkdir(parents=True, exist_ok=True) # INFO: technically not necessary, but VPKFile does not check if `source_dir` exists
                 if not VPKFile.create(str(custom_content_dir), str(vpk_base_path), split_size):
                     raise Exception("Failed to create custom VPK")
-            timer.checkpoint("build_custom_vpk")
-
             self._check_cancelled()
 
             if is_tf2:
@@ -515,12 +472,6 @@ class InstallService:
                     log.info("Reusing QuickPrecache outputs models=%d", precache_model_count)
 
                 self._check_cancelled()
-                timer.checkpoint(
-                    "quickprecache",
-                    models=precache_model_count,
-                    reused=precache_reused,
-                )
-
                 progress(95, "Configuring...")
 
                 has_mastercomfig = False
@@ -537,15 +488,9 @@ class InstallService:
                 if custom_vpk_path.exists():
                     vpk_handler = FileHandler(str(custom_vpk_path))
                     vpk_handler.process_file('cfg/w/config.cfg', config_content.encode('utf-8'))
-            timer.checkpoint("configure")
-
             progress(97, "Finalizing...")
 
             get_from_custom_dir(custom_dir, skip_paths=reusable_external_custom_paths)
-            timer.checkpoint(
-                "finalize_custom_content",
-                reused=len(reusable_external_custom_paths),
-            )
 
             if request_header is not None:
                 state_store.save_current(
@@ -555,15 +500,11 @@ class InstallService:
                     particle_selections,
                     precache_models=precache_models_for_state,
                 )
-                timer.checkpoint("save_install_state")
-
             progress(100, "Installation complete")
             return True
 
         finally:
             prepare_working_copy()
-            timer.checkpoint("reset_working_copy")
-            timer.finish()
 
     def uninstall(self, tf_path: str, on_progress: Optional[ProgressCallback] = None, game_target: str = "Team Fortress 2"):
         # resets everything
