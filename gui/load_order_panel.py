@@ -120,13 +120,14 @@ class LoadOrderPanel(QWidget):
                     overwrites = all_overwrites[addon_name]
                     display_text += " ⚠"
                     has_conflicts = True
-                    tooltip = "Will overwrite:\n"
+                    tooltip = "<div style='white-space: nowrap; color: #FFFFFF'>Will overwrite:<br>"
                     for overwrite_addon, overwrite_files in overwrites.items():
                         tooltip += f"• {overwrite_addon}: "
                         if overwrite_files:
-                            tooltip += f"{len(overwrite_files)} files including {overwrite_files[0]}\n"
+                            tooltip += f"{len(overwrite_files)} files including {overwrite_files[0]}<br>"
                         else:
-                            tooltip += "Unknown files\n"
+                            tooltip += "Unknown files<br>"
+                    tooltip += "</div>"
 
                     item = QListWidgetItem(display_text)
                     item.setToolTip(tooltip)
