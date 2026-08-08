@@ -15,6 +15,7 @@
 [djsigmann](https://github.com/djsigmann) for help with AUR packaging, providing linux-specific support, documentation, CI/CD, and other misc development.  
 [akuji](https://gamebanana.com/members/2017711) for being a huge help with discord support, documentation, and misc development.  
 [Feathers](https://github.com/FeathersTheChick) for help with documentation and the logo.  
+[Memer](https://github.com/MemerOnYT) for help with testing.  
 [Allen Scott](https://gamebanana.com/members/1242417) for the original logo.  
 [THE GOAT](https://gamebanana.com/members/2133251) This person made the [square_series](https://gamebanana.com/mods/435309) preset.  
 [Skeleton Hotel](https://gamebanana.com/members/1414545).  
