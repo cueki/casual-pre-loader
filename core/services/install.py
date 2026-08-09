@@ -21,8 +21,13 @@ from core.handlers.pcf_handler import (
     restore_particle_files,
     update_materials,
 )
-from core.handlers.skybox_handler import handle_skybox_mods, restore_skybox_files
+from core.handlers.skybox_handler import (
+    handle_skybox_mods,
+    remove_staged_skybox_vmts,
+    restore_skybox_files,
+)
 from core.handlers.sound_handler import SoundHandler
+from core.services.install_state import InstallStateStore, make_request_header
 from core.operations.file_processors import (
     check_game_type,
     game_type,
@@ -39,6 +44,7 @@ from core.operations.vgui_preload import patch_mainmenuoverride
 from core.quickprecache.precache_list import make_precache_list
 from core.quickprecache.quick_precache import QuickPrecache
 from core.util.file import check_writable, copy, delete, move
+from core.util.pcf_path_walk import apply_particle_selections as stage_particle_selections
 from core.util.vpk import get_vpk_name
 
 log = logging.getLogger()
@@ -95,7 +101,8 @@ class InstallService:
         fix_mdl_paths: bool = True,
         skip_quickprecache: bool = False,
         game_target: str = "Team Fortress 2",
-        ) -> None:
+        particle_selections: Optional[dict[str, str]] = None,
+        ) -> bool:
         """
         Install selected addons to the game directory.
 
@@ -109,10 +116,55 @@ class InstallService:
         """
 
         self.cancel_requested = False
+        state_store = InstallStateStore(folder_setup.install_state_file)
 
         def progress(pct: int, msg: str):
             if on_progress:
                 on_progress(pct, msg)
+
+        request_header = None
+        reusable_external_custom_paths = set()
+        precache_models_for_state = None
+        direct_game_files_reused = False
+        if particle_selections is not None:
+            request_header = make_request_header(
+                selected_addons,
+                particle_selections,
+                disable_paint_colors=disable_paint_colors,
+                show_console_on_startup=show_console_on_startup,
+                fix_mdl_paths=fix_mdl_paths,
+                skip_quickprecache=skip_quickprecache,
+                game_target=game_target,
+            )
+            is_current, reason = state_store.evaluate(
+                tf_path,
+                request_header,
+                selected_addons,
+                particle_selections,
+            )
+            log.info("Install state result=%s", reason)
+            if is_current:
+                progress(100, "Mods are already up to date")
+                return False
+            reusable_external_custom_paths = state_store.reusable_external_custom_paths(
+                tf_path,
+                request_header,
+            )
+            log.info(
+                "Reusing finalized external custom files count=%d",
+                len(reusable_external_custom_paths),
+            )
+            if game_target == "Team Fortress 2":
+                direct_game_files_reused = state_store.can_reuse_direct_game_files(
+                    tf_path,
+                    request_header,
+                    selected_addons,
+                    particle_selections,
+                    disable_paint_colors,
+                )
+                log.info("Reusing direct game VPK patches=%s", direct_game_files_reused)
+        else:
+            state_store.clear(tf_path)
 
         try:
             is_tf2 = game_target == "Team Fortress 2"
@@ -124,8 +176,9 @@ class InstallService:
                 working_vpk_path = Path(tf_path) / get_vpk_name(tf_path)
                 if not check_writable(working_vpk_path):
                     raise PermissionError("Please close TF2 before installing.")
-                file_handler = FileHandler(str(working_vpk_path))
-                base_default_pcf, base_default_parents = initialize_pcf(folder_setup.temp_to_be_referenced_dir)
+                if not direct_game_files_reused:
+                    file_handler = FileHandler(str(working_vpk_path))
+                    base_default_pcf, base_default_parents = initialize_pcf(folder_setup.temp_to_be_referenced_dir)
             progress(0, "Installing addons...")
 
             total_files = 0
@@ -189,18 +242,17 @@ class InstallService:
                                 json.dump(mod_info, f, indent=2)
                         except json.JSONDecodeError:
                             log.warning(f"Invalid JSON in {hud_mod_json}, skipping preloader_installed flag", exc_info=True)
-
             self._check_cancelled()
-            if is_tf2:
+            if is_tf2 and not direct_game_files_reused:
                 restore_skybox_files(tf_path)
                 restore_particle_files(tf_path)
                 enable_paints(tf_path)
-
             self._check_cancelled()
 
-            if apply_particle_selections:
+            if particle_selections is not None:
+                stage_particle_selections(particle_selections)
+            elif apply_particle_selections:
                 apply_particle_selections()
-
             # dest_path -> addon load-order index, used by mdl_relocate to
             # resolve per-file collisions when merging un-prefixed mod content
             # into a destination that another mod already shipped pre-prefixed.
@@ -226,7 +278,6 @@ class InstallService:
                     completed_files += 1
                     current_progress = 10 + int((completed_files / total_files) * progress_range)
                     progress(current_progress, f"Installing addons... ({completed_files}/{total_files} files)")
-
                 if is_tf2:
                     progress(35, "Processing sound mods...")
                     backup_scripts_dir = folder_setup.backup_dir / 'scripts'
@@ -245,17 +296,18 @@ class InstallService:
                     )
                     if sound_result:
                         progress(50, sound_result['message'])
-
                 self._check_cancelled()
 
                 if is_tf2:
-                    handle_skybox_mods(folder_setup.temp_to_be_vpk_dir, tf_path)
+                    if direct_game_files_reused:
+                        remove_staged_skybox_vmts(folder_setup.temp_to_be_vpk_dir)
+                    else:
+                        handle_skybox_mods(folder_setup.temp_to_be_vpk_dir, tf_path)
 
-                if is_tf2 and disable_paint_colors:
+                if is_tf2 and disable_paint_colors and not direct_game_files_reused:
                     progress(52, "Disabling paint colors...")
                     disable_paints(tf_path)
-
-            if is_tf2:
+            if is_tf2 and not direct_game_files_reused:
                 duplicate_effects = [
                     "item_fx.pcf",
                     "halloween.pcf",
@@ -313,7 +365,7 @@ class InstallService:
                     completed_files += 1
                     current_progress = start_progress + int((completed_files / total_files) * progress_range)
                     progress(current_progress, f"Processing particle files... ({completed_files}/{total_files})")
-            else:
+            elif not is_tf2:
                 particle_files = list(folder_setup.temp_to_be_patched_dir.glob("*.pcf"))
                 if particle_files:
                     particles_dir = folder_setup.temp_to_be_vpk_dir / 'particles'
@@ -359,7 +411,6 @@ class InstallService:
                     progress(78, "Relocating model material paths...")
                     relocate_mdl_paths(custom_content_dir, file_origin=file_origin)
                 generate_missing_vmt_files(custom_content_dir, tf_path)
-
             for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
                 split_file.unlink()
                 cache_file = custom_dir / (split_file.name + ".sound.cache")
@@ -373,39 +424,54 @@ class InstallService:
                 custom_content_dir.mkdir(parents=True, exist_ok=True) # INFO: technically not necessary, but VPKFile does not check if `source_dir` exists
                 if not VPKFile.create(str(custom_content_dir), str(vpk_base_path), split_size):
                     raise Exception("Failed to create custom VPK")
-
             self._check_cancelled()
 
             if is_tf2:
-                # Always flush prior precache state and clear stale precache VPKs,
-                # even when scan+build is skipped — otherwise the user keeps loading
-                # whatever was generated by the last install that did run it.
-                QuickPrecache(str(Path(tf_path).parents[0]), debug=False).run(flush=True)
+                precache_model_count = 0
+                precache_reused = False
+                precache = QuickPrecache(
+                    str(Path(tf_path).parents[0]),
+                    debug=False,
+                    progress_callback=on_progress,
+                )
                 quick_precache_path = custom_dir / "_QuickPrecache.vpk"
-                if quick_precache_path.exists():
-                    quick_precache_path.unlink()
-
                 old_quick_precache_path = custom_dir / "QuickPrecache.vpk"
-                if old_quick_precache_path.exists():
-                    old_quick_precache_path.unlink()
 
                 if skip_quickprecache:
                     log.info("Skipping QuickPrecache scan/build (skip_quickprecache=True)")
+                    precache_models_for_state = set()
                 else:
                     progress(85, "Scanning for models to precache...")
 
                     precache_prop_set = make_precache_list(str(Path(tf_path).parents[0]))
-                    if precache_prop_set:
-                        precache = QuickPrecache(
-                            str(Path(tf_path).parents[0]),
-                            debug=False,
-                            progress_callback=on_progress
-                            )
-                        precache.run(auto=True)
+                    precache_models_for_state = precache_prop_set
+                    precache_model_count = len(precache_prop_set)
+                    if request_header is not None:
+                        precache_reused = state_store.can_reuse_precache(
+                            tf_path,
+                            request_header,
+                            precache_prop_set,
+                        )
+
+                if not precache_reused:
+                    # Clear stale output when the desired model list changed or
+                    # QuickPrecache was explicitly disabled.
+                    precache.flush_files()
+                    if quick_precache_path.exists():
+                        quick_precache_path.unlink()
+                    if old_quick_precache_path.exists():
+                        old_quick_precache_path.unlink()
+
+                    if not skip_quickprecache and precache_models_for_state:
+                        precache.run(
+                            model_list=precache_models_for_state,
+                            flush_existing=False,
+                        )
                         copy(folder_setup.install_dir / 'core/quickprecache/_QuickPrecache.vpk', custom_dir / '_QuickPrecache.vpk')
+                else:
+                    log.info("Reusing QuickPrecache outputs models=%d", precache_model_count)
 
                 self._check_cancelled()
-
                 progress(95, "Configuring...")
 
                 has_mastercomfig = False
@@ -422,18 +488,27 @@ class InstallService:
                 if custom_vpk_path.exists():
                     vpk_handler = FileHandler(str(custom_vpk_path))
                     vpk_handler.process_file('cfg/w/config.cfg', config_content.encode('utf-8'))
-
             progress(97, "Finalizing...")
 
-            get_from_custom_dir(custom_dir)
+            get_from_custom_dir(custom_dir, skip_paths=reusable_external_custom_paths)
 
+            if request_header is not None:
+                state_store.save_current(
+                    tf_path,
+                    request_header,
+                    selected_addons,
+                    particle_selections,
+                    precache_models=precache_models_for_state,
+                )
             progress(100, "Installation complete")
+            return True
 
         finally:
             prepare_working_copy()
 
     def uninstall(self, tf_path: str, on_progress: Optional[ProgressCallback] = None, game_target: str = "Team Fortress 2"):
         # resets everything
+        InstallStateStore(folder_setup.install_state_file).clear(tf_path)
         def progress(pct: int, msg: str):
             if on_progress:
                 on_progress(pct, msg)

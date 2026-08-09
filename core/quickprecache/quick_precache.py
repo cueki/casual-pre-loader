@@ -1,4 +1,3 @@
-import itertools
 import logging
 import tempfile
 from pathlib import Path
@@ -122,36 +121,31 @@ class QuickPrecache:
 
     def make_precache_sub_list(self, strings: Set[str]) -> None:
         # create subdivided QC files for the model list
-        builder = get_precache_string_builder(self.builder_index)
-        passed_strings = set()
-        estimated_builders = max(1, len(strings) // 10)  # rough estimate
-        self.total_compiles = estimated_builders + 1
+        builders = []
+        builder = get_precache_string_builder(0)
+        builder_has_models = False
+
+        for model in sorted(strings):
+            include_line = get_include_model(model)
+
+            if builder_has_models and len(builder) + len(include_line) > self.MAX_SPLIT_SIZE:
+                builders.append(builder)
+                builder = get_precache_string_builder(len(builders))
+                builder_has_models = False
+
+            builder += include_line
+            builder_has_models = True
+
+        if builder_has_models:
+            builders.append(builder)
+
+        self.total_compiles = len(builders) + 1
         self.compiled_count = 0
+        self.builder_index = 0
 
-        # cycle through strings until all are processed
-        for s in itertools.cycle(strings):
-            if s in passed_strings:
-                continue
-
-            include_line = get_include_model(s)
-
-            # check if adding this line would exceed max size
-            if len(builder) + len(include_line) <= self.MAX_SPLIT_SIZE:
-                builder += include_line
-                passed_strings.add(s)
-            else:
-                # current builder is full, save it and start a new one
-                self.make_precache_sub_list_file(f"precache_{self.builder_index}.qc", builder)
-                self.builder_index += 1
-                builder = get_precache_string_builder(self.builder_index)
-
-            # check if all strings have been processed
-            if len(strings) == len(passed_strings):
-                # save the last builder
-                self.make_precache_sub_list_file(f"precache_{self.builder_index}.qc", builder)
-                self.builder_index += 1
-                self.total_compiles = self.builder_index + 1
-                break
+        for builder in builders:
+            self.make_precache_sub_list_file(f"precache_{self.builder_index}.qc", builder)
+            self.builder_index += 1
 
     def make_precache_sub_list_file(self, filename: str, data: str) -> bool:
         # create a QC file and compile it with StudioMDL
@@ -228,11 +222,18 @@ class QuickPrecache:
             except Exception:
                 log.exception(f"Error removing temporary file {temp_file}")
 
-    def run(self, auto: bool = False, list_file: str = "", flush: bool = False) -> bool:
+    def run(
+        self,
+        auto: bool = False,
+        list_file: str = "",
+        flush: bool = False,
+        model_list: Set[str] | None = None,
+        flush_existing: bool = True,
+    ) -> bool:
         # main process
         try:
             # step 1: flush old files
-            files_removed = self.flush_files()
+            files_removed = self.flush_files() if flush_existing or flush else 0
 
             if flush:
                 log.info("Flush completed. Exiting as requested.")
@@ -247,7 +248,9 @@ class QuickPrecache:
             check_root_lod(self.game_path)
 
             # step 3: get the model list
-            if auto:
+            if model_list is not None:
+                self.model_list = set(model_list)
+            elif auto:
                 log.info("Auto-scanning for models...")
                 self.model_list = make_precache_list(self.game_path)
 

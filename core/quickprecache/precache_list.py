@@ -8,6 +8,8 @@ from core.constants import QUICKPRECACHE_FILE_SUFFIXES, QUICKPRECACHE_MODEL_LIST
 
 log = logging.getLogger()
 
+QUICKPRECACHE_OUTPUT_NAMES = {"_quickprecache.vpk", "quickprecache.vpk"}
+
 
 def make_precache_list(game_path: str) -> Set[str]:
     # get list of files to precache from custom
@@ -18,7 +20,11 @@ def make_precache_list(game_path: str) -> Set[str]:
         for file in custom_folder.iterdir():
             if file.is_dir() and "disabled" not in file.name:
                 model_list.update(manage_folder(file))
-            elif file.is_file() and file.name.endswith(".vpk"):
+            elif (
+                file.is_file()
+                and file.name.endswith(".vpk")
+                and file.name.lower() not in QUICKPRECACHE_OUTPUT_NAMES
+            ):
                 model_list.update(manage_vpk(file))
 
     # filter out cosmetics and other non-gameplay models

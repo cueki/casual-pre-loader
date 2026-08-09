@@ -49,7 +49,7 @@ class TestVPKSafety:
 
         original_size = temp_vpk_file.stat().st_size
 
-        with patch.object(VPKFile, 'get_file_entry') as mock_get_entry:
+        with patch.object(VPKFile, '_get_file_entry') as mock_get_entry:
             # mock entry with specific size
             mock_entry = Mock()
             mock_entry.archive_index = 0x7fff  # dir vpk
@@ -108,7 +108,7 @@ class TestVPKSafety:
     def test_atomic_vpk_operations(self, temp_vpk_file, sample_pcf_data):
         original_content = temp_vpk_file.read_bytes()
 
-        with patch.object(VPKFile, 'get_file_entry') as mock_get_entry:
+        with patch.object(VPKFile, '_get_file_entry') as mock_get_entry:
             mock_entry = Mock()
             mock_entry.archive_index = 0x7fff
             mock_entry.entry_offset = len(original_content)

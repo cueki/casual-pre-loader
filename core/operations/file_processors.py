@@ -151,12 +151,16 @@ def get_from_file(file_path: Path):
         return 0
 
 
-def get_from_custom_dir(custom_dir: Path):
+def get_from_custom_dir(custom_dir: Path, skip_paths: set[str] | None = None):
     if not custom_dir.exists():
         return 0
 
+    skip_paths = skip_paths or set()
+
     # process VPK files
     for vpk_file in custom_dir.glob("*.vpk"):
+        if vpk_file.relative_to(custom_dir).as_posix() in skip_paths:
+            continue
         get_from_vpk(vpk_file)
 
     target_paths = [
@@ -173,5 +177,9 @@ def get_from_custom_dir(custom_dir: Path):
             for file_path in directory.glob("**/*"):
                 if file_path.is_file():
                     rel_path = str(file_path.relative_to(directory)).replace('\\', '/')
-                    if any(rel_path.startswith(target) for target in target_paths):
+                    custom_rel_path = file_path.relative_to(custom_dir).as_posix()
+                    if (
+                        custom_rel_path not in skip_paths
+                        and any(rel_path.startswith(target) for target in target_paths)
+                    ):
                         get_from_file(file_path)

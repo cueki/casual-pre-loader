@@ -39,7 +39,7 @@ class InstallController(QObject):
     def _on_progress(self, progress: int, message: str):
         self.progress_update.emit(progress, message)
 
-    def _run_install(self, install_path, selected_addons, mod_drop_zone, game_target="Team Fortress 2"):
+    def _run_install(self, install_path, selected_addons, particle_selections, game_target="Team Fortress 2"):
         try:
             disable_paint_colors = False
             show_console = True
@@ -51,22 +51,21 @@ class InstallController(QObject):
                 fix_mdl_paths = self.settings_manager.get_fix_mdl_paths()
                 skip_quickprecache = self.settings_manager.get_skip_quickprecache()
 
-            apply_particles = None
-            if mod_drop_zone:
-                apply_particles = mod_drop_zone.apply_particle_selections
-
-            self.service.install(
+            installed = self.service.install(
                 tf_path=install_path,
                 selected_addons=selected_addons,
                 on_progress=self._on_progress,
-                apply_particle_selections=apply_particles,
                 disable_paint_colors=disable_paint_colors,
                 show_console_on_startup=show_console,
                 fix_mdl_paths=fix_mdl_paths,
                 skip_quickprecache=skip_quickprecache,
                 game_target=game_target,
+                particle_selections=particle_selections,
             )
-            self.operation_success.emit("Mods installed successfully!")
+            if installed:
+                self.operation_success.emit("Mods installed successfully!")
+            else:
+                self.operation_success.emit("Mods are already up to date!")
             self._on_progress(0, "Installation complete")
 
         except Exception as e:
@@ -94,6 +93,9 @@ class InstallController(QObject):
 
     def install(self, selected_addons: list[str], mod_drop_zone=None, target_path=None, game_target="Team Fortress 2"):
         install_path = target_path if target_path else self.tf_path
+        particle_selections = None
+        if mod_drop_zone:
+            particle_selections = mod_drop_zone.conflict_matrix.get_selected_particles()
 
         is_valid = validate_game_directory(install_path)
 
@@ -105,7 +107,7 @@ class InstallController(QObject):
         self.processing = True
         thread = threading.Thread(
             target=self._run_install,
-            args=(install_path, selected_addons, mod_drop_zone, game_target),
+            args=(install_path, selected_addons, particle_selections, game_target),
             daemon=True
         )
         thread.start()
