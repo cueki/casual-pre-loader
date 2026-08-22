@@ -675,7 +675,7 @@ class ParticleManagerGUI(QMainWindow):
             msg_box.setText("Installation completed successfully!\n\n"
                             "IMPORTANT: You must add the following to your game's launch options:\n\n"
                             "+exec w/config.cfg\n\n"
-                            "This ensures the preloader works correctly with your game.")
+                            "This ensures the preloader works correctly with your game.\n")
             msg_box.setIcon(QMessageBox.Icon.Information)
 
             dont_show_checkbox = QCheckBox("Don't show this popup again")
@@ -684,6 +684,16 @@ class ParticleManagerGUI(QMainWindow):
 
             if dont_show_checkbox.isChecked():
                 self.settings.skip_launch_options_popup = True
+
+    def show_launch_options_cleanup_popup(self):
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle("Restore Complete - Launch Options Cleanup")
+        msg_box.setText("Game files restored successfully!\n\n"
+                        "IMPORTANT: You should now remove the following from your game's launch options:\n\n"
+                        "+exec w/config.cfg\n\n"
+                        "The preloader config no longer exists, so this option does nothing.")
+        msg_box.setIcon(QMessageBox.Icon.Information)
+        msg_box.exec()
 
     def rescan_addon_contents(self):
         thread = threading.Thread(
@@ -778,9 +788,12 @@ class ParticleManagerGUI(QMainWindow):
     def show_error(self, message):
         show_error(self, message)
 
-    def show_success(self, message):
+    def show_success(self, message, operation="install"):
         show_success(self, message)
-        self.show_launch_options_popup()
+        if operation == "uninstall":
+            self.show_launch_options_cleanup_popup()
+        else:
+            self.show_launch_options_popup()
 
     def delete_selected_addons(self):
         selected_items = self.addons_list.selectedItems()
