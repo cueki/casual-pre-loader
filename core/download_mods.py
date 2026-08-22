@@ -1,6 +1,8 @@
 import json
 import logging
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
+from datetime import datetime, timedelta, timezone
+from typing import Any
 
 from packaging.version import Version
 
@@ -11,7 +13,11 @@ from core.util.repo import Update
 from core.util.repo.github_api import get_releases_with_asset
 from core.util.zip import extract
 
-log = logging.getLogger()
+
+def save_modsinfo(modsinfo: Mapping[str, Any]) -> None:
+    config.modsinfo_file.parent.mkdir(parents=True, exist_ok=True)
+    with config.modsinfo_file.open('w') as fd:
+        json.dump(modsinfo, fd)
 
 
 def check_mods() -> Update | None:
@@ -38,27 +44,39 @@ def check_mods() -> Update | None:
     # - `casual-preloader-light.zip`
     # - There was also a time where the mods were kept in a zip file checked into the VCS...yeah, ~80 MB...per revision...
 
-    modsinfo = None
+    modsinfo: dict[str, Any] = {}
     try:
         with config.modsinfo_file.open('r') as fd:
             modsinfo = json.load(fd)
     except FileNotFoundError:
         pass
     except json.JSONDecodeError:
-        log.exception(f'Could not parse {config.modsinfo_file}') # ignore this error and act as if the file didn't exist at all
+        logging.exception(f'Could not parse {config.modsinfo_file}') # ignore this error and act as if the file didn't exist at all
 
-    for update in get_releases_with_asset(REMOTE_REPO, 'mods.zip'):
+    current_time = datetime.now(timezone.utc)
+
+    if modsinfo and modsinfo.get('last_checked') is not None:
+        last_checked = datetime.fromtimestamp(modsinfo['last_checked'], timezone.utc)
+        interval = timedelta(minutes=5)
+        if last_checked  > current_time - interval:
+            logging.info(f'less than {interval} since we last checked for a new release of mods ({last_checked.astimezone()}), skipping...')
+            return
+
+    update = next(iter(get_releases_with_asset(REMOTE_REPO, 'mods.zip')))
+    try:
         if modsinfo:
-            if update.asset.digest == modsinfo["digest"]:
-                log.info(f'We already have the latest release of mods ({update.version})')
+            if update.version > Version(modsinfo['tag']):
+                logging.info(f'A new release of mods is available ({update.version})')
+            elif update.version == Version(modsinfo['tag']) and update.asset.digest != modsinfo['digest']:
+                logging.info(f'We already have the latest release of mods ({update.version}), but the remote file differs')
+            else:
+                logging.info(f'We already have the latest release of mods ({modsinfo['tag']})') # NOTE: also runs if local version is newer than remote
                 return
 
-            if not update.version > Version(modsinfo["tag"]):
-                log.info(f"We already have the latest release of mods ({update.version}), but the remote file differs")
-        else:
-            log.info(f'A new release of mods is available ({update.version})')
-
         return update
+    finally:
+        modsinfo['last_checked'] = int(current_time.timestamp())
+        save_modsinfo(modsinfo)
 
 
 def download_mods(
@@ -96,9 +114,13 @@ def download_mods(
     try:
         extract(archive_path, config.mods_dir, 1, False)
 
-        config.modsinfo_file.parent.mkdir(parents=True, exist_ok=True)
-        with config.modsinfo_file.open('w') as fd:
-            json.dump({'tag': update.release.tag_name, 'digest': update.asset.digest}, fd)
+        save_modsinfo(
+            {
+                'tag': update.release.tag_name,
+                'digest': update.asset.digest,
+                'last_checked': int(datetime.now(timezone.utc).timestamp()),
+            }
+        )
     finally:
         archive_path.unlink()
 

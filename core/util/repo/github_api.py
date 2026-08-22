@@ -4,6 +4,7 @@ from collections.abc import Generator, Iterable
 from operator import attrgetter
 
 from github import Github
+# from github.GithubRetry import GithubRetry
 from github.GitRelease import GitRelease
 from github.Repository import Repository
 from packaging.version import Version
@@ -11,23 +12,23 @@ from packaging.version import Version
 from core.util import all_predicates
 from core.util.repo import Update
 
-log = logging.getLogger()
-client = Github()
-
+# gh: Github = Github(retry=GithubRetry(max_rate_limit_wait=0))
+gh: Github = Github()
 
 def get_repo(repo: str) -> Repository:
-    """
+    '''
     Retrieve information about a github repository.
 
     Args:
-        repo: A github repository in the format of `"owner/repo"`.
+        repo: A github repository in the format of `owner/repo`.
 
     Returns:
         An object representing the repository.
-    """
+    '''
 
-    log.debug(f"Retrieving repository ({repo})")
-    return client.get_repo(repo)
+    logging.debug(f'Retrieving repository ({repo})')
+
+    return gh.get_repo(repo)
 
 
 def get_releases(
@@ -35,7 +36,7 @@ def get_releases(
     prerelease: bool | None = False,
     draft: bool | None = False,
 ) -> Iterable[GitRelease]:
-    """
+    '''
     Retrieve release information from a github repository.
 
     The `prerelease` and `draft` arguments take either a `bool` or `None`.
@@ -46,21 +47,21 @@ def get_releases(
     https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28
 
     Args:
-        repo: A github repository in the format of `"owner/repo"`.
+        repo: A github repository in the format of `owner/repo`.
         prerelease: Whether to filter releases based on if they are prereleases.
         draft: Whether to filter releases based on if they are drafts.
 
     Returns:
         An Iterable of `github.GitRelease.GitRelease` objects.
-    """
+    '''
 
     if not isinstance(repo, Repository):
         repo = get_repo(repo)
 
     _filter = []
 
-    is_draft = attrgetter("draft")
-    is_prerelease = attrgetter("prerelease")
+    is_draft = attrgetter('draft')
+    is_prerelease = attrgetter('prerelease')
 
     if prerelease:
         _filter.append(is_prerelease)
@@ -74,7 +75,7 @@ def get_releases(
 
     _filter = all_predicates(*_filter)
 
-    log.debug(f"Retrieving releases from https://github.com/{repo.full_name}")
+    logging.debug(f'Retrieving releases from https://github.com/{repo.full_name}')
     return filter(_filter, repo.get_releases())
 
 
@@ -84,7 +85,7 @@ def get_releases_with_asset(
     prerelease: bool | None = False,
     draft: bool | None = False,
 ) -> Generator[Update, None, None]:
-    """
+    '''
     Retrieve release information from a github repository, filtering out those without a certain asset.
 
     The `prerelease` and `draft` arguments take either a `bool` or `None`.
@@ -95,23 +96,25 @@ def get_releases_with_asset(
     https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28
 
     Args:
-        repo: A github repository in the format of `"owner/repo"`.
+        repo: A github repository in the format of `owner/repo`.
         asset: The name of an asset or a regular expression that may match one.
         prerelease: Whether to filter releases based on if they are prereleases.
         draft: Whether to filter releases based on if they are drafts.
 
     Returns:
         A Generator that yields `github.GitRelease.GitRelease` objects.
-    """
+    '''
 
     if isinstance(asset, re.Pattern):
+
         def test(name: str) -> bool:
             return asset.match(name) is not None
     else:
+
         def test(name: str) -> bool:
             return asset == name
 
-    for release in get_releases(repo, prerelease, draft):
+    for release in get_releases(repo, prerelease=prerelease, draft=draft):
         for _asset in release.assets:
             if test(_asset.name):
                 yield Update(_asset, release, Version(release.tag_name))
