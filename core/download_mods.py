@@ -14,12 +14,15 @@ from core.util.zip import extract
 log = logging.getLogger()
 
 
-def check_mods() -> Update | None:
+def check_mods(force: bool = False) -> Update | None:
     """
     Check if a new modpack update is available for download.
 
+    Args:
+        force: Return the most recent update even if it is already installed.
+
     Returns:
-        The most recent non-downloaded update if any.
+        The most recent non-downloaded update if any, or the most recent update when `force` is set.
     """
 
     # NOTE: How files are packaged
@@ -48,6 +51,10 @@ def check_mods() -> Update | None:
         log.exception(f'Could not parse {config.modsinfo_file}') # ignore this error and act as if the file didn't exist at all
 
     for update in get_releases_with_asset(REMOTE_REPO, 'mods.zip'):
+        if force:
+            log.info(f'Re-downloading the latest release of mods ({update.version}) by request')
+            return update
+
         if modsinfo:
             if update.asset.digest == modsinfo["digest"]:
                 log.info(f'We already have the latest release of mods ({update.version})')

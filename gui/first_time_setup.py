@@ -338,7 +338,9 @@ def mods_download_group(parent_dialog):
     return mods_group
 
 
-def download_cueki_mods(parent=None, button=None):
+def download_cueki_mods(parent=None, button=None, force=False):
+    # force re-downloads the modpack even when the installed digest already matches
+    retry_forced = False
     # disable button and show loading state
     original_text = ""
     if button:
@@ -359,7 +361,7 @@ def download_cueki_mods(parent=None, button=None):
         progress.show()
         QApplication.processEvents()
 
-        update = check_mods()
+        update = check_mods(force)
         if update is not None:
             download_mods(update, progress.setValue, progress.setLabelText, QApplication.processEvents, progress.wasCanceled)
         progress.close()
@@ -371,11 +373,23 @@ def download_cueki_mods(parent=None, button=None):
             elif parent.parent() and hasattr(parent.parent(), 'refresh_all'):
                 parent.parent().refresh_all()
 
-        QMessageBox.information(
-            parent,
-            'Download Complete',
-            update is not None and "cueki's mods have been successfully downloaded and installed!" or "cueki's mods are already installed and up to date!"
-        )
+        if update is not None:
+            QMessageBox.information(
+                parent,
+                'Download Complete',
+                "cueki's mods have been successfully downloaded and installed!"
+            )
+        else:
+            # offer a way past the check for anyone whose local copy is damaged or edited
+            msg_box = QMessageBox(parent)
+            msg_box.setIcon(QMessageBox.Icon.Information)
+            msg_box.setWindowTitle('Download Complete')
+            msg_box.setText("cueki's mods are already installed and up to date!")
+            ok_btn = msg_box.addButton(QMessageBox.StandardButton.Ok)
+            again_btn = msg_box.addButton("Download Again Anyway", QMessageBox.ButtonRole.ActionRole)
+            msg_box.setDefaultButton(ok_btn)
+            msg_box.exec()
+            retry_forced = msg_box.clickedButton() is again_btn
     except Exception as e:
         log.exception('Download Failed')
 
@@ -395,3 +409,7 @@ def download_cueki_mods(parent=None, button=None):
             button.setEnabled(True)
             button.setText(original_text)
             button.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
+
+    if retry_forced:
+        # a second "already up to date" is impossible
+        return download_cueki_mods(parent, button, force=True)
