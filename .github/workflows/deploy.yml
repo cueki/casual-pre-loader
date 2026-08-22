@@ -44,7 +44,7 @@ jobs:
 
       - name: Build documentation
         env:
-          REPO_URL: https://github.com/${{ github.repository }}/
+          REPO_URL: https://github.com/${{ github.repository }}
           SITE_URL: ${{ steps.configure-pages.outputs.base_url }}
         run: |
           cd doc
