@@ -6,6 +6,7 @@ from PyQt6.QtCore import QObject, Qt, pyqtSignal
 from PyQt6.QtWidgets import QFrame, QMessageBox, QProgressDialog, QVBoxLayout
 
 from core.services.importer import ImportService, normalize_vpk_paths
+from core.services.particles import delete_particle_mods, prune_selections
 from core.structure_validator import StructureValidator, ValidationResult
 from core.util.pcf_path_walk import apply_particle_selections, get_mod_particles
 from gui.conflict_matrix import ConflictMatrix
@@ -48,7 +49,34 @@ class ModDropZone(QFrame):
 
         # conflict matrix
         self.conflict_matrix = ConflictMatrix(self.settings)
+        self.conflict_matrix.mod_delete_requested.connect(self.delete_particle_mod)
         layout.addWidget(self.conflict_matrix)
+
+    def delete_particle_mod(self, mod_name):
+        if not confirm_action(
+            self,
+            "Confirm Deletion",
+            f"The following particle mod will be permanently deleted:\n\n• {mod_name}\n\nAre you sure?",
+        ):
+            return
+
+        success, message = delete_particle_mods([mod_name])
+        if not success:
+            log.error(message, stack_info=True)
+            self.show_error(message)
+            return
+
+        # drop selections that pointed at the deleted mod so they don't linger in settings
+        if self.settings:
+            self.settings.matrix_selections = prune_selections(
+                self.settings.matrix_selections, [mod_name]
+            )
+            self.settings.matrix_selections_simple = prune_selections(
+                self.settings.matrix_selections_simple, [mod_name]
+            )
+
+        self.update_matrix()
+        self.addon_updated.emit()
 
     def apply_particle_selections(self):
         selections = self.conflict_matrix.get_selected_particles()

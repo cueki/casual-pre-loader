@@ -56,6 +56,10 @@ from gui.theme import (
 
 log = logging.getLogger()
 
+# this is because the fallback for the glyph is a weird size depending on fonts...
+# very annoying! so we will force the size for the addon/particle/settings nav buttons
+NAV_ITEM_HEIGHT = 44
+
 
 class SidebarNav(QListWidget):
     def __init__(self, parent=None):
@@ -171,6 +175,7 @@ class ParticleManagerGUI(QMainWindow):
         for name, icon_char in [("Particles", "\u25C6"), ("Addons", "\u25C7"), ("Settings", "\u2699")]:
             leading = " " if platform == "win32" and name == "Settings" else "  "
             item = QListWidgetItem(f"{leading}{icon_char}  {name}")
+            item.setSizeHint(QSize(0, NAV_ITEM_HEIGHT))
             self.nav_list.addItem(item)
         self.nav_list.setCurrentRow(0)
         sidebar_layout.addWidget(self.nav_list)

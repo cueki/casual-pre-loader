@@ -1,14 +1,16 @@
 import logging
 import webbrowser
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QColor
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QAction, QColor
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
     QHBoxLayout,
     QHeaderView,
+    QMenu,
     QPushButton,
+    QStyle,
     QTableWidget,
     QTableWidgetItem,
     QWidget,
@@ -25,6 +27,8 @@ log = logging.getLogger()
 
 
 class ConflictMatrix(QTableWidget):
+    mod_delete_requested = pyqtSignal(str)
+
     def __init__(self, settings=None):
         super().__init__()
         self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
@@ -36,6 +40,8 @@ class ConflictMatrix(QTableWidget):
         self.mod_particles_cache = {}  # cache mod particle data
         self.all_particles_cache = []  # cache all particle files
         self.verticalHeader().sectionClicked.connect(self.on_mod_name_clicked)
+        self.verticalHeader().setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.verticalHeader().customContextMenuRequested.connect(self.show_mod_context_menu)
 
         # smooth scrolling
         self.setHorizontalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
@@ -47,13 +53,50 @@ class ConflictMatrix(QTableWidget):
         mod_name = self.verticalHeaderItem(index).text().split(" (")[0]
         self.open_mod_url(mod_name)
 
-    def open_mod_url(self, mod_name):
-        from core.util.data import mod_urls
+    def show_mod_context_menu(self, position):
+        header = self.verticalHeader()
+        row = header.logicalIndexAt(position)
+        if row < 0:
+            return
 
+        header_item = self.verticalHeaderItem(row)
+        if not header_item:
+            return
+
+        mod_name = header_item.text().split(" (")[0]
+
+        menu = QMenu(self)
+
+        # some particles are user added and have no known page, so only offer it when there is one
+        if self.get_mod_url(mod_name) is not None:
+            url_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogInfoView)
+            url_action = QAction(url_icon, "Open mod page", self)
+            url_action.triggered.connect(lambda: self.open_mod_url(mod_name))
+            menu.addAction(url_action)
+
+            menu.addSeparator()
+
+        delete_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_TrashIcon)
+        delete_action = QAction(delete_icon, "Delete", self)
+        delete_action.triggered.connect(lambda: self.mod_delete_requested.emit(mod_name))
+        menu.addAction(delete_action)
+
+        menu.exec(header.mapToGlobal(position))
+
+    def get_mod_url(self, mod_name):
+        try:
+            from core.util.data import mod_urls
+            return mod_urls.get(mod_name)
+        except Exception:
+            log.exception("Error loading mod URLs")
+            return None
+
+    def open_mod_url(self, mod_name):
         # open the URL for the mod in the default web browser
-        if mod_urls.get(mod_name) is not None:
+        url = self.get_mod_url(mod_name)
+        if url is not None:
             try:
-                webbrowser.open(mod_urls[mod_name])
+                webbrowser.open(url)
             except Exception:
                 log.exception(f"Error opening URL for {mod_name}")
 
