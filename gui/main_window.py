@@ -596,7 +596,8 @@ class ParticleManagerGUI(QMainWindow):
         try:
             selected_items = self.addons_list.selectedItems()
             if selected_items:
-                selected_item = selected_items[0]
+                current = self.addons_list.currentItem()
+                selected_item = current if current in selected_items else selected_items[0]
                 addon_name = selected_item.text().split(' [#')[0]
 
                 if addon_name in self.addon_manager.addons_file_paths:
@@ -796,6 +797,8 @@ class ParticleManagerGUI(QMainWindow):
             updated_load_order = [name for name in self.settings.addon_selections if name not in deleted_addon_names]
             self.settings.addon_selections = updated_load_order
             self.load_addons()
+            # re-collapse the addon details if we deleted the selected one by refreshing
+            self.on_addon_click()
         else:
             log.error(message, stack_info=True)
             self.show_error(message)

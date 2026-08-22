@@ -88,7 +88,7 @@ class AddonPanel(QWidget):
         available_layout.addLayout(header_row)
 
         self.addons_list = QListWidget()
-        self.addons_list.setSelectionMode(QListWidget.SelectionMode.SingleSelection)
+        self.addons_list.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
         self.addons_list.itemClicked.connect(self.on_selection_changed)
         self.addons_list.itemChanged.connect(self.on_checkbox_changed)
         self.addons_list.itemDoubleClicked.connect(self.on_double_click)
@@ -247,30 +247,70 @@ class AddonPanel(QWidget):
     def show_context_menu(self, position):
         item = self.addons_list.itemAt(position)
         if item and item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
-            # retrigger selection if stale
-            self.addons_list.setCurrentItem(item)
+            # right click needs to no longer 'select' something, which clears the multi-selection
+            if not item.isSelected():
+                self.addons_list.setCurrentItem(item)
             self.addon_selection_changed.emit()
+
+            selected = self.get_selected_addons()
 
             menu = QMenu(self)
 
-            edit_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogDetailedView)
-            edit_action = QAction(edit_icon, "Edit mod.json", self)
-            edit_action.triggered.connect(self.addon_description.open_editor)
-            menu.addAction(edit_action)
+            # hide this stuff if we are multi-selecting
+            if len(selected) <= 1:
+                edit_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogDetailedView)
+                edit_action = QAction(edit_icon, "Edit mod.json", self)
+                edit_action.triggered.connect(self.addon_description.open_editor)
+                menu.addAction(edit_action)
 
-            export_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_DialogSaveButton)
-            export_action = QAction(export_icon, "Export as VPK", self)
-            export_action.triggered.connect(self.addon_description.export_addon)
-            menu.addAction(export_action)
+                export_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_DialogSaveButton)
+                export_action = QAction(export_icon, "Export as VPK", self)
+                export_action.triggered.connect(self.addon_description.export_addon)
+                menu.addAction(export_action)
+
+                menu.addSeparator()
+
+            enable_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_DialogApplyButton)
+            enable_action = QAction(enable_icon, self._bulk_label("Enable", selected), self)
+            enable_action.triggered.connect(lambda: self.set_selected_check_state(Qt.CheckState.Checked))
+            menu.addAction(enable_action)
+
+            disable_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_DialogCancelButton)
+            disable_action = QAction(disable_icon, self._bulk_label("Disable", selected), self)
+            disable_action.triggered.connect(lambda: self.set_selected_check_state(Qt.CheckState.Unchecked))
+            menu.addAction(disable_action)
 
             menu.addSeparator()
 
             delete_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_TrashIcon)
-            delete_action = QAction(delete_icon, "Delete", self)
+            delete_action = QAction(delete_icon, self._bulk_label("Delete", selected), self)
             delete_action.triggered.connect(lambda: self.delete_button_clicked.emit())
             menu.addAction(delete_action)
 
             menu.exec(self.addons_list.mapToGlobal(position))
+
+    @staticmethod
+    def _bulk_label(verb, selected):
+        return f"{verb} all selected" if len(selected) > 1 else verb
+
+    def get_selected_addons(self):
+        # selected rows, skipping the group splitters (which aren't selectable anyway)
+        return [
+            item for item in self.addons_list.selectedItems()
+            if item.flags() & Qt.ItemFlag.ItemIsUserCheckable
+        ]
+
+    def set_selected_check_state(self, state):
+        # batched bulk check/uncheck
+        targets = [item for item in self.get_selected_addons() if item.checkState() != state]
+        if not targets:
+            return
+
+        self.addons_list.blockSignals(True)
+        for item in targets:
+            item.setCheckState(state)
+        self.addons_list.blockSignals(False)
+        self.on_checkbox_changed()
 
     def _filter_addons(self, text):
         for i in range(self.addons_list.count()):
