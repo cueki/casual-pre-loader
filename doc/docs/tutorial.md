@@ -75,6 +75,7 @@ These may be packaged differently depending on the distro.
 !!! note
     There is an additional optional dependency on `wine`. If it's installed, it is used to run the windows build of `studiomdl` in order to compile MDL files.  
     (This may be unnecessary in the future if [this PR](https://github.com/craftablescience/sourcepp/pull/85)) gets merged.
+    UPDATE: The aforementioned PR hwas been merged, but we still require python bindings to the relevant c++ code.
 
 You can then download and run the program by cloning the repo:
 ```sh
