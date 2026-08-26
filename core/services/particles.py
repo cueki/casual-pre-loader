@@ -105,7 +105,7 @@ def delete_particle_mods(mod_names: list[str]) -> tuple[bool, str]:
     for mod_name in mod_names:
         mod_path = config.particles_dir / mod_name
         if not mod_path.is_dir():
-            log.warning(f"Cannot delete particle mod {mod_name}: {mod_path} is not a directory")
+            log.warning(f"Cannot delete particle mod {mod_name}")
             errors.append(f"Could not find a particle mod folder for {mod_name}")
             continue
 
