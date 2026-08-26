@@ -111,8 +111,7 @@ class ModDropZone(QFrame):
 
         if not mod_particles:
             # clear the matrix if there are no mods
-            self.conflict_matrix.setRowCount(0)
-            self.conflict_matrix.setColumnCount(0)
+            self.conflict_matrix.clear_matrix()
             return
 
         mods = list(mod_particles.keys())

@@ -151,6 +151,13 @@ class ConflictMatrix(QTableWidget):
         selections = self._get_current_selections_dict()
         return selections
 
+    def clear_matrix(self):
+        # the caches are what set_simple_mode rebuilds from, so they have to go with the rows
+        self.mod_particles_cache = {}
+        self.all_particles_cache = []
+        self.setRowCount(0)
+        self.setColumnCount(0)
+
     def set_simple_mode(self, enabled):
         self.simple_mode = enabled
         # rebuild matrix with cached data
