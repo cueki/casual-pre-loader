@@ -103,11 +103,14 @@ def delete_particle_mods(mod_names: list[str]) -> tuple[bool, str]:
     errors = []
     for mod_name in mod_names:
         mod_path = config.particles_dir / mod_name
-        if mod_path.exists() and mod_path.is_dir():
-            try:
-                delete(mod_path)
-            except Exception as e:
-                errors.append(f"Failed to delete {mod_name}: {e!s}")
+        if not mod_path.is_dir():
+            errors.append(f"Could not find a particle mod folder for {mod_name}")
+            continue
+
+        try:
+            delete(mod_path)
+        except Exception as e:
+            errors.append(f"Failed to delete {mod_name}: {e!s}")
 
     if errors:
         return False, "\n".join(errors)
