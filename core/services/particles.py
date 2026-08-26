@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Mapping
 
 from core.config import config
 from core.constants import PARTICLE_GROUP_MAPPING
@@ -104,12 +105,15 @@ def delete_particle_mods(mod_names: list[str]) -> tuple[bool, str]:
     for mod_name in mod_names:
         mod_path = config.particles_dir / mod_name
         if not mod_path.is_dir():
+            log.warning(f"Cannot delete particle mod {mod_name}: {mod_path} is not a directory")
             errors.append(f"Could not find a particle mod folder for {mod_name}")
             continue
 
         try:
             delete(mod_path)
+            log.info(f"Deleted particle mod {mod_name}")
         except Exception as e:
+            log.exception(f"Failed to delete particle mod {mod_name}")
             errors.append(f"Failed to delete {mod_name}: {e!s}")
 
     if errors:
@@ -118,7 +122,7 @@ def delete_particle_mods(mod_names: list[str]) -> tuple[bool, str]:
     return True, "Selected particle mods have been deleted."
 
 
-def prune_selections(selections: dict[str, str], mod_names: list[str]) -> dict[str, str]:
+def prune_selections(selections: Mapping[str, str], mod_names: list[str]) -> dict[str, str]:
     # drop any particle selections pointing at mods that no longer exist
     removed = set(mod_names)
     return {particle: mod for particle, mod in selections.items() if mod not in removed}
