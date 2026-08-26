@@ -367,11 +367,16 @@ class ParticleManagerGUI(QMainWindow):
         )
         preloader_layout.addWidget(self.skip_launch_cleanup_popup_checkbox)
 
+        layout.addWidget(preloader_group)
+
+        advanced_group = QGroupBox("Advanced")
+        advanced_layout = QVBoxLayout(advanced_group)
+
         self.disable_paint_checkbox = QCheckBox("Disable paint colors on cosmetics")
         self.disable_paint_checkbox.stateChanged.connect(
             lambda: setattr(self.settings, 'disable_paint_colors', self.disable_paint_checkbox.isChecked())
         )
-        preloader_layout.addWidget(self.disable_paint_checkbox)
+        advanced_layout.addWidget(self.disable_paint_checkbox)
 
         self.fix_mdl_paths_checkbox = QCheckBox("Attempt to automatically fix broken models. Try disabling this first if something is broken!")
         self.fix_mdl_paths_checkbox.setToolTip(
@@ -381,15 +386,15 @@ class ParticleManagerGUI(QMainWindow):
         self.fix_mdl_paths_checkbox.stateChanged.connect(
             lambda: setattr(self.settings, 'fix_mdl_paths', self.fix_mdl_paths_checkbox.isChecked())
         )
-        preloader_layout.addWidget(self.fix_mdl_paths_checkbox)
+        advanced_layout.addWidget(self.fix_mdl_paths_checkbox)
 
         self.skip_quickprecache_checkbox = QCheckBox("Skip QuickPrecache (advanced users only! May cause model unloading for map props!)")
         self.skip_quickprecache_checkbox.stateChanged.connect(
             lambda: setattr(self.settings, 'skip_quickprecache', self.skip_quickprecache_checkbox.isChecked())
         )
-        preloader_layout.addWidget(self.skip_quickprecache_checkbox)
+        advanced_layout.addWidget(self.skip_quickprecache_checkbox)
 
-        layout.addWidget(preloader_group)
+        layout.addWidget(advanced_group)
 
         # downloads group
         downloads_group = QGroupBox("Recommended Mods")
