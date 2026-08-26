@@ -39,7 +39,6 @@ class ConflictMatrix(QTableWidget):
         self.simple_mode = False  # track whether we're in simple or advanced mode
         self.mod_particles_cache = {}  # cache mod particle data
         self.all_particles_cache = []  # cache all particle files
-        self.verticalHeader().sectionClicked.connect(self.on_mod_name_clicked)
         self.verticalHeader().setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.verticalHeader().customContextMenuRequested.connect(self.show_mod_context_menu)
 
@@ -48,10 +47,6 @@ class ConflictMatrix(QTableWidget):
         h_scrollbar = self.horizontalScrollBar()
         new_pixel_step = 7
         h_scrollbar.setSingleStep(new_pixel_step)
-
-    def on_mod_name_clicked(self, index):
-        mod_name = self.verticalHeaderItem(index).text().split(" (")[0]
-        self.open_mod_url(mod_name)
 
     def show_mod_context_menu(self, position):
         header = self.verticalHeader()
