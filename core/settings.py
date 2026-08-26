@@ -74,6 +74,7 @@ class Settings:
     details_collapsed: bool = False
     done_initial_setup: bool = False
     profiles: Mapping[str, Profile] = field(default_factory=dict)
+    skip_launch_options_cleanup_popup: bool = False
     skip_launch_options_popup: bool = False
     skipped_update_version: Version | None = None
     suppress_update_notifications: bool = False
