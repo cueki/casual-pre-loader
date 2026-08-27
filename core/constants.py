@@ -243,6 +243,13 @@ class Sourcemods(Sourcemod, Enum):
     TF2GR = 3826520, 'Team Fortress 2: Gold Rush'
 
 
+class InstallOperation(Enum):
+    """Enum defining which operation an install controller just completed successfully."""
+
+    INSTALL = auto()
+    UNINSTALL = auto()
+
+
 # directories and files to include in releases
 # used by build script and auto-updater to avoid unpacking python binaries on linux
 BUILD_DIRS = [

@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PyQt6.QtCore import QObject, pyqtSignal
 
-from core.constants import Sourcemods
+from core.constants import InstallOperation, Sourcemods
 from core.services.install import InstallService
 from core.util.sourcemod import validate_game_directory
 
@@ -14,7 +14,7 @@ log = logging.getLogger()
 class InstallController(QObject):
     progress_update = pyqtSignal(int, str)
     operation_error = pyqtSignal(str)
-    operation_success = pyqtSignal(str, str)
+    operation_success = pyqtSignal(str, object)
     operation_finished = pyqtSignal()
 
     def __init__(self, settings=None):
@@ -68,7 +68,7 @@ class InstallController(QObject):
                 skip_quickprecache=skip_quickprecache,
                 sourcemod=sourcemod,
             )
-            self.operation_success.emit("Mods installed successfully!", "install")
+            self.operation_success.emit("Mods installed successfully!", InstallOperation.INSTALL)
             self._on_progress(0, "Installation complete")
 
         except Exception as e:
@@ -117,7 +117,7 @@ class InstallController(QObject):
                 on_progress=self._on_progress,
                 sourcemod=sourcemod,
             )
-            self.operation_success.emit("Mods uninstalled successfully!", "uninstall")
+            self.operation_success.emit("Mods uninstalled successfully!", InstallOperation.UNINSTALL)
         except Exception as e:
             self.operation_error.emit(f"An error occurred while uninstalling: {e!s}")
         finally:

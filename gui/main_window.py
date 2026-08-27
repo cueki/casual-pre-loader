@@ -25,7 +25,7 @@ from PyQt6.QtWidgets import (
 )
 
 from core.config import config
-from core.constants import Sourcemods
+from core.constants import InstallOperation, Sourcemods
 from core.particle_splits import migrate_old_particle_files
 from core.services.conflicts import scan_for_legacy_conflicts
 from core.settings import addon_metadata, settings
@@ -811,9 +811,9 @@ class ParticleManagerGUI(QMainWindow):
     def show_error(self, message):
         show_error(self, message)
 
-    def show_success(self, message, operation):
+    def show_success(self, message, operation: InstallOperation):
         show_success(self, message)
-        if operation == "uninstall":
+        if operation is InstallOperation.UNINSTALL:
             self.show_launch_options_cleanup_popup()
         else:
             self.show_launch_options_popup()
