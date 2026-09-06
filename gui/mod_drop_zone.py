@@ -61,23 +61,18 @@ class ModDropZone(QFrame):
         ):
             return
 
-        success, message = delete_particle_mods([mod_name])
-        if not success:
-            log.error(message, stack_info=True)
-            self.show_error(message)
-            return
-
-        # drop selections that pointed at the deleted mod so they don't linger in settings
-        if self.settings:
-            self.settings.matrix_selections = prune_selections(
-                self.settings.matrix_selections, [mod_name]
-            )
-            self.settings.matrix_selections_simple = prune_selections(
-                self.settings.matrix_selections_simple, [mod_name]
-            )
-
-        self.update_matrix()
-        self.addon_updated.emit()
+        try:
+            delete_particle_mods([mod_name])
+        except ExceptionGroup as eg:
+            errmsg = '\n'.join((f'{eg!s}:', *(e.__notes__.pop() for e in eg.exceptions)))
+            log.exception('Errors when deleting particle mods')
+            self.show_error(errmsg)
+        else:
+            if self.settings: # drop selections that pointed at the deleted mod so they don't linger in settings
+                self.settings.matrix_selections = prune_selections(self.settings.matrix_selections, [mod_name])
+                self.settings.matrix_selections_simple = prune_selections(self.settings.matrix_selections_simple, [mod_name])
+            self.update_matrix()
+            self.addon_updated.emit()
 
     def apply_particle_selections(self):
         selections = self.conflict_matrix.get_selected_particles()
