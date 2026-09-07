@@ -118,14 +118,14 @@ class ModDropZone(QFrame):
             self.progress_dialog.setValue(value)
             self.progress_dialog.setLabelText(message)
 
+    def _show_message(self, icon, title, message):
+        show_message(self, icon, title, message)
+
     def show_error(self, message):
         self._show_message(QMessageBox.Icon.Critical, "Error", message)
 
     def show_success(self, message):
         self._show_message(QMessageBox.Icon.Information, "Success", message)
-
-    def _show_message(self, icon, title, message):
-        show_message(self, icon, title, message)
 
     def on_process_finished(self):
         if self.progress_dialog:
@@ -134,27 +134,21 @@ class ModDropZone(QFrame):
         self.rescan_callback()
         self.processing = False
 
-    def process_dropped_items(self, dropped_paths):
-        # just a wrapper for the services
-        successful_items, failed_items = self.service.process_dropped_items(
-            dropped_paths,
-            progress_callback=self.worker.progress.emit
-        )
+    def process_dropped_items(self, dropped_paths: list[Path]) -> None:
+        try:
+            self.service.process_dropped_items(dropped_paths, progress_callback=self.worker.progress.emit)
+        except ExceptionGroup as eg:
+            for path in (Path(e.__notes__.pop()) for e in eg.exceptions):
+                dropped_paths.remove(path)
 
-        # emit errors for failed items
-        for item_name, error_msg in failed_items:
-            self.worker.error.emit(error_msg)
-
-        # emit success message and update addon list
-        if successful_items:
-            self.addon_updated.emit()
-            if len(successful_items) == 1:
-                self.worker.success.emit(f"Successfully processed {successful_items[0]}")
-            else:
-                items_text = bullet_list(successful_items, noun="items", bullet="")
-                self.worker.success.emit(f"Successfully processed {len(successful_items)} items:\n{items_text}")
-
-        self.worker.finished.emit()
+            errmsg = '\n'.join((f'{eg!s}:', *(e.__notes__.pop() for e in eg.exceptions)))
+            log.exception('Errors when importing mods')
+            self.worker.error.emit(errmsg)
+        finally:
+            if dropped_paths:
+                self.addon_updated.emit()
+                self.worker.success.emit('\n'.join((f'Successfully processed {len(dropped_paths)} items:', *map(str, dropped_paths))))
+            self.worker.finished.emit()
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
