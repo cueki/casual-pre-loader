@@ -127,7 +127,7 @@ class Gui:
     """Specify which profile to activate."""
 
     def __call__(self, config: Config) -> int:
-        from main import gui
+        from gui.gui import gui
 
         _log_start(config)
         _perform_migrations(config)
