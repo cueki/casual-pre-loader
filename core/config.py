@@ -162,7 +162,7 @@ class PrintSourcemods:
 @command
 @dataclass
 class Reset:
-    """Reset settings to defaults."""
+    '''Reset settings to defaults.'''
     def __call__(self, config: Config) -> int:
         _perform_migrations(config)
 
@@ -198,9 +198,9 @@ subcommand: _Subcommand
 
 @cache
 def _get_config() -> None:
-    """
+    '''
     Parses CLI args and globally sets the relevant `Config` instance and subcommand, only runs once per execution without being manually called.
-    """
+    '''
 
     global Config, FolderConfig, config, subcommand
 
@@ -226,7 +226,7 @@ def _get_config() -> None:
             f'{PROGRAM_NAME} {VERSION}',
             short='-V',
             long=True,
-            help="Print the version string and exit.",
+            help='Print the version string and exit.',
             group=Group(1, 'Help', section=2),
         ),
     )
