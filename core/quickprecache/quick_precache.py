@@ -9,7 +9,7 @@ from core.quickprecache.precache_list import make_precache_list
 from core.quickprecache.r_rootlod import check_root_lod
 from core.quickprecache.studio_mdl import StudioMDL
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def handle_string(input_str: str) -> str:

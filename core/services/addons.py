@@ -7,7 +7,7 @@ from core.settings import addon_metadata
 from core.util.file import delete
 from core.util.text import bullet_list
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class AddonService:

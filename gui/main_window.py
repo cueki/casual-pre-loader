@@ -55,7 +55,7 @@ from gui.theme import (
     SIDEBAR_NAV_STYLE,
 )
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 # this is because the fallback for the glyph is a weird size depending on fonts...
 # very annoying! so we will force the size for the addon/particle/settings nav buttons

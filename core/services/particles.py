@@ -6,7 +6,7 @@ from core.constants import PARTICLE_GROUP_MAPPING
 from core.util.file import delete
 from core.util.text import bullet_list
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def expand_group_selections(

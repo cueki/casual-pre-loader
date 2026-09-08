@@ -10,7 +10,7 @@ from core.operations.pcf_rebuild import load_particle_system_map
 from core.util.file import copytree, delete, modeset_add, move
 from core.util.text import inline_list
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def prepare_working_copy() -> str | None:

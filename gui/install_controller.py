@@ -8,7 +8,7 @@ from core.constants import InstallOperation, Sourcemods
 from core.services.install import InstallService
 from core.util.sourcemod import validate_game_directory
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class InstallController(QObject):

@@ -14,7 +14,7 @@ from core.operations.pcf_rebuild import (
     rebuild_particle_files,
 )
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def sequential_merge(pcf_files: list[PCFFile]):

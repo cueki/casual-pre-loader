@@ -18,7 +18,7 @@ from core.auto_updater import perform_updates
 from core.settings import settings
 from gui.theme import SUCCESS
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class UpdateWorker(QThread):

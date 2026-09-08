@@ -42,7 +42,7 @@ from core.quickprecache.quick_precache import QuickPrecache
 from core.util.file import check_writable, copyfile, copytree, delete, move
 from core.util.vpk import get_vpk_name
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 ProgressCallback = Callable[[int, str], None]
 

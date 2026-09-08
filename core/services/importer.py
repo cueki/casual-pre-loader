@@ -12,7 +12,7 @@ from core.structure_validator import StructureValidator
 from core.util.file import copytree, delete, move
 from core.util.zip import extract
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def normalize_vpk_paths(vpk_paths: list[Path]) -> list[Path]:

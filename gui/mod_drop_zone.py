@@ -13,7 +13,7 @@ from core.util.text import bullet_list
 from gui.conflict_matrix import ConflictMatrix
 from gui.dialogs import confirm_action, show_message
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class VPKProcessWorker(QObject):

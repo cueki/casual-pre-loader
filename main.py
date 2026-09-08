@@ -7,7 +7,7 @@ from rich.traceback import install
 
 
 def main() -> None:
-    logger = logging.getLogger()
+    logger = logging.getLogger() # explicitly get the root logger
 
     handler = RichHandler(rich_tracebacks=True)
     handler.setFormatter(logging.Formatter(datefmt='[%Y-%m-%d %H:%M:%S]'))

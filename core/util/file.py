@@ -5,7 +5,7 @@ import stat
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 #
 # TODO: replace shutil with pathlib (except for rmtree) once we hit python 3.14 minimum version
