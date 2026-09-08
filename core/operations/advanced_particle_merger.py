@@ -70,13 +70,9 @@ def save_split_files(merged_pcf: PCFFile, out_dir: Path, split_filters: dict) ->
 
 class AdvancedParticleMerger:
     def __init__(self, progress_callback=None):
-        self.progress_callback = progress_callback
+        self.progress_callback = progress_callback # TODO: ressurect this dead code
         self.particle_map = load_particle_system_map(config.data_dir / "particle_system_map.json")
         self.vpk_groups = defaultdict(lambda: defaultdict(list))  # {vpk_name: {particle_file: [paths]}}
-
-    def update_progress(self, progress, message: str):
-        if self.progress_callback:
-            self.progress_callback(progress, message)
 
     def preprocess_vpk(self, vpk_path: Path) -> None:
         vpk_folder_name = vpk_path.stem
