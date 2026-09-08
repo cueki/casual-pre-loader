@@ -3,7 +3,7 @@ import logging
 from core.constants import PARTICLE_SPLITS
 from core.config import config
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def migrate_old_particle_files():

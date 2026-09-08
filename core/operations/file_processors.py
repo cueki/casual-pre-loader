@@ -5,7 +5,7 @@ from valve_parsers import PCFFile, VPKFile
 
 from core.handlers.pcf_handler import get_parent_elements
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def pcf_empty_root_processor():

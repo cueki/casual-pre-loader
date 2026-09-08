@@ -7,8 +7,9 @@ from core.config import config
 from core.quickprecache.precache_list import make_precache_list
 from core.quickprecache.r_rootlod import check_root_lod
 from core.quickprecache.studio_mdl import StudioMDL
+from core.util import NoopProgressCallback, ProgressCallback
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def handle_string(input_str: str) -> str:
@@ -73,7 +74,7 @@ class QuickPrecache:
     # maximum size for QC file content (in chars)
     MAX_SPLIT_SIZE = 2048
 
-    def __init__(self, game_path: Path, debug: bool = False, progress_callback=None):
+    def __init__(self, game_path: Path, debug: bool = False, progress_callback: ProgressCallback = NoopProgressCallback):
         # debug keeps temp files
         self.game_path: Path = game_path
         self.debug = debug
@@ -87,7 +88,7 @@ class QuickPrecache:
         self.total_compiles = 0
 
     def update_progress(self, message: str):
-        if self.progress_callback and self.total_compiles > 0:
+        if self.total_compiles > 0:
             progress_range = 10
             start_progress = 85
             progress_percent = (self.compiled_count / self.total_compiles) * progress_range

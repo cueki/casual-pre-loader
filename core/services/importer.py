@@ -1,7 +1,6 @@
 import json
 import logging
 import tempfile
-from collections.abc import Callable
 from pathlib import Path
 
 from valve_parsers import VPKFile
@@ -9,17 +8,24 @@ from valve_parsers import VPKFile
 from core.config import config
 from core.operations.advanced_particle_merger import AdvancedParticleMerger
 from core.structure_validator import StructureValidator
+from core.util import NoopProgressCallback, ProgressCallback
 from core.util.file import copy, delete, move
 from core.util.zip import extract
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def normalize_vpk_paths(vpk_paths: list[Path]) -> list[Path]:
-    """
+    '''
     Normalize and deduplicate VPK paths.
     Multi-part VPKs (mod_000.vpk, mod_001.vpk, mod_dir.vpk) all resolve to mod_dir.vpk.
-    """
+
+    Args:
+        vpk_paths: A list of paths to nromalize
+
+    Return:
+        A  list of normalized paths in the same order they were provided
+    '''
 
     normalized = {}
     for vpk_path in vpk_paths:
@@ -32,6 +38,10 @@ def normalize_vpk_paths(vpk_paths: list[Path]) -> list[Path]:
     return list(normalized.values())
 
 
+class UnsupportedFileTypeError(Exception):
+    pass
+
+
 class ImportService:
     # mod extraction logic
     def __init__(self):
@@ -40,121 +50,111 @@ class ImportService:
     def process_folder(
         self,
         folder_path: Path,
-        override_name: str | None = None,
-        progress_callback: Callable[[int, str], None] | None = None
-    ) -> tuple[bool, str]:
-        # attempt to process a folder
-        folder_name = override_name if override_name else folder_path.name
+        folder_name: str | None = None,
+        progress_callback: ProgressCallback = NoopProgressCallback
+    ) -> None:
+        '''
+        Process a folder containing a mod
+
+        Args:
+            folder_path: Path to the folder to be processed
+            folder_name: Optional new name to use for the resulting processed folder
+            progress_callback: Optional callback to pass a progress metric and message to
+        '''
+
+        folder_name = folder_name or folder_path.name
         validation_result = self.validator.validate_folder(folder_path)
 
         try:
-            # determine if it has particles
-            has_particles = any((folder_path / "particles").glob("*.pcf"))
+            has_particles = any((folder_path / 'particles').glob('*.pcf'))
+            destination = (config.particles_dir if has_particles else config.addons_dir) / folder_name
+
+            delete(destination, not_exist_ok=True)
+            copy(folder_path, destination)
 
             if has_particles:
-                destination = config.particles_dir / folder_name
-                delete(destination, not_exist_ok=True)
-                copy(folder_path, destination)
-
-                # process with AdvancedParticleMerger
                 particle_merger = AdvancedParticleMerger(
-                    progress_callback=lambda p, m: progress_callback(50 + int(p / 2), m) if progress_callback else None
+                    progress_callback=lambda p, m: progress_callback(50 + int(p / 2), m)
                 )
                 particle_merger.preprocess_vpk(destination)
             else:
-                # it is an addon
-                destination = config.addons_dir / folder_name
-                delete(destination, not_exist_ok=True)
-                copy(folder_path, destination)
-
-                # create mod.json if it doesn't exist
-                mod_json_path = destination / "mod.json"
-                if not mod_json_path.exists():
+                mod_json_path = destination / 'mod.json'
+                if not mod_json_path.is_file():
                     default_mod_info = {
-                        "addon_name": folder_name,
-                        "type": validation_result.type_detected.title(),
-                        "description": f"Content from folder: {folder_name}",
-                        "contents": ["Custom content"]
+                        'addon_name': folder_name,
+                        'type': validation_result.type_detected.title(),
+                        'description': f'Content from folder: {folder_name}',
+                        'contents': ['Custom content']
                     }
-                    with open(mod_json_path, 'w') as f:
-                        json.dump(default_mod_info, f, indent=2)
+                    with mod_json_path.open('w') as fd:
+                        json.dump(default_mod_info, fd, indent=4)
+        except Exception:
+            log.error(f'Error processing folder {folder_name}')
+            raise
 
-            return True, f"Successfully processed folder {folder_name}"
-
-        except Exception as e:
-            log.exception(f"Error processing folder {folder_name}")
-            return False, f"Error processing folder {folder_name}: {e!s}"
+        log.info(f'Successfully processed folder {folder_name}')
 
     def process_zip_file(
         self,
         zip_path: Path,
-        progress_callback: Callable[[int, str], None] | None = None
-    ) -> tuple[bool, str]:
-        # attempt to process and extract a zip file
+        progress_callback: ProgressCallback = NoopProgressCallback
+    ) -> None:
+        '''
+        Process and extract a zip file
+
+        Args:
+            zip_path: The path to the zip file to extract
+            progress_callback: Optional callback to pass a progress metric and message to
+        '''
+
         zip_name = zip_path.stem
 
-        try:
-            # extract to temporary directory
-            with tempfile.TemporaryDirectory() as temp_dir:
-                temp_path = Path(temp_dir)
+        with tempfile.TemporaryDirectory() as temp_dir: # extract to temporary directory
+            temp_path = Path(temp_dir)
 
-                extract(zip_path, temp_path)
+            extract(zip_path, temp_path)
 
-                # analyze extracted structure to find mod folders
-                extracted_items = list(temp_path.iterdir())
-
-                if len(extracted_items) == 1 and extracted_items[0].is_dir():
-                    # check if this folder contains valid mod structure
-                    single_folder = extracted_items[0]
-                    validation_result = self.validator.validate_folder(single_folder)
-                    if validation_result.is_valid:
-                        # process as single mod
-                        success, message = self.process_folder(single_folder, progress_callback=progress_callback)
-                        return success, message
-                    else:
-                        # zip might contain multiple mod subdirectories
-                        # TODO: test this better
-                        success_count = 0
-                        for sub_item in single_folder.iterdir():
-                            if sub_item.is_dir():
-                                sub_validation = self.validator.validate_folder(sub_item)
-                                if sub_validation.is_valid:
-                                    success, _ = self.process_folder(sub_item, progress_callback=progress_callback)
-                                    if success:
-                                        success_count += 1
-                        if success_count > 0:
-                            return True, f"Successfully processed {success_count} mods from {zip_name}"
-                        return False, f"No valid mods found in {zip_name}"
-
+            # analyze extracted structure to find mod folders
+            extracted_items = list(temp_path.iterdir())
+            if len(extracted_items) == 1 and extracted_items[0].is_dir():
+                # check if this folder contains valid mod structure
+                single_folder = extracted_items[0]
+                validation_result = self.validator.validate_folder(single_folder)
+                if validation_result.is_valid:
+                    # process as single mod
+                    self.process_folder(single_folder, progress_callback=progress_callback)
                 else:
-                    # check if the temp_path itself is a valid mod (has mod folders at root)
-                    root_validation = self.validator.validate_folder(temp_path)
-                    if root_validation.is_valid:
-                        # use zip filename as the mod name
-                        success, message = self.process_folder(temp_path, override_name=zip_name, progress_callback=progress_callback)
-                        return success, message
+                    # zip might contain multiple mod subdirectories
+                    # TODO: test this better
+                    excs = []
+                    for i, sub_item in enumerate(f for f in single_folder.iterdir() if f.is_dir() and self.validator.validate_folder(f).is_valid):
+                        try:
+                            self.process_folder(sub_item, progress_callback=progress_callback)
+                        except Exception as e:  # ruff: ignore[blind-except]
+                            excs.append(e)
 
-                    # otherwise, process each valid mod folder
-                    success_count = 0
-                    for item in extracted_items:
-                        if item.is_dir():
-                            validation_result = self.validator.validate_folder(item)
-                            if validation_result.is_valid:
-                                success, _ = self.process_folder(item, progress_callback=progress_callback)
-                                if success:
-                                    success_count += 1
-                    if success_count > 0:
-                        return True, f"Successfully processed {success_count} mods from {zip_name}"
-                    return False, f"No valid mods found in {zip_name}"
+                    if excs:
+                        raise ExceptionGroup(f'No valid mods found in {zip_name}', excs)
+                    log.info(f'Successfully processed {i} mods from {zip_name}')
+            else:
+                if self.validator.validate_folder(temp_path).is_valid: # check if the temp_path itself is a valid mod (has mod folders at root)
+                    self.process_folder(temp_path, folder_name=zip_name, progress_callback=progress_callback) # use zip filename as the mod name
+                else: # otherwise, process each valid mod folder
+                    excs = []
+                    for i, item in enumerate(f for f in extracted_items if f.is_dir() and self.validator.validate_folder(f).is_valid):
+                        try:
+                            self.process_folder(item, progress_callback=progress_callback)
+                        except Exception as e:  # ruff: ignore[blind-except]
+                            excs.append(e)
 
-        except Exception as e:
-            log.exception(f"Error processing ZIP file {zip_name}")
-            return False, f"Error processing ZIP file {zip_name}: {e!s}"
+                    if excs:
+                        raise ExceptionGroup(f'No valid mods found in {zip_name}', excs)
+                    log.info(f'Successfully processed {i} mods from {zip_name}')
 
     def process_vpk_file(
         self,
         file_path: Path,
-        progress_callback: Callable[[int, str], None] | None = None
+        progress_callback: ProgressCallback = NoopProgressCallback
     ) -> tuple[bool, str]:
         # mod VPK extraction
         try:
@@ -163,39 +163,33 @@ class ImportService:
                 vpk_name = vpk_name[:-4]
 
             # validate VPK structure to determine type
-            if progress_callback:
-                progress_callback(5, "Validating VPK structure...")
+            progress_callback(5, 'Validating VPK structure...')
             validation_result = self.validator.validate_vpk(file_path)
 
             extracted_particles_dir = config.particles_dir / vpk_name
             extracted_addons_dir = config.addons_dir / vpk_name
             extracted_particles_dir.mkdir(parents=True, exist_ok=True)
 
-            if progress_callback:
-                progress_callback(10, "Analyzing VPK...")
+            progress_callback(10, 'Analyzing VPK...')
             vpk_handler = VPKFile(file_path)
 
             # check for particles
-            has_particles = bool(vpk_handler.find_files("*.pcf"))
+            has_particles = bool(vpk_handler.find_files('*.pcf'))
 
-            if progress_callback:
-                progress_callback(15, "Extracting files...")
+            progress_callback(15, 'Extracting files...')
             extracted_count = vpk_handler.extract_all(str(extracted_particles_dir))
-            if progress_callback:
-                progress_callback(35, f"Extracted {extracted_count} files")
+            progress_callback(35, f'Extracted {extracted_count} files')
 
             # process with AdvancedParticleMerger if it has particles
             if has_particles:
-                if progress_callback:
-                    progress_callback(50, "Processing particles...")
+                progress_callback(50, 'Processing particles...')
                 particle_merger = AdvancedParticleMerger(
-                    progress_callback=lambda p, m: progress_callback(50 + int(p / 2), m) if progress_callback else None
+                    progress_callback=lambda p, m: progress_callback(50 + int(p / 2), m)
                 )
                 particle_merger.preprocess_vpk(extracted_particles_dir)
             else:
                 # for non-particle mods, create addon folder
-                if progress_callback:
-                    progress_callback(60, "Creating addon folder...")
+                progress_callback(60, 'Creating addon folder...')
 
                 # if extracted_addons_dir already exists, remove it first
                 delete(extracted_addons_dir, not_exist_ok=True)
@@ -204,61 +198,57 @@ class ImportService:
                 move(extracted_particles_dir, extracted_addons_dir)
 
                 # create mod.json if it doesn't exist
-                mod_json_path = extracted_addons_dir / "mod.json"
-                if not mod_json_path.exists():
+                mod_json_path = extracted_addons_dir / 'mod.json'
+                if not mod_json_path.is_file():
                     default_mod_info = {
-                        "addon_name": vpk_name,
-                        "type": validation_result.type_detected.title() if validation_result.type_detected != "unknown" else "Unknown",
-                        "description": f"Content extracted from {file_path.name}",
-                        "contents": ["Custom content"]
+                        'addon_name': vpk_name,
+                        'type': validation_result.type_detected.title() if validation_result.type_detected != 'unknown' else 'Unknown',
+                        'description': f'Content extracted from {file_path.name}',
+                        'contents': ['Custom content']
                     }
                     with open(mod_json_path, 'w') as f:
                         json.dump(default_mod_info, f, indent=2)
+        except Exception:
+            log.error(f'Error processing VPK {file_path.name}')
+            raise
 
-            return True, f"Successfully processed VPK {vpk_name}"
-
-        except Exception as e:
-            error_msg = f"Error processing VPK {file_path.name}: {e!s}"
-            log.exception(error_msg)
-            return False, error_msg
+        log.info(f'Successfully processed VPK {vpk_name}')
 
     def process_dropped_items(
         self,
         item_paths: list[Path],
-        progress_callback: Callable[[int, str], None] | None = None
-    ) -> tuple[list[str], list[tuple[str, str]]]:
+        progress_callback: ProgressCallback = NoopProgressCallback
+    ) -> None:
+        '''
+        Process items that have been dragged onto the main window.
+
+        Args:
+            item_paths: The items to process
+            progress_callback: Optional callback to pass a progress metric and message to
+        '''
 
         total_items = len(item_paths)
-        successful_items = []
-        failed_items = []
 
+        excs = []
         for index, item_path in enumerate(item_paths):
             item_name = item_path.name
-            if progress_callback:
-                progress_callback(0, f"Processing item {index + 1}/{total_items}")
+            progress_callback(0, f'Processing item {index + 1}/{total_items}')
 
             try:
                 if item_path.is_dir():
-                    # folder
-                    success, message = self.process_folder(item_path, progress_callback=progress_callback)
+                    self.process_folder(item_path, progress_callback=progress_callback)
                 elif item_path.suffix.lower() == '.zip':
-                    # ZIP file
-                    success, message = self.process_zip_file(item_path, progress_callback=progress_callback)
+                    self.process_zip_file(item_path, progress_callback=progress_callback)
                 elif item_path.suffix.lower() == '.vpk':
-                    # VPK file
-                    success, message = self.process_vpk_file(item_path, progress_callback=progress_callback)
+                    self.process_vpk_file(item_path, progress_callback=progress_callback)
                 else:
-                    failed_items.append((item_name, f"Unsupported file type: {item_name}"))
-                    continue
+                    raise UnsupportedFileTypeError(item_path)
+            except Exception as e:  # ruff: ignore[blind-except]
+                errormsg = ('Error processing %s', item_name)
+                log.error(*errormsg)
+                e.add_note(errormsg[0] % errormsg[1:])
+                e.add_note(str(item_path))
+                excs.append(e)
 
-                if success:
-                    successful_items.append(item_name)
-                else:
-                    failed_items.append((item_name, message))
-
-            except Exception as e:
-                error_msg = f"Error processing {item_name}: {e!s}"
-                log.exception(error_msg)
-                failed_items.append((item_name, error_msg))
-
-        return successful_items, failed_items
+        if excs:
+            raise ExceptionGroup('', excs)

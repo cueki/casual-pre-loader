@@ -4,7 +4,7 @@ from pathlib import Path
 from core.config import config
 from core.util.file import copy, delete
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def is_valid_userdata_folder(userdata_path: Path) -> bool:

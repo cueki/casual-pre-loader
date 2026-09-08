@@ -13,7 +13,7 @@ from core.operations.pcf_rebuild import (
 )
 from core.util.file import copy
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def get_vmt_dependencies(vmt_path: Path) -> list[Path] | None:

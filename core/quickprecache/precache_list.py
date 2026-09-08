@@ -5,7 +5,7 @@ from valve_parsers import VPKFile
 
 from core.constants import QUICKPRECACHE_FILE_SUFFIXES, QUICKPRECACHE_MODEL_LIST
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def make_precache_list(game_path: Path) -> set[str]:

@@ -39,12 +39,11 @@ from core.operations.pcf_rebuild import extract_elements, load_particle_system_m
 from core.operations.vgui_preload import patch_mainmenuoverride
 from core.quickprecache.precache_list import make_precache_list
 from core.quickprecache.quick_precache import QuickPrecache
+from core.util import NoopProgressCallback, ProgressCallback
 from core.util.file import check_writable, copy, delete, move
 from core.util.vpk import get_vpk_name
 
-log = logging.getLogger()
-
-ProgressCallback = Callable[[int, str], None]
+log = logging.getLogger(__name__)
 
 
 class InstallService:
@@ -89,7 +88,7 @@ class InstallService:
         self,
         tf_path: Path,
         selected_addons: list[str],
-        on_progress: ProgressCallback | None = None,
+        progress_callback: ProgressCallback = NoopProgressCallback,
         apply_particle_selections: Callable[[], None] | None = None,
         disable_paint_colors: bool = False,
         show_console_on_startup: bool = True,
@@ -97,23 +96,19 @@ class InstallService:
         skip_quickprecache: bool = False,
         sourcemod: Sourcemods = Sourcemods.DEFAULT,
         ) -> None:
-        """
+        '''
         Install selected addons to the game directory.
 
         Args:
             tf_path: Path to the tf/ directory
             selected_addons: List of addon directory names to install
-            on_progress: Callback for progress updates (percent, message)
+            progress_callback: Optional callback to pass a progress metric and message to
             apply_particle_selections: Callback to apply particle selections from UI
             disable_paint_colors: Whether to disable paint colors
             show_console_on_startup: Whether to show console on startup
-        """
+        '''
 
         self.cancel_requested = False
-
-        def progress(pct: int, msg: str):
-            if on_progress:
-                on_progress(pct, msg)
 
         try:
             is_tf2 = sourcemod == Sourcemods.TF2
@@ -127,7 +122,7 @@ class InstallService:
                     raise PermissionError(f'Please close {sourcemod.full_name} before installing.')
                 file_handler = FileHandler(working_vpk_path)
                 base_default_pcf, base_default_parents = initialize_pcf(config.temp_to_be_referenced_dir)
-            progress(0, "Installing addons...")
+            progress_callback(0, 'Installing addons...')
 
             total_files = 0
             files_to_copy = []
@@ -208,7 +203,7 @@ class InstallService:
             if files_to_copy:
                 progress_range = 25
                 completed_files = 0
-                progress(10, f"Installing addons... (0/{total_files} files)")
+                progress_callback(10, f'Installing addons... (0/{total_files} files)')
 
                 for src_path, addon_dir, addon_index in files_to_copy:
                     self._check_cancelled()
@@ -224,10 +219,10 @@ class InstallService:
 
                     completed_files += 1
                     current_progress = 10 + int((completed_files / total_files) * progress_range)
-                    progress(current_progress, f"Installing addons... ({completed_files}/{total_files} files)")
+                    progress_callback(current_progress, f'Installing addons... ({completed_files}/{total_files} files)')
 
                 if is_tf2:
-                    progress(35, "Processing sound mods...")
+                    progress_callback(35, 'Processing sound mods...')
                     backup_scripts_dir = config.backup_dir / 'scripts'
 
                     vpk_paths = []
@@ -243,7 +238,7 @@ class InstallService:
                         vpk_paths
                     )
                     if sound_result:
-                        progress(50, sound_result['message'])
+                        progress_callback(50, sound_result['message'])
 
                 self._check_cancelled()
 
@@ -251,7 +246,7 @@ class InstallService:
                     handle_skybox_mods(config.temp_to_be_vpk_dir, tf_path)
 
                 if is_tf2 and disable_paint_colors:
-                    progress(52, "Disabling paint colors...")
+                    progress_callback(52, 'Disabling paint colors...')
                     disable_paints(tf_path)
 
             if is_tf2:
@@ -281,7 +276,7 @@ class InstallService:
                 start_progress = 55
                 progress_range = 25
                 completed_files = 0
-                progress(start_progress, f"Processing particle files... (0/{total_files})")
+                progress_callback(start_progress, f'Processing particle files... (0/{total_files})')
 
                 for pcf_file in particle_files:
                     self._check_cancelled()
@@ -304,14 +299,14 @@ class InstallService:
 
                         completed_files += 1
                         current_progress = start_progress + int((completed_files / total_files) * progress_range)
-                        progress(current_progress, f"Processing particle files... ({completed_files}/{total_files})")
+                        progress_callback(current_progress, f'Processing particle files... ({completed_files}/{total_files})')
 
                     file_handler.process_file(base_name, processed_pcf)
                     pcf_file.unlink()
 
                     completed_files += 1
                     current_progress = start_progress + int((completed_files / total_files) * progress_range)
-                    progress(current_progress, f"Processing particle files... ({completed_files}/{total_files})")
+                    progress_callback(current_progress, f'Processing particle files... ({completed_files}/{total_files})')
             else:
                 particle_files = list(config.temp_to_be_patched_dir.glob("*.pcf"))
                 if particle_files:
@@ -321,7 +316,7 @@ class InstallService:
                     total_files = len(particle_files)
                     start_progress = 50
                     progress_range = 30
-                    progress(start_progress, f"Copying particle files... (0/{total_files})")
+                    progress_callback(start_progress, f'Copying particle files... (0/{total_files})')
 
                     for i, pcf_file in enumerate(particle_files):
                         self._check_cancelled()
@@ -329,11 +324,11 @@ class InstallService:
                         move(pcf_file, particles_dir / pcf_file.name)
 
                         current_progress = start_progress + int(((i + 1) / total_files) * progress_range)
-                        progress(current_progress, f"Copying particle files... ({i + 1}/{total_files})")
+                        progress_callback(current_progress, f'Copying particle files... ({i + 1}/{total_files})')
 
             self._check_cancelled()
 
-            progress(80, "Making custom VPK")
+            progress_callback(80, 'Making custom VPK')
 
             game_type(tf_path / 'gameinfo.txt', uninstall=False)
 
@@ -355,7 +350,7 @@ class InstallService:
             if is_tf2:
                 patch_mainmenuoverride(tf_path)
                 if fix_mdl_paths:
-                    progress(78, "Relocating model material paths...")
+                    progress_callback(78, 'Relocating model material paths...')
                     relocate_mdl_paths(custom_content_dir, file_origin=file_origin)
                 generate_missing_vmt_files(custom_content_dir, tf_path)
 
@@ -391,21 +386,21 @@ class InstallService:
                 if skip_quickprecache:
                     log.info("Skipping QuickPrecache scan/build (skip_quickprecache=True)")
                 else:
-                    progress(85, "Scanning for models to precache...")
+                    progress_callback(85, 'Scanning for models to precache...')
 
                     precache_prop_set = make_precache_list(tf_path.parents[0])
                     if precache_prop_set:
                         precache = QuickPrecache(
                             tf_path.parents[0],
                             debug=False,
-                            progress_callback=on_progress
-                            )
+                            progress_callback=progress_callback
+                        )
                         precache.run(auto=True)
                         copy(config.install_dir / 'core/quickprecache/_QuickPrecache.vpk', custom_dir / '_QuickPrecache.vpk')
 
                 self._check_cancelled()
 
-                progress(95, "Configuring...")
+                progress_callback(95, 'Configuring...')
 
                 has_mastercomfig = False
                 for item in custom_dir.iterdir():
@@ -422,20 +417,25 @@ class InstallService:
                     vpk_handler = FileHandler(custom_vpk_path)
                     vpk_handler.process_file('cfg/w/config.cfg', config_content.encode('utf-8'))
 
-            progress(97, "Finalizing...")
+            progress_callback(97, 'Finalizing...')
 
             get_from_custom_dir(custom_dir)
 
-            progress(100, "Installation complete")
+            progress_callback(100, 'Installation complete')
 
         finally:
             prepare_working_copy()
 
-    def uninstall(self, tf_path: Path, on_progress: ProgressCallback | None = None, sourcemod: Sourcemods = Sourcemods.DEFAULT):
+    def uninstall(
+        self,
+        tf_path: Path,
+        progress_callback: ProgressCallback = NoopProgressCallback,
+        sourcemod: Sourcemods = Sourcemods.DEFAULT,
+    ) -> None:
         # resets everything
         def progress(pct: int, msg: str):
-            if on_progress:
-                on_progress(pct, msg)
+            if progress_callback is not None:
+                progress_callback(pct, msg)
 
         try:
             prepare_working_copy()

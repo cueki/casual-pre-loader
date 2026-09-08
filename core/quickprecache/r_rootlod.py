@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def check_root_lod(game_path: Path) -> bool:

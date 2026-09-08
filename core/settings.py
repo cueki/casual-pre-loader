@@ -12,6 +12,8 @@ from core.constants import Sourcemods
 from core.profile import Profile
 from core.util import as_base_class, update_dataclass
 
+log = logging.getLogger(__name__)
+
 # https://github.com/python/typing/issues/182#issuecomment-1320974824
 type JSON = dict[str, 'JSON'] | list['JSON'] | str | int | float | bool | None
 
@@ -60,7 +62,7 @@ def _get_profile_name(name: str, profiles: Profiles) -> str:
         renamed = True
 
     if renamed:
-        logging.warning(f'profile with name `{original_name}` already exists, using `{name}`')
+        log.warning(f'profile with name `{original_name}` already exists, using `{name}`')
 
     return name
 
@@ -124,9 +126,9 @@ class Settings:
         try:
             with input_settings_file.open('r') as fd:
                 data = json.load(fd)
-            logging.info(f'Loaded settings from {input_settings_file}')
+            log.info(f'Loaded settings from {input_settings_file}')
         except Exception:
-            logging.exception("Error loading settings")
+            log.exception("Error loading settings")
             raise
 
         if 'skipped_update_version' in data and data['skipped_update_version'] is not None: # deserialize Version objects
@@ -201,7 +203,7 @@ class Settings:
 
             self.active_profile = self.profiles['TF2']
 
-            logging.info(f'Migrated old settings to profile format ({len(self.profiles)} profile(s))')
+            log.info(f'Migrated old settings to profile format ({len(self.profiles)} profile(s))')
 
     def save_settings(self):
         from core.config import config
@@ -218,9 +220,9 @@ class Settings:
             config.app_settings_file.parent.mkdir(parents=True, exist_ok=True)
             with config.app_settings_file.open('w') as fd:
                 json.dump(data, fd, indent=2, cls=JSONEncoder)
-            logging.info(f'Saved settings to {config.app_settings_file}')
+            log.info(f'Saved settings to {config.app_settings_file}')
         except Exception:
-            logging.exception('Error saving settings')
+            log.exception('Error saving settings')
             raise
 
     def create_profile(self, name: str, game_path: Path, sourcemod: Sourcemods, activate: bool = False) -> Profile:
@@ -303,7 +305,7 @@ class AddonMetadata(dict):
                 with config.addon_metadata_file.open('r') as f:
                     data = f.read()
             except Exception:
-                logging.exception(f'Error loading addon metadata from file `{config.addon_metadata_file}`')
+                log.exception(f'Error loading addon metadata from file `{config.addon_metadata_file}`')
                 raise
 
             if data:
@@ -322,7 +324,7 @@ class AddonMetadata(dict):
             with config.addon_metadata_file.open('w') as fd:
                 json.dump(self, fd, indent=2, cls=JSONEncoder)
         except Exception:
-            logging.exception('Error saving addon metadata')
+            log.exception('Error saving addon metadata')
             raise
 
 

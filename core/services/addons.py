@@ -5,8 +5,9 @@ import logging
 from core.config import config
 from core.settings import addon_metadata
 from core.util.file import delete
+from core.util.text import abbrev_root
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class AddonService:
@@ -105,23 +106,36 @@ class AddonService:
         addon_metadata.save()
         return new_or_updated > 0
 
-    def delete_addons(self, addon_dir_names: list[str]) -> tuple[bool, str]:
-        errors = []
-        for folder_name in addon_dir_names:
-            addon_path = config.addons_dir / folder_name
-            if addon_path.exists() and addon_path.is_dir():
-                try:
-                    delete(addon_path)
-                except Exception as e:
-                    errors.append(f"Failed to delete {folder_name}: {e!s}")
+    def delete_addons(self, mod_names: list[str]) -> None:
+        '''
+        Delete addon folders from the particles directory.
 
-        if errors:
-            return False, "\n".join(errors)
+        Args:
+            mod_names: Names of the mod folders to delete
+        '''
 
-        # update addon_metadata.json
-        for folder_name in addon_dir_names:
-            if folder_name in addon_metadata:
-                del addon_metadata[folder_name]
+        metadata_modified = False
 
-        addon_metadata.save()
-        return True, "Selected addons have been deleted."
+        excs = []
+        for mod_name in mod_names:
+            mod_path = config.addons_dir / mod_name
+
+            try:
+                delete(mod_path, not_exist_ok=True)
+            except OSError as e:
+                errmsg = ('Failed to delete addon (%s[%d]): "%s"', e.strerror, e.errno, abbrev_root(config.addons_dir, mod_path, 'ADDONS'))
+                log.error(*errmsg)
+                e.add_note(errmsg[0] % errmsg[1:])
+                excs.append(e)
+            else:
+                log.info(f'Deleted addon {mod_name}')
+
+                if mod_name in addon_metadata:
+                    del addon_metadata[mod_name]
+                    metadata_modified = True
+
+        if metadata_modified: # update addon_metadata.json if need be
+            addon_metadata.save()
+
+        if excs:
+            raise ExceptionGroup('Failed to delete addons', excs)

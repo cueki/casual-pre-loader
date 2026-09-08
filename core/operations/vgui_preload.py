@@ -7,7 +7,7 @@ from valve_parsers import VPKFile
 from core.config import config
 from core.constants import BACKUP_MAINMENU_FOLDER
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def patch_mainmenuoverride(tf_path: Path):

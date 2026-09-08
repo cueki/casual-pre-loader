@@ -54,7 +54,7 @@ from gui.theme import (
     SIDEBAR_NAV_STYLE,
 )
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 # this is because the fallback for the glyph is a weird size depending on fonts...
 # very annoying! so we will force the size for the addon/particle/settings nav buttons
@@ -831,18 +831,17 @@ class ParticleManagerGUI(QMainWindow):
             display_name = item.data(Qt.ItemDataRole.UserRole) or item.text().split(' [#')[0]
             deleted_addon_names.append(display_name)
 
-        success, message = self.addon_manager.delete_selected_addons(self.addons_list)
-        if success is None:
-            return
-        elif success:
+        try:
+            self.addon_manager.delete_selected_addons(self.addons_list)
+        except ExceptionGroup as eg:
+            errmsg = '\n'.join((f'{eg!s}:', *(e.__notes__.pop() for e in eg.exceptions)))
+            log.exception('Errors when deleting addons')
+            self.show_error(errmsg)
+        finally:
             updated_load_order = [name for name in self.settings.addon_selections if name not in deleted_addon_names]
             self.settings.addon_selections = updated_load_order
             self.load_addons()
-            # re-collapse the addon details if we deleted the selected one by refreshing
-            self.on_addon_click()
-        else:
-            log.error(message, stack_info=True)
-            self.show_error(message)
+            self.on_addon_click() # re-collapse the addon details if we deleted the selected one by refreshing
 
     def open_addons_folder(self):
         addons_path = config.addons_dir

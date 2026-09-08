@@ -35,7 +35,7 @@ from core.util.sourcemod import (
 )
 from gui.theme import BUTTON_STYLE_ALT, FONT_SIZE_HEADER
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class FirstTimeSetupDialog(QDialog):

@@ -2,7 +2,7 @@ import logging
 
 from valve_parsers import PCFElement, PCFFile, AttributeType
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def copy_element(element: PCFElement, offset: int, source_pcf: PCFFile,

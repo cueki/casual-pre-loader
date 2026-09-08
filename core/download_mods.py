@@ -14,6 +14,8 @@ from core.util.repo import Update
 from core.util.repo.github_api import get_releases_with_asset
 from core.util.zip import extract
 
+log = logging.getLogger(__name__)
+
 
 @dataclass
 class Modsinfo:
@@ -45,7 +47,7 @@ class Modsinfo:
         except FileNotFoundError:
             pass
         except json.JSONDecodeError:
-            logging.exception(f'Could not parse {config.modsinfo_file}') # ignore this error and act as if the file didn't exist at all
+            log.exception(f'Could not parse {config.modsinfo_file}') # ignore this error and act as if the file didn't exist at all
 
         return cls()
 
@@ -96,13 +98,13 @@ def check_mods(force: bool = False) -> Update | None:
 
     if modsinfo.last_checked is not None:
         if force:
-            logging.debug('forcefully skipping client-side ratelimit when checking for new mod releases')
+            log.debug('forcefully skipping client-side ratelimit when checking for new mod releases')
         else:
             interval = timedelta(minutes=5)
             if modsinfo.last_checked > current_time:
-                logging.warning(f'last recorded check for a new release of mods is in the future, ({modsinfo.last_checked.astimezone()}), has the system\'s clock been rolled back?')
+                log.warning(f'last recorded check for a new release of mods is in the future, ({modsinfo.last_checked.astimezone()}), has the system\'s clock been rolled back?')
             elif modsinfo.last_checked + interval  > current_time:
-                logging.info(f'less than {interval} since the last recorded check for a new release of mods ({modsinfo.last_checked.astimezone()}), skipping...')
+                log.info(f'less than {interval} since the last recorded check for a new release of mods ({modsinfo.last_checked.astimezone()}), skipping...')
                 return
 
     try:
@@ -111,20 +113,20 @@ def check_mods(force: bool = False) -> Update | None:
             # TODO: this does the job, but this exception should probably be handled at a lower level
             update = next(iter(get_releases_with_asset(REMOTE_REPO, 'mods.zip')))
         except StopIteration:
-            logging.warning('No mod releases seem to be available!')
+            log.warning('No mod releases seem to be available!')
             return
 
         if modsinfo.version is not None:
             if update.version > modsinfo.version:
-                logging.info(f'A new release of mods is available ({update.version})')
+                log.info(f'A new release of mods is available ({update.version})')
             elif update.version == modsinfo.version and update.asset.digest != modsinfo.digest:
-                logging.info(f'We already have the latest release of mods ({update.version}), but the remote file differs')
+                log.info(f'We already have the latest release of mods ({update.version}), but the remote file differs')
             elif force:
                 # NOTE: this will download an older modpack release if the newest remote version is somehow older than the local version
                 # (remote getting deleted or users manually editing file)
-                logging.info(f'Re-downloading the latest release of mods ({update.version}) by request')
+                log.info(f'Re-downloading the latest release of mods ({update.version}) by request')
             else:
-                logging.info(f'We already have the latest release of mods ({modsinfo.tag})') # NOTE: also runs if local version is newer than remote
+                log.info(f'We already have the latest release of mods ({modsinfo.tag})') # NOTE: also runs if local version is newer than remote
                 return
 
         return update

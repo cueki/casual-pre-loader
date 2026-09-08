@@ -50,7 +50,7 @@ class AddonsManager(QObject):
                 item.setCheckState(Qt.CheckState.Unchecked)
                 addons_list.addItem(item)
 
-    def delete_selected_addons(self, addons_list):
+    def delete_selected_addons(self, addons_list) -> None:
         selected_items = addons_list.selectedItems()
         if not selected_items:
             return False, "No addons selected for deletion."
@@ -76,8 +76,7 @@ class AddonsManager(QObject):
         )
 
         if result != QMessageBox.StandardButton.Yes:
-            return None, None
+            return
 
         # delegated to service
-        success, message = self.service.delete_addons(selected_folder_names)
-        return success, message
+        self.service.delete_addons(selected_folder_names)

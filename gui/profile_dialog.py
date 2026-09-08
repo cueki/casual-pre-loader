@@ -94,35 +94,44 @@ class ProfileDialog(QDialog):
             self.path_edit.setText(directory)
             validate_game_directory(self.game_path, self.validation_label)
 
-    def auto_detect(self):
+    def auto_detect(self) -> None:
         sourcemod = self.sourcemod_edit.text().strip()
         try:
             self.sourcemod = get_sourcemod(sourcemod) if sourcemod else Sourcemods.DEFAULT
         except InvalidSourcemod:
-            QMessageBox.information(self, "Auto-Detection Failed",
-                                    f"Unknown sourcemod: {sourcemod}.\n"
-                                    "Please check the game target name.")
+            QMessageBox.information(
+                self,
+                'Auto-Detection Failed',
+                f'Unknown sourcemod: {sourcemod}.\n'
+                'Please check the game target name.'
+            )
             return
 
         try:
             self.game_path = auto_detect_sourcemod(self.sourcemod)
-
+        except InvalidSourcemodInstallationPath:
+            QMessageBox.information(
+                self,
+                'Auto-Detection Failed',
+                f'Could not find sourcemod `{self.sourcemod.full_name}` in common Steam locations.\n'
+                'Please manually select your game directory.'
+            )
+        else:
             self.path_edit.setText(str(self.game_path))
             validate_game_directory(self.game_path, self.validation_label)
-            QMessageBox.information(self, "Auto-Detection Successful", f"Found sourcemod `{self.sourcemod.full_name}` at:\n{self.game_path}")
-        except InvalidSourcemodInstallationPath:
-            QMessageBox.information(self, "Auto-Detection Failed",
-                                    f"Could not find sourcemod '{self.sourcemod.full_name}' in common Steam locations.\n"
-                                    "Please manually select your game directory.")
+            QMessageBox.information(
+                self,
+                'Auto-Detection Successful',
+                f'Found sourcemod `{self.sourcemod.full_name}` at:\n{self.game_path}'
+            )
 
-    def try_accept(self):
+    def try_accept(self) -> None:
         name = self.name_edit.text().strip()
         if not name:
-            QMessageBox.warning(self, "Validation Error", "Please enter a profile name.")
-            return
-        if not self.game_path:
-            QMessageBox.warning(self, "Validation Error", "Please select a game directory.")
-            return
-        self.name = name
-        self.sourcemod = get_sourcemod(self.sourcemod_edit.text().strip() or None)
-        self.accept()
+            QMessageBox.warning(self, 'Validation Error', 'Please enter a profile name.')
+        elif not self.game_path:
+            QMessageBox.warning(self, 'Validation Error', 'Please select a game directory.')
+        else:
+            self.name = name
+            self.sourcemod = get_sourcemod(self.sourcemod_edit.text().strip() or None)
+            self.accept()
