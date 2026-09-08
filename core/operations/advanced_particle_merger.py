@@ -13,6 +13,7 @@ from core.operations.pcf_rebuild import (
     load_particle_system_map,
     rebuild_particle_files,
 )
+from core.util import NoopProgressCallback, ProgressCallback
 
 log = logging.getLogger(__name__)
 
@@ -69,7 +70,7 @@ def save_split_files(merged_pcf: PCFFile, out_dir: Path, split_filters: dict) ->
 
 
 class AdvancedParticleMerger:
-    def __init__(self, progress_callback=None):
+    def __init__(self, progress_callback: ProgressCallback = NoopProgressCallback):
         self.progress_callback = progress_callback # TODO: ressurect this dead code
         self.particle_map = load_particle_system_map(config.data_dir / "particle_system_map.json")
         self.vpk_groups = defaultdict(lambda: defaultdict(list))  # {vpk_name: {particle_file: [paths]}}

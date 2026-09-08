@@ -113,7 +113,7 @@ class ModDropZone(QFrame):
         mods = list(mod_particles.keys())
         self.conflict_matrix.update_matrix(mods, all_particles)
 
-    def update_progress(self, value, message):
+    def update_progress(self, value: int, message: str) -> None:
         if self.progress_dialog:
             self.progress_dialog.setValue(value)
             self.progress_dialog.setLabelText(message)

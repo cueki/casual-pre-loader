@@ -1,7 +1,6 @@
 import json
 import logging
 import tempfile
-from collections.abc import Callable
 from pathlib import Path
 
 from valve_parsers import VPKFile
@@ -9,7 +8,8 @@ from valve_parsers import VPKFile
 from core.config import config
 from core.operations.advanced_particle_merger import AdvancedParticleMerger
 from core.structure_validator import StructureValidator
-from core.util.file import copy, delete, move
+from core.util import NoopProgressCallback, ProgressCallback
+from core.util.file import copytree, delete, move
 from core.util.zip import extract
 
 log = logging.getLogger(__name__)
@@ -19,6 +19,12 @@ def normalize_vpk_paths(vpk_paths: list[Path]) -> list[Path]:
     '''
     Normalize and deduplicate VPK paths.
     Multi-part VPKs (mod_000.vpk, mod_001.vpk, mod_dir.vpk) all resolve to mod_dir.vpk.
+
+    Args:
+        vpk_paths: A list of paths to nromalize
+
+    Return:
+        A  list of normalized paths in the same order they were provided
     '''
 
     normalized = {}
@@ -45,15 +51,15 @@ class ImportService:
         self,
         folder_path: Path,
         folder_name: str | None = None,
-        progress_callback: Callable[[int, str], None] | None = None
+        progress_callback: ProgressCallback = NoopProgressCallback
     ) -> None:
         '''
         Process a folder containing a mod
 
         Args:
-            folder_path: The path to the folder to be processed
-            folder_name: an optional new name to use for the resulting processed folder
-            progress_callback: An optional callback with which to pass a progress metric and message
+            folder_path: Path to the folder to be processed
+            folder_name: Optional new name to use for the resulting processed folder
+            progress_callback: Optional callback to pass a progress metric and message to
         '''
 
         folder_name = folder_name or folder_path.name
@@ -64,11 +70,11 @@ class ImportService:
             destination = (config.particles_dir if has_particles else config.addons_dir) / folder_name
 
             delete(destination, not_exist_ok=True)
-            copy(folder_path, destination)
+            copytree(folder_path, destination)
 
             if has_particles:
                 particle_merger = AdvancedParticleMerger(
-                    progress_callback=lambda p, m: progress_callback(50 + int(p / 2), m) if progress_callback else None
+                    progress_callback=lambda p, m: progress_callback(50 + int(p / 2), m)
                 )
                 particle_merger.preprocess_vpk(destination)
             else:
@@ -91,14 +97,14 @@ class ImportService:
     def process_zip_file(
         self,
         zip_path: Path,
-        progress_callback: Callable[[int, str], None] | None = None
+        progress_callback: ProgressCallback = NoopProgressCallback
     ) -> None:
         '''
-        Attempt to process and extract a zip file
+        Process and extract a zip file
 
         Args:
             zip_path: The path to the zip file to extract
-            progress_callback: An optional callback with which to pass a progress metric and message
+            progress_callback: Optional callback to pass a progress metric and message to
         '''
 
         zip_name = zip_path.stem
@@ -110,7 +116,6 @@ class ImportService:
 
             # analyze extracted structure to find mod folders
             extracted_items = list(temp_path.iterdir())
-
             if len(extracted_items) == 1 and extracted_items[0].is_dir():
                 # check if this folder contains valid mod structure
                 single_folder = extracted_items[0]
@@ -130,7 +135,7 @@ class ImportService:
 
                     if excs:
                         raise ExceptionGroup(f'No valid mods found in {zip_name}', excs)
-                    log.info(f"Successfully processed {i} mods from {zip_name}")
+                    log.info(f'Successfully processed {i} mods from {zip_name}')
             else:
                 if self.validator.validate_folder(temp_path).is_valid: # check if the temp_path itself is a valid mod (has mod folders at root)
                     self.process_folder(temp_path, folder_name=zip_name, progress_callback=progress_callback) # use zip filename as the mod name
@@ -149,7 +154,7 @@ class ImportService:
     def process_vpk_file(
         self,
         file_path: Path,
-        progress_callback: Callable[[int, str], None] | None = None
+        progress_callback: ProgressCallback = NoopProgressCallback
     ) -> tuple[bool, str]:
         # mod VPK extraction
         try:
@@ -158,39 +163,33 @@ class ImportService:
                 vpk_name = vpk_name[:-4]
 
             # validate VPK structure to determine type
-            if progress_callback:
-                progress_callback(5, "Validating VPK structure...")
+            progress_callback(5, 'Validating VPK structure...')
             validation_result = self.validator.validate_vpk(file_path)
 
             extracted_particles_dir = config.particles_dir / vpk_name
             extracted_addons_dir = config.addons_dir / vpk_name
             extracted_particles_dir.mkdir(parents=True, exist_ok=True)
 
-            if progress_callback:
-                progress_callback(10, "Analyzing VPK...")
+            progress_callback(10, 'Analyzing VPK...')
             vpk_handler = VPKFile(file_path)
 
             # check for particles
-            has_particles = bool(vpk_handler.find_files("*.pcf"))
+            has_particles = bool(vpk_handler.find_files('*.pcf'))
 
-            if progress_callback:
-                progress_callback(15, "Extracting files...")
+            progress_callback(15, 'Extracting files...')
             extracted_count = vpk_handler.extract_all(str(extracted_particles_dir))
-            if progress_callback:
-                progress_callback(35, f"Extracted {extracted_count} files")
+            progress_callback(35, f'Extracted {extracted_count} files')
 
             # process with AdvancedParticleMerger if it has particles
             if has_particles:
-                if progress_callback:
-                    progress_callback(50, "Processing particles...")
+                progress_callback(50, 'Processing particles...')
                 particle_merger = AdvancedParticleMerger(
-                    progress_callback=lambda p, m: progress_callback(50 + int(p / 2), m) if progress_callback else None
+                    progress_callback=lambda p, m: progress_callback(50 + int(p / 2), m)
                 )
                 particle_merger.preprocess_vpk(extracted_particles_dir)
             else:
                 # for non-particle mods, create addon folder
-                if progress_callback:
-                    progress_callback(60, "Creating addon folder...")
+                progress_callback(60, 'Creating addon folder...')
 
                 # if extracted_addons_dir already exists, remove it first
                 delete(extracted_addons_dir, not_exist_ok=True)
@@ -199,35 +198,33 @@ class ImportService:
                 move(extracted_particles_dir, extracted_addons_dir)
 
                 # create mod.json if it doesn't exist
-                mod_json_path = extracted_addons_dir / "mod.json"
-                if not mod_json_path.exists():
+                mod_json_path = extracted_addons_dir / 'mod.json'
+                if not mod_json_path.is_file():
                     default_mod_info = {
-                        "addon_name": vpk_name,
-                        "type": validation_result.type_detected.title() if validation_result.type_detected != "unknown" else "Unknown",
-                        "description": f"Content extracted from {file_path.name}",
-                        "contents": ["Custom content"]
+                        'addon_name': vpk_name,
+                        'type': validation_result.type_detected.title() if validation_result.type_detected != 'unknown' else 'Unknown',
+                        'description': f'Content extracted from {file_path.name}',
+                        'contents': ['Custom content']
                     }
                     with open(mod_json_path, 'w') as f:
                         json.dump(default_mod_info, f, indent=2)
+        except Exception:
+            log.error(f'Error processing VPK {file_path.name}')
+            raise
 
-            return True, f"Successfully processed VPK {vpk_name}"
-
-        except Exception as e:
-            error_msg = f"Error processing VPK {file_path.name}: {e!s}"
-            log.exception(error_msg)
-            return False, error_msg
+        log.info(f'Successfully processed VPK {vpk_name}')
 
     def process_dropped_items(
         self,
         item_paths: list[Path],
-        progress_callback: Callable[[int, str], None] | None = None
+        progress_callback: ProgressCallback = NoopProgressCallback
     ) -> None:
         '''
         Process items that have been dragged onto the main window.
 
         Args:
             item_paths: The items to process
-            progress_callback: An optional callback with which to pass a progress metric and message
+            progress_callback: Optional callback to pass a progress metric and message to
         '''
 
         total_items = len(item_paths)
@@ -235,8 +232,7 @@ class ImportService:
         excs = []
         for index, item_path in enumerate(item_paths):
             item_name = item_path.name
-            if progress_callback:
-                progress_callback(0, f"Processing item {index + 1}/{total_items}")
+            progress_callback(0, f'Processing item {index + 1}/{total_items}')
 
             try:
                 if item_path.is_dir():
@@ -248,7 +244,7 @@ class ImportService:
                 else:
                     raise UnsupportedFileTypeError(item_path)
             except Exception as e:  # ruff: ignore[blind-except]
-                errormsg = ("Error processing %s", item_name)
+                errormsg = ('Error processing %s', item_name)
                 log.error(*errormsg)
                 e.add_note(errormsg[0] % errormsg[1:])
                 e.add_note(str(item_path))
@@ -256,5 +252,3 @@ class ImportService:
 
         if excs:
             raise ExceptionGroup('', excs)
-
-        # return successful_items, failed_items
