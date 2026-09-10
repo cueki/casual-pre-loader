@@ -39,7 +39,7 @@ from core.operations.pcf_rebuild import extract_elements, load_particle_system_m
 from core.operations.vgui_preload import patch_mainmenuoverride
 from core.quickprecache.precache_list import make_precache_list
 from core.quickprecache.quick_precache import QuickPrecache
-from core.util.file import check_writable, copy, delete, move
+from core.util.file import check_writable, copy, copytree, delete, move
 from core.util.vpk import get_vpk_name
 
 log = logging.getLogger()
@@ -176,7 +176,7 @@ class InstallService:
                     if hud_dest.exists():
                         log.info(f'{hud_dest} already exists, skipping as to not overwrite possible user-modified files')
                         continue
-                    copy(addon_dir, hud_dest)
+                    copytree(addon_dir, hud_dest)
 
                     hud_mod_json = hud_dest / 'mod.json'
                     if hud_mod_json.exists():
@@ -401,7 +401,7 @@ class InstallService:
                             progress_callback=on_progress
                             )
                         precache.run(auto=True)
-                        copy(config.install_dir / 'core/quickprecache/_QuickPrecache.vpk', custom_dir / '_QuickPrecache.vpk')
+                        copytree(config.install_dir / 'core/quickprecache/_QuickPrecache.vpk', custom_dir / '_QuickPrecache.vpk')
 
                 self._check_cancelled()
 

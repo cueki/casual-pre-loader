@@ -9,7 +9,7 @@ from valve_parsers import VPKFile
 from core.config import config
 from core.operations.advanced_particle_merger import AdvancedParticleMerger
 from core.structure_validator import StructureValidator
-from core.util.file import copy, delete, move
+from core.util.file import copytree, delete, move
 from core.util.zip import extract
 
 log = logging.getLogger()
@@ -54,7 +54,7 @@ class ImportService:
             if has_particles:
                 destination = config.particles_dir / folder_name
                 delete(destination, not_exist_ok=True)
-                copy(folder_path, destination)
+                copytree(folder_path, destination)
 
                 # process with AdvancedParticleMerger
                 particle_merger = AdvancedParticleMerger(
@@ -65,7 +65,7 @@ class ImportService:
                 # it is an addon
                 destination = config.addons_dir / folder_name
                 delete(destination, not_exist_ok=True)
-                copy(folder_path, destination)
+                copytree(folder_path, destination)
 
                 # create mod.json if it doesn't exist
                 mod_json_path = destination / "mod.json"

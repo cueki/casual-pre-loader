@@ -1,10 +1,13 @@
+import datetime
 import logging
+import os
 import shutil
+import stat
 from pathlib import Path
 
 from core.config import config
 from core.operations.pcf_rebuild import load_particle_system_map
-from core.util.file import copy, delete
+from core.util.file import copytree, delete, modeset_add, move
 
 log = logging.getLogger()
 
@@ -44,7 +47,7 @@ def prepare_working_copy() -> str | None:
             "try re-extracting the preloader to a local folder."
         )
 
-    expected = {Path(key).name for key in particle_map.keys()}
+    expected = {Path(key).name for key in particle_map}
     dest = config.temp_to_be_referenced_dir
     missing = sorted(name for name in expected if not (dest / name).exists())
 
@@ -79,20 +82,41 @@ def prepare_runtime_environment() -> str | None:
     user-facing error message on failure, or None if everything is ready."""
 
     bundled_backup = config.install_dir / "backup"
-    project_backup = config.project_dir / "backup"
+    working_backup = config.project_dir / "backup"
+    tmpdir = working_backup.with_name(working_backup.name + '_')
+
     try:
-        copy(bundled_backup, project_backup, noclobber=False)
+        # NOTE: As per `shutil`'s documentation:
+        # 'Permissions and times of directories are copied with copystat(), individual files are copied using copy2().' [well, actually the value of `copy_function`, which defaults to `copy2()`]
+        # We need to ensure directories are writable and should also set a reasonable mtime for all files.
+
+        delete(tmpdir, not_exist_ok=True)
+        delete(working_backup, not_exist_ok=True)
+
+        timestamp = datetime.datetime.now().astimezone().timestamp()
+        times = (timestamp, timestamp)
+
+        copytree(bundled_backup, tmpdir, copy_function=shutil.copyfile, noclobber=False)
+        for dirpath, _, filenames in tmpdir.walk():
+            modeset_add(dirpath, stat.S_IWUSR)
+            os.utime(dirpath, times)
+
+            for filename in filenames:
+                os.utime(dirpath / filename , times)
+        move(tmpdir, working_backup)
     except Exception as e:
         log.exception("Failed to copy bundled backup/ to project dir")
         return (
             f"Failed to copy the bundled backup/ folder.\n\n"
             f"Source: {bundled_backup}\n"
-            f"Destination: {project_backup}\n\n"
+            f"Destination: {working_backup}\n\n"
             f"{e}\n\n"
             "This usually means the application can't read its bundled files or "
             "can't write to its data folder. Try running the preloader from a "
             "local folder (not OneDrive/cloud-synced) and check that antivirus "
             "software isn't interfering."
         )
+    finally:
+        delete(tmpdir, not_exist_ok=True)
 
     return prepare_working_copy()

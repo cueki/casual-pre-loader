@@ -11,16 +11,18 @@ log = logging.getLogger()
 # TODO: replace shutil with pathlib (except for rmtree) once we hit python 3.14 minimum version
 #
 
+type CopyFunction = Callable[[os.PathLike | str, os.PathLike | str], os.PathLike | str]  # return value is the same type as the second argument - i.e. passed-through
+
 
 def _get_next_new_file(file: Path) -> Path:
-    """
+    '''
     Atomically create a new file, appending underscores to its name until valid, and return a path-like object representing it.
 
     Args:
         file: The base file name.
     Returns:
         A path-like object representing the new file.
-    """
+    '''
 
     while True:
         try:
@@ -30,14 +32,14 @@ def _get_next_new_file(file: Path) -> Path:
             file = file.with_name(file.name + '_')
 
 
-def delete(file: Path, not_exist_ok: bool = False) -> None:
-    """
+def delete(file: Path, *, not_exist_ok: bool = False) -> None:
+    '''
     Delete a file or directory.
 
     Args:
         file: The file to delete.
         not_exist_ok: Do not throw an error if the file does not exist.
-    """
+    '''
 
     try:
         if not file.exists():
@@ -55,18 +57,59 @@ def delete(file: Path, not_exist_ok: bool = False) -> None:
             shutil.rmtree(file)
 
         log.debug(f'Deleted {is_file and "file" or "folder"} {file}')
-    except Exception as e:
-        raise Exception(f'Error deleting {file}') from e
+    except Exception:
+        log.exception(f'Error deleting {file}')
+        raise
+
+
+def _copy[**P](
+    src: Path,
+    dst: Path,
+    noclobber: bool | None,
+    not_exist_ok: bool,
+    func: Callable[P, os.PathLike | str],
+    # passed through to `func()`
+    *args: P.args,
+    **kwargs: P.kwargs,
+) -> Path | None:
+    if not src.exists():
+        if not_exist_ok:
+            log.debug(f'Cannot copy {src} -> {dst} as source does not exist')
+            return
+        else:
+            raise FileNotFoundError(f"[Errno 2] No such file or directory: {src}")
+
+    if src == dst:
+        log.debug(f'Tried copying {src} to itself, skipping...')
+        return
+
+    try:
+        if noclobber is None:
+            dst = _get_next_new_file(dst)
+        elif noclobber and dst.exists():
+            raise FileExistsError(f'[Errno 17] File exists: {dst}')
+
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        func(*args, src=src, dst=dst, **kwargs)
+
+        log.debug(f'Copied {src} -> {dst}')
+        return dst
+    except Exception:
+        log.exception(f'Error copying {src} -> {dst}')
+        raise
 
 
 def copy(
     src: Path,
     dst: Path,
-    not_exist_ok: bool = False,
+    *,
+    copy_function: CopyFunction = shutil.copy2,
     noclobber: bool | None = False,
-    ignore: Callable[[str, list[str]], Sequence] | None = None,
+    not_exist_ok: bool = False,
+    # passed through to `copy_function()`
+    follow_symlinks: bool | None = None,
 ) -> Path | None:
-    """
+    '''
     Copy a file or directory.
 
     Args:
@@ -78,35 +121,42 @@ def copy(
 
     Returns:
         The destination path upon a successful copy.
-    """
+    '''
 
-    if src == dst:
-        log.debug(f'Tried copying {src} to itself, skipping...')
-        return
+    return _copy(
+        src=src,
+        dst=dst,
+        noclobber=noclobber,
+        not_exist_ok=not_exist_ok,
+        func=copy_function,
+        follow_symlinks=follow_symlinks,
+    )
 
-    try:
-        if not src.exists():
-            if not_exist_ok:
-                log.debug(f'Cannot copy {src} -> {dst} as source does not exist')
-                return
-            else:
-                raise FileNotFoundError(f"[Errno 2] No such file or directory: {src}")
 
-        if noclobber is None:
-            dst = _get_next_new_file(dst)
-        elif noclobber and dst.exists():
-            raise FileExistsError(f'[Errno 17] File exists: {dst}')
-
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        if src.is_file():
-            shutil.copy2(src, dst)
-        else:
-            shutil.copytree(src, dst, ignore, dirs_exist_ok=(not noclobber))
-
-        log.debug(f'Copied {src} -> {dst}')
-        return dst
-    except Exception as e:
-        raise Exception(f'Error copying {src} -> {dst}') from e
+def copytree(
+    src: Path,
+    dst: Path,
+    *,
+    noclobber: bool | None = False,
+    not_exist_ok: bool = False,
+    # passed through to `shutil.copytree()`
+    symlinks: bool | None = None,
+    ignore: Callable[[str, list[str]], Sequence] | None = None,
+    copy_function: CopyFunction = shutil.copy2,
+    ignore_dangling_symlinks: bool | None = None,
+) -> Path | None:
+    return _copy(
+        src=src,
+        dst=dst,
+        noclobber=noclobber,
+        not_exist_ok=not_exist_ok,
+        func=shutil.copytree,
+        symlinks=symlinks,
+        ignore=ignore,
+        copy_function=copy_function,
+        ignore_dangling_symlinks=ignore_dangling_symlinks,
+        dirs_exist_ok=(not noclobber),
+    )
 
 
 def move(
@@ -114,9 +164,10 @@ def move(
     dst: Path,
     not_exist_ok: bool = False,
     noclobber: bool | None = False,
+    # passed through to `copytree()`
     ignore: Callable[[str, list[str]], Sequence] | None = None,
 ) -> Path | None:
-    """
+    '''
     Move a file or directory.
 
     Args:
@@ -128,7 +179,7 @@ def move(
 
     Returns:
         The destination path upon a successful move.
-    """
+    '''
 
     if src == dst:
         log.debug(f'Tried moving {src} to itself, skipping...')
@@ -149,19 +200,26 @@ def move(
 
         dst.parent.mkdir(parents=True, exist_ok=True)
         if ignore:
-            copy(src, dst, False, noclobber, ignore)
+            copytree(
+                src=src,
+                dst=dst,
+                not_exist_ok=False,
+                noclobber=noclobber,
+                ignore=ignore
+            )
             delete(src)
         else:
             shutil.move(src, dst)
 
         log.debug(f'Moved {src} -> {dst}')
         return dst
-    except Exception as e:
-        raise Exception(f'Error moving\n{src} -> {dst}') from e
+    except Exception:
+        log.exception(f'Error moving\n{src} -> {dst}')
+        raise
 
 
 def _format_mode(mode: int) -> str:
-    """
+    '''
     Format a file permission mode into a human-readable representation (e.g. rwxrwxrwx).
 
     Args:
@@ -169,7 +227,7 @@ def _format_mode(mode: int) -> str:
 
     Returns:
         A human-readble representation of mode bits.
-    """
+    '''
 
     ret = ''
 
@@ -189,14 +247,14 @@ def _format_mode(mode: int) -> str:
 
 
 def _modeget(file: Path) -> tuple[int, str]:
-    """
+    '''
     Retrieve a file's mode bits.
 
     Args:
         file: The file to operate on.
     Returns:
         A tuple of the file's mode bits and a human-readable representation.
-    """
+    '''
 
     mode = file.stat().st_mode
     f_mode = _format_mode(mode)
@@ -205,14 +263,14 @@ def _modeget(file: Path) -> tuple[int, str]:
 
 
 def modeset(file: Path, mode: int, not_exist_ok: bool = False) -> None:
-    """
+    '''
     Change a file's mode bits.
 
     Args:
         file: The file to operate on.
         mode: The mode.
         not_exist_ok: Do not throw an error if the file does not exist.
-    """
+    '''
 
     try:
         if not_exist_ok and not file.exists():
@@ -226,14 +284,14 @@ def modeset(file: Path, mode: int, not_exist_ok: bool = False) -> None:
 
 
 def modeset_add(file: Path, mode: int, not_exist_ok: bool = False) -> None:
-    """
+    '''
     Additively change a file's mode bits.
 
     Args:
         file: The file to operate on.
         mode: The mode bitwise OR with the file's mode.
         not_exist_ok: Do not throw an error if the file does not exist.
-    """
+    '''
 
     try:
         if not_exist_ok and not file.exists():
@@ -250,7 +308,7 @@ def modeset_add(file: Path, mode: int, not_exist_ok: bool = False) -> None:
 
 
 def check_writable(file: Path) -> bool:
-    """
+    '''
     Check if a file can be written to (not locked by another process).
 
     Args:
@@ -258,7 +316,7 @@ def check_writable(file: Path) -> bool:
 
     Returns:
         True if the file can be written to, False otherwise.
-    """
+    '''
 
     try:
         with open(file, 'r+b'):
