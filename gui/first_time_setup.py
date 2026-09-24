@@ -33,6 +33,7 @@ from core.util.sourcemod import (
     auto_detect_sourcemod,
     validate_game_directory,
 )
+from core.util.text import bullet_list
 from gui.theme import BUTTON_STYLE_ALT, FONT_SIZE_HEADER
 
 log = logging.getLogger()
@@ -285,7 +286,7 @@ class FirstTimeSetupDialog(QDialog):
             if not success:
                 QMessageBox.warning(
                     self, "Import Error",
-                    "Failed to import userdata:\n" + "\n".join(warnings)
+                    "Failed to import userdata:\n" + bullet_list(warnings, bullet="", noun="warnings")
                     + "\n\nSetup will continue without importing."
                 )
             elif warnings:

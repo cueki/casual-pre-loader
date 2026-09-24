@@ -6,6 +6,7 @@ from pathlib import Path
 from valve_parsers import VPKFile
 
 from core.constants import VALID_MOD_ROOT_FOLDERS
+from core.util.text import bullet_list, inline_list
 
 log = logging.getLogger()
 
@@ -34,7 +35,7 @@ def validate_mod_structure(folder_path: Path) -> ValidationResult:
         if vpk_files:
             vpk_names = [vpk.name for vpk in vpk_files]
             errors.append(
-                f"Folder '{folder_path.name}' contains VPK files: {', '.join(vpk_names)}\n\n"
+                f"Folder '{folder_path.name}' contains VPK files: {inline_list(vpk_names, noun='VPK files')}\n\n"
                 f"Please drag the VPK files directly instead of the folder containing them.\n"
                 f"VPK files should be dragged individually for proper processing."
             )
@@ -59,7 +60,7 @@ def validate_mod_structure(folder_path: Path) -> ValidationResult:
             vpk_locations = [f"{subdir}/{vpk}" for subdir, vpk in found_vpk_files]
             errors.append(
                 f"Folder '{folder_path.name}' contains VPK files in subdirectories:\n"
-                f"{chr(10).join(f'• {loc}' for loc in vpk_locations)}\n\n"
+                f"{bullet_list(vpk_locations, noun='VPK files')}\n\n"
                 f"Please extract and drag the VPK files directly instead of the folder containing them."
             )
             return ValidationResult(
@@ -78,7 +79,7 @@ def validate_mod_structure(folder_path: Path) -> ValidationResult:
             errors.append(
                 f"Folder '{folder_path.name}' does not contain any valid mod structure folders.\n"
                 f"Expected at least one of: {', '.join(VALID_MOD_ROOT_FOLDERS)}\n"
-                f"Found subdirectories: {', '.join([d.name for d in subdirs]) if subdirs else 'none'}"
+                f"Found subdirectories: {inline_list([d.name for d in subdirs])}"
             )
             return ValidationResult(
                 is_valid=False,
@@ -124,8 +125,7 @@ def validate_zip_structure(zip_file: zipfile.ZipFile) -> ValidationResult:
         if vpk_files:
             errors.append(
                 f"ZIP file contains VPK files:\n"
-                f"{chr(10).join(f'• {vpk}' for vpk in vpk_files[:10])}"
-                f"{f'{chr(10)}• ... and {len(vpk_files) - 10} more VPK files' if len(vpk_files) > 10 else ''}\n\n"
+                f"{bullet_list(vpk_files, noun='VPK files')}\n\n"
                 f"Please extract the VPK files from the ZIP and drag them directly instead.\n"
                 f"VPK files should be dragged individually for proper processing."
             )
@@ -188,7 +188,7 @@ def validate_zip_structure(zip_file: zipfile.ZipFile) -> ValidationResult:
                 errors.append(
                     f"ZIP file does not contain any valid mod structure.\n"
                     f"Expected structure: mod_name/materials/... etc. \n"
-                    f"Found potential mod directories: {', '.join(potential_mod_dirs) if potential_mod_dirs else 'none'}\n"
+                    f"Found potential mod directories: {inline_list(potential_mod_dirs, noun='directories')}\n"
                     f"Each mod directory should contain at least one of: {', '.join(VALID_MOD_ROOT_FOLDERS)}"
                 )
                 return ValidationResult(
@@ -200,7 +200,7 @@ def validate_zip_structure(zip_file: zipfile.ZipFile) -> ValidationResult:
 
         type_detected = "unknown"
         if len(found_mod_folders) > 1:
-            warnings.append(f"ZIP contains multiple mods: {', '.join([mod['name'] for mod in found_mod_folders])}")
+            warnings.append(f"ZIP contains multiple mods: {inline_list([mod['name'] for mod in found_mod_folders], noun='mods')}")
 
         # HUD indicators
         for mod_info in found_mod_folders:
@@ -250,7 +250,7 @@ def validate_vpk_structure(vpk_path: Path) -> ValidationResult:
             errors.append(
                 f"VPK does not contain any valid mod folders.\n"
                 f"Expected at least one of: {', '.join(VALID_MOD_ROOT_FOLDERS)}\n"
-                f"Found folders: {', '.join(sorted(found_folders)) if found_folders else 'none'}"
+                f"Found folders: {inline_list(sorted(found_folders), noun='folders')}"
             )
 
         # detect HUD mods
