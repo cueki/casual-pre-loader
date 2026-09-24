@@ -8,6 +8,7 @@ from pathlib import Path
 from core.config import config
 from core.operations.pcf_rebuild import load_particle_system_map
 from core.util.file import copytree, delete, modeset_add, move
+from core.util.text import inline_list
 
 log = logging.getLogger()
 
@@ -64,9 +65,7 @@ def prepare_working_copy() -> str | None:
             "try re-extracting the preloader to a local folder."
         )
 
-    preview = ', '.join(missing[:5])
-    if len(missing) > 5:
-        preview += f', and {len(missing) - 5} more'
+    preview = inline_list(missing)
     return (
         f"Vanilla particle staging folder is missing {len(missing)} of "
         f"{len(expected)} expected files:\n{dest}\n\n"

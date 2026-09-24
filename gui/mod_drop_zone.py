@@ -9,6 +9,7 @@ from core.services.importer import ImportService, normalize_vpk_paths
 from core.services.particles import delete_particle_mods, prune_selections
 from core.structure_validator import StructureValidator, ValidationResult
 from core.util.pcf_path_walk import apply_particle_selections, get_mod_particles
+from core.util.text import bullet_list
 from gui.conflict_matrix import ConflictMatrix
 from gui.dialogs import confirm_action, show_message
 
@@ -86,11 +87,11 @@ class ModDropZone(QFrame):
         # show validation warnings/errors and return whether to proceed
         if not validation_result.is_valid:
             error_msg = f"Cannot process '{item_name}':\n\n"
-            error_msg += "\n".join(f"• {error}" for error in validation_result.errors)
+            error_msg += bullet_list(validation_result.errors, noun="errors")
 
             if validation_result.warnings:
                 error_msg += "\n\nWarnings:\n"
-                error_msg += "\n".join(f"• {warning}" for warning in validation_result.warnings)
+                error_msg += bullet_list(validation_result.warnings, noun="warnings")
 
             self._show_message(QMessageBox.Icon.Critical, "Invalid Structure", error_msg)
             return False
@@ -98,7 +99,7 @@ class ModDropZone(QFrame):
         # show warnings but allow processing
         if validation_result.warnings:
             warning_msg = f"Warnings found for '{item_name}':\n\n"
-            warning_msg += "\n".join(f"• {warning}" for warning in validation_result.warnings)
+            warning_msg += bullet_list(validation_result.warnings, noun="warnings")
             warning_msg += "\n\nDo you want to continue anyway?"
 
             return confirm_action(self, "Validation Warnings", warning_msg)
@@ -155,7 +156,7 @@ class ModDropZone(QFrame):
             if len(successful_items) == 1:
                 self.worker.success.emit(f"Successfully processed {successful_items[0]}")
             else:
-                items_text = ",\n".join(successful_items)
+                items_text = bullet_list(successful_items, noun="items", bullet="")
                 self.worker.success.emit(f"Successfully processed {len(successful_items)} items:\n{items_text}")
 
         self.worker.finished.emit()
