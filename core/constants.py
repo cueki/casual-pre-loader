@@ -123,6 +123,17 @@ COSMETIC_VMT_PATHS = [
 ]
 
 
+# VMT parameters whose value is a texture path
+VMT_TEXTURE_PARAMS = {
+    "$basetexture", "$basetexture2", "$hdrbasetexture", "$hdrcompressedtexture",
+    "$detail", "$detail2", "$bumpmap", "$bumpmap2", "$normalmap", "$normalmap2",
+    "$dudvmap", "$envmap", "$envmapmask", "$ramptexture", "$blendmodulatetexture",
+    "$selfillummask", "$lightwarptexture", "$phongexponenttexture", "$phongwarptexture",
+    "$refracttexture", "$refracttinttexture", "$texture2", "$iris", "$corneatexture",
+    "$ambientoccltexture", "$sheenmap", "$sheenmapmask",
+}
+
+
 DECAL_MAPPING = {
     # this is just the blood decal mapping, would need to add bullet holes and such if we want those
     "decal/flesh/blood1": {"position": (384, 64), "size": (64, 64)},
