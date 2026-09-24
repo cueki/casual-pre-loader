@@ -62,19 +62,6 @@ def get_vmt_dependencies(vmt_path: Path, materials_root: Path | None = None, _se
     return deps
 
 
-def get_mod_particles() -> tuple[dict[str, list[str]], list[str]]:
-    # returns (mod name -> its pcf names, sorted list of every pcf name across mods)
-    mod_particles = {}
-    if config.particles_dir.exists():
-        for mod_dir in config.particles_dir.iterdir():
-            particle_dir = mod_dir / 'actual_particles'
-            if particle_dir.is_dir():
-                mod_particles[mod_dir.name] = [pcf.stem for pcf in particle_dir.glob('*.pcf')]
-
-    all_particles = sorted({name for names in mod_particles.values() for name in names})
-    return mod_particles, all_particles
-
-
 def _pcf_materials(pcf_path: Path) -> set[str]:
     # vmt paths (relative to materials/) used by every particle system in a pcf
     pcf = PCFFile(pcf_path).decode()

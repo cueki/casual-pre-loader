@@ -173,7 +173,7 @@ class ConflictMatrix(QTableWidget):
         self.all_particles_cache = pcf_files
 
         # build mod_particles_cache (which particles each mod has)
-        from core.util.pcf_path_walk import get_mod_particles
+        from core.services.particles import get_mod_particles
         mod_particles, _ = get_mod_particles()
         self.mod_particles_cache = mod_particles
 
