@@ -9,7 +9,7 @@ from core.config import config
 from core.operations.pcf_rebuild import load_particle_system_map
 from core.util.file import copytree, delete, modeset_add, move
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def prepare_working_copy() -> str | None:

@@ -9,7 +9,7 @@ from pathlib import Path
 from core.config import config
 from core.util.file import move
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 Reporthook = Callable[[int, float, float], None]

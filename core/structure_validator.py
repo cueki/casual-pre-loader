@@ -7,7 +7,7 @@ from valve_parsers import VPKFile
 
 from core.constants import VALID_MOD_ROOT_FOLDERS
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 @dataclass

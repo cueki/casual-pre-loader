@@ -7,7 +7,7 @@ from core.constants import COSMETIC_VMT_PATHS
 from core.handlers.file_handler import FileHandler
 from core.util.vpk import get_vpk_name
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 def find_cosmetics(tf_path: Path, proxy_name: bytes) -> list[tuple[str, bytes]]:
     vpk_path = tf_path / get_vpk_name(tf_path)

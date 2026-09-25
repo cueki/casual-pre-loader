@@ -7,7 +7,7 @@ from valve_parsers import PCFFile, VPKFile
 
 from core.config import config
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 def generate_config(has_mastercomfig=False, needs_quickprecache=False, show_console=True):
     config_parts = [

@@ -20,6 +20,12 @@ type FieldCompatibleIterable = Iterable[tuple[str, Any]]
 class DataClass(Protocol):
     __dataclass_fields__: ClassVar[dict[str, Field[Any]]]
 
+type ProgressCallback = Callable[[int, str], None]
+
+
+def NoopProgressCallback(progress: int, message: str):
+    pass
+
 
 def all_predicates[**P](*predicates: Callable[P, bool]) -> Callable[P, bool]:
     """

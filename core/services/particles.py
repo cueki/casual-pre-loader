@@ -4,8 +4,9 @@ from collections.abc import Mapping
 from core.config import config
 from core.constants import PARTICLE_GROUP_MAPPING
 from core.util.file import delete
+from core.util.text import abbrev_root
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def expand_group_selections(
@@ -90,36 +91,30 @@ def calculate_particle_availability(
     return should_enable, should_check
 
 
-def delete_particle_mods(mod_names: list[str]) -> tuple[bool, str]:
-    """
+def delete_particle_mods(mod_names: list[str]) -> None:
+    '''
     Delete particle mod folders from the particles directory.
 
     Args:
         mod_names: Names of the mod folders to delete
+    '''
 
-    Returns:
-        Tuple of (success, message)
-    """
-
-    errors = []
+    excs = []
     for mod_name in mod_names:
         mod_path = config.particles_dir / mod_name
-        if not mod_path.is_dir():
-            log.warning(f"Cannot delete particle mod {mod_name}")
-            errors.append(f"Could not find a particle mod folder for {mod_name}")
-            continue
 
         try:
-            delete(mod_path)
+            delete(mod_path, not_exist_ok=True)
+        except OSError as e:
+            errmsg = ('Failed to delete particle mod (%s[%d]): "%s"', e.strerror, e.errno, abbrev_root(config.addons_dir, mod_path, 'ADDONS'))
+            log.error(*errmsg)
+            e.add_note(errmsg[0] % errmsg[1:])
+            excs.append(e)
+        else:
             log.info(f"Deleted particle mod {mod_name}")
-        except Exception as e:
-            log.exception(f"Failed to delete particle mod {mod_name}")
-            errors.append(f"Failed to delete {mod_name}: {e!s}")
 
-    if errors:
-        return False, "\n".join(errors)
-
-    return True, "Selected particle mods have been deleted."
+    if excs:
+        raise ExceptionGroup('Failed to delete particle mods', excs)
 
 
 def prune_selections(selections: Mapping[str, str], mod_names: list[str]) -> dict[str, str]:

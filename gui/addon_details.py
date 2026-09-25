@@ -29,7 +29,7 @@ from core.config import config
 from core.constants import MOD_EXPORT_VPK_SPLIT_SIZE, MOD_TYPE_COLORS
 from gui.theme import COMBOBOX_POPUP_STYLE, FG_LIGHTEST, FG_MUTED
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class ModJsonEditor(QDialog):

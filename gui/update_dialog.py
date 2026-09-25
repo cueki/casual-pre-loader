@@ -18,7 +18,7 @@ from core.auto_updater import perform_updates
 from core.settings import settings
 from gui.theme import SUCCESS
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class UpdateWorker(QThread):
@@ -30,8 +30,8 @@ class UpdateWorker(QThread):
         self.updates = updates
 
     def run(self):
+        self.progress_updated.emit('Starting update')
         try:
-            self.progress_updated.emit('Starting update')
             perform_updates(self.updates)
         except Exception:
             log.exception('Update failed')

@@ -5,7 +5,7 @@ import stat
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 #
 # TODO: replace shutil with pathlib (except for rmtree) once we hit python 3.14 minimum version
@@ -41,25 +41,21 @@ def delete(file: Path, *, not_exist_ok: bool = False) -> None:
         not_exist_ok: Do not throw an error if the file does not exist.
     '''
 
-    try:
-        if not file.exists():
-            if not_exist_ok:
-                log.debug(f'Cannot delete {file} because it does not exist')
-                return
-            else:
-                raise FileNotFoundError(f"[Errno 2] No such file or directory: {file}")
-
-        is_file = file.is_file()
-
-        if is_file:
-            file.unlink()
+    if not file.exists():
+        if not_exist_ok:
+            log.debug(f'Cannot delete {file} because it does not exist')
+            return
         else:
-            shutil.rmtree(file)
+            raise FileNotFoundError(f"[Errno 2] No such file or directory: {file}")
 
-        log.debug(f'Deleted {is_file and "file" or "folder"} {file}')
-    except Exception:
-        log.exception(f'Error deleting {file}')
-        raise
+    is_file = file.is_file()
+
+    if is_file:
+        file.unlink()
+    else:
+        shutil.rmtree(file)
+
+    log.debug(f'Deleted {is_file and "file" or "folder"} {file}')
 
 
 def _copy[**P](
