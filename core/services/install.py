@@ -39,7 +39,7 @@ from core.operations.pcf_rebuild import extract_elements, load_particle_system_m
 from core.operations.vgui_preload import patch_mainmenuoverride
 from core.quickprecache.precache_list import make_precache_list
 from core.quickprecache.quick_precache import QuickPrecache
-from core.util.file import check_writable, copy, copytree, delete, move
+from core.util.file import check_writable, copyfile, copytree, delete, move
 from core.util.vpk import get_vpk_name
 
 log = logging.getLogger()
@@ -219,7 +219,7 @@ class InstallService:
                     else:
                         dest_path = config.temp_to_be_vpk_dir / rel_path
 
-                    copy(src_path, dest_path)
+                    copyfile(src_path, dest_path)
                     file_origin[dest_path] = addon_index
 
                     completed_files += 1
@@ -401,7 +401,7 @@ class InstallService:
                             progress_callback=on_progress
                             )
                         precache.run(auto=True)
-                        copy(config.install_dir / 'core/quickprecache/_QuickPrecache.vpk', custom_dir / '_QuickPrecache.vpk')
+                        copyfile(config.install_dir / 'core/quickprecache/_QuickPrecache.vpk', custom_dir / '_QuickPrecache.vpk')
 
                 self._check_cancelled()
 

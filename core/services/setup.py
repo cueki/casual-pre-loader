@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from core.config import config
-from core.util.file import copy, copytree, delete
+from core.util.file import copyfile, copytree, delete
 
 log = logging.getLogger()
 
@@ -54,7 +54,7 @@ def import_userdata(userdata_path: Path) -> tuple[bool, list[str]]:
 
         try:
             delete(dst, not_exist_ok=True)
-            (copy if src.is_file() else copytree)(src, dst)
+            (copyfile if src.is_file() else copytree)(src, dst)
         except Exception as e:
             log.exception(f"Failed to import {src}")
             warnings.append(f"Failed to import {src.name}: {e}")

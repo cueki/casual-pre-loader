@@ -14,7 +14,7 @@ from urllib3.exceptions import NameResolutionError
 
 from core.config import config
 from core.constants import BUILD_DIRS, BUILD_FILES, REMOTE_REPO
-from core.util.file import copy, delete
+from core.util.file import copyfile, delete
 from core.util.net import download_file
 from core.util.repo import Update
 from core.util.repo.github_api import get_releases_with_asset
@@ -94,7 +94,7 @@ def perform_updates(updates: tuple[Update, ...] | None = None) -> None:
 
                 try:
                     extract(archive_path, config.install_dir.parent / '.tmp_update', 0, False, None)
-                    copy(config.install_dir.parent / 'RUNME.bat', renamed_runme) # INFO: we need to rename RUNME to avoid file lock issues
+                    copyfile(config.install_dir.parent / 'RUNME.bat', renamed_runme) # INFO: we need to rename RUNME to avoid file lock issues
                 except Exception:
                     log.exception(f'Error extracting update {update.release.tag_name}')
 
