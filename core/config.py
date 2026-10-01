@@ -239,13 +239,16 @@ def _get_config() -> None:
             settings_dir: ClassVar[Path] = _install_dir / 'userdata' / 'config'
             temp_dir:     ClassVar[Path] = _install_dir / 'userdata' / 'temp'
     else:
-        import platformdirs
+        from platformdirs import PlatformDirs
+
+        dirs = PlatformDirs(PROGRAM_NAME, PROGRAM_AUTHOR, ensure_exists=True)
 
         @dataclass
         class FolderConfig(FolderConfig):
-            project_dir  = platformdirs.user_data_path(PROGRAM_NAME, PROGRAM_AUTHOR)
-            settings_dir = platformdirs.user_config_path(PROGRAM_NAME, PROGRAM_AUTHOR)
-            temp_dir     = platformdirs.user_cache_path(PROGRAM_NAME, PROGRAM_AUTHOR)
+            # TODO: replace descriptors with simple lambdas - would be much simpler if we drop portable data location support
+            project_dir  = dirs.user_data_path
+            settings_dir = dirs.user_config_path
+            temp_dir     = dirs.user_cache_path
 
     @dataclass
     class Config(Args, FolderConfig):
