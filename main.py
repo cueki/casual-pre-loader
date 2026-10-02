@@ -95,6 +95,25 @@ def main():
     log.addHandler(handler)
     log.setLevel(logging.INFO)
 
+    # TODO: Find a way to display bad exit messages with GUI popups when running the program's GUI.
+    # This would require the program init to have zero side effects, i.e. not write to any non-instance-specific files on disk (log files and config files)
+
+    if platform == 'win32':
+        import ctypes
+
+        if ctypes.windll.shell32.IsUserAnAdmin():
+            log.error('This program should not be run as administrator')
+            raise SystemExit(1)
+    elif platform == 'linux':
+        import os
+
+        if os.getuid() == 0:
+            log.error('This program should not be run as root')
+            raise SystemExit(1)
+    else:
+        log.error(f"could not determine privileges on platform type: {platform}")
+        raise SystemExit(1)
+
     from core.config import config, subcommand
 
     install(show_locals=config.verbose, max_frames=(not config.verbose and 100 or 0 )) # install the rich traceback handler
