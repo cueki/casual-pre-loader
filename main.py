@@ -80,6 +80,22 @@ def gui() -> int:
     return 0
 
 def main():
+    if platform == 'win32':
+        import ctypes
+
+        if ctypes.windll.shell32.IsUserAnAdmin():
+            print('This program should not be run as administrator')
+            raise SystemExit(1)
+    elif platform == 'linux':
+        import os
+
+        if os.getuid() == 0:
+            print('This program should not be run as root')
+            raise SystemExit(1)
+    else:
+        print(f"could not determine privileges on platform type: {platform}")
+        raise SystemExit(1)
+
     from rich.logging import RichHandler
     from rich.traceback import install
 
