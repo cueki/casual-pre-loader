@@ -18,7 +18,7 @@ from valve_parsers import PCFFile
 from core.config import config
 from core.operations.pcf_rebuild import extract_elements, get_pcf_element_names
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def load_particle_system_map() -> dict[str, list[str]]:

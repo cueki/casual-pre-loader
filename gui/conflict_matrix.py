@@ -23,7 +23,7 @@ from core.services.particles import (
 )
 from gui.theme import BG_DEFAULT, BUTTON_STYLE_ALT, CODE_BG, FONT_SIZE_NORMAL
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class ConflictMatrix(QTableWidget):

@@ -21,7 +21,7 @@ from core.util.repo.github_api import get_releases_with_asset
 from core.util.zip import FilterPredicate, extract
 from core.version import VERSION
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 """
 This module handles all the logic related to auto-updating.

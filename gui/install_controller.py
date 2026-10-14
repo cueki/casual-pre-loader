@@ -8,7 +8,7 @@ from core.constants import InstallOperation, Sourcemods
 from core.services.install import InstallService
 from core.util.sourcemod import validate_game_directory
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class InstallController(QObject):
@@ -38,7 +38,7 @@ class InstallController(QObject):
     def set_tf_path(self, path: Path) -> None:
         self.tf_path = path
 
-    def _on_progress(self, progress: int, message: str):
+    def _progress_callback(self, progress: int, message: str):
         self.progress_update.emit(progress, message)
 
     def _run_install(self, install_path: Path, selected_addons, mod_drop_zone, sourcemod: Sourcemods = Sourcemods.DEFAULT):
@@ -60,7 +60,7 @@ class InstallController(QObject):
             self.service.install(
                 tf_path=install_path,
                 selected_addons=selected_addons,
-                on_progress=self._on_progress,
+                progress_callback=self._progress_callback,
                 apply_particle_selections=apply_particles,
                 disable_paint_colors=disable_paint_colors,
                 show_console_on_startup=show_console,
@@ -69,14 +69,14 @@ class InstallController(QObject):
                 sourcemod=sourcemod,
             )
             self.operation_success.emit("Mods installed successfully!", InstallOperation.INSTALL)
-            self._on_progress(0, "Installation complete")
+            self._progress_callback(0, 'Installation complete')
 
         except Exception as e:
-            was_cancelled = "cancelled by user" in str(e).lower()
-            if was_cancelled:
-                self._on_progress(0, "Cancelling installation, restoring files...")
-            else:
-                self._on_progress(0, "Installation failed, attempting cleanup...")
+            was_cancelled = 'cancelled by user' in str(e).lower()
+            self._progress_callback(
+                0,
+                'Cancelling installation, restoring files...' if was_cancelled else 'Installation failed, attempting cleanup...'
+            )
 
             try:
                 self.service.uninstall(tf_path=install_path, sourcemod=sourcemod)
@@ -114,7 +114,7 @@ class InstallController(QObject):
         try:
             self.service.uninstall(
                 tf_path=restore_path,
-                on_progress=self._on_progress,
+                progress_callback=self._progress_callback,
                 sourcemod=sourcemod,
             )
             self.operation_success.emit("Mods uninstalled successfully!", InstallOperation.UNINSTALL)

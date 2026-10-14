@@ -6,7 +6,7 @@ from valve_parsers import VPKFile
 from core.config import config
 from core.util.vpk import get_vpk_name
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def find_material_files(directory: Path) -> tuple[list[Path], set[str]]:
