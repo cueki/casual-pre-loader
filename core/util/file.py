@@ -99,7 +99,7 @@ def _copy[**P](
         raise
 
 
-def copy(
+def copyfile(
     src: Path,
     dst: Path,
     *,

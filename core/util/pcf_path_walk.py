@@ -11,7 +11,7 @@ from core.operations.pcf_rebuild import (
     get_pcf_element_names,
     load_particle_system_map,
 )
-from core.util.file import copy
+from core.util.file import copyfile
 
 log = logging.getLogger()
 
@@ -151,7 +151,7 @@ def apply_particle_selections(selections: dict) -> bool:
                     source_file = source_particles_dir / f"{particle_file}.pcf"
                     if source_file.exists():
                         # copy particle file to to_be_patched
-                        copy(source_file, config.temp_to_be_patched_dir / f"{particle_file}.pcf")
+                        copyfile(source_file, config.temp_to_be_patched_dir / f"{particle_file}.pcf")
                         # get particle file mats from attrib
                         pcf = PCFFile(source_file).decode()
                         system_defs = pcf.get_elements_by_type('DmeParticleSystemDefinition')
@@ -174,14 +174,14 @@ def apply_particle_selections(selections: dict) -> bool:
             full_material_path = mod_dir / 'materials' / material_path.replace('\\', '/')
             if full_material_path.exists():
                 material_destination = config.temp_to_be_vpk_dir / Path(full_material_path).relative_to(mod_dir)
-                copy(full_material_path, material_destination)
+                copyfile(full_material_path, material_destination)
                 texture_paths = get_vmt_dependencies(full_material_path)
                 if texture_paths:
                     for texture_path in texture_paths:
                         full_texture_path = mod_dir / 'materials' / str(texture_path).replace('\\', '/')
                         if full_texture_path.exists():
                             texture_destination = config.temp_to_be_vpk_dir / Path(full_texture_path).relative_to(mod_dir)
-                            copy(full_texture_path, texture_destination)
+                            copyfile(full_texture_path, texture_destination)
 
     # merge split files back into original files
     for original_file, split_defs in PARTICLE_SPLITS.items():
