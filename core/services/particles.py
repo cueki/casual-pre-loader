@@ -4,6 +4,7 @@ from collections.abc import Mapping
 from core.config import config
 from core.constants import PARTICLE_GROUP_MAPPING
 from core.util.file import delete
+from core.util.text import bullet_list
 
 log = logging.getLogger()
 
@@ -117,7 +118,7 @@ def delete_particle_mods(mod_names: list[str]) -> tuple[bool, str]:
             errors.append(f"Failed to delete {mod_name}: {e!s}")
 
     if errors:
-        return False, "\n".join(errors)
+        return False, bullet_list(errors, bullet="", noun="errors")
 
     return True, "Selected particle mods have been deleted."
 

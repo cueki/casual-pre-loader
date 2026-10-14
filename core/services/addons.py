@@ -5,6 +5,7 @@ import logging
 from core.config import config
 from core.settings import addon_metadata
 from core.util.file import delete
+from core.util.text import bullet_list
 
 log = logging.getLogger()
 
@@ -116,7 +117,7 @@ class AddonService:
                     errors.append(f"Failed to delete {folder_name}: {e!s}")
 
         if errors:
-            return False, "\n".join(errors)
+            return False, bullet_list(errors, bullet="", noun="errors")
 
         # update addon_metadata.json
         for folder_name in addon_dir_names:

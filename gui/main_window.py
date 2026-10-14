@@ -29,6 +29,7 @@ from core.constants import InstallOperation, Sourcemods
 from core.particle_splits import migrate_old_particle_files
 from core.services.conflicts import scan_for_legacy_conflicts
 from core.settings import addon_metadata, settings
+from core.util.text import bullet_list
 from core.version import VERSION
 from gui.addon_panel import AddonPanel
 from gui.addons_manager import AddonsManager
@@ -681,11 +682,13 @@ class ParticleManagerGUI(QMainWindow):
         found_conflicts = scan_for_legacy_conflicts(custom_dir)
 
         if found_conflicts:
-            conflict_list = "\n\u2022 ".join(found_conflicts)
+            # the dialog only shows the first few, so keep the whole set in the log
+            log.info("Legacy conflicts found in custom folder: %s", found_conflicts)
+            conflict_list = bullet_list(found_conflicts, noun="items")
             QMessageBox.warning(
                 self,
                 "Conflicting Files Detected",
-                f"The following items in your custom folder may conflict with this method:\n\n\u2022 {conflict_list}\n\nIt's recommended to remove these to avoid issues."
+                f"The following items in your custom folder may conflict with this method:\n\n{conflict_list}\n\nIt's recommended to remove these to avoid issues."
             )
 
     def _show_launch_options_popup(self, title, text, setting):

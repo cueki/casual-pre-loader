@@ -2,6 +2,7 @@ from PyQt6.QtCore import QObject, Qt
 from PyQt6.QtWidgets import QListWidgetItem, QMessageBox
 
 from core.services.addons import AddonService
+from core.util.text import bullet_list
 
 
 class AddonsManager(QObject):
@@ -66,11 +67,11 @@ class AddonsManager(QObject):
             else:
                 selected_folder_names.append(display_name)
 
-        addon_list = "\n• ".join(selected_addon_names)
+        addon_list = bullet_list(selected_addon_names, noun="addons")
         result = QMessageBox.warning(
             None,
             "Confirm Deletion",
-            f"The following addons will be permanently deleted:\n\n• {addon_list}\n\nAre you sure?",
+            f"The following addons will be permanently deleted:\n\n{addon_list}\n\nAre you sure?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No  # this forces default to "no" if someone spams enter (me)
         )
