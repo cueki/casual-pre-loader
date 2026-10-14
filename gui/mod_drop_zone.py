@@ -5,10 +5,10 @@ from pathlib import Path
 from PyQt6.QtCore import QObject, Qt, pyqtSignal
 from PyQt6.QtWidgets import QFrame, QMessageBox, QProgressDialog, QVBoxLayout
 
+from core.operations.particle_install import apply_particle_selections
 from core.services.importer import ImportService, normalize_vpk_paths
-from core.services.particles import delete_particle_mods, prune_selections
+from core.services.particles import delete_particle_mods, get_mod_particles, prune_selections
 from core.structure_validator import StructureValidator, ValidationResult
-from core.util.pcf_path_walk import apply_particle_selections, get_mod_particles
 from gui.conflict_matrix import ConflictMatrix
 from gui.dialogs import confirm_action, show_message
 
