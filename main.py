@@ -80,13 +80,18 @@ def gui() -> int:
     return 0
 
 def main():
+    import datetime
+
     from rich.logging import RichHandler
     from rich.traceback import install
+
+    def fmt_time(t: datetime.datetime) -> str: # `logging` uses naive datetime objects by default (i.e. no tzdata)
+        return t.astimezone().strftime('[%Y-%m-%d %H:%M:%S %z]')
 
     log = logging.getLogger()
 
     handler = RichHandler(rich_tracebacks=True)
-    handler.setFormatter(logging.Formatter(datefmt='[%Y-%m-%d %H:%M:%S]'))
+    handler.setFormatter(logging.Formatter(datefmt=fmt_time))
     log.addHandler(handler)
     log.setLevel(logging.INFO)
 
