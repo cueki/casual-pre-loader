@@ -6,6 +6,7 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Annotated, ClassVar, cast
 
+import platformdirs
 from cappa import Arg, ArgAction, Destructured, Group, Subcommand, command, parse
 
 from core.constants import DESCRIPTION, PROGRAM_AUTHOR, PROGRAM_NAME, Sourcemods
@@ -93,6 +94,8 @@ class FolderConfig:
     """Final location of all files before being packed into the output VPK"""
     # ruff: enable[function-call-in-dataclass-default-argument]
 
+    lock_file: Path = platformdirs.user_runtime_path(PROGRAM_NAME, PROGRAM_AUTHOR) / f'{PROGRAM_NAME}.lock'
+
 
 # create a class that inherits all config dataclasess, initialize it using a union of an instance of each
 # based on https://github.com/omni-us/jsonargparse/pull/796
@@ -108,6 +111,7 @@ def _log_start(config: Config) -> None:
     logging.info(f'Config files are in {config.settings_dir}')
     logging.info(f'Cache files are in {config.temp_dir}')
     logging.info(f'Log is written to {config.log_file}')
+    logging.info(f'lock file is {config.lock_file}')
 
     logging.debug('DEBUG OUTPUT HAS BEEN ENABLED')
 
@@ -240,9 +244,7 @@ def _get_config() -> None:
             settings_dir: ClassVar[Path] = _install_dir / 'userdata' / 'config'
             temp_dir:     ClassVar[Path] = _install_dir / 'userdata' / 'temp'
     else:
-        from platformdirs import PlatformDirs
-
-        dirs = PlatformDirs(PROGRAM_NAME, PROGRAM_AUTHOR, ensure_exists=True)
+        dirs = platformdirs.PlatformDirs(PROGRAM_NAME, PROGRAM_AUTHOR, ensure_exists=True)
 
         @dataclass
         class FolderConfig(FolderConfig):

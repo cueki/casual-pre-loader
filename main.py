@@ -83,6 +83,8 @@ def gui() -> int:
 def main():
     import datetime
 
+    from filelock import FileLock
+    from filelock import Timeout as FileLockTimeout
     from rich.logging import RichHandler
     from rich.traceback import install
 
@@ -119,10 +121,22 @@ def main():
     install(show_locals=config.verbose, max_frames=(not config.verbose and 100 or 0)) # install the rich traceback handler
     log.setLevel(config.verbose and logging.DEBUG or logging.INFO)
 
-    config.log_file.parent.mkdir(parents=True, exist_ok=True)
-    log.addHandler(logging.FileHandler(config.log_file, mode='a', encoding='utf-8'))
+    try:
+        acquired_lock = FileLock(config.lock_file, mode = 0o0600, blocking=False).acquire()
+    except FileLockTimeout:
+        log.critical('Another instance is already running.', exc_info=True)
+        raise SystemExit(1)
+    with acquired_lock:
+        # TODO: investigate if handlers can 'block'
+        # i.e. if we add a handler that creates a popup using a GUI library, could it potentially not emit to the other handlers until the user accepts the popup?
+        # If so, then the logfile handler should be moved so that it is called before any such handlers
+        log.addHandler(logfile_handler := logging.FileHandler(config.log_file, mode='a', encoding='utf-8'))
+        try:
+            raise SystemExit(subcommand(config))
+        finally:
+            log.removeHandler(logfile_handler)
+            logfile_handler.close()
 
-    raise SystemExit(subcommand(config))
 
 if __name__ == '__main__':
     main()
