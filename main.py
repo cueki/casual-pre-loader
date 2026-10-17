@@ -4,6 +4,7 @@ import logging
 from sys import platform
 
 from core.util.file import delete
+from core.util.text import notimplemented_msg
 
 
 #TODO: move to `gui/` and reorganize
@@ -70,7 +71,7 @@ def gui() -> int:
     elif platform == 'linux':
         window.setWindowIcon(QIcon(str(config.install_dir / 'gui/icons/cueki_icon.svg')))
     else:
-        logging.warning(f"We don't know how to set an icon for platform type: {platform}")
+        logging.warning(notimplemented_msg('set an icon'))
 
     splash.finish(window)
     window.show()
