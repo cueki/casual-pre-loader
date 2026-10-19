@@ -16,7 +16,7 @@ from PyQt6.QtWidgets import (
 from core.services.conflicts import detect_addon_overwrites
 from gui.theme import BUTTON_STYLE_ALT, FONT_SIZE_NORMAL, FRAME_STYLE, SECTION_LABEL_STYLE, WARNING
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class LoadOrderPanel(QWidget):

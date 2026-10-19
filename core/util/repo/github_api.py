@@ -19,6 +19,8 @@ from urllib3.response import HTTPResponse
 from core.util import all_predicates
 from core.util.repo import Update
 
+log = logging.getLogger(__name__)
+
 
 # subclass `github.GithubRetry.GithubRetry` so that it short-circuits NameResolutionError
 class GithubRetry(GithubRetry):
@@ -57,7 +59,7 @@ def get_repo(repo: str) -> Repository:
         An object representing the repository.
     '''
 
-    logging.debug(f'Retrieving repository ({repo})')
+    log.debug(f'Retrieving repository ({repo})')
 
     return gh.get_repo(repo)
 
@@ -106,7 +108,7 @@ def get_releases(
 
     _filter = all_predicates(*_filter)
 
-    logging.debug(f'Retrieving releases from https://github.com/{repo.full_name}')
+    log.debug(f'Retrieving releases from https://github.com/{repo.full_name}')
     return filter(_filter, repo.get_releases())
 
 

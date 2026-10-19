@@ -12,7 +12,7 @@ from core.util.pcf_path_walk import apply_particle_selections, get_mod_particles
 from gui.conflict_matrix import ConflictMatrix
 from gui.dialogs import confirm_action, show_message
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class VPKProcessWorker(QObject):
@@ -60,23 +60,18 @@ class ModDropZone(QFrame):
         ):
             return
 
-        success, message = delete_particle_mods([mod_name])
-        if not success:
-            log.error(message, stack_info=True)
-            self.show_error(message)
-            return
-
-        # drop selections that pointed at the deleted mod so they don't linger in settings
-        if self.settings:
-            self.settings.matrix_selections = prune_selections(
-                self.settings.matrix_selections, [mod_name]
-            )
-            self.settings.matrix_selections_simple = prune_selections(
-                self.settings.matrix_selections_simple, [mod_name]
-            )
-
-        self.update_matrix()
-        self.addon_updated.emit()
+        try:
+            delete_particle_mods([mod_name])
+        except ExceptionGroup as eg:
+            errmsg = '\n'.join((f'{eg!s}:', *(e.__notes__.pop() for e in eg.exceptions)))
+            log.exception('Errors when deleting particle mods')
+            self.show_error(errmsg)
+        else:
+            if self.settings: # drop selections that pointed at the deleted mod so they don't linger in settings
+                self.settings.matrix_selections = prune_selections(self.settings.matrix_selections, [mod_name])
+                self.settings.matrix_selections_simple = prune_selections(self.settings.matrix_selections_simple, [mod_name])
+            self.update_matrix()
+            self.addon_updated.emit()
 
     def apply_particle_selections(self):
         selections = self.conflict_matrix.get_selected_particles()
@@ -117,19 +112,19 @@ class ModDropZone(QFrame):
         mods = list(mod_particles.keys())
         self.conflict_matrix.update_matrix(mods, all_particles)
 
-    def update_progress(self, value, message):
+    def update_progress(self, value: int, message: str) -> None:
         if self.progress_dialog:
             self.progress_dialog.setValue(value)
             self.progress_dialog.setLabelText(message)
+
+    def _show_message(self, icon, title, message):
+        show_message(self, icon, title, message)
 
     def show_error(self, message):
         self._show_message(QMessageBox.Icon.Critical, "Error", message)
 
     def show_success(self, message):
         self._show_message(QMessageBox.Icon.Information, "Success", message)
-
-    def _show_message(self, icon, title, message):
-        show_message(self, icon, title, message)
 
     def on_process_finished(self):
         if self.progress_dialog:
@@ -138,27 +133,22 @@ class ModDropZone(QFrame):
         self.rescan_callback()
         self.processing = False
 
-    def process_dropped_items(self, dropped_paths):
-        # just a wrapper for the services
-        successful_items, failed_items = self.service.process_dropped_items(
-            dropped_paths,
-            progress_callback=self.worker.progress.emit
-        )
+    def process_dropped_items(self, dropped_paths: list[Path]) -> None:
+        try:
+            self.service.process_dropped_items(dropped_paths, progress_callback=self.worker.progress.emit)
+        except ExceptionGroup as eg:
+            for path in (Path(e.__notes__.pop()) for e in eg.exceptions):
+                dropped_paths.remove(path)
 
-        # emit errors for failed items
-        for item_name, error_msg in failed_items:
-            self.worker.error.emit(error_msg)
+            errmsg = '\n'.join((f'{eg!s}:', *(e.__notes__.pop() for e in eg.exceptions)))
+            log.exception('Errors when importing mods')
+            self.worker.error.emit(errmsg)
+        finally:
+            if dropped_paths:
+                self.addon_updated.emit()
+                self.worker.success.emit('\n'.join((f'Successfully processed {len(dropped_paths)} items:', *map(str, dropped_paths))))
 
-        # emit success message and update addon list
-        if successful_items:
-            self.addon_updated.emit()
-            if len(successful_items) == 1:
-                self.worker.success.emit(f"Successfully processed {successful_items[0]}")
-            else:
-                items_text = ",\n".join(successful_items)
-                self.worker.success.emit(f"Successfully processed {len(successful_items)} items:\n{items_text}")
-
-        self.worker.finished.emit()
+            self.worker.finished.emit()
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
