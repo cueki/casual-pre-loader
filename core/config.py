@@ -236,13 +236,14 @@ def _get_config() -> None:
 
     # NOTE: This is some fucking cursed-ass metaprogramming bullshit - but it works, but it works...
     # Perhaps weakly-typed dynamic languages *can* give one *too* much freedom...
-
     if args.args.portable:
+        dirs = platformdirs.PlatformDirs(PROGRAM_NAME, PROGRAM_AUTHOR)
+
         @dataclass
         class FolderConfig(FolderConfig):
-            project_dir:  ClassVar[Path] = _install_dir / 'userdata' / 'data'
-            settings_dir: ClassVar[Path] = _install_dir / 'userdata' / 'config'
-            temp_dir:     ClassVar[Path] = _install_dir / 'userdata' / 'temp'
+            project_dir:  ClassVar[Path] = _install_dir / 'userdata' / 'data' / dirs.user_data_path.relative_to(platformdirs.user_data_path())
+            settings_dir: ClassVar[Path] = _install_dir / 'userdata' / 'config' / dirs.user_config_path.relative_to(platformdirs.user_config_path())
+            temp_dir:     ClassVar[Path] = _install_dir / 'userdata' / 'cache' / dirs.user_cache_path.relative_to(platformdirs.user_cache_path())
     else:
         dirs = platformdirs.PlatformDirs(PROGRAM_NAME, PROGRAM_AUTHOR, ensure_exists=True)
 

@@ -53,6 +53,9 @@ def migrate():
         config.install_dir / 'operations',
         config.install_dir / 'quickprecache',
         config.install_dir / 'temp',
+        config.install_dir / 'userdata/temp',
+        config.install_dir / 'casual-pre-loader.log',
+        config.install_dir / 'userdata/data/casual-pre-loader.log',
     ]
     DELETE: list[Param[Path]] = [
         config.project_dir / 'temp',
@@ -63,8 +66,10 @@ def migrate():
         (config.install_dir / 'mods', config.mods_dir),
         (config.install_dir / 'app_settings.json', config.app_settings_file),
         (config.install_dir / 'addon_metadata.json', config.addon_metadata_file),
-        (config.install_dir / 'casual-pre-loader.log', config.log_file),
         (config.install_dir / 'modsinfo.json', config.modsinfo_file),
+        # reorganize userdata so its subdirectories have the same structure as XDG directories
+        ((file, config.project_dir / file.name) for file in (config.install_dir / 'userdata/data').iterdir() if file != config.project_dir),
+        ((file, config.settings_dir / file.name) for file in (config.install_dir / 'userdata/config').iterdir() if file != config.settings_dir),
     ]
     MOVE: list[Param[tuple[Path, Path]]] = []
 
