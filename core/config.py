@@ -104,8 +104,9 @@ class Config(Args, FolderConfig):
 def _log_start(config: Config) -> None:
     logging.info(f'Version {VERSION} on {sys.platform} {"(portable)" if config.portable else ""}')
     logging.info(f'Application files are located in {config.install_dir}')
-    logging.info(f'Project files are written to {config.project_dir}')
-    logging.info(f'Settings files are in {config.settings_dir}')
+    logging.info(f'Data files are written to {config.project_dir}')
+    logging.info(f'Config files are in {config.settings_dir}')
+    logging.info(f'Cache files are in {config.temp_dir}')
     logging.info(f'Log is written to {config.log_file}')
 
     logging.debug('DEBUG OUTPUT HAS BEEN ENABLED')
