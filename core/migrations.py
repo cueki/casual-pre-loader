@@ -1,7 +1,7 @@
 import stat
-from collections.abc import Iterable
+from collections.abc import Generator
 from functools import partial
-from itertools import starmap
+from itertools import chain, starmap
 from pathlib import Path
 
 from more_itertools import consume
@@ -9,7 +9,7 @@ from more_itertools import consume
 from core.config import config
 from core.util.file import delete, modeset, modeset_add, move
 
-"""
+'''
 This module has a single function, `migrate()`, that ensures that old files are cleaned up or moved into new locations.
 This is so that if we change things, users will have a (hopefully) seamless expereince.
 
@@ -31,11 +31,19 @@ so I'd say this is a tolerable shortcoming.
 To try and mitigate this potential problem, it is recommended to not remove things from this file too often, once a month at the most should be fine.
 
 `migrate()` only needs to be called once per program execution, so even though they are effectively constants, put all migration data into its body so it can get GC'ed when it goes OOS.
-"""
+'''
+
+def yield_param[T](param: T | Generator[T, None, None]) -> Generator[T, None, None]:
+    if isinstance(param, Generator):
+        yield from param
+    else:
+        yield param
+
 
 def migrate():
-    # Files and folders to delete
-    DELETE_PORTABLE: list[Path] = [
+    type Param[T] = T | Generator[T, None, None]
+
+    DELETE_PORTABLE: list[Param[Path]] = [ # Files and folders to delete
         # old updater
         config.install_dir / 'core' / 'updater_old.exe',
         config.install_dir / 'RUNME.tmp.bat',
@@ -45,29 +53,32 @@ def migrate():
         config.install_dir / 'operations',
         config.install_dir / 'quickprecache',
         config.install_dir / 'temp',
+        config.install_dir / 'userdata/temp',
+        config.install_dir / 'casual-pre-loader.log',
+        config.install_dir / 'userdata/data/casual-pre-loader.log',
     ]
-    DELETE: list[Path] = [
+    DELETE: list[Param[Path]] = [
         config.project_dir / 'temp',
     ]
 
-    # Files and folders to relocate
-    MOVE_PORTABLE: list[tuple[Path, Path]] = [
+    MOVE_PORTABLE: list[Param[tuple[Path, Path]]] = [ # Files and folders to relocate
         # userdata
         (config.install_dir / 'mods', config.mods_dir),
         (config.install_dir / 'app_settings.json', config.app_settings_file),
         (config.install_dir / 'addon_metadata.json', config.addon_metadata_file),
-        (config.install_dir / 'casual-pre-loader.log', config.log_file),
         (config.install_dir / 'modsinfo.json', config.modsinfo_file),
+        # reorganize userdata so its subdirectories have the same structure as XDG directories
+        ((file, config.project_dir / file.name) for file in (config.install_dir / 'userdata/data').iterdir() if file != config.project_dir),
+        ((file, config.settings_dir / file.name) for file in (config.install_dir / 'userdata/config').iterdir() if file != config.settings_dir),
     ]
-    MOVE: list[tuple[Path, Path]] = []
+    MOVE: list[Param[tuple[Path, Path]]] = []
 
     # Files and folders to set the mode of
     MODESET: dict[int, list[Path]] = {}
     MODESET_PORTABLE: dict[int, list[Path]] = {}
     MODESET_ADD: dict[int, list[Path]] = {}
     MODESET_ADD_PORTABLE: dict[int, list[Path]] = {
-        # set executable bit
-        stat.S_IXOTH | stat.S_IXGRP | stat.S_IXUSR: [
+        stat.S_IXOTH | stat.S_IXGRP | stat.S_IXUSR: [ # set executable bit
             config.install_dir / 'main.py',
             config.install_dir / 'scripts' / 'build.py',
             config.install_dir / 'scripts' / 'analyze_particle_hierarchy.py',
@@ -75,20 +86,6 @@ def migrate():
             config.install_dir / 'scripts' / 'run.sh',
         ]
     }
-
-    def _delete(files: Iterable[Path]):
-        consume(map(partial(delete, not_exist_ok=True), files))
-
-    def _move(pairs: Iterable[tuple[Path, Path]]):
-        consume(starmap(partial(move, not_exist_ok=True), pairs))
-
-    def _modeset(groups: Iterable[tuple[int, Iterable[Path]]]):
-        for mode, files in groups:
-            consume(map(partial(modeset, mode=mode, not_exist_ok=True), files))
-
-    def _modeset_add(groups: Iterable[tuple[int, Iterable[Path]]]):
-        for mode, files in groups:
-            consume(map(partial(modeset_add, mode=mode, not_exist_ok=True), files))
 
     if config.portable:
         DELETE += DELETE_PORTABLE
@@ -100,7 +97,18 @@ def migrate():
         for k,v in MODESET_ADD_PORTABLE.items():
             MODESET_ADD[k] = MODESET_ADD.get(k, []) + v
 
-    _delete(DELETE)
-    _move(MOVE)
-    _modeset(MODESET.items())
-    _modeset_add(MODESET_ADD.items())
+    consume(map(
+        partial(delete, not_exist_ok=True),
+        chain.from_iterable(map(yield_param, DELETE))
+    ))
+
+    consume(starmap(
+        partial(move, not_exist_ok=True),
+        chain.from_iterable(map(yield_param, MOVE))
+    ))
+
+    for mode, files in MODESET.items():
+        consume(map(partial(modeset, mode=mode, not_exist_ok=True), files))
+
+    for mode, files in MODESET_ADD.items():
+        consume(map(partial(modeset_add, mode=mode, not_exist_ok=True), files))

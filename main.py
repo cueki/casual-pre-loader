@@ -4,6 +4,7 @@ import logging
 from sys import platform
 
 from core.util.file import delete
+from core.util.text import notimplemented_msg
 
 
 #TODO: move to `gui/` and reorganize
@@ -70,7 +71,7 @@ def gui() -> int:
     elif platform == 'linux':
         window.setWindowIcon(QIcon(str(config.install_dir / 'gui/icons/cueki_icon.svg')))
     else:
-        logging.warning(f"We don't know how to set an icon for platform type: {platform}")
+        logging.warning(notimplemented_msg('set an icon'))
 
     splash.finish(window)
     window.show()
@@ -80,23 +81,74 @@ def gui() -> int:
     return 0
 
 def main():
+    import datetime
+
+    from platformdirs import PlatformDirs
     from rich.logging import RichHandler
     from rich.traceback import install
 
-    logger = logging.getLogger()
+    from core.constants import PROGRAM_AUTHOR, PROGRAM_NAME
+
+    def fmt_time(t: datetime.datetime) -> str: # `logging` uses naive datetime objects by default (i.e. no tzdata)
+        return t.astimezone().strftime('[%Y-%m-%d %H:%M:%S %z]')
+
+    log = logging.getLogger()
 
     handler = RichHandler(rich_tracebacks=True)
-    handler.setFormatter(logging.Formatter(datefmt='[%Y-%m-%d %H:%M:%S]'))
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
+    handler.setFormatter(logging.Formatter(datefmt=fmt_time))
+    log.addHandler(handler)
+    log.setLevel(logging.INFO)
+
+    # TODO: Find a way to display bad exit messages with GUI popups when running the program's GUI.
+    # This would require the program init to have zero side effects, i.e. not write to any non-instance-specific files on disk (log files and config files)
+
+    if platform == 'win32':
+        import ctypes
+
+        if ctypes.windll.shell32.IsUserAnAdmin():
+            log.critical('This program should not be run as administrator')
+            raise SystemExit(1)
+    elif platform == 'linux':
+        import os
+
+        if os.getuid() == 0:
+            log.critical('This program should not be run as root')
+            raise SystemExit(1)
+    else:
+        raise NotImplementedError(notimplemented_msg('determine privileges'))
+
+    dirs = PlatformDirs(PROGRAM_NAME, PROGRAM_AUTHOR, ensure_exists=True)
+
+    # TODO: see if using `filelock`/`portalocker` makes sense
+    try:
+        lock_file = dirs.place_runtime_file(f'{PROGRAM_NAME}.lock')
+        log.info(f'lock file is {lock_file}') # TODO: make debug
+
+        global lock_fd # avoid GC until exit
+        lock_fd = open(lock_file, mode='a+b', buffering=0)  # ruff: ignore[open-file-with-context-handler]
+
+        if platform == 'win32':
+            import msvcrt
+
+            lock_fd.seek(0)
+            msvcrt.locking(lock_fd.fileno(), msvcrt.LK_NBLCK, 1) # lock one byte at the beginning of the file
+        elif platform == 'linux':
+            import fcntl
+
+            fcntl.flock(lock_fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        else:
+            raise NotImplementedError(notimplemented_msg('acquire file locks'))
+    except OSError:
+        log.critical('Another instance is already running.', exc_info=True)
+        raise SystemExit(1)
 
     from core.config import config, subcommand
 
-    install(show_locals=config.verbose, max_frames=(not config.verbose and 100 or 0 )) # install the rich traceback handler
+    install(show_locals=config.verbose, max_frames=(not config.verbose and 100 or 0)) # install the rich traceback handler
+    log.setLevel(config.verbose and logging.DEBUG or logging.INFO)
 
     config.log_file.parent.mkdir(parents=True, exist_ok=True)
-    logger.addHandler(logging.FileHandler(config.log_file, mode='a', encoding='utf-8'))
-    logger.setLevel(config.verbose and logging.DEBUG or logging.INFO),
+    log.addHandler(logging.FileHandler(config.log_file, mode='a', encoding='utf-8'))
 
     raise SystemExit(subcommand(config))
 
