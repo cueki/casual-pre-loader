@@ -1,7 +1,4 @@
-#base "backpackicons.res"
-#base "warpaints.res"
-#base "skyboxes.res"
-#base "maps.res"
+#base "vguipreload_generated.res"
 "Resource/UI/MainMenuOverride.res"
 {
 	"PreloadPanel"

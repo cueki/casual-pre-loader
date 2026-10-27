@@ -208,6 +208,114 @@ MOD_TYPE_COLORS = {
 }
 
 
+VGUI_PRELOAD_FILE = "vguipreload_generated.res"
+
+# patterns match lowercase material paths relative to materials/ without an extension, "*" also matches "/"
+VGUI_PRELOAD_GROUPS = {
+    "backpackicons": {
+        "include": [
+            "backpack/flaregun_*",
+            "backpack/*weapons/*",
+            "backpack/items/*",
+            "backpack/player/items/mvm_loot/*/fob_*",
+            "backpack/player/items/sniper/knife_shield*",
+            "backpack/workshop/player/items/sniper/croc_shield/*",
+            "backpack/workshop/player/items/sniper/xms_sniper_commandobackpack/*",
+        ],
+    },
+    "warpaints": {
+        "include": [
+            "patterns/*",
+            "models/*weapons/*/p_*",
+            "models/weapons/c_models/weartest/*",
+            "models/weapons/stattrack/*",
+        ],
+    },
+    "skyboxes": {
+        "include": ["skybox/*"],
+    },
+    "maps": {
+        "include": [
+            "brick/*",
+            "concrete/*",
+            "console/*",
+            "cp_bloodstained/*",
+            "cp_manor/*",
+            "cp_mountainlab/*",
+            "decals/*",
+            "detail/*",
+            "dev/*",
+            "effects/*",
+            "egypt/*",
+            "harvest/*",
+            "koth_viaduct_event/*",
+            "medieval/*",
+            "nature/*",
+            "overlays/*",
+            "pl_barnblitz/*",
+            "pl_hoodoo/*",
+            "props/*",
+            "signs/*",
+            "swamp/*",
+            "tile/*",
+            "winter/*",
+            "wood/*",
+            "models/flag/*",
+            "models/items/*",
+            "models/props_2fort/*",
+            "models/props_badlands/*",
+            "models/props_farm/*",
+            "models/props_foliage/*",
+            "models/props_forest/*",
+            "models/props_gameplay/*",
+            "models/props_halloween/*",
+            "models/props_hydro/*",
+            "models/props_manor/*",
+            "models/props_medieval/*",
+            "models/props_mining/*",
+            "models/props_powerhouse/*",
+            "models/props_spytech/*",
+            "models/props_swamp/*",
+            "models/props_trainyard/*",
+            "models/props_vehicles/*",
+            "models/props_well/*",
+        ],
+        "exclude": [
+            "effects/workshop/boil_*",
+            "effects/workshop/cor_sparkle2",
+            "effects/workshop/crowstar",
+            "effects/workshop/fable_feathers3",
+            "effects/workshop/magicsparkle",
+            "effects/workshop/null",
+            "effects/workshop/radioactive/*",
+            "effects/workshop/ray_simple",
+            "effects/workshop/scaredsouls/*",
+            "effects/workshop/smokelit2_depthblend",
+            "effects/workshop/spirits/*",
+            "effects/workshop/twirl",
+            "effects/workshop/waste_unusual_floor_*",
+            "models/items/australium_bar_*",
+            "models/items/bullion*",
+            "models/items/cash_pile",
+            "models/items/crystal_ball_*",
+            "models/items/festivizer_wire",
+            "models/items/item_selfillum",
+            "models/items/paintkit_tool/*",
+            "models/items/staple_gun*",
+            "models/items/target_duck*",
+        ],
+    },
+}
+
+# never preload these
+VGUI_PRELOAD_EXCLUDE = {
+    "models/props_halloween/misfortune_sign_flicker",
+    "models/props_mining/track_lighting_blue",
+    "models/props_mining/track_lighting_red",
+    "swamp/water/water_murky",
+}
+
+
 # project and remote repository info
 DESCRIPTION = 'TF2 particle modifications via some wizardry.'
 PROGRAM_AUTHOR = 'cueki'
