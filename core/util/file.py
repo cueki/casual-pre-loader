@@ -32,6 +32,25 @@ def _get_next_new_file(file: Path) -> Path:
             file = file.with_name(file.name + '_')
 
 
+def _check_src(*, file: Path, not_exist_ok: bool) -> bool:
+    if not file.exists():
+        if not_exist_ok:
+            return False
+        else:
+            raise FileNotFoundError(f"[Errno 2] No such file or directory: {file}")
+    return True
+
+
+def _check_dst(*, src: Path, dst: Path, noclobber: bool | None) -> Path | None:
+    if noclobber is None:
+        dst = _get_next_new_file(dst)
+    elif noclobber and dst.exists():
+        raise FileExistsError(f'[Errno 17] File exists: {dst}')
+    elif src == dst:
+        return
+    return dst
+
+
 def delete(file: Path, *, not_exist_ok: bool = False) -> None:
     '''
     Delete a file or directory.
@@ -41,25 +60,16 @@ def delete(file: Path, *, not_exist_ok: bool = False) -> None:
         not_exist_ok: Do not throw an error if the file does not exist.
     '''
 
-    try:
-        if not file.exists():
-            if not_exist_ok:
-                log.debug(f'Cannot delete {file} because it does not exist')
-                return
-            else:
-                raise FileNotFoundError(f"[Errno 2] No such file or directory: {file}")
+    if not _check_src(file=file, not_exist_ok=not_exist_ok):
+        log.debug(f'Cannot delete {file} because it does not exist')
+        return
 
-        is_file = file.is_file()
-
-        if is_file:
-            file.unlink()
-        else:
-            shutil.rmtree(file)
-
-        log.debug(f'Deleted {is_file and "file" or "folder"} {file}')
-    except Exception:
-        log.exception(f'Error deleting {file}')
-        raise
+    is_file = file.is_file()
+    if is_file:
+        file.unlink()
+    else:
+        shutil.rmtree(file)
+    log.debug(f'Deleted {is_file and 'file' or 'folder'} {file}')
 
 
 def _copy[**P](
@@ -68,35 +78,24 @@ def _copy[**P](
     noclobber: bool | None,
     not_exist_ok: bool,
     func: Callable[P, os.PathLike | str],
+    todir: bool,
     # passed through to `func()`
     *args: P.args,
     **kwargs: P.kwargs,
 ) -> Path | None:
-    if not src.exists():
-        if not_exist_ok:
-            log.debug(f'Cannot copy {src} -> {dst} as source does not exist')
-            return
-        else:
-            raise FileNotFoundError(f"[Errno 2] No such file or directory: {src}")
+    if not _check_src(file=src, not_exist_ok=not_exist_ok):
+        log.debug(f'Cannot copy {src} -> {dst} because it does not exist')
+        return
 
-    if src == dst:
+    if (dst := _check_dst(src=src, dst=dst, noclobber=noclobber)) is None:
         log.debug(f'Tried copying {src} to itself, skipping...')
         return
 
-    try:
-        if noclobber is None:
-            dst = _get_next_new_file(dst)
-        elif noclobber and dst.exists():
-            raise FileExistsError(f'[Errno 17] File exists: {dst}')
+    (dst if todir else dst.parent).mkdir(parents=True, exist_ok=True)
+    dst = Path(func(*args, src=src, dst=dst, **kwargs))
+    log.debug(f'Copied {src} -> {dst}')
 
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        func(*args, src=src, dst=dst, **kwargs)
-
-        log.debug(f'Copied {src} -> {dst}')
-        return dst
-    except Exception:
-        log.exception(f'Error copying {src} -> {dst}')
-        raise
+    return dst
 
 
 def copyfile(
@@ -106,6 +105,7 @@ def copyfile(
     copy_function: CopyFunction = shutil.copy2,
     noclobber: bool | None = False,
     not_exist_ok: bool = False,
+    todir: bool = False,
     # passed through to `copy_function()`
     follow_symlinks: bool = True,
 ) -> Path | None:
@@ -117,10 +117,14 @@ def copyfile(
         dst: The destination file.
         noclobber: Throw an error if the destination exists (i.e. do not overwrite files). A value of `None` tries to append a suffix to the filename.
         not_exist_ok: Do not throw an error if the source does not exist.
+        todir: Whether or not to treat dst as a dir to move src into.
 
     Returns:
         The destination path upon a successful copy.
     '''
+
+    if src.is_dir():
+        raise IsADirectoryError(src)
 
     return _copy(
         src=src,
@@ -128,6 +132,7 @@ def copyfile(
         noclobber=noclobber,
         not_exist_ok=not_exist_ok,
         func=copy_function,
+        todir=todir,
         follow_symlinks=follow_symlinks,
     )
 
@@ -138,6 +143,7 @@ def copytree(
     *,
     noclobber: bool | None = False,
     not_exist_ok: bool = False,
+    todir: bool = False,
     # passed through to `shutil.copytree()`
     symlinks: bool | None = None,
     ignore: Callable[[str, list[str]], Sequence] | None = None,
@@ -152,16 +158,22 @@ def copytree(
         dst: The destination file.
         noclobber: Throw an error if the destination exists (i.e. do not overwrite files). A value of `None` tries to append a suffix to the filename.
         not_exist_ok: Do not throw an error if the source does not exist.
+        todir: Whether or not to treat dst as a dir to move src into.
 
     Returns:
         The destination path upon a successful copy.
     '''
+
+    if src.is_file():
+        raise NotADirectoryError(src)
+
     return _copy(
         src=src,
         dst=dst,
         noclobber=noclobber,
         not_exist_ok=not_exist_ok,
         func=shutil.copytree,
+        todir=todir,
         symlinks=symlinks,
         ignore=ignore,
         copy_function=copy_function,
@@ -173,60 +185,52 @@ def copytree(
 def move(
     src: Path,
     dst: Path,
+    *,
     not_exist_ok: bool = False,
     noclobber: bool | None = False,
+    todir: bool = False,
     # passed through to `copytree()`
     ignore: Callable[[str, list[str]], Sequence] | None = None,
 ) -> Path | None:
     '''
-    Move a file or directory.
+    Move a file or directory to a new location.
 
     Args:
         src: The source file.
         dst: The destination file.
         not_exist_ok: Do not throw an error if the source does not exist.
         noclobber: Throw an error if the destination exists (i.e. do not overwrite files). A value of `None` tries to append a suffix to the filename.
+        todir: Whether or not to treat dst as a dir to move src into.
         ignore: A callable that is passed to the `ignore` argument of `shutil.copytree()`.
 
     Returns:
         The destination path upon a successful move.
     '''
 
-    if src == dst:
+    if not _check_src(file=src, not_exist_ok=not_exist_ok):
+        log.debug(f'Cannot move {src} -> {dst} as source does not exist')
+        return
+
+    if (dst := _check_dst(src=src, dst=dst, noclobber=noclobber)) is None:
         log.debug(f'Tried moving {src} to itself, skipping...')
         return
 
-    try:
-        if not src.exists():
-            if not_exist_ok:
-                log.debug(f'Cannot move {src} -> {dst} as source does not exist')
-                return
-            else:
-                raise FileNotFoundError(f"[Errno 2] No such file or directory: {src}")
+    (dst if todir else dst.parent).mkdir(parents=True, exist_ok=True)
+    if ignore:
+        dst = copytree(
+            src=src,
+            dst=dst,
+            noclobber=noclobber,
+            not_exist_ok=False,
+            todir=todir,
+            ignore=ignore
+        )
+        delete(src)
+    else:
+        dst = Path(shutil.move(src, dst))
+    log.debug(f'Moved {src} -> {dst}')
 
-        if noclobber is None:
-            dst = _get_next_new_file(dst)
-        elif noclobber and dst.exists():
-            raise FileExistsError(f'[Errno 17] File exists: {dst}')
-
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        if ignore:
-            copytree(
-                src=src,
-                dst=dst,
-                not_exist_ok=False,
-                noclobber=noclobber,
-                ignore=ignore
-            )
-            delete(src)
-        else:
-            shutil.move(src, dst)
-
-        log.debug(f'Moved {src} -> {dst}')
-        return dst
-    except Exception:
-        log.exception(f'Error moving\n{src} -> {dst}')
-        raise
+    return dst
 
 
 def _format_mode(mode: int) -> str:
@@ -330,7 +334,7 @@ def check_writable(file: Path) -> bool:
     '''
 
     try:
-        with open(file, 'r+b'):
+        with file.open('r+b'):
             pass
         return True
     except PermissionError:
