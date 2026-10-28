@@ -6,6 +6,7 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Annotated, ClassVar, cast
 
+import platformdirs
 from cappa import Arg, ArgAction, Destructured, Group, Subcommand, command, parse
 
 from core.constants import DESCRIPTION, PROGRAM_AUTHOR, PROGRAM_NAME, Sourcemods
@@ -104,8 +105,9 @@ class Config(Args, FolderConfig):
 def _log_start(config: Config) -> None:
     logging.info(f'Version {VERSION} on {sys.platform} {"(portable)" if config.portable else ""}')
     logging.info(f'Application files are located in {config.install_dir}')
-    logging.info(f'Project files are written to {config.project_dir}')
-    logging.info(f'Settings files are in {config.settings_dir}')
+    logging.info(f'Data files are written to {config.project_dir}')
+    logging.info(f'Config files are in {config.settings_dir}')
+    logging.info(f'Cache files are in {config.temp_dir}')
     logging.info(f'Log is written to {config.log_file}')
 
     logging.debug('DEBUG OUTPUT HAS BEEN ENABLED')
@@ -231,17 +233,16 @@ def _get_config() -> None:
 
     # NOTE: This is some fucking cursed-ass metaprogramming bullshit - but it works, but it works...
     # Perhaps weakly-typed dynamic languages *can* give one *too* much freedom...
-
     if args.args.portable:
+        dirs = platformdirs.PlatformDirs(PROGRAM_NAME, PROGRAM_AUTHOR)
+
         @dataclass
         class FolderConfig(FolderConfig):
-            project_dir:  ClassVar[Path] = _install_dir / 'userdata' / 'data'
-            settings_dir: ClassVar[Path] = _install_dir / 'userdata' / 'config'
-            temp_dir:     ClassVar[Path] = _install_dir / 'userdata' / 'temp'
+            project_dir:  ClassVar[Path] = _install_dir / 'userdata' / 'data' / dirs.user_data_path.relative_to(platformdirs.user_data_path())
+            settings_dir: ClassVar[Path] = _install_dir / 'userdata' / 'config' / dirs.user_config_path.relative_to(platformdirs.user_config_path())
+            temp_dir:     ClassVar[Path] = _install_dir / 'userdata' / 'cache' / dirs.user_cache_path.relative_to(platformdirs.user_cache_path())
     else:
-        from platformdirs import PlatformDirs
-
-        dirs = PlatformDirs(PROGRAM_NAME, PROGRAM_AUTHOR, ensure_exists=True)
+        dirs = platformdirs.PlatformDirs(PROGRAM_NAME, PROGRAM_AUTHOR, ensure_exists=True)
 
         @dataclass
         class FolderConfig(FolderConfig):

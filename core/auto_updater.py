@@ -15,6 +15,7 @@ from core.util.file import copyfile, delete
 from core.util.net import download_file
 from core.util.repo import Update
 from core.util.repo.github_api import get_releases_with_asset
+from core.util.text import notimplemented_msg
 from core.util.zip import FilterPredicate, extract
 from core.version import VERSION
 
@@ -130,4 +131,4 @@ def perform_updates(updates: tuple[Update, ...] | None = None) -> None:
                 os.execve(run_script, [run_script] + sys.argv[1:], os.environ) # NOTE: calls `exec()` and restarts the program
 
             case _:
-                raise NotImplementedError
+                raise NotImplementedError(notimplemented_msg('auto-update'))

@@ -242,7 +242,7 @@ class InstallService:
                         backup_scripts_dir,
                         vpk_paths
                     )
-                    if sound_result:
+                    if sound_result is not None:
                         progress(50, sound_result['message'])
 
                 self._check_cancelled()

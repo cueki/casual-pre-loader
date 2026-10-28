@@ -1,3 +1,4 @@
+import sys
 from collections.abc import Iterable
 from itertools import islice
 
@@ -76,3 +77,7 @@ def inline_list(items: Iterable[object], limit: int = DEFAULT_INLINE_LIMIT, *, n
         text += f", and {_more(remaining, noun)}"
 
     return text
+
+
+def notimplemented_msg(msg: str) -> str:
+    return f"We don't know how to {msg} on platform type: {sys.platform}"

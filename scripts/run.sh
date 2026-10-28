@@ -10,7 +10,7 @@ _log() (
 
 	level="${1}"
 	fmt="%s ${2:-'%s %s\n'}"
-	date="$(date '+[%Y-%m-%d %H:%M:%S]')"
+	date="$(date '+[%Y-%m-%d %H:%M:%S %z]')"
 
 	while read -r line; do
 		# shellcheck disable=SC2059
