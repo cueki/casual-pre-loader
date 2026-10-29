@@ -1,9 +1,16 @@
 from collections.abc import Iterable
 from itertools import islice
+from pathlib import Path, PurePath
 
 # vertical lists get more room than inline ones
 DEFAULT_LIST_LIMIT = 10
 DEFAULT_INLINE_LIMIT = 5
+
+# TODO: document
+def abbrev_root(root: Path, path: Path, abbrev: str) -> PurePath:
+    if path.is_relative_to(root):
+        return PurePath(f'{{{abbrev}}}') / path.relative_to(root)
+    return PurePath(path)
 
 
 def _more(remaining: int, noun: str) -> str:

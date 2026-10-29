@@ -5,6 +5,8 @@ from types import MappingProxyType
 
 from core.config import config
 
+log = logging.getLogger(__name__)
+
 # TODO: change to frozendict once we hit python 3.15 minimum version
 type ModUrls = Mapping[str, str]
 
@@ -14,7 +16,7 @@ def _load_mod_urls() -> ModUrls:
         with config.mod_urls_file.open('r') as fd:
             return MappingProxyType(json.load(fd))
     except Exception:
-        logging.exception('Error loading mod URLs')
+        log.exception('Error loading mod URLs')
         raise
 
 

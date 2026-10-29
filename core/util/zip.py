@@ -4,7 +4,7 @@ from pathlib import Path
 from zipfile import Path as ZipFilePath
 from zipfile import ZipFile
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 FilterPredicate = Callable[[ZipFilePath], bool]
 Filter = Callable[[ZipFilePath], FilterPredicate ]
