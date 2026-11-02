@@ -1,5 +1,5 @@
 # GUI
-PyQt6~=6.11
+PyQt6~=6.12
 
 # core
 cappa~=0.33.0
