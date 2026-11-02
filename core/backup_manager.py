@@ -7,7 +7,7 @@ from pathlib import Path
 
 from core.config import config
 from core.operations.pcf_rebuild import load_particle_system_map
-from core.util.file import copyfile, copytree, delete, modeset_add, move
+from core.util.file import copyfile, copytree, delete, modeset, move
 from core.util.text import inline_list
 
 log = logging.getLogger()
@@ -101,7 +101,7 @@ def prepare_runtime_environment() -> str | None:
 
         copytree(bundled_backup, tmpdir, copy_function=shutil.copyfile, noclobber=False)
         for dirpath, _, filenames in tmpdir.walk():
-            modeset_add(dirpath, stat.S_IWUSR)
+            modeset(dirpath, stat.S_IWUSR, add=True)
             os.utime(dirpath, times)
 
             for filename in filenames:

@@ -7,7 +7,7 @@ from pathlib import Path
 from more_itertools import consume
 
 from core.config import config
-from core.util.file import delete, modeset, modeset_add, move
+from core.util.file import delete, modeset, move
 
 '''
 This module has a single function, `migrate()`, that ensures that old files are cleaned up or moved into new locations.
@@ -111,4 +111,4 @@ def migrate():
         consume(map(partial(modeset, mode=mode, not_exist_ok=True), files))
 
     for mode, files in MODESET_ADD.items():
-        consume(map(partial(modeset_add, mode=mode, not_exist_ok=True), files))
+        consume(map(partial(modeset, mode=mode, add=True, not_exist_ok=True), files))
