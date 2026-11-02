@@ -4,7 +4,7 @@ import shutil
 import stat
 from collections.abc import Callable, Sequence
 from functools import partial
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import TYPE_CHECKING, Protocol, TypeVar, overload
 
 if TYPE_CHECKING:
@@ -351,3 +351,7 @@ def move(
     log.debug(f'Moved {src} -> {dst}')
 
     return dst
+
+
+def get_lockfile(file: PurePath) -> PurePath:
+    return file.with_stem(file.stem + '.lock')
