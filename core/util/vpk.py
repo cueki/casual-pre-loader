@@ -17,7 +17,7 @@ def normalize_vpk_paths(vpk_paths: list[Path]) -> list[Path]:
         vpk_name = vpk_path.stem
         if len(vpk_name) >= 4 and vpk_name[-4] == '_' and (vpk_name[-3:].isdigit() or vpk_name[-3:] == 'dir'):
             base_name = vpk_name[:-4]
-            normalized[base_name] = vpk_path.parent / f"{base_name}_dir.vpk"
+            normalized[base_name] = vpk_path.with_stem(f'{base_name}_dir')
         else:
             normalized[vpk_name] = vpk_path
     return list(normalized.values())
