@@ -6,7 +6,7 @@ from sys import platform
 
 from core.config import config
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class StudioMDLVersion(Enum):

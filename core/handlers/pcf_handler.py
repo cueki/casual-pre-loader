@@ -6,7 +6,7 @@ from valve_parsers import PCFElement, PCFFile, VPKFile
 from core.config import config
 from core.util.vpk import get_vpk_name
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def restore_particle_files(tf_path: Path) -> int:

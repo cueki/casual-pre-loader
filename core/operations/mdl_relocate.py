@@ -27,7 +27,7 @@ from valve_parsers import MDLFile
 
 from core.util.file import move
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 DEFAULT_PREFIX = "console"
 

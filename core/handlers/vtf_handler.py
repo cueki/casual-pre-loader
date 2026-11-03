@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 from sys import platform
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class VTFHandler:

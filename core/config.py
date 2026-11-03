@@ -12,6 +12,8 @@ from core.constants import DESCRIPTION, PROGRAM_AUTHOR, PROGRAM_NAME, Sourcemods
 from core.util.dep import Dep
 from core.version import VERSION
 
+log = logging.getLogger(__name__)
+
 # INFO: This dummy file just allows package maintainers to set whether this application may act as a portable installation.
 # They can easily create this file, e.g.
 # `touch "${pkgdir}/usr/bin/lib/casual-pre-loader/.noportable"`
@@ -102,13 +104,13 @@ class Config(Args, FolderConfig):
 
 
 def _log_start(config: Config) -> None:
-    logging.info(f'Version {VERSION} on {sys.platform} {"(portable)" if config.portable else ""}')
-    logging.info(f'Application files are located in {config.install_dir}')
-    logging.info(f'Project files are written to {config.project_dir}')
-    logging.info(f'Settings files are in {config.settings_dir}')
-    logging.info(f'Log is written to {config.log_file}')
+    log.info(f'Version {VERSION} on {sys.platform} {"(portable)" if config.portable else ""}')
+    log.info(f'Application files are located in {config.install_dir}')
+    log.info(f'Project files are written to {config.project_dir}')
+    log.info(f'Settings files are in {config.settings_dir}')
+    log.info(f'Log is written to {config.log_file}')
 
-    logging.debug('DEBUG OUTPUT HAS BEEN ENABLED')
+    log.debug('DEBUG OUTPUT HAS BEEN ENABLED')
 
 
 def _perform_migrations(config: Config) -> None:
@@ -127,7 +129,7 @@ class Gui:
     """Specify which profile to activate."""
 
     def __call__(self, config: Config) -> int:
-        from main import gui
+        from gui.gui import gui
 
         _log_start(config)
         _perform_migrations(config)
@@ -138,7 +140,7 @@ class Gui:
             try:
                 settings.active_profile = self.profile
             except ProfileNotFound:
-                logging.critical(f'invalid profile name given via `--profile`: {self.profile}')
+                log.critical(f'invalid profile name given via `--profile`: {self.profile}')
                 raise SystemExit(1)
 
         return gui()
@@ -160,12 +162,12 @@ class PrintSourcemods:
 @command
 @dataclass
 class Reset:
-    """Reset settings to defaults."""
+    '''Reset settings to defaults.'''
     def __call__(self, config: Config) -> int:
         _perform_migrations(config)
 
         if not (config.app_settings_file.is_file() or config.addon_metadata_file.is_file()):
-            logging.warning('Nothing to reset')
+            log.warning('Nothing to reset')
             return 0
 
         from rich.prompt import Confirm
@@ -180,10 +182,10 @@ class Reset:
 
             delete(config.app_settings_file, not_exist_ok=True)
             delete(config.addon_metadata_file, not_exist_ok=True)
-            logging.warning('Settings have been reset')
+            log.warning('Settings have been reset')
             return 0
         else:
-            logging.critical('Reset cancelled')
+            log.critical('Reset cancelled')
             return 1
 
 
@@ -196,9 +198,9 @@ subcommand: _Subcommand
 
 @cache
 def _get_config() -> None:
-    """
+    '''
     Parses CLI args and globally sets the relevant `Config` instance and subcommand, only runs once per execution without being manually called.
-    """
+    '''
 
     global Config, FolderConfig, config, subcommand
 
@@ -224,7 +226,7 @@ def _get_config() -> None:
             f'{PROGRAM_NAME} {VERSION}',
             short='-V',
             long=True,
-            help="Print the version string and exit.",
+            help='Print the version string and exit.',
             group=Group(1, 'Help', section=2),
         ),
     )

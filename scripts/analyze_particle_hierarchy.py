@@ -15,7 +15,7 @@ from pathlib import Path
 
 from valve_parsers import AttributeType, PCFFile
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 # TODO: narrow types

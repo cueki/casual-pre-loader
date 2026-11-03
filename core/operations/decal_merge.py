@@ -7,7 +7,7 @@ from PIL import Image, ImageFilter
 from core.constants import DECAL_MAPPING
 from core.handlers.vtf_handler import VTFHandler
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def create_shadow_effect(image, shadow_color=(127, 127, 127, 255)):

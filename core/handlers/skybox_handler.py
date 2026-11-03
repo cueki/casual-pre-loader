@@ -8,7 +8,7 @@ from core.config import config
 from core.handlers.file_handler import FileHandler
 from core.util.vpk import get_vpk_name
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 def is_skybox_vmt(file_path: Path) -> bool:

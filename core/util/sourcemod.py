@@ -6,7 +6,8 @@ from typing import Any
 
 from core.constants import Sourcemods
 
-log = logging.getLogger()
+# TODO: add logging
+log = logging.getLogger(__name__)
 
 
 class InvalidSourcemod(KeyError):

@@ -6,7 +6,7 @@ from pathlib import Path
 
 from valve_parsers import VPKFile
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class SoundHandler:

@@ -8,7 +8,7 @@ from valve_parsers import VPKFile
 from core.constants import VALID_MOD_ROOT_FOLDERS
 from core.util.text import bullet_list, inline_list
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 @dataclass
