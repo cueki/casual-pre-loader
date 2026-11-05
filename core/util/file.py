@@ -211,15 +211,13 @@ def _copy(
 
     dst = _check_dst(src=src, dst=dst, noclobber=noclobber, src_is_file=is_file)
 
-    if todir:
-        target_dst = dst
-
-        if not is_file:
-            dst /= src.name
+    if not todir:
+        dst.parent.mkdir(parents=True, exist_ok=True)
     else:
-        target_dst = dst.parent
+        dst.mkdir(parents=True, exist_ok=True)
 
-    target_dst.mkdir(parents=True, exist_ok=True)
+        dst = dst if is_file else dst / src.name
+
     dst = Path(func(src, dst))
     log.debug(f'Copied {src} -> {dst}')
 
@@ -340,13 +338,9 @@ def move(
         log.debug(f'Cannot move {src} -> {dst} as source does not exist')
         return
 
-    if not todir:
-        dst = _check_dst(src=src, dst=dst, noclobber=noclobber, src_is_file=is_file)
-        dst.parent.mkdir(parents=True, exist_ok=True)
-    else:
-        dst = _check_dst(src=src, dst=dst.parent, noclobber=noclobber, src_is_file=is_file) / dst.name
-        dst.mkdir(parents=True, exist_ok=True)
+    dst = _check_dst(src=src, dst=dst, noclobber=noclobber, src_is_file=is_file)
 
+    (dst if todir else dst.parent).mkdir(parents=True, exist_ok=True)
     dst = Path(shutil.move(src, dst))
     log.debug(f'Moved {src} -> {dst}')
 
