@@ -4,6 +4,7 @@ import logging
 from sys import platform
 
 from core.util.file import delete
+from core.util.text import notimplemented_msg
 
 
 #TODO: move to `gui/` and reorganize
@@ -70,7 +71,7 @@ def gui() -> int:
     elif platform == 'linux':
         window.setWindowIcon(QIcon(str(config.install_dir / 'gui/icons/cueki_icon.svg')))
     else:
-        logging.warning(f"We don't know how to set an icon for platform type: {platform}")
+        logging.warning(notimplemented_msg('set an icon'))
 
     splash.finish(window)
     window.show()
@@ -80,25 +81,63 @@ def gui() -> int:
     return 0
 
 def main():
+    import datetime
+
+    from filelock import FileLock
+    from filelock import Timeout as FileLockTimeout
     from rich.logging import RichHandler
     from rich.traceback import install
 
-    logger = logging.getLogger()
+    def fmt_time(t: datetime.datetime) -> str: # `logging` uses naive datetime objects by default (i.e. no tzdata)
+        return t.astimezone().strftime('[%Y-%m-%d %H:%M:%S %z]')
+
+    log = logging.getLogger()
 
     handler = RichHandler(rich_tracebacks=True)
-    handler.setFormatter(logging.Formatter(datefmt='[%Y-%m-%d %H:%M:%S]'))
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
+    handler.setFormatter(logging.Formatter(datefmt=fmt_time))
+    log.addHandler(handler)
+    log.setLevel(logging.INFO)
+
+    # TODO: Find a way to display bad exit messages with GUI popups when running the program's GUI.
+    # This would require the program init to have zero side effects, i.e. not write to any non-instance-specific files on disk (log files and config files)
+
+    if platform == 'win32':
+        import ctypes
+
+        if ctypes.windll.shell32.IsUserAnAdmin():
+            log.critical('This program should not be run as administrator')
+            raise SystemExit(1)
+    elif platform == 'linux':
+        import os
+
+        if os.getuid() == 0:
+            log.critical('This program should not be run as root')
+            raise SystemExit(1)
+    else:
+        raise NotImplementedError(notimplemented_msg('determine privileges'))
 
     from core.config import config, subcommand
 
-    install(show_locals=config.verbose, max_frames=(not config.verbose and 100 or 0 )) # install the rich traceback handler
+    install(show_locals=config.verbose, max_frames=(not config.verbose and 100 or 0)) # install the rich traceback handler
+    log.setLevel(config.verbose and logging.DEBUG or logging.INFO)
 
-    config.log_file.parent.mkdir(parents=True, exist_ok=True)
-    logger.addHandler(logging.FileHandler(config.log_file, mode='a', encoding='utf-8'))
-    logger.setLevel(config.verbose and logging.DEBUG or logging.INFO),
+    try:
+        acquired_lock = FileLock(config.lock_file, mode = 0o0600, blocking=False).acquire()
+    except FileLockTimeout:
+        log.critical('Another instance is already running.', exc_info=True)
+        raise SystemExit(1)
+    with acquired_lock:
+        # TODO: investigate if handlers can 'block'
+        # i.e. if we add a handler that creates a popup using a GUI library, could it potentially not emit to the other handlers until the user accepts the popup?
+        # If so, then the logfile handler should be moved so that it is called before any such handlers
+        config.log_file.parent.mkdir(parents=True, exist_ok=True)
+        log.addHandler(logfile_handler := logging.FileHandler(config.log_file, mode='a', encoding='utf-8'))
+        try:
+            raise SystemExit(subcommand(config))
+        finally:
+            log.removeHandler(logfile_handler)
+            logfile_handler.close()
 
-    raise SystemExit(subcommand(config))
 
 if __name__ == '__main__':
     main()
