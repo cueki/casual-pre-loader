@@ -87,13 +87,14 @@ class FileHandler:
                 return False
 
             padding = original_size - len(content)
-            if padding > 0:
-                log.debug(f'Adding {padding} bytes of padding to {file_name}')
-                new_data = content + b' ' * padding
-                return self.vpk.patch_file(full_path, new_data, create_backup=False)
-            elif padding < 0:
+            if padding < 0:
                 log.warning(f'{file_name} is {-padding} bytes larger than original! This should be ignored unless you know what you are doing')
                 return False
+
+            if padding > 0:
+                log.debug(f'Adding {padding} bytes of padding to {file_name}')
+                content += b' ' * padding
+            return self.vpk.patch_file(full_path, content, create_backup=False)
         except Exception:
             log.exception(f'Error processing file {file_name}')
             return False
