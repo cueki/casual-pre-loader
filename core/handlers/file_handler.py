@@ -44,7 +44,7 @@ def copy_config_files(custom_content_dir):
     vgui_dest_dir = custom_content_dir / 'resource' / 'ui'
     vgui_dest_dir.mkdir(parents=True, exist_ok=True)
     for file in (config.install_dir / 'backup/resource/ui').iterdir():
-        if file.suffix == '.res' and file.stem.lower() != 'mainmenuoveride':
+        if file.suffix == '.res' and file.stem.lower() != 'mainmenuoverride':
             copyfile(file, vgui_dest_dir)
 
 
