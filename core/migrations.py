@@ -74,8 +74,8 @@ def migrate():
         (config.install_dir / 'addon_metadata.json', config.addon_metadata_file),
         (config.install_dir / 'modsinfo.json', config.modsinfo_file),
         # reorganize userdata so its subdirectories have the same structure as XDG directories
-        ((file, config.project_dir / file.name) for file in get_dir_contents(config.install_dir / 'userdata/data') if file != config.project_dir),
-        ((file, config.settings_dir / file.name) for file in get_dir_contents(config.install_dir / 'userdata/config') if file != config.settings_dir),
+        ((file, config.project_dir / file.name) for file in get_dir_contents(config.install_dir / 'userdata/data') if not config.project_dir.is_relative_to(file)),
+        ((file, config.settings_dir / file.name) for file in get_dir_contents(config.install_dir / 'userdata/config') if not config.settings_dir.is_relative_to(file)),
     ]
     MOVE: list[Param[tuple[Path, Path]]] = []
 
