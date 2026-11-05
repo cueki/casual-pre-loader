@@ -33,6 +33,12 @@ To try and mitigate this potential problem, it is recommended to not remove thin
 `migrate()` only needs to be called once per program execution, so even though they are effectively constants, put all migration data into its body so it can get GC'ed when it goes OOS.
 '''
 
+def get_dir_contents(dir: Path) -> Generator[Path, None, None]:
+    try:
+        yield from dir.iterdir()
+    except FileNotFoundError:
+        pass
+
 def yield_param[T](param: T | Generator[T, None, None]) -> Generator[T, None, None]:
     if isinstance(param, Generator):
         yield from param
@@ -68,8 +74,8 @@ def migrate():
         (config.install_dir / 'addon_metadata.json', config.addon_metadata_file),
         (config.install_dir / 'modsinfo.json', config.modsinfo_file),
         # reorganize userdata so its subdirectories have the same structure as XDG directories
-        ((file, config.project_dir / file.name) for file in (config.install_dir / 'userdata/data').iterdir() if file != config.project_dir),
-        ((file, config.settings_dir / file.name) for file in (config.install_dir / 'userdata/config').iterdir() if file != config.settings_dir),
+        ((file, config.project_dir / file.name) for file in get_dir_contents(config.install_dir / 'userdata/data') if file != config.project_dir),
+        ((file, config.settings_dir / file.name) for file in get_dir_contents(config.install_dir / 'userdata/config') if file != config.settings_dir),
     ]
     MOVE: list[Param[tuple[Path, Path]]] = []
 
