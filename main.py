@@ -130,6 +130,7 @@ def main():
         # TODO: investigate if handlers can 'block'
         # i.e. if we add a handler that creates a popup using a GUI library, could it potentially not emit to the other handlers until the user accepts the popup?
         # If so, then the logfile handler should be moved so that it is called before any such handlers
+        config.log_file.parent.mkdir(parents=True, exist_ok=True)
         log.addHandler(logfile_handler := logging.FileHandler(config.log_file, mode='a', encoding='utf-8'))
         try:
             raise SystemExit(subcommand(config))
