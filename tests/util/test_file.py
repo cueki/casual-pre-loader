@@ -327,10 +327,10 @@ def test__copy(tmp_path: Path, todir: bool, src_state: FileState):
         func = DEFAULT_COPYTREE_FUNC
     else:
         with pytest.raises(FileNotFoundError):
-            _copy(src, dst, DEFAULT_COPY_FUNC)
+            _copy(src, dst, DEFAULT_COPY_FUNC, todir=todir)
         return
 
-    result = _copy(src=src, dst=dst, func=func, todir=todir)
+    result = _copy(src, dst, func, todir=todir)
 
     if todir:
         assert result == dst / src.name
