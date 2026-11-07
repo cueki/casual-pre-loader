@@ -10,33 +10,33 @@ log = logging.getLogger()
 
 
 def restore_particle_files(tf_path: Path) -> int:
-    backup_particles_dir = config.backup_dir / "particles"
+    backup_particles_dir = config.backup_dir / 'particles'
     if not backup_particles_dir.is_dir():
         raise FileNotFoundError(backup_particles_dir)
 
     vpk_name = get_vpk_name(tf_path)
     vpk_path = tf_path / vpk_name
     if not vpk_path.exists():
-        log.error(f"missing {vpk_name}, is the path correct?")
+        log.error(f'missing {vpk_name}, is the path correct?')
         return 0
 
     vpk = VPKFile(vpk_path)
     patched_count = 0
 
-    for pcf_file in backup_particles_dir.glob("*.pcf"):
+    for pcf_file in (file for file in backup_particles_dir.iterdir() if file.suffix == '.pcf'):
         file_name = pcf_file.name
 
         try:
-            file_path = f"particles/{file_name}"
+            file_path = f'particles/{file_name}'
 
-            with open(pcf_file, 'rb') as f:
-                original_content = f.read()
+            with pcf_file.open('rb') as fd:
+                original_content = fd.read()
 
             if vpk.patch_file(file_path, original_content, create_backup=False):
                 patched_count += 1
 
         except Exception:
-            log.exception(f"Error patching particle file {file_name}")
+            log.exception(f'Error patching particle file {file_name}')
 
     return patched_count
 

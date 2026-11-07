@@ -11,10 +11,11 @@ from packaging.version import Version
 
 from core.config import config
 from core.constants import BUILD_DIRS, BUILD_FILES, REMOTE_REPO
-from core.util.file import copyfile, delete
+from core.util.file import copy2, delete
 from core.util.net import download_file
 from core.util.repo import Update
 from core.util.repo.github_api import get_releases_with_asset
+from core.util.text import notimplemented_msg
 from core.util.zip import FilterPredicate, extract
 from core.version import VERSION
 
@@ -91,7 +92,7 @@ def perform_updates(updates: tuple[Update, ...] | None = None) -> None:
 
                 try:
                     extract(archive_path, config.install_dir.parent / '.tmp_update', 0, False, None)
-                    copyfile(config.install_dir.parent / 'RUNME.bat', renamed_runme) # INFO: we need to rename RUNME to avoid file lock issues
+                    copy2(config.install_dir.parent / 'RUNME.bat', renamed_runme) # INFO: we need to rename RUNME to avoid file lock issues
                 except Exception:
                     log.exception(f'Error extracting update {update.release.tag_name}')
 
@@ -130,4 +131,4 @@ def perform_updates(updates: tuple[Update, ...] | None = None) -> None:
                 os.execve(run_script, [run_script] + sys.argv[1:], os.environ) # NOTE: calls `exec()` and restarts the program
 
             case _:
-                raise NotImplementedError
+                raise NotImplementedError(notimplemented_msg('auto-update'))

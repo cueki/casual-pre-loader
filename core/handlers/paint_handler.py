@@ -25,12 +25,12 @@ def find_cosmetics(tf_path: Path, proxy_name: bytes) -> list[tuple[str, bytes]]:
             if content and proxy_name in content:
                 results.append((vmt_path, content))
         except Exception:
-            log.exception(f"Error reading VMT: {vmt_path}")
+            log.exception(f'Error reading VMT: {vmt_path}')
 
     return results
 
 
-def disable_paints(tf_path: Path):
+def disable_paints(tf_path: Path) -> None:
     file_handler = FileHandler(tf_path / get_vpk_name(tf_path))
     painted = find_cosmetics(tf_path, b'"ItemTintColor"')
 
@@ -41,17 +41,17 @@ def disable_paints(tf_path: Path):
             if file_handler.process_file(vmt_path, modified):
                 patched += 1
         except Exception:
-            log.exception(f"Error processing VMT: {vmt_path}")
+            log.exception(f'Error processing VMT: {vmt_path}')
 
-    log.info(f"Patched {patched} cosmetic VMTs to disable paints")
+    log.info(f'Patched {patched} cosmetic VMTs to disable paints')
 
 
-def enable_paints(tf_path: Path):
+def enable_paints(tf_path: Path) -> None:
     file_handler = FileHandler(tf_path / get_vpk_name(tf_path))
 
     disabled = find_cosmetics(tf_path, b'"XtemTintColor"')
     if not disabled:
-        return 0
+        return
 
     restored = 0
     for vmt_path, content in disabled:
@@ -60,7 +60,9 @@ def enable_paints(tf_path: Path):
             if file_handler.process_file(vmt_path, modified):
                 restored += 1
         except Exception:
-            log.exception(f"Error restoring paint VMT: {vmt_path}")
+            log.exception(f'Error restoring paint VMT: {vmt_path}')
 
     if restored > 0:
-        log.info(f"Restored {restored} paint VMTs")
+        log.info(f'Restored {restored} paint VMTs')
+    else:
+        log.debug('Restored NO paint VMTs')
