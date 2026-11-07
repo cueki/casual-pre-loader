@@ -36,7 +36,7 @@ from core.operations.for_the_love_of_god_add_vmts_to_your_mods import (
 from core.operations.mdl_relocate import relocate_mdl_paths
 from core.operations.pcf_compress import remove_duplicate_elements
 from core.operations.pcf_rebuild import extract_elements, load_particle_system_map
-from core.operations.vgui_preload import patch_mainmenuoverride
+from core.operations.vgui_preload import generate_vgui_preload, patch_mainmenuoverride
 from core.quickprecache.precache_list import make_precache_list
 from core.quickprecache.quick_precache import QuickPrecache
 from core.util.file import check_writable, copyfile, copytree, delete, move
@@ -358,6 +358,7 @@ class InstallService:
                     progress(78, "Relocating model material paths...")
                     relocate_mdl_paths(custom_content_dir, file_origin=file_origin)
                 generate_missing_vmt_files(custom_content_dir, tf_path)
+                generate_vgui_preload(custom_content_dir, custom_dir)
 
             for split_file in custom_dir.glob(f"{CUSTOM_VPK_SPLIT_PATTERN}*.vpk"):
                 split_file.unlink()

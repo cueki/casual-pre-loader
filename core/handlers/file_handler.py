@@ -1,11 +1,11 @@
 import logging
 import os
-import shutil
 from pathlib import Path
 
 from valve_parsers import PCFFile, VPKFile
 
 from core.config import config
+from core.util.file import copyfile
 
 log = logging.getLogger()
 
@@ -30,25 +30,14 @@ def generate_config(has_mastercomfig=False, needs_quickprecache=False, show_cons
 
 
 def copy_config_files(custom_content_dir):
-    # config copy
-    config_dest_dir = custom_content_dir / "cfg" / "w"
-    config_dest_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(config.install_dir / 'backup/cfg/w/config.cfg', config_dest_dir)
-    shutil.copy2(config.install_dir / 'backup/cfg/w/kitty.cfg', config_dest_dir)
-
-    # vscript copy
-    vscript_dest_dir = custom_content_dir / "scripts" / "vscripts"
-    vscript_dest_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(config.install_dir / 'backup/scripts/vscripts/randommenumusic.nut', vscript_dest_dir)
-
-    # vgui copy: vguipreload.res plus everything it #bases.
-    # mainmenuoverride.res is excluded, it gets placed separately by patch_mainmenuoverride()
-    vgui_dest_dir = custom_content_dir / "resource" / "ui"
-    vgui_dest_dir.mkdir(parents=True, exist_ok=True)
-    for res_file in sorted((config.install_dir / 'backup/resource/ui').glob('*.res')):
-        if res_file.name.lower() == 'mainmenuoverride.res':
-            continue
-        shutil.copy2(res_file, vgui_dest_dir)
+    backup_dir = config.install_dir / 'backup'
+    for file in (
+        'cfg/w/config.cfg',
+        'cfg/w/kitty.cfg',
+        'scripts/vscripts/randommenumusic.nut',
+        'resource/ui/vguipreload.res',
+    ):
+        copyfile(backup_dir / file, custom_content_dir / file)
 
 
 class FileHandler:
