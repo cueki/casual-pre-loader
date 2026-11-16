@@ -6,6 +6,8 @@ from pathlib import Path
 
 from valve_parsers import VPKFile
 
+from core.util.text import inline_list
+
 log = logging.getLogger()
 
 
@@ -251,8 +253,7 @@ def create_vpk_based_mappings(sound_files: list[Path], vpk_paths: list[Path]) ->
             log.exception(f"Error removing {file_to_remove}")
 
     if removed_count:
-        names = sorted(f.name for f in files_to_remove)
-        shown = ', '.join(names[:20]) + (f", and {len(names) - 20} more" if len(names) > 20 else '')
+        shown = inline_list(sorted(f.name for f in files_to_remove), 20, noun='files')
         log.warning(f"Dropped {removed_count} sound file(s) that don't exist in the game's sound VPKs: {shown}")
 
     return file_mappings
