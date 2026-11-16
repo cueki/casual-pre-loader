@@ -28,6 +28,7 @@ def validate_mod_structure(folder_path: Path) -> ValidationResult:
     warnings = []
     found_valid_folders = []
     found_vpk_files = []
+    type_detected = "unknown"
 
     try:
         # VPK check
@@ -89,7 +90,6 @@ def validate_mod_structure(folder_path: Path) -> ValidationResult:
             )
 
         # determine type based on found folders (rn just HUD)
-        type_detected = "unknown"
         if "resource" in found_valid_folders or any("ui" in str(subdir) for subdir in subdirs):
             # check for HUD files in resource folder
             resource_dir = folder_path / "resource"
@@ -118,6 +118,7 @@ def validate_zip_structure(zip_file: zipfile.ZipFile) -> ValidationResult:
     errors = []
     warnings = []
     found_mod_folders = []
+    type_detected = "unknown"
 
     try:
         file_list = zip_file.namelist()
@@ -198,7 +199,6 @@ def validate_zip_structure(zip_file: zipfile.ZipFile) -> ValidationResult:
                     type_detected="unknown"
                 )
 
-        type_detected = "unknown"
         if len(found_mod_folders) > 1:
             warnings.append(f"ZIP contains multiple mods: {inline_list(map(repr, [mod['name'] for mod in found_mod_folders]), noun='mods')}")
 

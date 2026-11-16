@@ -240,7 +240,8 @@ class InstallService:
                     sound_result = self.sound_handler.process_temp_sound_mods(
                         config.temp_to_be_vpk_dir,
                         backup_scripts_dir,
-                        vpk_paths
+                        vpk_paths,
+                        file_origin,
                     )
                     if sound_result:
                         progress(50, sound_result['message'])
@@ -355,7 +356,7 @@ class InstallService:
             if is_tf2:
                 patch_mainmenuoverride(tf_path)
                 if fix_mdl_paths:
-                    progress(78, "Relocating model material paths...")
+                    progress(82, "Relocating model material paths...")
                     relocate_mdl_paths(custom_content_dir, file_origin=file_origin)
                 generate_missing_vmt_files(custom_content_dir, tf_path)
                 generate_vgui_preload(custom_content_dir, custom_dir)
@@ -399,7 +400,8 @@ class InstallService:
                         precache = QuickPrecache(
                             tf_path.parents[0],
                             debug=False,
-                            progress_callback=on_progress
+                            progress_callback=on_progress,
+                            model_list=precache_prop_set,
                             )
                         precache.run(auto=True)
                         copyfile(config.install_dir / 'core/quickprecache/_QuickPrecache.vpk', custom_dir / '_QuickPrecache.vpk')
@@ -421,7 +423,13 @@ class InstallService:
                 custom_vpk_path = custom_dir / CUSTOM_VPK_NAME.replace('.vpk', '_dir.vpk')
                 if custom_vpk_path.exists():
                     vpk_handler = FileHandler(custom_vpk_path)
-                    vpk_handler.process_file('cfg/w/config.cfg', config_content.encode('utf-8'))
+                    if not vpk_handler.process_file('cfg/w/config.cfg', config_content.encode('utf-8')):
+                        # the config is patched over backup/cfg/w/config.cfg inside the VPK, so it can't be
+                        # longer than that file. if generate_config() grows, that file has to grow with it
+                        log.error(
+                            f"Could not write the startup config ({len(config_content.encode('utf-8'))} bytes) "
+                            f"into {custom_vpk_path.name}, the game will start with the default one"
+                        )
 
             progress(97, "Finalizing...")
 

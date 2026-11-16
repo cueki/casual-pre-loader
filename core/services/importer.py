@@ -9,7 +9,7 @@ from valve_parsers import VPKFile
 from core.config import config
 from core.operations.advanced_particle_merger import AdvancedParticleMerger
 from core.structure_validator import StructureValidator
-from core.util.file import copytree, delete, move
+from core.util.file import copytree, delete
 from core.util.zip import extract
 
 log = logging.getLogger()
@@ -142,7 +142,8 @@ class ImportService:
         # mod VPK extraction
         try:
             vpk_name = file_path.stem
-            if vpk_name[-3:].isdigit() and vpk_name[-4] == '_' or vpk_name[-4:] == '_dir':
+            # slices, not indexes: a short name like "123.vpk" has no [-4]
+            if vpk_name[-3:].isdigit() and vpk_name[-4:-3] == '_' or vpk_name[-4:] == '_dir':
                 vpk_name = vpk_name[:-4]
 
             # validate VPK structure to determine type
@@ -152,7 +153,6 @@ class ImportService:
 
             extracted_particles_dir = config.particles_dir / vpk_name
             extracted_addons_dir = config.addons_dir / vpk_name
-            extracted_particles_dir.mkdir(parents=True, exist_ok=True)
 
             if progress_callback:
                 progress_callback(10, "Analyzing VPK...")
@@ -161,9 +161,15 @@ class ImportService:
             # check for particles
             has_particles = bool(vpk_handler.find_files("*.pcf"))
 
+            # start from an empty folder, like process_folder: extracting over a previous import
+            # would keep files the new version of the mod no longer ships
+            extract_dir = extracted_particles_dir if has_particles else extracted_addons_dir
+            delete(extract_dir, not_exist_ok=True)
+            extract_dir.mkdir(parents=True, exist_ok=True)
+
             if progress_callback:
                 progress_callback(15, "Extracting files...")
-            extracted_count = vpk_handler.extract_all(str(extracted_particles_dir))
+            extracted_count = vpk_handler.extract_all(str(extract_dir))
             if progress_callback:
                 progress_callback(35, f"Extracted {extracted_count} files")
 
@@ -179,12 +185,6 @@ class ImportService:
                 # for non-particle mods, create addon folder
                 if progress_callback:
                     progress_callback(60, "Creating addon folder...")
-
-                # if extracted_addons_dir already exists, remove it first
-                delete(extracted_addons_dir, not_exist_ok=True)
-
-                # move the extracted files to the addons directory
-                move(extracted_particles_dir, extracted_addons_dir)
 
                 # create mod.json if it doesn't exist
                 mod_json_path = extracted_addons_dir / "mod.json"

@@ -1,5 +1,4 @@
 import logging
-import shutil
 from pathlib import Path
 
 from valve_parsers import VPKFile
@@ -35,23 +34,9 @@ def handle_skybox_mods(temp_dir: Path, tf_path: Path) -> int:
             with vmt_file.open('rb') as f:
                 vmt_content = f.read()
 
-            # get the original texture path
-            texture_path = Path('skybox/' + vmt_file.stem)
-
-            # copy vtf with modified name
-            orig_vtf_path = vmt_file.with_suffix('.vtf')
-            if orig_vtf_path.exists():
-                new_vtf_path = temp_dir / 'materials' / f"{texture_path}.vtf"
-                new_vtf_path.parent.mkdir(parents=True, exist_ok=True)
-                shutil.move(orig_vtf_path, new_vtf_path)
-
-            # find the vmt file in the vpk
-            vmt_filename = vmt_file.name
-            target_path = 'materials/skybox/' + vmt_filename
-
-            if not target_path:
-                log.error(f"Could not find {vmt_filename} in VPK", stack_info=True)
-                continue
+            # the vtf next to it stays where it is and ships in the custom VPK,
+            # the vmt is patched over the vanilla one in the game VPK
+            target_path = 'materials/skybox/' + vmt_file.name
 
             # patch vmt into vpk
             success = file_handler.process_file(target_path, vmt_content)

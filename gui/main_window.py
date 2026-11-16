@@ -80,34 +80,8 @@ class ParticleManagerGUI(QMainWindow):
         self.addon_manager = AddonsManager()
         self.install_manager = InstallController(self.settings)
 
-        # UI components
-        self.progress_dialog = None
-        self.mod_drop_zone: ModDropZone | None = None
-        self.addon_panel: AddonPanel | None = None
-        self.addons_list = None
-        self.addon_description = None
-        self.install_button = None
-        self.download_mods_button = None
-        self.nav_list = None
-        self.content_stack = None
-        self.profile_add_btn = None
-
-        # settings page widgets
-        self.console_checkbox = None
-        self.suppress_updates_checkbox = None
-        self.skip_launch_popup_checkbox = None
-        self.disable_paint_checkbox = None
-        self.fix_mdl_paths_checkbox = None
-        self.skip_quickprecache_checkbox = None
-        self.restore_button = None
-        self.current_profile_label = None
-
-        # profile UI
-        self.profile_btn = None
-        self.profile_menu = None
-
-        # simple mode toggle
-        self.simple_mode_btn = None
+        # only set while an install/restore is running
+        self.progress_dialog: QProgressDialog | None = None
 
         # setup
         self.setWindowTitle("cukei's casual pre-loader :)")

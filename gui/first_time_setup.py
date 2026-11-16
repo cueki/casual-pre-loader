@@ -41,12 +41,6 @@ class FirstTimeSetupDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.import_status_label = None
-        self.userdata_import_edit = None
-        self.validation_label = None
-        self.browse_button = None
-        self.tf_path_edit = None
-        self.finish_button = None
         self.tf_directory: Path | None = None
         self.import_userdata_path: Path | None = None
 

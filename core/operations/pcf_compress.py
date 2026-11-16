@@ -1,20 +1,31 @@
+import struct
+
 from valve_parsers import PCFElement, PCFFile, AttributeType
 
 from core.constants import ATTRIBUTE_DEFAULTS, ELEMENT_DEFAULTS
 
 
-
-def get_element_hash(element: PCFElement):
-    sorted_attrs = tuple(
+def get_element_key(element: PCFElement):
+    # the attributes themselves are the key, not their hash(): hash(-1) == hash(-2) in CPython,
+    # so hashing made operators that only differ by -1 vs -2 look like duplicates
+    return tuple(
         (name, attr_type, value if not isinstance(value, list) else tuple(value))
         for name, (attr_type, value) in sorted(element.attributes.items())
     )
-    return hash(sorted_attrs)
+
+
+def _as_float32(value):
+    # pcf floats are stored as float32, so a default like 0.1 is read back as 0.10000000149011612
+    if isinstance(value, float):
+        return struct.unpack('<f', struct.pack('<f', value))[0]
+    if isinstance(value, tuple):
+        return tuple(_as_float32(v) for v in value)
+    return value
 
 
 def find_duplicate_array_elements(pcf: PCFFile):
     # find duplicate elements referenced in array attributes
-    hash_to_indices = {}
+    key_to_indices = {}
 
     for element in pcf.elements:
         for attr_name, (attr_type, value) in element.attributes.items():
@@ -24,12 +35,9 @@ def find_duplicate_array_elements(pcf: PCFFile):
                         referenced_element = pcf.elements[idx]
                         ref_type_name = pcf.string_dictionary[referenced_element.type_name_index].decode('ascii')
                         if ref_type_name not in ('DmeElement','DmElement', 'DmeParticleSystemDefinition'):
-                            element_hash = get_element_hash(referenced_element)
-                            if element_hash not in hash_to_indices:
-                                hash_to_indices[element_hash] = []
-                            hash_to_indices[element_hash].append(idx)
+                            key_to_indices.setdefault(get_element_key(referenced_element), []).append(idx)
 
-    return {hash_: indices for hash_, indices in hash_to_indices.items() if len(indices) > 1}
+    return {key: indices for key, indices in key_to_indices.items() if len(indices) > 1}
 
 
 def update_array_indices(pcf: PCFFile, duplicates):
@@ -149,15 +157,14 @@ def _remove_default_attributes(element: PCFElement, defaults_dict: dict):
 
 def combined_cleanup_pass(pcf: PCFFile):
     # convert defaults lists to dicts for O(1) lookup
-    attribute_defaults_dict = {name: value for name, value in ATTRIBUTE_DEFAULTS}
-    element_defaults_dict = {name: value for name, value in ELEMENT_DEFAULTS}
+    attribute_defaults_dict = {name: _as_float32(value) for name, value in ATTRIBUTE_DEFAULTS}
+    element_defaults_dict = {name: _as_float32(value) for name, value in ELEMENT_DEFAULTS}
 
     # first build system indices map for child reference fixing
     system_indices = {}
-    system_defs = pcf.get_elements_by_type('DmeParticleSystemDefinition')
-    for element in system_defs:
-        name = element.element_name.decode('ascii')
-        system_indices[name] = pcf.elements.index(element)
+    for index, element in enumerate(pcf.elements):
+        if pcf.string_dictionary[element.type_name_index] == b'DmeParticleSystemDefinition':
+            system_indices[element.element_name.decode('ascii')] = index
 
     # single pass over all elements
     for element in pcf.elements:

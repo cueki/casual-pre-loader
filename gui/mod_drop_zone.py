@@ -30,7 +30,6 @@ class ModDropZone(QFrame):
 
     def __init__(self, parent=None, settings=None, rescan_callback=None):
         super().__init__(parent)
-        self.conflict_matrix = None
         self.settings = settings
         self.setAcceptDrops(True)
         self.setup_ui()

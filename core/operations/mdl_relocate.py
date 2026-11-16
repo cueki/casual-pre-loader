@@ -80,11 +80,16 @@ def add_prefix(dir_str: str, prefix: str) -> str:
     return f"{prefix}/{stripped}"
 
 
-def resolve_ci(root: Path, rel_path: str) -> Path | None:
+def resolve_ci(
+    root: Path, rel_path: str, listing_cache: dict[Path, dict[str, Path]] | None = None
+) -> Path | None:
     """Resolve `rel_path` under `root` case-insensitively, the way the Source
     engine does on Windows. Linux is case-sensitive, but a mod authored on
     Windows can ship files whose case differs from the MDL's references; plain
     `Path.exists()` would say 'missing' and trigger spurious work.
+
+    `listing_cache` remembers directory listings between calls. Only pass one
+    while nothing is being created, moved or deleted under `root`.
     """
     rel = _norm(rel_path).strip("/")
     if not rel:
@@ -102,7 +107,16 @@ def resolve_ci(root: Path, rel_path: str) -> Path | None:
             continue
         target = part.lower()
         try:
-            match = next((e for e in current.iterdir() if e.name.lower() == target), None)
+            if listing_cache is None:
+                match = next((e for e in current.iterdir() if e.name.lower() == target), None)
+            else:
+                listing = listing_cache.get(current)
+                if listing is None:
+                    listing = {}
+                    for entry in current.iterdir():
+                        listing.setdefault(entry.name.lower(), entry)  # first match wins, as above
+                    listing_cache[current] = listing
+                match = listing.get(target)
         except (OSError, NotADirectoryError):
             return None
         if match is None:
@@ -308,7 +322,9 @@ def _relocate_one_mdl(
             except OSError:
                 break
 
-    mdl.rewrite_material_dirs(new_dirs + fallback_dirs)
+    # rewriting appends a new block to the MDL, so leave models that needed no relocation untouched
+    if relocations:
+        mdl.rewrite_material_dirs(new_dirs + fallback_dirs)
     return relocations
 
 
@@ -347,6 +363,7 @@ def _apply_path_rewrites(
     pattern: re.Pattern[str] | None,
     mapping: dict[str, str] | None,
     materials_root: Path,
+    listing_cache: dict[Path, dict[str, Path]] | None = None,
 ) -> str:
     """Rewrite path refs whose target file exists at the new location; leave
     refs that don't (they're relying on engine fallback to vanilla).
@@ -366,7 +383,7 @@ def _apply_path_rewrites(
             candidates = (full_new,)
         else:
             candidates = (full_new + ".vtf",)
-        if any(resolve_ci(materials_root, c) is not None for c in candidates):
+        if any(resolve_ci(materials_root, c, listing_cache) is not None for c in candidates):
             return new_prefix + tail
         return m.group(0)
 
@@ -395,6 +412,8 @@ def _relocate_material_names(working_root: Path, mdl_paths: list[Path], relocati
         reverse=True,
     )
     materials_root = working_root / "materials"
+    # every on-disk move happened in the previous pass, so listings can be reused from here on
+    listing_cache: dict[Path, dict[str, Path]] = {}
 
     def rewrite_name(name: str) -> str:
         normalized = _norm(name).lstrip("/")
@@ -403,18 +422,24 @@ def _relocate_material_names(working_root: Path, mdl_paths: list[Path], relocati
         for old, new in pairs:
             if normalized.startswith(old):
                 candidate = new + normalized[len(old):] + ".vmt"
-                if resolve_ci(materials_root, candidate) is None:
+                if resolve_ci(materials_root, candidate, listing_cache) is None:
                     return name
                 return new + normalized[len(old):]
         return name
 
     for mdl_path in mdl_paths:
-        mdl = MDLFile(mdl_path)
-        new_names = [rewrite_name(m) for m in mdl.materials]
-        if new_names == mdl.materials:
+        # one unreadable MDL must not stop the names of every other model from being rewritten
+        try:
+            mdl = MDLFile(mdl_path)
+            old_names = list(mdl.materials)
+            new_names = [rewrite_name(m) for m in old_names]
+            if new_names == old_names:
+                continue
+            mdl.rewrite_materials(new_names)
+        except Exception:
+            log.exception(f"MDL material-name rewrite failed for {mdl_path}; leaving as-is")
             continue
-        mdl.rewrite_materials(new_names)
-        for old, new in zip(mdl.materials, new_names):
+        for old, new in zip(old_names, new_names):
             if old != new:
                 log.debug(f"[{mdl_path.name}] rewrote material name: {old!r} -> {new!r}")
 
@@ -430,10 +455,12 @@ def _update_vmt_refs(working_root: Path, relocations: list[Relocation]) -> None:
     materials_root = working_root / "materials"
     if not materials_root.exists():
         return
+    # this pass only rewrites VMT contents, nothing is moved, so listings can be reused
+    listing_cache: dict[Path, dict[str, Path]] = {}
     for vmt in materials_root.rglob("*.vmt"):
         original = vmt.read_text(encoding="utf-8", errors="replace")
         text = original.replace("\\", "/")
-        new_text = _apply_path_rewrites(text, pattern, mapping, materials_root)
+        new_text = _apply_path_rewrites(text, pattern, mapping, materials_root, listing_cache)
         if new_text != original:
             vmt.write_text(new_text, encoding="utf-8")
             log.debug(f"rewrote refs in materials/{vmt.relative_to(materials_root)}")
@@ -454,7 +481,15 @@ def relocate_mdl_paths(
 
     Returns the number of MDLs found.
     """
-    mdl_paths = sorted(working_root.rglob("*.mdl"))
+    # the engine only loads models from models/. Mods also ship .mdl files elsewhere (decompile
+    # leftovers under materials/, text files with the extension); relocating for those moves
+    # textures nothing references and fails on the ones that aren't models at all.
+    mdl_paths = sorted(
+        mdl
+        for models_dir in (working_root.iterdir() if working_root.is_dir() else ())
+        if models_dir.is_dir() and models_dir.name.lower() == "models"
+        for mdl in models_dir.rglob("*.mdl")
+    )
     if not mdl_paths:
         return 0
 

@@ -40,18 +40,22 @@ def _process_file_to_model_path(file_path: str) -> str:
 def manage_folder(folder_path: Path) -> set[str]:
     model_set = set()
 
-    for file_path in folder_path.glob("**/*"):
-        if not file_path.is_file():
+    for models_dir in folder_path.iterdir():
+        if not (models_dir.is_dir() and models_dir.name.lower() == "models"):
             continue
 
-        relative_path = str(file_path.relative_to(folder_path))
+        for file_path in models_dir.glob("**/*"):
+            if not file_path.is_file():
+                continue
 
-        if not _should_quickprecache(relative_path):
-            continue
+            # relative to models/, like manage_vpk: $includemodel paths don't carry the models/ prefix
+            relative_path = file_path.relative_to(models_dir).as_posix()
 
-        if any(relative_path.endswith(suffix) for suffix in QUICKPRECACHE_FILE_SUFFIXES):
-            model_path = Path(_process_file_to_model_path(relative_path)).as_posix().lower()
-            model_set.add(model_path)
+            if not _should_quickprecache(relative_path):
+                continue
+
+            if any(relative_path.endswith(suffix) for suffix in QUICKPRECACHE_FILE_SUFFIXES):
+                model_set.add(_process_file_to_model_path(relative_path).lower())
 
     return model_set
 

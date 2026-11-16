@@ -90,10 +90,14 @@ class Settings:
 
     def __setattr__(self, attr, value, /):
         if attr == 'active_profile':
-            if value is not None and value in self.profiles:
+            if isinstance(value, Profile): # accept a profile as well as its name
+                value = value.name
+
+            if value is not None:
+                if value not in self.profiles:
+                    raise ProfileNotFound(f'{value} is not a known profile name')
+
                 value = self.profiles[value]
-            else:
-                raise ProfileNotFound(f'{value} is not a known profile name')
         elif attr == 'profiles':
             raise AttributeError('profiles may not be set manually, use `create_profile()`/`delete_profile()`')
 
@@ -243,11 +247,11 @@ class Settings:
             _profiles.pop(i)
             profile = cast(dict, self.profiles).pop(name)
 
-            if self.active_profile == profile:
+            if self.active_profile is profile:
                 if i != 0:
-                    self.active_profile = self.profiles[_profiles[i-1]]
+                    self.active_profile = _profiles[i-1]
                 elif self.profiles:
-                    self.active_profile = self.profiles[_profiles[0]]
+                    self.active_profile = _profiles[0]
                 else:
                     self.active_profile = None
             else:
@@ -257,11 +261,21 @@ class Settings:
 
     def update_profile(self, profile_name: str, **kwargs):
         if profile_name in self.profiles:
-            update_dataclass(self.profiles[profile_name], **kwargs)
+            profiles = cast(dict, self.profiles)
+            profile = profiles[profile_name]
 
-            if 'name' in kwargs:
-                self.profiles[kwargs['name']] = self.profiles[profile_name]
-                del self.profiles[profile_name]
+            new_name = kwargs.get('name', profile_name)
+            if new_name != profile_name:
+                # don't let a rename replace another profile
+                kwargs['name'] = new_name = _get_profile_name(new_name, profiles)
+
+            update_dataclass(profile, **kwargs)
+
+            if new_name != profile_name:
+                # re-key in place so the profile keeps its position in the list
+                renamed = {new_name if name == profile_name else name: p for name, p in profiles.items()}
+                profiles.clear()
+                profiles.update(renamed)
 
             self.save_settings()
         else:

@@ -37,13 +37,6 @@ class ModJsonEditor(QDialog):
 
     def __init__(self, addon_name, addon_info, parent=None):
         super().__init__(parent)
-        self.gamebanana_edit = None
-        self.description_edit = None
-        self.version_edit = None
-        self.type_combo = None
-        self.name_edit = None
-        self.color_edit = None
-        self.color_preview = None
         self.addon_name = addon_name
         self.addon_info = addon_info
         self.setWindowTitle(f"Edit {addon_name}")
@@ -198,15 +191,6 @@ class AddonDescription(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.gamebanana_label = None
-        self.content_layout = None
-        self.name_label = None
-        self.type_label = None
-        self.separator_line = None
-        self.version_label = None
-        self.description_label = None
-        self.features_label = None
-        self.features_list = None
         self.current_addon_name = None
         self.current_addon_info = None
         self.setup_ui()
