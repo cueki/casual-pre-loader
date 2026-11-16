@@ -95,8 +95,9 @@ def perform_updates(updates: tuple[Update, ...] | None = None) -> None:
                 except Exception:
                     log.exception(f'Error extracting update {update.release.tag_name}')
 
-                    delete(config.install_dir.parent / '.tmp_update')
-                    delete(renamed_runme)
+                    # either may not exist yet, depending on which step failed
+                    delete(config.install_dir.parent / '.tmp_update', not_exist_ok=True)
+                    delete(renamed_runme, not_exist_ok=True)
 
                     break
                 finally:

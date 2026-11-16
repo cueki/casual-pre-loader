@@ -63,16 +63,16 @@ class StudioMDL:
 
         # use wine on not windows
         if platform != "win32":
-            # for wine, use shell=True and use Z:path maybe ???
-            cmd_str = f'wine "{exe_path}" -game "Z:{tf_path}" -nop4 -verbose "Z:{qc_file}"'
-            log.info(f"Executing with wine: {cmd_str}")
-            process = subprocess.Popen(
-                cmd_str,
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True
-            )
+            # wine maps the unix root to Z:. passed as an argument list (no shell), so paths
+            # containing quotes, $ or backticks reach studiomdl unchanged
+            cmd_args = [
+                "wine", exe_path,
+                "-game", f"Z:{tf_path}",
+                "-nop4",
+                "-verbose",
+                f"Z:{qc_file}"
+            ]
+            log.info(f"Executing with wine: {' '.join(cmd_args)}")
         else:
             # windows
             cmd_args = [
@@ -83,12 +83,13 @@ class StudioMDL:
                 str(qc_file)
             ]
             log.info(f"Executing: {' '.join(cmd_args)}")
-            process = subprocess.Popen(
-                cmd_args,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-            )
+
+        process = subprocess.Popen(
+            cmd_args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
 
         while True:
             line = process.stdout.readline()

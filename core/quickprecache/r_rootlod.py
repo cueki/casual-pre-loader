@@ -11,8 +11,9 @@ def check_root_lod(game_path: Path) -> bool:
         log.warning(f"Config file not found: {config_file}")
         return False
 
-    # read the config file
-    config_text = config_file.read_text()
+    # read the config file. binds can hold any text the user typed, in whatever encoding the game wrote,
+    # so undecodable bytes are carried through untouched instead of failing on the locale's codec
+    config_text = config_file.read_text(encoding="utf-8", errors="surrogateescape")
 
     # find r_rootlod setting
     root_lod_index = config_text.find("r_rootlod")
@@ -20,6 +21,8 @@ def check_root_lod(game_path: Path) -> bool:
     if root_lod_index > -1:
         # find the line with r_rootlod
         end_index = config_text.find("\n", root_lod_index)
+        if end_index == -1:  # last line without a trailing newline
+            end_index = len(config_text)
         old_line = config_text[root_lod_index:end_index]
 
         # replace with r_rootlod "0"
@@ -33,5 +36,5 @@ def check_root_lod(game_path: Path) -> bool:
         log.info(f"Added r_rootlod setting to {config_file}")
 
     # write the updated config
-    config_file.write_text(config_text)
+    config_file.write_text(config_text, encoding="utf-8", errors="surrogateescape")
     return True

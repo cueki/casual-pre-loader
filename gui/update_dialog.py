@@ -43,12 +43,6 @@ class UpdateWorker(QThread):
 class UpdateDialog(QDialog):
     def __init__(self, updates, parent=None):
         super().__init__(parent)
-        self.update_button = None
-        self.later_button = None
-        self.skip_button = None
-        self.suppress_checkbox = None
-        self.progress_label = None
-        self.progress_bar = None
         self.updates = updates
         self.update_worker = None
         self.settings = settings

@@ -76,10 +76,12 @@ class QuickPrecache:
     # room reserved in each chunk for its $modelname header
     HEADER_RESERVE = len(get_precache_string_builder(9999))
 
-    def __init__(self, game_path: Path, debug: bool = False, progress_callback=None):
+    def __init__(self, game_path: Path, debug: bool = False, progress_callback=None, model_list: set[str] | None = None):
         # debug keeps temp files
+        # model_list: an already scanned list for run(auto=True), so the caller's scan isn't repeated
         self.game_path: Path = game_path
         self.debug = debug
+        self.prescanned_model_list = model_list
         self.model_list = set()
         self.failed_vpks = []
         self.failed_compiles = []
@@ -228,8 +230,11 @@ class QuickPrecache:
 
             # step 3: get the model list
             if auto:
-                log.info("Auto-scanning for models...")
-                self.model_list = make_precache_list(self.game_path)
+                if self.prescanned_model_list is not None:
+                    self.model_list = set(self.prescanned_model_list)
+                else:
+                    log.info("Auto-scanning for models...")
+                    self.model_list = make_precache_list(self.game_path)
 
                 # save the list if requested
                 if list_file:

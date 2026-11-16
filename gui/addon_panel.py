@@ -32,15 +32,8 @@ class AddonPanel(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.addons_list = None
-        self.addon_search = None
-        self.load_order_panel = None
-        self.addon_description = None
-        self.details_frame = None
-        self.details_header = None
         self.details_collapsed = False
         self.details_has_content = False
-        self.collapse_btn = None
         self.setup_ui()
 
     def setup_ui(self):

@@ -6,6 +6,8 @@ from pathlib import Path
 
 from valve_parsers import VPKFile
 
+from core.util.text import inline_list
+
 log = logging.getLogger()
 
 
@@ -14,7 +16,15 @@ class SoundHandler:
         self.sound_extensions = ['.wav', '.mp3']
         self.script_extensions = ['.txt']
 
-    def process_temp_sound_mods(self, temp_mods_dir: Path, backup_scripts_dir: Path, vpk_paths: list[Path]) -> dict | None:
+    def process_temp_sound_mods(
+        self,
+        temp_mods_dir: Path,
+        backup_scripts_dir: Path,
+        vpk_paths: list[Path],
+        file_origin: dict[Path, int] | None = None,
+    ) -> dict | None:
+        # file_origin: staged file -> load-order index of the addon it came from, decides which
+        # addon keeps a sound when two of them end up at the same path
         temp_sound_dir = temp_mods_dir / 'sound'
         if not temp_sound_dir.exists():
             return None
@@ -47,7 +57,7 @@ class SoundHandler:
         copied_scripts = copy_needed_scripts(needed_scripts, temp_scripts_dir)
 
         # move/restructure sound files based on VPK mappings
-        moved_files = move_sound_files(file_mappings)
+        moved_files = move_sound_files(file_mappings, file_origin)
 
         # update script files with final paths
         modified_scripts = []
@@ -204,9 +214,10 @@ def create_vpk_based_mappings(sound_files: list[Path], vpk_paths: list[Path]) ->
         filename = sound_file.name
         canonical_path = None
 
-        # search all VPK files for this filename
+        # search all VPK files for this filename. VPK entries are lowercase and the lookup is
+        # case-sensitive, so a mod shipping Your_Team_SuddenDeath.wav has to be matched by its lowercase name
         for vpk in vpk_files:
-            vpk_file_path = vpk.find_file_path(filename)
+            vpk_file_path = vpk.find_file_path(filename.lower())
             if vpk_file_path:
                 canonical_path = vpk_file_path[6:]  # remove 'sound/' prefix
                 break
@@ -241,13 +252,19 @@ def create_vpk_based_mappings(sound_files: list[Path], vpk_paths: list[Path]) ->
         except Exception:
             log.exception(f"Error removing {file_to_remove}")
 
+    if removed_count:
+        shown = inline_list(sorted(f.name for f in files_to_remove), 20, noun='files')
+        log.warning(f"Dropped {removed_count} sound file(s) that don't exist in the game's sound VPKs: {shown}")
+
     return file_mappings
 
 
 # TODO: narrow types
-def move_sound_files(file_mappings: list[Mapping]) -> list[tuple[str, str]]:
+def move_sound_files(file_mappings: list[Mapping], file_origin: dict[Path, int] | None = None) -> list[tuple[str, str]]:
     # move sound files to their VPK based locations
     moved_files = []
+    if file_origin is None:
+        file_origin = {}
 
     for mapping in file_mappings:
         source_file = mapping['source_file']
@@ -269,8 +286,17 @@ def move_sound_files(file_mappings: list[Mapping]) -> list[tuple[str, str]]:
 
         try:
             if source_file != target_path:  # only move if different
+                # two addons can land on the same sound (same name in different folders, or
+                # Sound.wav next to sound.wav on a case-sensitive filesystem): the later addon keeps it
+                if target_path.exists() and file_origin.get(source_file, -1) < file_origin.get(target_path, -1):
+                    file_origin.pop(source_file, None)
+                    source_file.unlink()
+                    continue
+
                 shutil.move(str(source_file), str(target_path))
                 moved_files.append((str(source_file), str(target_path)))
+                if (origin := file_origin.pop(source_file, None)) is not None:
+                    file_origin[target_path] = origin
         except Exception:
             log.exception(f"Error moving {source_file} to {target_path}")
 

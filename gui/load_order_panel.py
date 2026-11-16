@@ -26,9 +26,6 @@ class LoadOrderPanel(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.load_order_list = None
-        self.conflict_label = None
-        self.deselect_all_btn = None
         self.setup_ui()
 
     def setup_ui(self):

@@ -32,8 +32,12 @@ def find_pos(data, val) -> int:
     return count
 
 
+# gameinfo.txt is rewritten in place, so bytes that aren't valid utf-8 have to survive the round trip
+_GAMEINFO_ENCODING = {'encoding': 'utf-8', 'errors': 'surrogateescape'}
+
+
 def game_type(file_path: Path, uninstall: bool = False) -> bool:
-    with file_path.open('r') as file:
+    with file_path.open('r', **_GAMEINFO_ENCODING) as file:
         lines = file.readlines()
 
     found = False
@@ -49,7 +53,7 @@ def game_type(file_path: Path, uninstall: bool = False) -> bool:
                 found = True
 
     if found:
-        with file_path.open('w') as file:
+        with file_path.open('w', **_GAMEINFO_ENCODING) as file:
             file.writelines(lines)
         return True
     else:
@@ -58,7 +62,7 @@ def game_type(file_path: Path, uninstall: bool = False) -> bool:
 
 def check_game_type(file_path: Path) -> bool:
     try:
-        with file_path.open('r') as file:
+        with file_path.open('r', **_GAMEINFO_ENCODING) as file:
             for line in file:
                 if 'type' in line and 'multiplayer_only' in line and '//' in line:
                     return True

@@ -85,7 +85,7 @@ class AdvancedParticleMerger:
         # lazy copy whatever
         excluded_patterns = ['dx80', 'dx90']
         particles_filter = [f for f in Path(out_dir / "particles").glob("*.pcf")
-                            if not any(pattern in str(f).lower() for pattern in excluded_patterns)]
+                            if not any(pattern in f.name.lower() for pattern in excluded_patterns)]
 
         # group files by their target particle file
         for particle in particles_filter:
